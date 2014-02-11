@@ -8,39 +8,41 @@ public abstract class Routes
 {
 	public static void define(Configuration config, RestExpress server)
 	{
-		server.uri("/namespaces.{format}", config.getNamespacesController())
+		server.uri("/databases.{format}", config.getNamespacesController())
+			.alias("/dbs.{format}")
 			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.POST)
-			.name(Constants.Routes.NAMESPACES);
+			.name(Constants.Routes.DATABASES);
 
-		server.uri("/namespaces/{namespaceId}.{format}", config.getNamespacesController())
+		server.uri("/databases/{databaseId}.{format}", config.getNamespacesController())
+			.alias("/dbs/{databaseId}.{format}")
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
-			.name(Constants.Routes.NAMESPACE);
+			.name(Constants.Routes.DATABASE);
 
-		server.uri("/collections.{format}", config.getCollectionsController())
+		server.uri("/tables.{format}", config.getCollectionsController())
 			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.POST)
-			.name(Constants.Routes.COLLECTIONS);
+			.name(Constants.Routes.TABLES);
 
-		server.uri("/collections/{collectionId}.{format}", config.getCollectionsController())
+		server.uri("/tables/{tableId}.{format}", config.getCollectionsController())
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
-			.name(Constants.Routes.COLLECTION);
+			.name(Constants.Routes.TABLE);
 
-		server.uri("/collections/{collectionId}/entities.{format}", config.getEntitiesController())
+		server.uri("/tables/{tableId}/entities.{format}", config.getEntitiesController())
 			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.POST)
 			.name(Constants.Routes.ENTITIES);
 
-		server.uri("/collections/{collectionId}/entities/{entityId}.{format}", config.getEntitiesController())
+		server.uri("/tables/{tableId}/entities/{entityId}.{format}", config.getEntitiesController())
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name(Constants.Routes.ENTITY);
 
-		server.uri("/collections/{collectionId}/indexes.{format}", config.getIndexesController())
+		server.uri("/tables/{tableId}/indexes.{format}", config.getIndexesController())
 			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.PUT)
 			.name(Constants.Routes.INDEXES);
 
-		server.uri("/collections/{collectionId}/indexes/{indexId}.{format}", config.getIndexesController())
+		server.uri("/tables/{tableId}/indexes/{indexId}.{format}", config.getIndexesController())
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name(Constants.Routes.INDEX);
 
@@ -49,7 +51,7 @@ public abstract class Routes
 			.name(Constants.Routes.QUERIES);
 
 		server.uri("/queries/{queryId}.{format}", config.getQueryController())
-			.action("querySaved", HttpMethod.POST)
+			.action("executeSavedQuery", HttpMethod.POST)
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name(Constants.Routes.QUERY);
 
