@@ -8,41 +8,47 @@ public abstract class Routes
 {
 	public static void define(Configuration config, RestExpress server)
 	{
-		server.uri("/databases.{format}", config.getNamespacesController())
+		server.uri("/namespaces.{format}", config.getNamespacesController())
 			.alias("/dbs.{format}")
 			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.POST)
-			.name(Constants.Routes.DATABASES);
+			.name(Constants.Routes.NAMESPACES);
 
-		server.uri("/databases/{databaseId}.{format}", config.getNamespacesController())
-			.alias("/dbs/{databaseId}.{format}")
+		server.uri("/namespaces/{namespaceId}.{format}", config.getNamespacesController())
+			.alias("/dbs/{namespaceId}.{format}")
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
-			.name(Constants.Routes.DATABASE);
+			.name(Constants.Routes.NAMESPACE);
 
-		server.uri("/tables.{format}", config.getCollectionsController())
+		server.uri("/collections.{format}", config.getCollectionsController())
+			.alias("/tables.{format}")
 			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.POST)
-			.name(Constants.Routes.TABLES);
+			.name(Constants.Routes.COLLECTIONS);
 
-		server.uri("/tables/{tableId}.{format}", config.getCollectionsController())
+		server.uri("/collections/{collectionId}.{format}", config.getCollectionsController())
+			.alias("/tables/{collectionId}.{format}")
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
-			.name(Constants.Routes.TABLE);
+			.name(Constants.Routes.COLLECTION);
 
-		server.uri("/tables/{tableId}/entities.{format}", config.getEntitiesController())
+		server.uri("/collections/{collectionId}/entities.{format}", config.getEntitiesController())
+			.alias("/tables/{collectionId}/entities.{format}")
 			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.POST)
 			.name(Constants.Routes.ENTITIES);
 
-		server.uri("/tables/{tableId}/entities/{entityId}.{format}", config.getEntitiesController())
+		server.uri("/collections/{collectionId}/entities/{entityId}.{format}", config.getEntitiesController())
+			.alias("/tables/{collectionId}/entities/{entityId}.{format}")
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name(Constants.Routes.ENTITY);
 
-		server.uri("/tables/{tableId}/indexes.{format}", config.getIndexesController())
+		server.uri("/collections/{collectionId}/indexes.{format}", config.getIndexesController())
+			.alias("/tables/{collectionId}/indexes.{format}")
 			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.PUT)
 			.name(Constants.Routes.INDEXES);
 
-		server.uri("/tables/{tableId}/indexes/{indexId}.{format}", config.getIndexesController())
+		server.uri("/collections/{collectionId}/indexes/{indexId}.{format}", config.getIndexesController())
+			.alias("/tables/{collectionId}/indexes/{indexId}.{format}")
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name(Constants.Routes.INDEX);
 

@@ -12,8 +12,8 @@ public class Constants
 		public static final String KEY1 = "key1";
 		public static final String KEY2 = "key2";
 		public static final String KEY3 = "key3";
-		public static final String DATABASE_ID = "databaseId";
-		public static final String TABLE_ID = "tableId";
+		public static final String NAMESPACE_ID = "namespaceId";
+		public static final String COLLECTION_ID = "collectionId";
 		public static final String ENTITY_ID = "entityId";
 		public static final String INDEX_ID = "indexId";
 		public static final String QUERY_ID = "queryId";
@@ -30,10 +30,10 @@ public class Constants
 		public static final String SINGLE_COMPOUND_SAMPLE = "sample.compound.single.route";
 		public static final String SAMPLE_UUID_COLLECTION = "sample.uuid.collection.route";
 		public static final String SAMPLE_COMPOUND_COLLECTION = "sample.compound.collection.route";
-		public static final String DATABASES = "database.collection.route";
-		public static final String DATABASE = "database.single.route";
-		public static final String TABLES = "table.collection.route";
-		public static final String TABLE = "table.single.route";
+		public static final String NAMESPACES = "namespace.collection.route";
+		public static final String NAMESPACE = "namespace.single.route";
+		public static final String COLLECTIONS = "collection.collection.route";
+		public static final String COLLECTION = "collection.single.route";
 		public static final String ENTITIES = "entity.collection.route";
 		public static final String ENTITY = "entity.single.route";
 		public static final String INDEXES = "index.collection.route";
