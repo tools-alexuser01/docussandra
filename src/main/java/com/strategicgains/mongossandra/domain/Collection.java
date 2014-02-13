@@ -1,14 +1,11 @@
 package com.strategicgains.mongossandra.domain;
 
-import java.util.UUID;
-
 import com.strategicgains.repoexpress.domain.AbstractUuidEntity;
 
 public class Collection
 extends AbstractUuidEntity
 {
 	private String name;
-	private UUID namespaceId;
 
 	public Collection()
 	{

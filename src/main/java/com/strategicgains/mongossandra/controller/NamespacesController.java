@@ -1,14 +1,15 @@
 package com.strategicgains.mongossandra.controller;
 
+import java.util.List;
+
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
-import org.restexpress.exception.BadRequestException;
-import com.strategicgains.mongossandra.Constants;
-import com.strategicgains.mongossandra.domain.SampleUuidEntity;
-import com.strategicgains.mongossandra.service.SampleUuidEntityService;
 
 import com.strategicgains.hyperexpress.UrlBuilder;
+import com.strategicgains.mongossandra.Constants;
+import com.strategicgains.mongossandra.domain.Namespace;
+import com.strategicgains.mongossandra.service.NamespacesService;
 import com.strategicgains.repoexpress.adapter.Identifiers;
 import com.strategicgains.repoexpress.util.UuidConverter;
 
@@ -21,26 +22,26 @@ import com.strategicgains.repoexpress.util.UuidConverter;
  */
 public class NamespacesController
 {
-	private SampleUuidEntityService service;
+	private NamespacesService service;
 	
-	public NamespacesController(SampleUuidEntityService sampleService)
+	public NamespacesController(NamespacesService sampleService)
 	{
 		super();
 		this.service = sampleService;
 	}
 
-	public SampleUuidEntity create(Request request, Response response)
+	public Namespace create(Request request, Response response)
 	{
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
-		SampleUuidEntity saved = service.create(entity);
+		Namespace entity = request.getBodyAs(Namespace.class, "Resource details not provided");
+		Namespace saved = service.create(entity);
 
 		// Construct the response for create...
 		response.setResponseCreated();
 
 		// Include the Location header...
-		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.SINGLE_UUID_SAMPLE);
+		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.NAMESPACE);
 		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.UUID, saved.getId().toString())
+			.param(Constants.Url.NAMESPACE_ID, Identifiers.UUID.format(saved.getId()))
 			.build());
 
 		// enrich the resource with links, etc. here...
@@ -49,33 +50,39 @@ public class NamespacesController
 		return saved;
 	}
 
-	public SampleUuidEntity read(Request request, Response response)
+	public Namespace read(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = service.read(Identifiers.UUID.parse(id));
+		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No resource ID supplied");
+		Namespace entity = service.read(Identifiers.UUID.parse(id));
 
 		// enrich the entity with links, etc. here...
 
 		return entity;
 	}
+	
+	public List<Namespace> readAll(Request request, Response response)
+	{
+		return service.readAll();
+	}
 
 	public void update(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
-		
-		if (!Identifiers.UUID.parse(id).equals(entity.getId()))
-		{
-			throw new BadRequestException("ID in URL and ID in resource body must match");
-		}
+		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No resource ID supplied");
+		Namespace entity = request.getBodyAs(Namespace.class, "Resource details not provided");
 
+//		if (!Identifiers.UUID.parse(id).equals(entity.getId()))
+//		{
+//			throw new BadRequestException("ID in URL and ID in resource body must match");
+//		}
+
+		entity.setUuid(UuidConverter.parse(id));
 		service.update(entity);
 		response.setResponseNoContent();
 	}
 
 	public void delete(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
+		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No resource ID supplied");
 		service.delete(Identifiers.UUID.parse(id));
 		response.setResponseNoContent();
 	}

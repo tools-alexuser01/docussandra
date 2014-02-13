@@ -10,8 +10,8 @@ import com.strategicgains.mongossandra.controller.EntitiesController;
 import com.strategicgains.mongossandra.controller.IndexesController;
 import com.strategicgains.mongossandra.controller.NamespacesController;
 import com.strategicgains.mongossandra.controller.QueriesController;
-import com.strategicgains.mongossandra.persistence.SampleUuidEntityRepository;
-import com.strategicgains.mongossandra.service.SampleUuidEntityService;
+import com.strategicgains.mongossandra.persistence.NamespacesRepository;
+import com.strategicgains.mongossandra.service.NamespacesService;
 import com.strategicgains.repoexpress.cassandra.CassandraConfig;
 
 public class Configuration
@@ -47,15 +47,15 @@ extends Environment
 
 	private void initialize(CassandraConfig dbConfig)
 	{
-		SampleUuidEntityRepository sampleUuidEntityRepository = new SampleUuidEntityRepository(dbConfig.getSession());
-		SampleUuidEntityService SampleUuidEntityService = new SampleUuidEntityService(sampleUuidEntityRepository);
-		namespacesController = new NamespacesController(SampleUuidEntityService);
+		NamespacesRepository namespacesRepository = new NamespacesRepository(dbConfig.getSession());
+		NamespacesService namespacesService = new NamespacesService(namespacesRepository);
+		namespacesController = new NamespacesController(namespacesService);
 
 		// TODO: create service and repository implementations for these...
-		collectionsController = new CollectionsController(SampleUuidEntityService);
-		entitiesController = new EntitiesController(SampleUuidEntityService);
-		indexesController = new IndexesController(SampleUuidEntityService);
-		queriesController = new QueriesController(SampleUuidEntityService);
+//		collectionsController = new CollectionsController(SampleUuidEntityService);
+//		entitiesController = new EntitiesController(SampleUuidEntityService);
+//		indexesController = new IndexesController(SampleUuidEntityService);
+//		queriesController = new QueriesController(SampleUuidEntityService);
 	}
 
 	public int getPort()

@@ -2,6 +2,9 @@ package com.strategicgains.mongossandra;
 
 public class Constants
 {
+	public static final String NAME_MESSAGE = "is web-safe. It must contain lower-case letters, numbers or hyphens ('-') or underscores ('_')";
+	public static final String NAME_PATTERN = "[a-z_\\-0-9]+";
+
 	/**
 	 * These define the URL parmaeters used in the route definition strings (e.g. '{userId}').
 	 */
