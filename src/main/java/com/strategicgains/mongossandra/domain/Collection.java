@@ -1,17 +1,17 @@
 package com.strategicgains.mongossandra.domain;
 
-import java.util.UUID;
-
 import com.strategicgains.repoexpress.domain.AbstractUuidEntity;
 
 public class Collection
 extends AbstractUuidEntity
 {
-	private UUID namespaceId;
+	private String namespace;
 	private String name;
+	private String description;
 
 	public Collection()
 	{
+		super();
 	}
 
 	public Collection(String name)
@@ -26,7 +26,27 @@ extends AbstractUuidEntity
 	}
 
 	public void setName(String name)
-    {
+	{
 		this.name = name;
-    }
+	}
+
+	public String getNamespace()
+	{
+		return namespace;
+	}
+
+	public void setNamespace(String namespace)
+	{
+		this.namespace = namespace;
+	}
+
+	public String getDescription()
+	{
+		return description;
+	}
+
+	public void setDescription(String description)
+	{
+		this.description = description;
+	}
 }

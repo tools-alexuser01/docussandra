@@ -3,13 +3,11 @@ package com.strategicgains.mongossandra.controller;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
-import org.restexpress.exception.BadRequestException;
-import com.strategicgains.mongossandra.Constants;
-import com.strategicgains.mongossandra.domain.SampleUuidEntity;
-import com.strategicgains.mongossandra.service.SampleUuidEntityService;
 
 import com.strategicgains.hyperexpress.UrlBuilder;
-import com.strategicgains.repoexpress.adapter.Identifiers;
+import com.strategicgains.mongossandra.Constants;
+import com.strategicgains.mongossandra.domain.Collection;
+import com.strategicgains.mongossandra.service.CollectionsService;
 import com.strategicgains.repoexpress.util.UuidConverter;
 
 /**
@@ -21,18 +19,18 @@ import com.strategicgains.repoexpress.util.UuidConverter;
  */
 public class CollectionsController
 {
-	private SampleUuidEntityService service;
+	private CollectionsService service;
 	
-	public CollectionsController(SampleUuidEntityService sampleService)
+	public CollectionsController(CollectionsService collectionsService)
 	{
 		super();
-		this.service = sampleService;
+		this.service = collectionsService;
 	}
 
-	public SampleUuidEntity create(Request request, Response response)
+	public Collection create(Request request, Response response)
 	{
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
-		SampleUuidEntity saved = service.create(entity);
+		Collection entity = request.getBodyAs(Collection.class, "Resource details not provided");
+		Collection saved = service.create(entity);
 
 		// Construct the response for create...
 		response.setResponseCreated();
@@ -49,10 +47,11 @@ public class CollectionsController
 		return saved;
 	}
 
-	public SampleUuidEntity read(Request request, Response response)
+	public Collection read(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = service.read(Identifiers.UUID.parse(id));
+		String namespace = request.getHeader(Constants.Url.NAMESPACE_ID, "No namespace name supplied");
+		String id = request.getHeader(Constants.Url.COLLECTION_ID, "No collection name supplied");
+		Collection entity = service.read(id);
 
 		// enrich the entity with links, etc. here...
 
@@ -61,22 +60,23 @@ public class CollectionsController
 
 	public void update(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
-		
-		if (!Identifiers.UUID.parse(id).equals(entity.getId()))
-		{
-			throw new BadRequestException("ID in URL and ID in resource body must match");
-		}
+		String id = request.getHeader(Constants.Url.COLLECTION_ID, "No resource ID supplied");
+		Collection entity = request.getBodyAs(Collection.class, "Resource details not provided");
 
+//		if (!Identifiers.UUID.parse(id).equals(entity.getId()))
+//		{
+//			throw new BadRequestException("ID in URL and ID in resource body must match");
+//		}
+
+		entity.setUuid(UuidConverter.parse(id));
 		service.update(entity);
 		response.setResponseNoContent();
 	}
 
 	public void delete(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		service.delete(Identifiers.UUID.parse(id));
+		String id = request.getHeader(Constants.Url.COLLECTION_ID, "No resource ID supplied");
+		service.delete(id);
 		response.setResponseNoContent();
 	}
 }

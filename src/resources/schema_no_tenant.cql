@@ -6,13 +6,17 @@ use mongossandra;
 drop table if exists namespaces;
 create table namespaces (
 	id uuid primary key,
-	name text
+	name text,
+	created_at timestamp,
+	updated_at timestamp
 );
 
 drop table if exists namespaces_name;
 create table namespaces_name (
 	id uuid,
-	name text primary key
+	name text primary key,
+	created_at timestamp,
+	updated_at timestamp
 );
 
 drop table if exists collections;
@@ -21,6 +25,8 @@ create table collections (
 	namespace text,
 	name text,
 	description text,
+	created_at timestamp,
+	updated_at timestamp,
 	primary key ((namespace), id)
 );
 
@@ -30,6 +36,8 @@ create table collections_name (
 	namespace text,
 	name text,
 	description text,
+	created_at timestamp,
+	updated_at timestamp,
 	primary key ((namespace), name)
 );
 
@@ -51,7 +59,7 @@ create table entities_idx (
 	id uuid,	// Entity ID
 	key blob,	// Indexed column name(s)
 	value blob,	// Indexed value
-	object blob,	// BSON representation of the entity
+	object blob,
 	primary key ((namespace, collection, key, value), id)
 );
 

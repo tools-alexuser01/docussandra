@@ -14,10 +14,10 @@ public class NamespacesService
 {
 	private NamespacesRepository namespaces;
 	
-	public NamespacesService(NamespacesRepository samplesRepository)
+	public NamespacesService(NamespacesRepository namespacesRepository)
 	{
 		super();
-		this.namespaces = samplesRepository;
+		this.namespaces = namespacesRepository;
 	}
 
 	public Namespace create(Namespace entity)

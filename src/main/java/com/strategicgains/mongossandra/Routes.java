@@ -19,17 +19,17 @@ public abstract class Routes
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name(Constants.Routes.NAMESPACE);
 
-//		server.uri("/collections.{format}", config.getCollectionsController())
-//			.alias("/tables.{format}")
-//			.action("readAll", HttpMethod.GET)
-//			.method(HttpMethod.POST)
-//			.name(Constants.Routes.COLLECTIONS);
-//
-//		server.uri("/collections/{collectionId}.{format}", config.getCollectionsController())
-//			.alias("/tables/{collectionId}.{format}")
-//			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
-//			.name(Constants.Routes.COLLECTION);
-//
+		server.uri("/collections.{format}", config.getCollectionsController())
+			.alias("/tables.{format}")
+			.action("readAll", HttpMethod.GET)
+			.method(HttpMethod.POST)
+			.name(Constants.Routes.COLLECTIONS);
+
+		server.uri("/collections/{collectionId}.{format}", config.getCollectionsController())
+			.alias("/tables/{collectionId}.{format}")
+			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
+			.name(Constants.Routes.COLLECTION);
+
 //		server.uri("/collections/{collectionId}/entities.{format}", config.getEntitiesController())
 //			.alias("/tables/{collectionId}/entities.{format}")
 //			.action("readAll", HttpMethod.GET)
