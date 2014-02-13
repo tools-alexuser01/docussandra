@@ -53,7 +53,7 @@ public class NamespacesController
 	public Namespace read(Request request, Response response)
 	{
 		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No resource ID supplied");
-		Namespace entity = service.read(Identifiers.UUID.parse(id));
+		Namespace entity = service.read(id);
 
 		// enrich the entity with links, etc. here...
 
@@ -83,7 +83,7 @@ public class NamespacesController
 	public void delete(Request request, Response response)
 	{
 		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No resource ID supplied");
-		service.delete(Identifiers.UUID.parse(id));
+		service.delete(id);
 		response.setResponseNoContent();
 	}
 }
