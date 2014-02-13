@@ -83,6 +83,7 @@ extends CassandraUuidTimestampedEntityRepository<Namespace>
 			throw new DuplicateItemException("Namespace already exists: " + entity.getName());
 		}
 
+		entity.setCreatedAt(prev.getCreatedAt());
 		BatchStatement batch = new BatchStatement();
 		BoundStatement bs = new BoundStatement(updateStmt);
 		bindUpdate(bs, entity);
@@ -93,9 +94,10 @@ extends CassandraUuidTimestampedEntityRepository<Namespace>
 		bs2.bind(prev.getName());
 		batch.add(bs2);
 
-		// Re-insert the new name
+		// Insert the new name
 		BoundStatement bs3 = new BoundStatement(createStmt2);
 		bindCreate(bs3, entity);
+		batch.add(bs3);
 
 		getSession().execute(batch);
 		return entity;
