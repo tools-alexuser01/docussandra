@@ -1,5 +1,8 @@
 package com.strategicgains.mongossandra.controller;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
@@ -7,7 +10,9 @@ import org.restexpress.Response;
 import com.strategicgains.hyperexpress.UrlBuilder;
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.mongossandra.domain.Collection;
+import com.strategicgains.mongossandra.domain.Namespace;
 import com.strategicgains.mongossandra.service.CollectionsService;
+import com.strategicgains.repoexpress.adapter.Identifiers;
 import com.strategicgains.repoexpress.util.UuidConverter;
 
 /**
@@ -36,9 +41,9 @@ public class CollectionsController
 		response.setResponseCreated();
 
 		// Include the Location header...
-		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.SINGLE_UUID_SAMPLE);
+		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.COLLECTION);
 		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.UUID, saved.getId().toString())
+			.param(Constants.Url.COLLECTION_ID, Identifiers.UUID.format(saved.getId()))
 			.build());
 
 		// enrich the resource with links, etc. here...
@@ -49,13 +54,18 @@ public class CollectionsController
 
 	public Collection read(Request request, Response response)
 	{
-		String namespace = request.getHeader(Constants.Url.NAMESPACE_ID, "No namespace name supplied");
 		String id = request.getHeader(Constants.Url.COLLECTION_ID, "No collection name supplied");
 		Collection entity = service.read(id);
 
 		// enrich the entity with links, etc. here...
 
 		return entity;
+	}
+
+	public List<Namespace> readAll(Request request, Response response)
+	{
+//		return service.readAll();
+		return Collections.emptyList();
 	}
 
 	public void update(Request request, Response response)

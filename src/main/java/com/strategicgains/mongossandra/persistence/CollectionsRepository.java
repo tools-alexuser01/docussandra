@@ -3,6 +3,7 @@ package com.strategicgains.mongossandra.persistence;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
@@ -20,12 +21,12 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 	private static final String PRIMARY_TABLE = "collections";
 	private static final String SECONDARY_TABLE = "collections_name";
 
-	private static final String UPDATE_CQL = "update %s set name = ?, namespace = ?, description = ? updated_at = ? where %s = ?";
-	private static final String CREATE_CQL = "insert into %s (%s, name, namespace, description, created_at, updated_at) values (?, ?, ?, ?, ?, ?)";
+	private static final String UPDATE_CQL = "update %s set name = ?, namespace_id = ?, description = ?, updated_at = ? where %s = ?";
+	private static final String CREATE_CQL = "insert into %s (%s, name, namespace_id, description, created_at, updated_at) values (?, ?, ?, ?, ?, ?)";
 	private static final String DELETE_CQL2 = "delete from %s where name = ?";
-	private static final String READ_NAME_CQL = "select * from %s where name = ?";
-	private static final String NAME_EXISTS_CQL = "select count(*) from %s where namespace = ? and name = ?";
-	private static final String READ_ALL_CQL = "select * from %s where namespace = ?";
+	private static final String READ_NAME_CQL = "select * from %s where namespace_id = ? and name = ?";
+	private static final String NAME_EXISTS_CQL = "select count(*) from %s where namespace_id = ? and name = ?";
+	private static final String READ_ALL_CQL = "select * from %s where namespace_id = ?";
 
 	private PreparedStatement createStmt;
 	private PreparedStatement createStmt2;
@@ -55,7 +56,7 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 	@Override
     protected Collection createEntity(Collection entity)
     {
-		if (nameExists(entity.getNamespace(), entity.getName()))
+		if (nameExists(entity.getNamespaceId(), entity.getName()))
 		{
 			throw new DuplicateItemException("Collection already exists: " + entity.getName());
 		}
@@ -78,7 +79,7 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
     {
 		Collection prev = read(entity.getId());
 		
-		if (!prev.getName().equals(entity.getName()) && nameExists(entity.getNamespace(), entity.getName()))
+		if (!prev.getName().equals(entity.getName()) && nameExists(entity.getNamespaceId(), entity.getName()))
 		{
 			throw new DuplicateItemException("Collection already exists: " + entity.getName());
 		}
@@ -118,12 +119,12 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 		getSession().execute(batch);
 	}
 
-	public boolean nameExists(String namespace, String name)
+	public boolean nameExists(UUID namespaceId, String name)
 	{
 		if (name == null || name.isEmpty()) return false;
 
 		BoundStatement bs = new BoundStatement(nameExistsStmt);
-		bs.bind(namespace, name);
+		bs.bind(namespaceId, name);
 		return (getSession().execute(bs).one().getLong(0) > 0);
 	}
 
@@ -136,18 +137,18 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 		return marshalRow(getSession().execute(bs).one());
 	}
 
-	public List<Collection> readAll(String namespace)
+	public List<Collection> readAll(UUID namespaceId)
     {
 		BoundStatement bs = new BoundStatement(readAllStmt);
-		bs.bind(namespace);
-	    return marshalResultSet(getSession().execute(bs));
+		bs.bind(namespaceId);
+	    return marshalAll(getSession().execute(bs));
     }
 
 	private void bindCreate(BoundStatement bs, Collection entity)
 	{
 		bs.bind(entity.getUuid(),
 			entity.getName(),
-			entity.getNamespace(),
+			entity.getNamespaceId(),
 			entity.getDescription(),
 		    entity.getCreatedAt(),
 		    entity.getUpdatedAt());
@@ -156,13 +157,13 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 	private void bindUpdate(BoundStatement bs, Collection entity)
 	{
 		bs.bind(entity.getName(),
-			entity.getNamespace(),
+			entity.getNamespaceId(),
 			entity.getDescription(),
 			entity.getUpdatedAt(),
 		    entity.getUuid());
 	}
 
-	private List<Collection> marshalResultSet(ResultSet rs)
+	private List<Collection> marshalAll(ResultSet rs)
 	{
 		List<Collection> collections = new ArrayList<Collection>();
 		Iterator<Row> i = rs.iterator();
@@ -183,7 +184,7 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 		Collection c = new Collection();
 		c.setUuid(row.getUUID(getIdentifierColumn()));
 		c.setName(row.getString("name"));
-		c.setNamespace(row.getString("namespace"));
+		c.setNamespace(row.getString("namespace_id"));
 		c.setDescription(row.getString("description"));
 		c.setCreatedAt(row.getDate("created_at"));
 		c.setUpdatedAt(row.getDate("updated_at"));

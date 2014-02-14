@@ -59,7 +59,7 @@ public class NamespacesController
 
 		return entity;
 	}
-	
+
 	public List<Namespace> readAll(Request request, Response response)
 	{
 		return service.readAll();
