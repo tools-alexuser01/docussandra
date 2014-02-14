@@ -17,8 +17,20 @@ import com.strategicgains.repoexpress.exception.DuplicateItemException;
 public class NamespacesRepository
 extends CassandraUuidTimestampedEntityRepository<Namespace>
 {
-	private static final String PRIMARY_TABLE = "namespaces";
-	private static final String SECONDARY_TABLE = "namespaces_name";
+	
+	private class Tables
+	{
+		static final String BY_ID = "namespaces";
+		static final String BY_NAME = "namespaces_name";
+	}
+
+	private class Columns
+	{
+		static final String ID = "id";
+		static final String NAME = "name";
+		static final String CREATED_AT = "created_at";
+		static final String UPDATED_AT = "updated_at";
+	}
 
 	private static final String UPDATE_CQL = "update %s set name = ?, updated_at = ? where %s = ?";
 	private static final String CREATE_CQL = "insert into %s (%s, name, created_at, updated_at) values (?, ?, ?, ?)";
@@ -37,19 +49,19 @@ extends CassandraUuidTimestampedEntityRepository<Namespace>
 
 	public NamespacesRepository(Session session)
     {
-	    super(session, PRIMARY_TABLE, "id");
+	    super(session, Tables.BY_ID, Columns.ID);
 	    initializeStatements();
     }
 
 	protected void initializeStatements()
 	{
 		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), getIdentifierColumn()));
-		createStmt2 = getSession().prepare(String.format(CREATE_CQL, SECONDARY_TABLE, getIdentifierColumn()));
+		createStmt2 = getSession().prepare(String.format(CREATE_CQL, Tables.BY_NAME, getIdentifierColumn()));
 		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable(), getIdentifierColumn()));
-		deleteStmt2 = getSession().prepare(String.format(DELETE_CQL2, SECONDARY_TABLE));
-		readNameStmt = getSession().prepare(String.format(READ_NAME_CQL, SECONDARY_TABLE));
-		nameExistsStmt = getSession().prepare(String.format(NAME_EXISTS_CQL, SECONDARY_TABLE));
-		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, SECONDARY_TABLE));
+		deleteStmt2 = getSession().prepare(String.format(DELETE_CQL2, Tables.BY_NAME));
+		readNameStmt = getSession().prepare(String.format(READ_NAME_CQL, Tables.BY_NAME));
+		nameExistsStmt = getSession().prepare(String.format(NAME_EXISTS_CQL, Tables.BY_NAME));
+		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, Tables.BY_NAME));
 	}
 
 	@Override
@@ -170,29 +182,16 @@ extends CassandraUuidTimestampedEntityRepository<Namespace>
 		return namespaces;
 	}
 
-	private List<Namespace> marshalAll(ResultSet rs)
-	{
-		List<Namespace> collections = new ArrayList<Namespace>();
-		Iterator<Row> i = rs.iterator();
-		
-		while (i.hasNext())
-		{
-			collections.add(marshalRow(i.next()));
-		}
-
-		return collections;
-	}
-
 	@Override
     protected Namespace marshalRow(Row row)
     {
 		if (row == null) return null;
 
-		Namespace s = new Namespace();
-		s.setUuid(row.getUUID(getIdentifierColumn()));
-		s.setName(row.getString("name"));
-		s.setCreatedAt(row.getDate("created_at"));
-		s.setUpdatedAt(row.getDate("updated_at"));
-		return s;
+		Namespace n = new Namespace();
+		n.setUuid(row.getUUID(getIdentifierColumn()));
+		n.setName(row.getString(Columns.NAME));
+		n.setCreatedAt(row.getDate(Columns.CREATED_AT));
+		n.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
+		return n;
     }
 }

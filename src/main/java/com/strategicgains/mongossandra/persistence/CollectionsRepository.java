@@ -21,20 +21,33 @@ import com.strategicgains.repoexpress.exception.DuplicateItemException;
 public class CollectionsRepository
 extends AbstractCassandraRepository<Collection>
 {
-	private static final String PRIMARY_TABLE = "collections";
-	private static final String SECONDARY_TABLE = "collections_name";
+	private class Tables
+	{
+		static final String BY_ID = "collections";
+		static final String BY_NAME = "collections_name";
+	}
 
-	private static final String IDENTITY_CQL = " where namespace = ? and id = ?";
+	private class Columns
+	{
+		static final String ID = "id";
+		static final String NAME = "name";
+		static final String NAMESPACE_ID = "namespace_id";
+		static final String DESCRIPTION = "description";
+		static final String CREATED_AT = "created_at";
+		static final String UPDATED_AT = "updated_at";
+	}
+
+	private static final String IDENTITY_CQL = " where namespace_id = ? and id = ?";
 	private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
 	private static final String CREATE_CQL = "insert into %s (%s, name, namespace_id, description, created_at, updated_at) values (?, ?, ?, ?, ?, ?)";
 	private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
 	private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
-	private static final String UPDATE_CQL = "update %s set name = ?, namespace_id = ?, description = ?, updated_at = ?" + IDENTITY_CQL;
-	private static final String DELETE_CQL2 = "delete from %s where namespace = ? and name = ?";
+	private static final String UPDATE_CQL = "update %s set name = ?, description = ?, updated_at = ?" + IDENTITY_CQL;
+	private static final String DELETE_CQL2 = "delete from %s where namespace_id = ? and name = ?";
 	private static final String READ_NAME_CQL = "select * from %s where namespace_id = ? and name = ?";
 	private static final String NAME_EXISTS_CQL = "select count(*) from %s where namespace_id = ? and name = ?";
 	private static final String READ_ALL_CQL = "select * from %s where namespace_id = ?";
-	private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where namespace = ?";
+	private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where namespace_id = ?";
 
 	private PreparedStatement existStmt;
 	private PreparedStatement readStmt;
@@ -50,7 +63,7 @@ extends AbstractCassandraRepository<Collection>
 
 	public CollectionsRepository(Session session)
 	{
-		super(session, PRIMARY_TABLE);
+		super(session, Tables.BY_ID);
 		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Collection>());
 		addObserver(new UuidIdentityRepositoryObserver<Collection>());
 		initialize();
@@ -60,14 +73,14 @@ extends AbstractCassandraRepository<Collection>
 	{
 		existStmt = getSession().prepare(String.format(EXISTENCE_CQL, getTable()));
 		readStmt = getSession().prepare(String.format(READ_CQL, getTable()));
-		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable()));
-		createStmt2 = getSession().prepare(String.format(CREATE_CQL, SECONDARY_TABLE));
+		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), Columns.ID));
+		createStmt2 = getSession().prepare(String.format(CREATE_CQL, Tables.BY_NAME, Columns.ID));
 		deleteStmt = getSession().prepare(String.format(DELETE_CQL, getTable()));
 		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable()));
-		deleteStmt2 = getSession().prepare(String.format(DELETE_CQL2, SECONDARY_TABLE));
-		readNameStmt = getSession().prepare(String.format(READ_NAME_CQL, SECONDARY_TABLE));
-		nameExistsStmt = getSession().prepare(String.format(NAME_EXISTS_CQL, SECONDARY_TABLE));
-		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, SECONDARY_TABLE));
+		deleteStmt2 = getSession().prepare(String.format(DELETE_CQL2, Tables.BY_NAME));
+		readNameStmt = getSession().prepare(String.format(READ_NAME_CQL, Tables.BY_NAME));
+		nameExistsStmt = getSession().prepare(String.format(NAME_EXISTS_CQL, Tables.BY_NAME));
+		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, Tables.BY_NAME));
 		readAllCountStmt = getSession().prepare(String.format(READ_ALL_COUNT_CQL, getTable()));
 	}
 
@@ -201,7 +214,6 @@ extends AbstractCassandraRepository<Collection>
 	private void bindUpdate(BoundStatement bs, Collection entity)
 	{
 		bs.bind(entity.getName(),
-			entity.getNamespaceId(),
 			entity.getDescription(),
 			entity.getUpdatedAt(),
 		    entity.getUuid());
@@ -225,12 +237,12 @@ extends AbstractCassandraRepository<Collection>
 		if (row == null) return null;
 
 		Collection c = new Collection();
-		c.setUuid(row.getUUID("id"));
-		c.setName(row.getString("name"));
-		c.setNamespace(row.getString("namespace_id"));
-		c.setDescription(row.getString("description"));
-		c.setCreatedAt(row.getDate("created_at"));
-		c.setUpdatedAt(row.getDate("updated_at"));
+		c.setUuid(row.getUUID(Columns.ID));
+		c.setName(row.getString(Columns.NAME));
+		c.setNamespaceId(row.getUUID(Columns.NAMESPACE_ID));
+		c.setDescription(row.getString(Columns.DESCRIPTION));
+		c.setCreatedAt(row.getDate(Columns.CREATED_AT));
+		c.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return c;
     }
 }
