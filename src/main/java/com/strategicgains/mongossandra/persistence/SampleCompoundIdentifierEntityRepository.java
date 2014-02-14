@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.strategicgains.mongossandra.domain.SampleCompoundIdentifierEntity;
-
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.strategicgains.mongossandra.domain.SampleCompoundIdentifierEntity;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;

@@ -3,6 +3,7 @@ package com.strategicgains.mongossandra.persistence;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
@@ -11,50 +12,87 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.mongossandra.domain.Collection;
-import com.strategicgains.repoexpress.cassandra.CassandraUuidTimestampedEntityRepository;
+import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
+import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
+import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 
 public class CollectionsRepository
-extends CassandraUuidTimestampedEntityRepository<Collection>
+extends AbstractCassandraRepository<Collection>
 {
 	private static final String PRIMARY_TABLE = "collections";
 	private static final String SECONDARY_TABLE = "collections_name";
 
-	private static final String UPDATE_CQL = "update %s set name = ?, namespace = ?, description = ? updated_at = ? where %s = ?";
+	private static final String IDENTITY_CQL = " where namespace = ? and id = ?";
+	private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
+	private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
+	private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
+	private static final String UPDATE_CQL = "update %s set updatedat = ?" + IDENTITY_CQL;
 	private static final String CREATE_CQL = "insert into %s (%s, name, namespace, description, created_at, updated_at) values (?, ?, ?, ?, ?, ?)";
-	private static final String DELETE_CQL2 = "delete from %s where name = ?";
+	private static final String DELETE_CQL2 = "delete from %s where namespace = ? and name = ?";
 	private static final String READ_NAME_CQL = "select * from %s where name = ?";
 	private static final String NAME_EXISTS_CQL = "select count(*) from %s where namespace = ? and name = ?";
 	private static final String READ_ALL_CQL = "select * from %s where namespace = ?";
+	private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where namespace = ?";
 
+	private PreparedStatement existStmt;
+	private PreparedStatement readStmt;
 	private PreparedStatement createStmt;
-	private PreparedStatement createStmt2;
+	private PreparedStatement deleteStmt;
 	private PreparedStatement updateStmt;
+	private PreparedStatement readAllStmt;
+	private PreparedStatement readAllCountStmt;
+	private PreparedStatement createStmt2;
 	private PreparedStatement deleteStmt2;
 	private PreparedStatement readNameStmt;
 	private PreparedStatement nameExistsStmt;
-	private PreparedStatement readAllStmt;
 
 	public CollectionsRepository(Session session)
-    {
-	    super(session, PRIMARY_TABLE, "id");
-	    initializeStatements();
-    }
-
-	protected void initializeStatements()
 	{
-		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), getIdentifierColumn()));
-		createStmt2 = getSession().prepare(String.format(CREATE_CQL, SECONDARY_TABLE, getIdentifierColumn()));
-		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable(), getIdentifierColumn()));
+		super(session, PRIMARY_TABLE);
+		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Collection>());
+		addObserver(new UuidIdentityRepositoryObserver<Collection>());
+		initialize();
+	}
+
+	protected void initialize()
+	{
+		existStmt = getSession().prepare(String.format(EXISTENCE_CQL, getTable()));
+		readStmt = getSession().prepare(String.format(READ_CQL, getTable()));
+		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable()));
+		createStmt2 = getSession().prepare(String.format(CREATE_CQL, SECONDARY_TABLE));
+		deleteStmt = getSession().prepare(String.format(DELETE_CQL, getTable()));
+		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable()));
 		deleteStmt2 = getSession().prepare(String.format(DELETE_CQL2, SECONDARY_TABLE));
 		readNameStmt = getSession().prepare(String.format(READ_NAME_CQL, SECONDARY_TABLE));
 		nameExistsStmt = getSession().prepare(String.format(NAME_EXISTS_CQL, SECONDARY_TABLE));
 		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, SECONDARY_TABLE));
+		readAllCountStmt = getSession().prepare(String.format(READ_ALL_COUNT_CQL, getTable()));
 	}
 
 	@Override
-    protected Collection createEntity(Collection entity)
-    {
+	public boolean exists(Identifier identifier)
+	{
+		if (identifier == null || identifier.isEmpty()) return false;
+
+		BoundStatement bs = new BoundStatement(existStmt);
+		bindIdentifier(bs, identifier);
+		return (getSession().execute(bs).one().getLong(0) > 0);
+	}
+
+	protected Collection readEntityById(Identifier identifier)
+	{
+		if (identifier == null || identifier.isEmpty()) return null;
+
+		BoundStatement bs = new BoundStatement(readStmt);
+		bindIdentifier(bs, identifier);
+		return marshalRow(getSession().execute(bs).one());
+	}
+
+	@Override
+	protected Collection createEntity(Collection entity)
+	{
 		if (nameExists(entity.getNamespace(), entity.getName()))
 		{
 			throw new DuplicateItemException("Collection already exists: " + entity.getName());
@@ -71,11 +109,11 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 
 		getSession().execute(batch);
 		return entity;
-    }
+	}
 
 	@Override
-    protected Collection updateEntity(Collection entity)
-    {
+	protected Collection updateEntity(Collection entity)
+	{
 		Collection prev = read(entity.getId());
 		
 		if (!prev.getName().equals(entity.getName()) && nameExists(entity.getNamespace(), entity.getName()))
@@ -101,7 +139,7 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 
 		getSession().execute(batch);
 		return entity;
-    }
+	}
 
 	@Override
 	protected void deleteEntity(Collection entity)
@@ -136,12 +174,19 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 		return marshalRow(getSession().execute(bs).one());
 	}
 
-	public List<Collection> readAll(String namespace)
-    {
+	public List<Collection> readAll(UUID namespaceId)
+	{
 		BoundStatement bs = new BoundStatement(readAllStmt);
-		bs.bind(namespace);
-	    return marshalResultSet(getSession().execute(bs));
-    }
+		bs.bind(namespaceId);
+		return (marshalAll(getSession().execute(bs)));
+	}
+
+	public long count(String context, String nodeType)
+	{
+		BoundStatement bs = new BoundStatement(readAllCountStmt);
+		bs.bind(context, nodeType);
+		return (getSession().execute(bs).one().getLong(0));
+	}
 
 	private void bindCreate(BoundStatement bs, Collection entity)
 	{
@@ -162,7 +207,7 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 		    entity.getUuid());
 	}
 
-	private List<Collection> marshalResultSet(ResultSet rs)
+	protected List<Collection> marshalAll(ResultSet rs)
 	{
 		List<Collection> collections = new ArrayList<Collection>();
 		Iterator<Row> i = rs.iterator();
@@ -175,13 +220,12 @@ extends CassandraUuidTimestampedEntityRepository<Collection>
 		return collections;
 	}
 
-	@Override
     protected Collection marshalRow(Row row)
     {
 		if (row == null) return null;
 
 		Collection c = new Collection();
-		c.setUuid(row.getUUID(getIdentifierColumn()));
+		c.setUuid(row.getUUID("id"));
 		c.setName(row.getString("name"));
 		c.setNamespace(row.getString("namespace"));
 		c.setDescription(row.getString("description"));

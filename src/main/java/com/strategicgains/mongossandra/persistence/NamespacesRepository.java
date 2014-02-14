@@ -170,6 +170,19 @@ extends CassandraUuidTimestampedEntityRepository<Namespace>
 		return namespaces;
 	}
 
+	private List<Namespace> marshalAll(ResultSet rs)
+	{
+		List<Namespace> collections = new ArrayList<Namespace>();
+		Iterator<Row> i = rs.iterator();
+		
+		while (i.hasNext())
+		{
+			collections.add(marshalRow(i.next()));
+		}
+
+		return collections;
+	}
+
 	@Override
     protected Namespace marshalRow(Row row)
     {
