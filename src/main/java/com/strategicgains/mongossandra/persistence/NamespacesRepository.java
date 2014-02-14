@@ -139,7 +139,7 @@ extends CassandraUuidTimestampedEntityRepository<Namespace>
 	public List<Namespace> readAll()
     {
 		BoundStatement bs = new BoundStatement(readAllStmt);
-	    return marshalResultSet(getSession().execute(bs));
+	    return marshalAll(getSession().execute(bs));
     }
 
 	private void bindCreate(BoundStatement bs, Namespace entity)
@@ -157,7 +157,7 @@ extends CassandraUuidTimestampedEntityRepository<Namespace>
 		    entity.getUuid());
 	}
 
-	private List<Namespace> marshalResultSet(ResultSet rs)
+	private List<Namespace> marshalAll(ResultSet rs)
 	{
 		List<Namespace> namespaces = new ArrayList<Namespace>();
 		Iterator<Row> i = rs.iterator();

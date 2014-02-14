@@ -7,7 +7,7 @@ import com.strategicgains.syntaxe.annotation.RegexValidation;
 public class Namespace
 extends AbstractUuidEntity
 {
-	@RegexValidation(name = "Application Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
+	@RegexValidation(name = "Namespace Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
 	private String name;
 
 	public Namespace()

@@ -19,9 +19,20 @@ public abstract class Routes
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name(Constants.Routes.NAMESPACE);
 
+		server.uri("/namespaces/{namespaceId}/collections.{format}", config.getCollectionsController())
+			.alias("/tables.{format}")
+	//		.action("readAll", HttpMethod.GET)
+			.method(HttpMethod.POST)
+			.name(Constants.Routes.COLLECTIONS);
+
+		server.uri("/namespaces/{namespaceId}/collections/{collectionId}.{format}", config.getCollectionsController())
+			.alias("/dbs/{namespaceId}/tables/{collectionId}.{format}")
+			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
+			.name(Constants.Routes.COLLECTION);
+
 		server.uri("/collections.{format}", config.getCollectionsController())
 			.alias("/tables.{format}")
-			.action("readAll", HttpMethod.GET)
+//			.action("readAll", HttpMethod.GET)
 			.method(HttpMethod.POST)
 			.name(Constants.Routes.COLLECTIONS);
 
@@ -36,7 +47,7 @@ public abstract class Routes
 //			.method(HttpMethod.POST)
 //			.name(Constants.Routes.ENTITIES);
 //
-//		server.uri("/collections/{collectionId}/entities/{entityId}.{format}", config.getEntitiesController())
+//		server.uri("/entities/{entityId}.{format}", config.getEntitiesController())
 //			.alias("/tables/{collectionId}/entities/{entityId}.{format}")
 //			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 //			.name(Constants.Routes.ENTITY);

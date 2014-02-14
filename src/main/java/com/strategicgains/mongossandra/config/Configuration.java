@@ -10,7 +10,9 @@ import com.strategicgains.mongossandra.controller.EntitiesController;
 import com.strategicgains.mongossandra.controller.IndexesController;
 import com.strategicgains.mongossandra.controller.NamespacesController;
 import com.strategicgains.mongossandra.controller.QueriesController;
+import com.strategicgains.mongossandra.persistence.CollectionsRepository;
 import com.strategicgains.mongossandra.persistence.NamespacesRepository;
+import com.strategicgains.mongossandra.service.CollectionsService;
 import com.strategicgains.mongossandra.service.NamespacesService;
 import com.strategicgains.repoexpress.cassandra.CassandraConfig;
 
@@ -51,8 +53,11 @@ extends Environment
 		NamespacesService namespacesService = new NamespacesService(namespacesRepository);
 		namespacesController = new NamespacesController(namespacesService);
 
+		CollectionsRepository collectionsRepository = new CollectionsRepository(dbConfig.getSession());
+		CollectionsService collectionsService = new CollectionsService(namespacesRepository, collectionsRepository);
+		collectionsController = new CollectionsController(collectionsService);
+		
 		// TODO: create service and repository implementations for these...
-//		collectionsController = new CollectionsController(SampleUuidEntityService);
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
 //		indexesController = new IndexesController(SampleUuidEntityService);
 //		queriesController = new QueriesController(SampleUuidEntityService);
