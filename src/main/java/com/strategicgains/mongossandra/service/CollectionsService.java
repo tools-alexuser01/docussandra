@@ -63,7 +63,7 @@ public class CollectionsService
 
 	public Collection read(Identifier id)
 	{
-		Collection c = collections.read(new Identifier(id.components().get(1)));
+		Collection c = collections.read(new Identifier(id.primaryKey()));
 
 		if (c == null) throw new ItemNotFoundException("Collection not found: " + id.toString());
 

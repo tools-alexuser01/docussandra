@@ -148,7 +148,7 @@ extends AbstractCassandraRepository<Collection>
 
 		// Delete the indexed-by-name instance
 		BoundStatement bs2 = new BoundStatement(deleteStmt2);
-		bs2.bind(prev.getName());
+		bs2.bind(prev.getNamespaceId(), prev.getName());
 		batch.add(bs2);
 
 		// Insert the new name
