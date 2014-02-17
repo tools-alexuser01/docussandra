@@ -17,6 +17,7 @@ import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
 import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
+import com.strategicgains.syntaxe.ValidationException;
 
 public class CollectionsRepository
 extends AbstractCassandraRepository<Collection>
@@ -37,7 +38,7 @@ extends AbstractCassandraRepository<Collection>
 		static final String UPDATED_AT = "updated_at";
 	}
 
-	private static final String IDENTITY_CQL = " where namespace_id = ? and id = ?";
+	private static final String IDENTITY_CQL = " where id = ?";
 	private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
 	private static final String CREATE_CQL = "insert into %s (%s, name, namespace_id, description, created_at, updated_at) values (?, ?, ?, ?, ?, ?)";
 	private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
@@ -81,7 +82,7 @@ extends AbstractCassandraRepository<Collection>
 		readNameStmt = getSession().prepare(String.format(READ_NAME_CQL, Tables.BY_NAME));
 		nameExistsStmt = getSession().prepare(String.format(NAME_EXISTS_CQL, Tables.BY_NAME));
 		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, Tables.BY_NAME));
-		readAllCountStmt = getSession().prepare(String.format(READ_ALL_COUNT_CQL, getTable()));
+		readAllCountStmt = getSession().prepare(String.format(READ_ALL_COUNT_CQL, Tables.BY_NAME));
 	}
 
 	@Override
@@ -134,6 +135,11 @@ extends AbstractCassandraRepository<Collection>
 			throw new DuplicateItemException("Collection already exists: " + entity.getName());
 		}
 
+		if (!prev.getNamespaceId().equals(entity.getNamespaceId()))
+		{
+			throw new ValidationException("Cannot update namespace");
+		}
+
 		entity.setCreatedAt(prev.getCreatedAt());
 		BatchStatement batch = new BatchStatement();
 		BoundStatement bs = new BoundStatement(updateStmt);
@@ -163,7 +169,7 @@ extends AbstractCassandraRepository<Collection>
 		batch.add(bs);
 
 		BoundStatement bs2 = new BoundStatement(deleteStmt2);
-		bs2.bind(entity.getName());
+		bs2.bind(entity.getUuid(), entity.getName());
 		batch.add(bs2);
 
 		getSession().execute(batch);
@@ -178,12 +184,12 @@ extends AbstractCassandraRepository<Collection>
 		return (getSession().execute(bs).one().getLong(0) > 0);
 	}
 
-	public Collection readByName(String name)
+	public Collection readByName(UUID namespaceId, String name)
 	{
 		if (name == null || name.isEmpty()) return null;
 		
 		BoundStatement bs = new BoundStatement(readNameStmt);
-		bs.bind(name);
+		bs.bind(namespaceId, name);
 		return marshalRow(getSession().execute(bs).one());
 	}
 
@@ -194,10 +200,10 @@ extends AbstractCassandraRepository<Collection>
 		return (marshalAll(getSession().execute(bs)));
 	}
 
-	public long count(String context, String nodeType)
+	public long countAll(UUID namespaceId)
 	{
 		BoundStatement bs = new BoundStatement(readAllCountStmt);
-		bs.bind(context, nodeType);
+		bs.bind(namespaceId);
 		return (getSession().execute(bs).one().getLong(0));
 	}
 

@@ -1,18 +1,19 @@
 package com.strategicgains.mongossandra.controller;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
+import org.restexpress.exception.NotFoundException;
 
 import com.strategicgains.hyperexpress.UrlBuilder;
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.mongossandra.domain.Collection;
-import com.strategicgains.mongossandra.domain.Namespace;
 import com.strategicgains.mongossandra.service.CollectionsService;
 import com.strategicgains.repoexpress.adapter.Identifiers;
+import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.util.UuidConverter;
 
 /**
@@ -34,7 +35,9 @@ public class CollectionsController
 
 	public Collection create(Request request, Response response)
 	{
-		Collection entity = request.getBodyAs(Collection.class, "Resource details not provided");
+		String namespace = request.getHeader(Constants.Url.NAMESPACE_ID, "No namespace provided");
+		Collection entity = request.getBodyAs(Collection.class, "Collection details not provided");
+		entity.setNamespace(namespace);
 		Collection saved = service.create(entity);
 
 		// Construct the response for create...
@@ -54,18 +57,36 @@ public class CollectionsController
 
 	public Collection read(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.COLLECTION_ID, "No collection name supplied");
-		Collection entity = service.read(id);
+		String id = request.getHeader(Constants.Url.COLLECTION_ID, "No collection ID supplied");
 
-		// enrich the entity with links, etc. here...
+		try
+		{
+			Identifier collectionId = Identifiers.UUID.parse(id);
+			Collection entity = service.read(collectionId);
 
-		return entity;
+			// enrich the entity with links, etc. here...
+
+			return entity;
+		}
+		catch(Exception e)
+		{
+			throw new NotFoundException("Collection not found: " + id);
+		}
 	}
 
-	public List<Namespace> readAll(Request request, Response response)
+	public List<Collection> readAll(Request request, Response response)
 	{
-//		return service.readAll();
-		return Collections.emptyList();
+		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No namespace provided");
+
+		try
+		{
+			UUID namespaceId = UuidConverter.parse(id);
+			return service.readAll(namespaceId);
+		}
+		catch(Exception e)
+		{
+			throw new NotFoundException("Collection not found: " + id);
+		}
 	}
 
 	public void update(Request request, Response response)
@@ -86,7 +107,7 @@ public class CollectionsController
 	public void delete(Request request, Response response)
 	{
 		String id = request.getHeader(Constants.Url.COLLECTION_ID, "No resource ID supplied");
-		service.delete(id);
+		service.delete(Identifiers.UUID.parse(id));
 		response.setResponseNoContent();
 	}
 }

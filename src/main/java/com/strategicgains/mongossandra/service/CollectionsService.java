@@ -9,7 +9,6 @@ import com.strategicgains.mongossandra.persistence.CollectionsRepository;
 import com.strategicgains.mongossandra.persistence.NamespacesRepository;
 import com.strategicgains.repoexpress.adapter.Identifiers;
 import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
 
@@ -30,40 +29,45 @@ public class CollectionsService
 		// Translate namespace name to namespace ID before persisting.
 		if (entity.getNamespace() != null)
 		{
-			Namespace n = namespaces.readByName(entity.getNamespace());
+			Identifier nId = null;
+			
+			try
+			{
+				nId = Identifiers.UUID.parse(entity.getNamespace());
+			}
+			catch(Exception e)
+			{
+				// Do nothing.
+			}
+
+			Namespace n = null;
+			
+			if (nId != null)
+			{
+				n = namespaces.read(nId);
+			}
+			else
+			{
+				n = namespaces.readByName(entity.getNamespace());
+			}
 			
 			if (n == null) throw new ItemNotFoundException("Namespace not found: " + entity.getNamespace());
 			
 			entity.setNamespaceId(n.getUuid());
+			entity.setNamespace(null);
 		}
 
 		ValidationEngine.validateAndThrow(entity);
 		return collections.create(entity);
 	}
 
-	public Collection read(String name)
+	public Collection read(Identifier id)
 	{
-		Collection n = collections.readByName(name);
-		
-		if (n == null)
-		{
-			Identifier id = null;
-			
-			try
-			{
-				id = Identifiers.UUID.parse(name);
-			}
-			catch (InvalidObjectIdException e)
-			{
-				throw new ItemNotFoundException("Collection not found: " + name);
-			}
+		Collection c = collections.read(new Identifier(id.components().get(1)));
 
-			n = collections.read(id);
-		}
-		
-		if (n == null) throw new ItemNotFoundException("Collection not found: " + name);
+		if (c == null) throw new ItemNotFoundException("Collection not found: " + id.toString());
 
-		return n;
+		return c;
 	}
 
 	public List<Collection> readAll(UUID namespaceId)
@@ -77,8 +81,8 @@ public class CollectionsService
 		collections.update(entity);
     }
 
-	public void delete(String name)
+	public void delete(Identifier id)
     {
-		collections.delete(read(name));
+		collections.delete(read(id));
     }
 }
