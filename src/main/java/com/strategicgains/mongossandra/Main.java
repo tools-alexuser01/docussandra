@@ -25,6 +25,7 @@ import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.restexpress.plugin.cache.CacheControlPlugin;
+import com.strategicgains.restexpress.plugin.cors.CorsHeaderPlugin;
 import com.strategicgains.restexpress.plugin.metrics.MetricsPlugin;
 import com.strategicgains.restexpress.plugin.swagger.SwaggerPlugin;
 import com.strategicgains.syntaxe.ValidationException;
@@ -64,6 +65,9 @@ public class Main
 	    configureMetrics(config, server);
 
 		new CacheControlPlugin()
+			.register(server);
+
+		new CorsHeaderPlugin("*")
 			.register(server);
 
 		new SwaggerPlugin()
