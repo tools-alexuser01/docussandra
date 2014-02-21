@@ -10,8 +10,6 @@ import com.strategicgains.hyperexpress.UrlBuilder;
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.mongossandra.domain.Namespace;
 import com.strategicgains.mongossandra.service.NamespacesService;
-import com.strategicgains.repoexpress.adapter.Identifiers;
-import com.strategicgains.repoexpress.util.UuidConverter;
 
 /**
  * This is the 'controller' layer, where HTTP details are converted to domain concepts and passed to the service layer.
@@ -32,7 +30,9 @@ public class NamespacesController
 
 	public Namespace create(Request request, Response response)
 	{
+		String name = request.getHeader(Constants.Url.NAMESPACE, "No namespace name provided");
 		Namespace entity = request.getBodyAs(Namespace.class, "Resource details not provided");
+		entity.setName(name);
 		Namespace saved = service.create(entity);
 
 		// Construct the response for create...
@@ -41,7 +41,7 @@ public class NamespacesController
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.NAMESPACE);
 		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.NAMESPACE_ID, Identifiers.UUID.format(saved.getId()))
+			.param(Constants.Url.NAMESPACE, saved.getName())
 			.build());
 
 		// enrich the resource with links, etc. here...
@@ -52,7 +52,7 @@ public class NamespacesController
 
 	public Namespace read(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No resource ID supplied");
+		String id = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		Namespace entity = service.read(id);
 
 		// enrich the entity with links, etc. here...
@@ -67,22 +67,17 @@ public class NamespacesController
 
 	public void update(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No resource ID supplied");
+		String name = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		Namespace entity = request.getBodyAs(Namespace.class, "Resource details not provided");
 
-//		if (!Identifiers.UUID.parse(id).equals(entity.getId()))
-//		{
-//			throw new BadRequestException("ID in URL and ID in resource body must match");
-//		}
-
-		entity.setUuid(UuidConverter.parse(id));
+		entity.setName(name);
 		service.update(entity);
 		response.setResponseNoContent();
 	}
 
 	public void delete(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.NAMESPACE_ID, "No resource ID supplied");
+		String id = request.getHeader(Constants.Url.NAMESPACE, "No namespace name supplied");
 		service.delete(id);
 		response.setResponseNoContent();
 	}

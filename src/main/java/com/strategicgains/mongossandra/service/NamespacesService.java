@@ -4,9 +4,7 @@ import java.util.List;
 
 import com.strategicgains.mongossandra.domain.Namespace;
 import com.strategicgains.mongossandra.persistence.NamespacesRepository;
-import com.strategicgains.repoexpress.adapter.Identifiers;
 import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
 
@@ -26,30 +24,9 @@ public class NamespacesService
 		return namespaces.create(entity);
 	}
 
-//	public Namespace read(Identifier id)
-//    {
-//		return namespaces.read(id);
-//    }
-
 	public Namespace read(String name)
 	{
-		Namespace n = namespaces.readByName(name);
-		
-		if (n == null)
-		{
-			Identifier id = null;
-			
-			try
-			{
-				id = Identifiers.UUID.parse(name);
-			}
-			catch (InvalidObjectIdException e)
-			{
-				throw new ItemNotFoundException("Namespace not found: " + name);
-			}
-
-			n = namespaces.read(id);
-		}
+		Namespace n = namespaces.read(new Identifier(name));
 		
 		if (n == null) throw new ItemNotFoundException("Namespace not found: " + name);
 
@@ -69,6 +46,6 @@ public class NamespacesService
 
 	public void delete(String name)
     {
-		namespaces.delete(read(name));
+		namespaces.delete(new Identifier(name));
     }
 }

@@ -64,14 +64,14 @@ public class Main
     {
 	    configureMetrics(config, server);
 
-		new CacheControlPlugin()
-			.register(server);
-
-		new CorsHeaderPlugin("*")
-			.register(server);
-
-		new SwaggerPlugin()
-			.register(server);
+//		new CacheControlPlugin()
+//			.register(server);
+//
+//		new CorsHeaderPlugin("*")
+//			.register(server);
+//
+//		new SwaggerPlugin("/a/b/c/api-docs")
+//			.register(server);
     }
 
 	private static void configureMetrics(Configuration config, RestExpress server)

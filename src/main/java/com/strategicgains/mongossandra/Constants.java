@@ -15,9 +15,9 @@ public class Constants
 		public static final String KEY1 = "key1";
 		public static final String KEY2 = "key2";
 		public static final String KEY3 = "key3";
-		public static final String NAMESPACE_ID = "namespaceId";
-		public static final String COLLECTION_ID = "collectionId";
-		public static final String ENTITY_ID = "entityId";
+		public static final String NAMESPACE = "namespace";
+		public static final String COLLECTION = "collection";
+		public static final String DOCUMENT_ID = "documentId";
 		public static final String INDEX_ID = "indexId";
 		public static final String QUERY_ID = "queryId";
 	}
@@ -37,8 +37,8 @@ public class Constants
 		public static final String NAMESPACE = "namespace.single.route";
 		public static final String COLLECTIONS = "collection.collection.route";
 		public static final String COLLECTION = "collection.single.route";
-		public static final String ENTITIES = "entity.collection.route";
-		public static final String ENTITY = "entity.single.route";
+		public static final String DOCUMENTS = "document.collection.route";
+		public static final String DOCUMENT = "document.single.route";
 		public static final String INDEXES = "index.collection.route";
 		public static final String INDEX = "index.single.route";
 		public static final String QUERIES = "query.collection.route";
