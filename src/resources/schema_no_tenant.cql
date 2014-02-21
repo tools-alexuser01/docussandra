@@ -5,62 +5,64 @@ use mongossandra;
 
 drop table if exists namespaces;
 create table namespaces (
-	id uuid primary key,
-	name text,
-	created_at timestamp,
-	updated_at timestamp
-);
-
-drop table if exists namespaces_name;
-create table namespaces_name (
-	id uuid,
 	name text primary key,
+	description text,
 	created_at timestamp,
 	updated_at timestamp
 );
 
 drop table if exists collections;
 create table collections (
-	id uuid,
-	namespace_id uuid,
+	namespace text,
 	name text,
 	description text,
 	created_at timestamp,
 	updated_at timestamp,
-	primary key ((namespace_id), id)
+	primary key ((namespace), name)
 );
 
-drop table if exists collections_name;
-create table collections_name (
+drop table if exists documents;
+create table documents (
 	id uuid,
-	namespace_id uuid,
-	name text,
-	description text,
+	namespace text,
+	collection text,
+	object blob,
 	created_at timestamp,
 	updated_at timestamp,
-	primary key ((namespace_id), name)
+	primary key (id) //(namespace, collection, id)
 );
 
-drop table if exists entities;
-create table entities (
-	id uuid primary key,
-	namespace_id uuid,
-	collection_id uuid,
-	object blob
-);
+create index on documents (namespace);
+create index on documents (collection);
 
-// To support cascade-delete
-create index on entities (namespace_id);
-create index on entities (collection_id);
-
-drop table if exists entities_idx;
-create table entities_idx (
-	id uuid,
-	namespace_id uuid,
-	collection_id uuid,
+drop table if exists doc_idx;
+create table doc_idx (
+	namespace text,
+	collection text,
+	id uuid,	// Entity ID
 	key blob,	// Indexed column name(s)
 	value blob,	// Indexed value
 	object blob,
-	primary key ((namespace_id, collection_id, key, value), id)
-//	primary key ((namespace_id, collection_id, key), value, id)
+	primary key ((namespace, collection, key, value), id)
 );
+
+//==================================
+// From Data Extension Framework:
+//----------------------------------
+CREATE TABLE data_entity (
+	id uuid PRIMARY KEY,
+	type text,
+	object text
+);
+
+CREATE INDEX ON data_entity (type);
+
+CREATE TABLE data_entity_attribute (
+	entity_type text,
+	attribute_name text,
+	attribute_value text,
+	entity_id uuid,
+	data_entity_object text,
+	PRIMARY KEY ((entity_type, attribute_name, attribute_value), entity_id)
+);
+//==================================

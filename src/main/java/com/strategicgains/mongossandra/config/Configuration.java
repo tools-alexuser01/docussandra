@@ -6,13 +6,15 @@ import org.restexpress.RestExpress;
 import org.restexpress.util.Environment;
 
 import com.strategicgains.mongossandra.controller.CollectionsController;
-import com.strategicgains.mongossandra.controller.EntitiesController;
+import com.strategicgains.mongossandra.controller.DocumentsController;
 import com.strategicgains.mongossandra.controller.IndexesController;
 import com.strategicgains.mongossandra.controller.NamespacesController;
 import com.strategicgains.mongossandra.controller.QueriesController;
 import com.strategicgains.mongossandra.persistence.CollectionsRepository;
+import com.strategicgains.mongossandra.persistence.DocumentsRepository;
 import com.strategicgains.mongossandra.persistence.NamespacesRepository;
 import com.strategicgains.mongossandra.service.CollectionsService;
+import com.strategicgains.mongossandra.service.DocumentsService;
 import com.strategicgains.mongossandra.service.NamespacesService;
 import com.strategicgains.repoexpress.cassandra.CassandraConfig;
 
@@ -32,7 +34,7 @@ extends Environment
 
 	private NamespacesController namespacesController;
 	private CollectionsController collectionsController;
-	private EntitiesController entitiesController;
+	private DocumentsController documentsController;
 	private IndexesController indexesController;
 	private QueriesController queriesController;
 
@@ -56,7 +58,11 @@ extends Environment
 		CollectionsRepository collectionsRepository = new CollectionsRepository(dbConfig.getSession());
 		CollectionsService collectionsService = new CollectionsService(namespacesRepository, collectionsRepository);
 		collectionsController = new CollectionsController(collectionsService);
-		
+
+		DocumentsRepository documentsRepository = new DocumentsRepository(dbConfig.getSession());
+		DocumentsService documentsService = new DocumentsService(collectionsRepository, documentsRepository);
+		documentsController = new DocumentsController(documentsService);
+
 		// TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
 //		indexesController = new IndexesController(SampleUuidEntityService);
@@ -93,9 +99,9 @@ extends Environment
 		return collectionsController;
     }
 
-	public Object getEntitiesController()
+	public Object getDocumentsController()
     {
-		return entitiesController;
+		return documentsController;
     }
 
 	public Object getIndexesController()

@@ -62,8 +62,8 @@ extends AbstractCassandraRepository<Collection>
 		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), Columns.NAME));
 		deleteStmt = getSession().prepare(String.format(DELETE_CQL, getTable()));
 		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable()));
-		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, Tables.BY_ID));
-		readAllCountStmt = getSession().prepare(String.format(READ_ALL_COUNT_CQL, Tables.BY_ID));
+		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, getTable()));
+		readAllCountStmt = getSession().prepare(String.format(READ_ALL_COUNT_CQL, getTable()));
 	}
 
 	@Override

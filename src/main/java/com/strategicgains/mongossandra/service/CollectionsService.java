@@ -41,6 +41,8 @@ public class CollectionsService
 
 	public List<Collection> readAll(String namespace)
 	{
+		if (!namespaces.exists(new Identifier(namespace))) throw new ItemNotFoundException("Namespace not found: " + namespace);
+
 		return collections.readAll(namespace);
 	}
 

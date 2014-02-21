@@ -18,7 +18,7 @@ public abstract class Routes
 			.name(Constants.Routes.NAMESPACES);
 
 		server.uri("/{namespace}", config.getNamespacesController())
-			.method(GET, DELETE, PUT, PUT)
+			.method(GET, DELETE, PUT, POST)
 			.name(Constants.Routes.NAMESPACE);
 
 		server.uri("/{namespace}/", config.getCollectionsController())
@@ -29,17 +29,15 @@ public abstract class Routes
 			.method(GET, DELETE, PUT, POST)
 			.name(Constants.Routes.COLLECTION);
 
-//		server.uri("/collections/{collectionId}/entities.{format}", config.getEntitiesController())
-//			.alias("/tables/{collectionId}/entities.{format}")
-//			.action("readAll", GET)
-//			.method(POST)
-//			.name(Constants.Routes.ENTITIES);
+		server.uri("/{namespace}/{collection}/", config.getDocumentsController())
+			.action("readAll", GET)
+			.method(POST)
+			.name(Constants.Routes.DOCUMENTS);
 
-//		server.uri("/entities/{entityId}.{format}", config.getEntitiesController())
-//			.alias("/tables/{collectionId}/entities/{entityId}.{format}")
-//			.method(GET, PUT, DELETE)
-//			.name(Constants.Routes.ENTITY);
-//
+		server.uri("/{namespace}/{collection}/{documentId}", config.getDocumentsController())
+			.method(GET, PUT, DELETE)
+			.name(Constants.Routes.DOCUMENT);
+
 //		server.uri("/collections/{collectionId}/indexes.{format}", config.getIndexesController())
 //			.alias("/tables/{collectionId}/indexes.{format}")
 //			.action("readAll", GET)

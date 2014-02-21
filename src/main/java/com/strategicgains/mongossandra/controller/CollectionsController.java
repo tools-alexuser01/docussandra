@@ -60,9 +60,9 @@ public class CollectionsController
 
 	public List<Collection> readAll(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
+		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 
-		return service.readAll(id);
+		return service.readAll(namespace);
 	}
 
 	public void update(Request request, Response response)

@@ -4,14 +4,13 @@ import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
-import com.strategicgains.syntaxe.annotation.Required;
 
 public class Collection
 extends AbstractTimestampedIdentifiable
 {
-	@Required("Namespace")
+	@RegexValidation(name = "Namespace", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
 	private String namespace;
-	
+
 	@RegexValidation(name = "Collection Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
 	private String name;
 	private String description;
