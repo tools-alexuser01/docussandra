@@ -1,8 +1,12 @@
 package com.strategicgains.mongossandra.persistence;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.bson.BSON;
+import org.bson.BSONObject;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
@@ -89,17 +93,33 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 
 	private void bindCreate(BoundStatement bs, Document entity)
 	{
+		// TODO: parse the entity.object into a BSON structure and introduce the id.
+		BSONObject bson = BSON.decode(entity.getObject());
+
+		if (!bson.containsField(Columns.ID))
+		{
+			bson.put(Columns.ID, entity.getUuid());
+		}
+
 		bs.bind(entity.getUuid(),
 			entity.getNamespace(),
 			entity.getCollection(),
-			entity.getObject(),
+			ByteBuffer.wrap(BSON.encode(bson)),
 		    entity.getCreatedAt(),
 		    entity.getUpdatedAt());
 	}
 
 	private void bindUpdate(BoundStatement bs, Document entity)
 	{
-		bs.bind(entity.getObject(),
+		// TODO: parse the entity.object into a BSON structure and ensure the id is present.
+		BSONObject bson = BSON.decode(entity.getObject());
+
+		if (!bson.containsField(Columns.ID))
+		{
+			bson.put(Columns.ID, entity.getUuid());
+		}
+
+		bs.bind(ByteBuffer.wrap(BSON.encode(bson)),
 			entity.getUpdatedAt(),
 		    entity.getUuid());
 	}
@@ -126,7 +146,14 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 		d.setUuid(row.getUUID(getIdentifierColumn()));
 		d.setNamespace(row.getString(Columns.NAMESPACE));
 		d.setCollection(row.getString(Columns.COLLECTION));
-		d.setObject(row.getBytes(Columns.OBJECT));
+		ByteBuffer b = row.getBytes(Columns.OBJECT);
+		
+		if (b != null)
+		{
+			// TODO: format the document.object from BSON into a string.
+			d.setObject(b.array());
+		}
+
 		d.setCreatedAt(row.getDate(Columns.CREATED_AT));
 		d.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return d;

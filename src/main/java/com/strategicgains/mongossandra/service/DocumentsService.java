@@ -1,6 +1,5 @@
 package com.strategicgains.mongossandra.service;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.restexpress.exception.NotFoundException;
@@ -23,7 +22,7 @@ public class DocumentsService
 		this.collections = collectionsRepository;
 	}
 
-	public Document create(String namespace, String collection, ByteBuffer object)
+	public Document create(String namespace, String collection, byte[] object)
 	{
 		verifyCollection(namespace, collection);
 			

@@ -3,6 +3,8 @@ package com.strategicgains.mongossandra.controller;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.bson.BSON;
+import org.bson.BSONObject;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
@@ -29,10 +31,11 @@ public class DocumentsController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
-		ByteBuffer data = request.getBody().toByteBuffer();
-		
-		if (data == null) throw new BadRequestException("No document data provided");
+		byte[] data = request.getBody().array();
 
+		if (data == null || data.length == 0) throw new BadRequestException("No document data provided");
+
+		BSONObject bson = BSON.decode(data);
 		Document saved = service.create(namespace, collection, data);
 
 		// Construct the response for create...
@@ -75,16 +78,17 @@ public class DocumentsController
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
 		String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
-		ByteBuffer data = request.getBody().toByteBuffer();
-		
-		if (data == null) throw new BadRequestException("No document data provided");
+		byte[] data = request.getBody().array();
 
-		Document entity = new Document();
-		entity.setUuid(UuidConverter.parse(id));
-		entity.setNamespace(namespace);
-		entity.setCollection(collection);
-		entity.setObject(data);
-		service.update(entity);
+		if (data == null || data.length == 0) throw new BadRequestException("No document data provided");
+
+		BSONObject bson = BSON.decode(data);
+		Document document = new Document();
+		document.setUuid(UuidConverter.parse(id));
+		document.setNamespace(namespace);
+		document.setCollection(collection);
+		document.setObject(data);
+		service.update(document);
 		response.setResponseNoContent();
 	}
 
