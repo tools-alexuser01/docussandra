@@ -2,17 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<name>RestExpress-Cassandra-Scaffold</name>
-	<!-- 
-		To run the project: mvn clean package exec:java
-			* mongod must be running.
-
-		To create a project deployable assembly (zip file):
-			mvn clean package
-			mvn assembly:single
-	 -->
-	<description>A Basic, Cassandra-backed Service Suite</description>
-	<url>https://github.com/RestExpress/RestExpress-Scaffold</url>
+	<name>Mongossandra</name>
+	<description>An HTTP document database backed by Cassandra</description>
 	<groupId>com.strategicgains.mongossandra</groupId>
 	<artifactId>mongossandra</artifactId>
 	<version>1.0-SNAPSHOT</version>

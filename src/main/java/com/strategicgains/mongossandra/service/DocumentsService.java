@@ -22,14 +22,14 @@ public class DocumentsService
 		this.collections = collectionsRepository;
 	}
 
-	public Document create(String namespace, String collection, byte[] object)
+	public Document create(String namespace, String collection, String data)
 	{
 		verifyCollection(namespace, collection);
 			
 		Document doc = new Document();
 		doc.setNamespace(namespace);
 		doc.setCollection(collection);
-		doc.setObject(object);
+		doc.setObject(data);
 		ValidationEngine.validateAndThrow(doc);
 		return docs.create(doc);
 	}

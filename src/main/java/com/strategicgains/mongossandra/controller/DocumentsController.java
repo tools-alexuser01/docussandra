@@ -1,11 +1,9 @@
 package com.strategicgains.mongossandra.controller;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.bson.BSON;
-import org.bson.BSONObject;
 import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.exception.BadRequestException;
@@ -31,11 +29,10 @@ public class DocumentsController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
-		byte[] data = request.getBody().array();
+		String data = request.getBody().toString(ContentType.CHARSET);
 
-		if (data == null || data.length == 0) throw new BadRequestException("No document data provided");
+		if (data == null || data.length() == 0) throw new BadRequestException("No document data provided");
 
-		BSONObject bson = BSON.decode(data);
 		Document saved = service.create(namespace, collection, data);
 
 		// Construct the response for create...
@@ -44,7 +41,7 @@ public class DocumentsController
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.SINGLE_UUID_SAMPLE);
 		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.UUID, Identifiers.UUID.format(saved.getId()))
+			.param(Constants.Url.DOCUMENT_ID, Identifiers.UUID.format(saved.getId()))
 			.build());
 
 		// enrich the resource with links, etc. here...
@@ -78,11 +75,10 @@ public class DocumentsController
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
 		String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
-		byte[] data = request.getBody().array();
+		String data = request.getBody().toString(ContentType.CHARSET);
 
-		if (data == null || data.length == 0) throw new BadRequestException("No document data provided");
+		if (data == null || data.length() == 0) throw new BadRequestException("No document data provided");
 
-		BSONObject bson = BSON.decode(data);
 		Document document = new Document();
 		document.setUuid(UuidConverter.parse(id));
 		document.setNamespace(namespace);

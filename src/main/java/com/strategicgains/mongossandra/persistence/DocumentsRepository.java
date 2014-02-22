@@ -13,6 +13,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.mongodb.util.JSON;
 import com.strategicgains.mongossandra.domain.Document;
 import com.strategicgains.repoexpress.cassandra.CassandraUuidTimestampedEntityRepository;
 
@@ -93,8 +94,7 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 
 	private void bindCreate(BoundStatement bs, Document entity)
 	{
-		// TODO: parse the entity.object into a BSON structure and introduce the id.
-		BSONObject bson = BSON.decode(entity.getObject());
+		BSONObject bson = (BSONObject) JSON.parse(entity.getObject());
 
 		if (!bson.containsField(Columns.ID))
 		{
@@ -111,8 +111,7 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 
 	private void bindUpdate(BoundStatement bs, Document entity)
 	{
-		// TODO: parse the entity.object into a BSON structure and ensure the id is present.
-		BSONObject bson = BSON.decode(entity.getObject());
+		BSONObject bson = (BSONObject) JSON.parse(entity.getObject());
 
 		if (!bson.containsField(Columns.ID))
 		{
@@ -148,10 +147,10 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 		d.setCollection(row.getString(Columns.COLLECTION));
 		ByteBuffer b = row.getBytes(Columns.OBJECT);
 		
-		if (b != null)
+		if (b != null && b.hasArray())
 		{
-			// TODO: format the document.object from BSON into a string.
-			d.setObject(b.array());
+			BSONObject o = BSON.decode(b.array());
+			d.setObject(JSON.serialize(o));
 		}
 
 		d.setCreatedAt(row.getDate(Columns.CREATED_AT));

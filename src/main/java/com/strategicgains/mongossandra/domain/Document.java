@@ -14,7 +14,7 @@ extends AbstractUuidEntity
 	@RegexValidation(name = "Collection", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
 	private String collection;
 
-	private byte[] object;
+	private String object;
 
 	public Document()
 	{
@@ -40,12 +40,12 @@ extends AbstractUuidEntity
 		this.collection = collection;
 	}
 
-	public byte[] getObject()
+	public String getObject()
 	{
 		return object;
 	}
 
-	public void setObject(byte[] object)
+	public void setObject(String object)
 	{
 		this.object = object;
 	}
