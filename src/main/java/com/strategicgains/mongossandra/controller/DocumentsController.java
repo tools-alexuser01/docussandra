@@ -39,7 +39,7 @@ public class DocumentsController
 		response.setResponseCreated();
 
 		// Include the Location header...
-		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.SINGLE_UUID_SAMPLE);
+		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.DOCUMENT);
 		response.addLocationHeader(new UrlBuilder(locationPattern)
 			.param(Constants.Url.DOCUMENT_ID, Identifiers.UUID.format(saved.getId()))
 			.build());
