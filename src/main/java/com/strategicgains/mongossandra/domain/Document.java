@@ -1,9 +1,10 @@
 package com.strategicgains.mongossandra.domain;
 
+import java.nio.ByteBuffer;
+
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.repoexpress.domain.AbstractUuidEntity;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
-import com.strategicgains.syntaxe.annotation.Required;
 
 public class Document
 extends AbstractUuidEntity
@@ -14,7 +15,7 @@ extends AbstractUuidEntity
 	@RegexValidation(name = "Collection", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
 	private String collection;
 
-	private String object;
+	private ByteBuffer object;
 
 	public Document()
 	{
@@ -40,12 +41,12 @@ extends AbstractUuidEntity
 		this.collection = collection;
 	}
 
-	public String getObject()
+	public ByteBuffer getObject()
 	{
 		return object;
 	}
 
-	public void setObject(String object)
+	public void setObject(ByteBuffer object)
 	{
 		this.object = object;
 	}

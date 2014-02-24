@@ -94,7 +94,8 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 
 	private void bindCreate(BoundStatement bs, Document entity)
 	{
-		BSONObject bson = (BSONObject) JSON.parse(entity.getObject());
+		String json = new String(entity.getObject().array());
+		BSONObject bson = (BSONObject) JSON.parse(json);
 
 		if (!bson.containsField(Columns.ID))
 		{
@@ -111,7 +112,8 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 
 	private void bindUpdate(BoundStatement bs, Document entity)
 	{
-		BSONObject bson = (BSONObject) JSON.parse(entity.getObject());
+		String json = entity.getObject().toString();
+		BSONObject bson = (BSONObject) JSON.parse(json);
 
 		if (!bson.containsField(Columns.ID))
 		{
@@ -146,11 +148,13 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 		d.setNamespace(row.getString(Columns.NAMESPACE));
 		d.setCollection(row.getString(Columns.COLLECTION));
 		ByteBuffer b = row.getBytes(Columns.OBJECT);
-		
+
 		if (b != null && b.hasArray())
 		{
-			BSONObject o = BSON.decode(b.array());
-			d.setObject(JSON.serialize(o));
+			byte[] result = new byte[b.remaining()];
+			b.get(result);
+			BSONObject o = BSON.decode(result);
+			d.setObject(ByteBuffer.wrap(JSON.serialize(o).getBytes()));
 		}
 
 		d.setCreatedAt(row.getDate(Columns.CREATED_AT));
