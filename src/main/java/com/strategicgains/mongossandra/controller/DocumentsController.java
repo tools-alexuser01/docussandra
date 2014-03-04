@@ -1,6 +1,5 @@
 package com.strategicgains.mongossandra.controller;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.jboss.netty.handler.codec.http.HttpMethod;
@@ -30,9 +29,9 @@ public class DocumentsController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
-		ByteBuffer data = request.getBody().toByteBuffer();
+		String data = request.getBody().toString(ContentType.CHARSET);
 
-		if (data == null || data.remaining() == 0) throw new BadRequestException("No document data provided");
+		if (data == null || data.isEmpty()) throw new BadRequestException("No document data provided");
 
 		Document saved = service.create(namespace, collection, data);
 
@@ -76,9 +75,9 @@ public class DocumentsController
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
 		String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
-		ByteBuffer data = request.getBody().toByteBuffer();
+		String data = request.getBody().toString(ContentType.CHARSET);
 
-		if (data == null || data.remaining() == 0) throw new BadRequestException("No document data provided");
+		if (data == null || data.isEmpty()) throw new BadRequestException("No document data provided");
 
 		Document document = new Document();
 		document.setUuid(UuidConverter.parse(id));
