@@ -22,6 +22,7 @@ extends AbstractTimestampedIdentifiable
 	private String name;
 
 	private boolean isUnique = false;
+	private long bucketSize = 2000l;
 	private Map<String, IndexProperties> properties = new HashMap<String, Index.IndexProperties>();
 
 	public Index()
