@@ -6,7 +6,10 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
 
-import com.strategicgains.hyperexpress.UrlBuilder;
+import com.strategicgains.hyperexpress.HyperExpress;
+import com.strategicgains.hyperexpress.builder.TokenBinder;
+import com.strategicgains.hyperexpress.builder.TokenResolver;
+import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.mongossandra.domain.Namespace;
 import com.strategicgains.mongossandra.service.NamespacesService;
@@ -20,6 +23,8 @@ import com.strategicgains.mongossandra.service.NamespacesService;
  */
 public class NamespacesController
 {
+	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
+
 	private NamespacesService service;
 	
 	public NamespacesController(NamespacesService sampleService)
@@ -38,13 +43,12 @@ public class NamespacesController
 		// Construct the response for create...
 		response.setResponseCreated();
 
+		// enrich the resource with links, etc. here...
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.NAMESPACE, saved.getName());
+
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.NAMESPACE);
-		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.NAMESPACE, saved.getName())
-			.build());
-
-		// enrich the resource with links, etc. here...
+		response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
 		// Return the newly-created resource...
 		return saved;
@@ -56,12 +60,21 @@ public class NamespacesController
 		Namespace entity = service.read(id);
 
 		// enrich the entity with links, etc. here...
+		HyperExpress.bind(Constants.Url.NAMESPACE, entity.getName());
 
 		return entity;
 	}
 
 	public List<Namespace> readAll(Request request, Response response)
 	{
+		HyperExpress.tokenBinder(new TokenBinder<Namespace>()
+		{
+			@Override
+            public void bind(Namespace object, TokenResolver resolver)
+            {
+				resolver.bind(Constants.Url.NAMESPACE, object.getName());
+            }
+		});
 		return service.readAll();
 	}
 

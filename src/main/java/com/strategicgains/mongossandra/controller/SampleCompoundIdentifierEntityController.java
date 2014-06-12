@@ -8,11 +8,13 @@ import org.restexpress.Response;
 import org.restexpress.common.query.QueryRange;
 import org.restexpress.exception.BadRequestException;
 import org.restexpress.query.QueryRanges;
+
+import com.strategicgains.hyperexpress.HyperExpress;
+import com.strategicgains.hyperexpress.builder.TokenResolver;
+import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.mongossandra.domain.SampleCompoundIdentifierEntity;
 import com.strategicgains.mongossandra.service.SampleCompoundIdentifierEntityService;
-
-import com.strategicgains.hyperexpress.UrlBuilder;
 import com.strategicgains.repoexpress.domain.Identifier;
 
 /**
@@ -24,6 +26,8 @@ import com.strategicgains.repoexpress.domain.Identifier;
  */
 public class SampleCompoundIdentifierEntityController
 {
+	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
+
 	private SampleCompoundIdentifierEntityService service;
 	
 	public SampleCompoundIdentifierEntityController(SampleCompoundIdentifierEntityService service)
@@ -53,15 +57,14 @@ public class SampleCompoundIdentifierEntityController
 		// Construct the response for create...
 		response.setResponseCreated();
 
+		// enrich the resource with links, etc. here...
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.KEY1, saved.getKey1())
+			.bind(Constants.Url.KEY2, saved.getKey2())
+			.bind(Constants.Url.KEY3, saved.getKey3());
+
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.SINGLE_COMPOUND_SAMPLE);
-		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.KEY1, saved.getKey1())
-			.param(Constants.Url.KEY2, saved.getKey2())
-			.param(Constants.Url.KEY3, saved.getKey3())
-			.build());
-
-		// enrich the resource with links, etc. here...
+		response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
 		// Return the newly-created resource...
 		return saved;

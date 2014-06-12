@@ -4,13 +4,14 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.exception.BadRequestException;
+
+import com.strategicgains.hyperexpress.HyperExpress;
+import com.strategicgains.hyperexpress.builder.TokenResolver;
+import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.mongossandra.domain.SampleUuidEntity;
 import com.strategicgains.mongossandra.service.SampleUuidEntityService;
-
-import com.strategicgains.hyperexpress.UrlBuilder;
 import com.strategicgains.repoexpress.adapter.Identifiers;
-import com.strategicgains.repoexpress.util.UuidConverter;
 
 /**
  * This is the 'controller' layer, where HTTP details are converted to domain concepts and passed to the service layer.
@@ -21,6 +22,8 @@ import com.strategicgains.repoexpress.util.UuidConverter;
  */
 public class QueriesController
 {
+	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
+
 	private SampleUuidEntityService service;
 	
 	public QueriesController(SampleUuidEntityService sampleService)
@@ -37,13 +40,12 @@ public class QueriesController
 		// Construct the response for create...
 		response.setResponseCreated();
 
+		// enrich the resource with links, etc. here...
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.UUID, Identifiers.UUID.format(saved.getId()));
+
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.SINGLE_UUID_SAMPLE);
-		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.UUID, saved.getId().toString())
-			.build());
-
-		// enrich the resource with links, etc. here...
+		response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
 		// Return the newly-created resource...
 		return saved;

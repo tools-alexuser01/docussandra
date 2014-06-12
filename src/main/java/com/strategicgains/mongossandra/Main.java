@@ -10,6 +10,8 @@ import org.restexpress.exception.BadRequestException;
 import org.restexpress.exception.ConflictException;
 import org.restexpress.exception.NotFoundException;
 import org.restexpress.pipeline.SimpleConsoleLogMessageObserver;
+import org.restexpress.plugin.hyperexpress.HyperExpressPlugin;
+import org.restexpress.plugin.hyperexpress.Linkable;
 import org.restexpress.util.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +23,11 @@ import com.codahale.metrics.graphite.GraphiteReporter;
 import com.strategicgains.mongossandra.config.Configuration;
 import com.strategicgains.mongossandra.config.MetricsConfig;
 import com.strategicgains.mongossandra.serialization.SerializationProvider;
+import com.strategicgains.repoexpress.adapter.Identifiers;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
-import com.strategicgains.restexpress.plugin.cache.CacheControlPlugin;
-import com.strategicgains.restexpress.plugin.cors.CorsHeaderPlugin;
 import com.strategicgains.restexpress.plugin.metrics.MetricsPlugin;
-import com.strategicgains.restexpress.plugin.swagger.SwaggerPlugin;
 import com.strategicgains.syntaxe.ValidationException;
 
 public class Main
@@ -45,6 +45,7 @@ public class Main
 	public static RestExpress initializeServer(String[] args) throws IOException
 	{
 		RestExpress.setSerializationProvider(new SerializationProvider());
+		Identifiers.UUID.useShortUUID(true);
 
 		Configuration config = loadEnvironment(args);
 		RestExpress server = new RestExpress()
@@ -54,6 +55,7 @@ public class Main
 				.addMessageObserver(new SimpleConsoleLogMessageObserver());
 
 		Routes.define(config, server);
+		Relationships.define(server);
 		configurePlugins(config, server);
 		mapExceptions(server);
 		server.bind(config.getPort());
@@ -63,6 +65,9 @@ public class Main
 	private static void configurePlugins(Configuration config, RestExpress server)
     {
 	    configureMetrics(config, server);
+
+	    new HyperExpressPlugin(Linkable.class)
+	    	.register(server);
 
 //		new CacheControlPlugin()
 //			.register(server);

@@ -6,7 +6,10 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
 
-import com.strategicgains.hyperexpress.UrlBuilder;
+import com.strategicgains.hyperexpress.HyperExpress;
+import com.strategicgains.hyperexpress.builder.TokenBinder;
+import com.strategicgains.hyperexpress.builder.TokenResolver;
+import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.mongossandra.domain.Collection;
 import com.strategicgains.mongossandra.service.CollectionsService;
@@ -14,6 +17,8 @@ import com.strategicgains.repoexpress.domain.Identifier;
 
 public class CollectionsController
 {
+	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
+
 	private CollectionsService service;
 	
 	public CollectionsController(CollectionsService collectionsService)
@@ -34,13 +39,12 @@ public class CollectionsController
 		// Construct the response for create...
 		response.setResponseCreated();
 
+		// enrich the resource with links, etc. here...
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.COLLECTION, saved.getId().components().get(1).toString());
+
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.COLLECTION);
-		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.COLLECTION, saved.getId().toString())
-			.build());
-
-		// enrich the resource with links, etc. here...
+		response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
 		// Return the newly-created resource...
 		return saved;
@@ -54,6 +58,7 @@ public class CollectionsController
 		Collection entity = service.read(namespace, collection);
 
 		// enrich the entity with links, etc. here...
+		HyperExpress.bind(Constants.Url.COLLECTION, entity.getId().components().get(1).toString());
 
 		return entity;
 	}
@@ -62,6 +67,14 @@ public class CollectionsController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 
+		HyperExpress.tokenBinder(new TokenBinder<Collection>()
+		{
+			@Override
+            public void bind(Collection object, TokenResolver resolver)
+            {
+				resolver.bind(Constants.Url.COLLECTION, object.getId().components().get(1).toString());
+			}
+		});
 		return service.readAll(namespace);
 	}
 

@@ -34,7 +34,7 @@ public abstract class Routes
 			.method(POST)
 			.name(Constants.Routes.DOCUMENTS);
 
-		server.uri("/{namespace}/{collection}/docs/{documentId}", config.getDocumentsController())
+		server.uri("/{namespace}/{collection}/{documentId}", config.getDocumentsController())
 			.method(GET, PUT, DELETE)
 			.name(Constants.Routes.DOCUMENT);
 

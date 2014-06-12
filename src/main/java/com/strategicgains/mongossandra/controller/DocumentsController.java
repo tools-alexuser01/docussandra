@@ -8,7 +8,10 @@ import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.exception.BadRequestException;
 
-import com.strategicgains.hyperexpress.UrlBuilder;
+import com.strategicgains.hyperexpress.HyperExpress;
+import com.strategicgains.hyperexpress.builder.TokenBinder;
+import com.strategicgains.hyperexpress.builder.TokenResolver;
+import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import com.strategicgains.mongossandra.Constants;
 import com.strategicgains.mongossandra.domain.Document;
 import com.strategicgains.mongossandra.service.DocumentsService;
@@ -17,6 +20,8 @@ import com.strategicgains.repoexpress.util.UuidConverter;
 
 public class DocumentsController
 {
+	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
+
 	private DocumentsService service;
 	
 	public DocumentsController(DocumentsService documentsService)
@@ -38,13 +43,12 @@ public class DocumentsController
 		// Construct the response for create...
 		response.setResponseCreated();
 
+		// enrich the resource with links, etc. here...
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.DOCUMENT_ID, saved.getUuid().toString());
+
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.DOCUMENT);
-		response.addLocationHeader(new UrlBuilder(locationPattern)
-			.param(Constants.Url.DOCUMENT_ID, Identifiers.UUID.format(saved.getId()))
-			.build());
-
-		// enrich the resource with links, etc. here...
+		response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
 		// Return the newly-created resource...
 		return saved;
@@ -58,6 +62,7 @@ public class DocumentsController
 		Document document = service.read(namespace, collection, Identifiers.UUID.parse(id));
 
 		// enrich the entity with links, etc. here...
+		HyperExpress.bind(Constants.Url.DOCUMENT_ID, document.getUuid().toString());
 
 		return document;
 	}
@@ -66,6 +71,15 @@ public class DocumentsController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
+
+		HyperExpress.tokenBinder(new TokenBinder<Document>()
+		{
+			@Override
+            public void bind(Document object, TokenResolver resolver)
+            {
+				resolver.bind(Constants.Url.DOCUMENT_ID, object.getUuid().toString());
+            }
+		});
 
 		return service.readAll(namespace, collection);
 	}
