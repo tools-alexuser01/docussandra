@@ -1,16 +1,14 @@
-A Cassandra-Backed RestExpress Server
-=====================================
-A template RestExpress project with Cassandra persistence for domain objects.
-Example Cassandra schema (to run the base server) is in src/main/cql/sample.cql
+A REST-based, Document-Oriented Cassandra
+=========================================
 
-This project produces two domain objects and two corresponding repositories, illustrating
-the two primary ways to persist a domain model to Cassandra
+A REST API that makes Cassandra behave much like MongoDB. Stores arbitrary payloads as
+BSON in Cassandra, supporting indexing, filtering, sorting, querying.
 
-# One domain object is identified by a single UUID
-# The other identified by a compound key
+All with a great scale story, multi-datacenter or otherwise.
 
 To run the project:
-	Make sure Cassandra is running (and your keyspace and schema is created)
+	Make sure Cassandra is running
+	Load the schema in src/resources/schema_no_tenant.cql (e.g. 'cqlsh -f src/resources/schema_no_tenant.cql')
 	mvn clean package exec:java
 
 To create a project deployable assembly (zip file):
