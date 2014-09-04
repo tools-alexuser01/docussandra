@@ -1,7 +1,10 @@
 package com.strategicgains.mongossandra.controller;
 
+import static com.strategicgains.mongossandra.Constants.Routes.*;
+
 import java.util.List;
 
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
@@ -15,11 +18,7 @@ import com.strategicgains.mongossandra.domain.Namespace;
 import com.strategicgains.mongossandra.service.NamespacesService;
 
 /**
- * This is the 'controller' layer, where HTTP details are converted to domain concepts and passed to the service layer.
- * Then service layer response information is enhanced with HTTP details, if applicable, for the response.
- * <p/>
- * This controller demonstrates how to process a Cassandra entity that is identified by a single, primary row key such
- * as a UUID.
+ * REST controller for Namespace entities.
  */
 public class NamespacesController
 {
@@ -31,6 +30,18 @@ public class NamespacesController
 	{
 		super();
 		this.service = sampleService;
+	}
+
+	public void options(Request request, Response response)
+	{
+		if (NAMESPACES.equals(request.getResolvedRoute().getName()))
+		{
+			response.addHeader(HttpHeaders.Names.ALLOW, "GET");
+		}
+		else if (NAMESPACE.equals(request.getResolvedRoute().getName()))
+		{
+			response.addHeader(HttpHeaders.Names.ALLOW, "GET, DELETE, PUT, POST");			
+		}
 	}
 
 	public Namespace create(Request request, Response response)

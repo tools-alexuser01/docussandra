@@ -1,6 +1,6 @@
 package com.strategicgains.mongossandra;
 
-import static org.jboss.netty.handler.codec.http.HttpMethod.DELETE;
+import static org.jboss.netty.handler.codec.http.HttpMethod.*;
 import static org.jboss.netty.handler.codec.http.HttpMethod.GET;
 import static org.jboss.netty.handler.codec.http.HttpMethod.POST;
 import static org.jboss.netty.handler.codec.http.HttpMethod.PUT;
@@ -15,10 +15,12 @@ public abstract class Routes
 	{
 		server.uri("/", config.getNamespacesController())
 			.action("readAll", GET)
+			.method(OPTIONS)
 			.name(Constants.Routes.NAMESPACES);
 
 		server.uri("/{namespace}", config.getNamespacesController())
 			.method(GET, DELETE, PUT, POST)
+			.method(OPTIONS)
 			.name(Constants.Routes.NAMESPACE);
 
 		server.uri("/{namespace}/", config.getCollectionsController())
