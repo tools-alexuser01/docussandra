@@ -32,7 +32,7 @@ import com.strategicgains.syntaxe.ValidationException;
 
 public class Main
 {
-	private static final String SERVICE_NAME = "Mongossandra";
+	private static final String SERVICE_NAME = "Docussandra";
 	private static final Logger LOG = LoggerFactory.getLogger(SERVICE_NAME);
 
 
