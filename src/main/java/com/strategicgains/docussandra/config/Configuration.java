@@ -1,0 +1,116 @@
+package com.strategicgains.docussandra.config;
+
+import java.util.Properties;
+
+import org.restexpress.RestExpress;
+import org.restexpress.util.Environment;
+
+import com.strategicgains.docussandra.controller.CollectionsController;
+import com.strategicgains.docussandra.controller.DocumentsController;
+import com.strategicgains.docussandra.controller.IndexesController;
+import com.strategicgains.docussandra.controller.NamespacesController;
+import com.strategicgains.docussandra.controller.QueriesController;
+import com.strategicgains.docussandra.persistence.CollectionsRepository;
+import com.strategicgains.docussandra.persistence.DocumentsRepository;
+import com.strategicgains.docussandra.persistence.NamespacesRepository;
+import com.strategicgains.docussandra.service.CollectionsService;
+import com.strategicgains.docussandra.service.DocumentsService;
+import com.strategicgains.docussandra.service.NamespacesService;
+import com.strategicgains.repoexpress.cassandra.CassandraConfig;
+
+public class Configuration
+extends Environment
+{
+	private static final String DEFAULT_EXECUTOR_THREAD_POOL_SIZE = "20";
+
+	private static final String PORT_PROPERTY = "port";
+	private static final String BASE_URL_PROPERTY = "base.url";
+	private static final String EXECUTOR_THREAD_POOL_SIZE = "executor.threadPool.size";
+
+	private int port;
+	private String baseUrl;
+	private int executorThreadPoolSize;
+	private MetricsConfig metricsSettings;
+
+	private NamespacesController namespacesController;
+	private CollectionsController collectionsController;
+	private DocumentsController documentsController;
+	private IndexesController indexesController;
+	private QueriesController queriesController;
+
+	@Override
+	protected void fillValues(Properties p)
+	{
+		this.port = Integer.parseInt(p.getProperty(PORT_PROPERTY, String.valueOf(RestExpress.DEFAULT_PORT)));
+		this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
+		this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_SIZE, DEFAULT_EXECUTOR_THREAD_POOL_SIZE));
+		this.metricsSettings = new MetricsConfig(p);
+		CassandraConfig dbConfig = new CassandraConfig(p);
+		initialize(dbConfig);
+	}
+
+	private void initialize(CassandraConfig dbConfig)
+	{
+		NamespacesRepository namespacesRepository = new NamespacesRepository(dbConfig.getSession());
+		NamespacesService namespacesService = new NamespacesService(namespacesRepository);
+		namespacesController = new NamespacesController(namespacesService);
+
+		CollectionsRepository collectionsRepository = new CollectionsRepository(dbConfig.getSession());
+		CollectionsService collectionsService = new CollectionsService(namespacesRepository, collectionsRepository);
+		collectionsController = new CollectionsController(collectionsService);
+
+		DocumentsRepository documentsRepository = new DocumentsRepository(dbConfig.getSession());
+		DocumentsService documentsService = new DocumentsService(collectionsRepository, documentsRepository);
+		documentsController = new DocumentsController(documentsService);
+
+		// TODO: create service and repository implementations for these...
+//		entitiesController = new EntitiesController(SampleUuidEntityService);
+//		indexesController = new IndexesController(SampleUuidEntityService);
+//		queriesController = new QueriesController(SampleUuidEntityService);
+	}
+
+	public int getPort()
+	{
+		return port;
+	}
+	
+	public String getBaseUrl()
+	{
+		return baseUrl;
+	}
+	
+	public int getExecutorThreadPoolSize()
+	{
+		return executorThreadPoolSize;
+	}
+
+	public MetricsConfig getMetricsConfig()
+    {
+	    return metricsSettings;
+    }
+
+	public Object getNamespacesController()
+    {
+		return namespacesController;
+    }
+
+	public Object getCollectionsController()
+    {
+		return collectionsController;
+    }
+
+	public Object getDocumentsController()
+    {
+		return documentsController;
+    }
+
+	public Object getIndexesController()
+    {
+		return indexesController;
+    }
+
+	public Object getQueryController()
+    {
+		return queriesController;
+    }
+}

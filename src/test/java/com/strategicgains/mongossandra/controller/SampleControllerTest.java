@@ -14,7 +14,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restexpress.RestExpress;
-import com.strategicgains.mongossandra.Main;
+
+import com.strategicgains.docussandra.Main;
 
 public class SampleControllerTest {
 
