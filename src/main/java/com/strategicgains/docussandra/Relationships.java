@@ -39,9 +39,6 @@ public class Relationships
 		Map<String, String> routes = server.getRouteUrlsByName();
 
 		HyperExpress.relationships()
-		.addNamespace(new com.strategicgains.hyperexpress.domain.Namespace("collections", "http://namespaces.strategicgains.com/rel/{rel}"))
-		.addNamespace(new com.strategicgains.hyperexpress.domain.Namespace("documents", "http://namespaces.strategicgains.com/rel/{rel}"))
-
 		.forCollectionOf(Namespace.class)
 			.rel(SELF, routes.get(NAMESPACES))
 
