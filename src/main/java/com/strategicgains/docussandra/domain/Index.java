@@ -30,6 +30,7 @@ implements Linkable
 	 * This is how many items will be stored in a single wide row, before creating another wide row.
 	 */
 	private long bucketSize = 2000l;
+
 	private Map<String, IndexProperties> properties = new HashMap<String, Index.IndexProperties>();
 
 	public Index()
@@ -40,6 +41,26 @@ implements Linkable
 	{
 		this();
 		setName(name);
+	}
+
+	public String getNamespace()
+	{
+		return namespace;
+	}
+
+	public void setNamespace(String namespace)
+	{
+		this.namespace = namespace;
+	}
+
+	public String getCollection()
+	{
+		return collection;
+	}
+
+	public void setCollection(String collection)
+	{
+		this.collection = collection;
 	}
 
 	public String getName()
@@ -62,6 +83,16 @@ implements Linkable
 	{
 		this.isUnique = value;
 		return this;
+	}
+
+	public void setProperties(Map<String, IndexProperties> props)
+	{
+		this.properties = new HashMap<String, Index.IndexProperties>(props);
+	}
+
+	public Map<String, IndexProperties> getProperties()
+	{
+		return properties;
 	}
 
 	public Index addProperty(String name, String type)
@@ -90,7 +121,18 @@ implements Linkable
 	@Override
     public void setId(Identifier id)
     {
+		// intentionally left blank.
     }
+
+	public long getBucketSize()
+	{
+		return bucketSize;
+	}
+
+	public void setBucketSize(long bucketSize)
+	{
+		this.bucketSize = bucketSize;
+	}
 
 	public class IndexProperties
 	{

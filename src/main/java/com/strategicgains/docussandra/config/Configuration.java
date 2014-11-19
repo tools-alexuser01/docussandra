@@ -15,9 +15,11 @@ import com.strategicgains.docussandra.handler.IndexDeletedHandler;
 import com.strategicgains.docussandra.handler.NamespaceDeletedHandler;
 import com.strategicgains.docussandra.persistence.CollectionsRepository;
 import com.strategicgains.docussandra.persistence.DocumentsRepository;
+import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.NamespacesRepository;
 import com.strategicgains.docussandra.service.CollectionsService;
 import com.strategicgains.docussandra.service.DocumentsService;
+import com.strategicgains.docussandra.service.IndexService;
 import com.strategicgains.docussandra.service.NamespacesService;
 import com.strategicgains.eventing.DomainEvents;
 import com.strategicgains.eventing.EventBus;
@@ -42,7 +44,7 @@ extends Environment
 	private NamespacesController namespacesController;
 	private CollectionsController collectionsController;
 	private DocumentsController documentsController;
-	private IndexesController indexesController;
+	private IndexesController indexController;
 	private QueriesController queriesController;
 
 	@Override
@@ -59,16 +61,19 @@ extends Environment
 	private void initialize(CassandraConfig dbConfig)
 	{
 		NamespacesRepository namespacesRepository = new NamespacesRepository(dbConfig.getSession());
-		NamespacesService namespacesService = new NamespacesService(namespacesRepository);
-		namespacesController = new NamespacesController(namespacesService);
-
 		CollectionsRepository collectionsRepository = new CollectionsRepository(dbConfig.getSession());
-		CollectionsService collectionsService = new CollectionsService(namespacesRepository, collectionsRepository);
-		collectionsController = new CollectionsController(collectionsService);
-
 		DocumentsRepository documentsRepository = new DocumentsRepository(dbConfig.getSession());
+		IndexRepository indexRepository = new IndexRepository(dbConfig.getSession());
+
+		NamespacesService namespacesService = new NamespacesService(namespacesRepository);
+		CollectionsService collectionsService = new CollectionsService(namespacesRepository, collectionsRepository);
 		DocumentsService documentsService = new DocumentsService(collectionsRepository, documentsRepository);
+		IndexService indexService = new IndexService(indexRepository);
+
+		namespacesController = new NamespacesController(namespacesService);
+		collectionsController = new CollectionsController(collectionsService);
 		documentsController = new DocumentsController(documentsService);
+		indexController = new IndexesController(indexService);
 
 		// TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
@@ -104,27 +109,27 @@ extends Environment
 	    return metricsSettings;
     }
 
-	public Object getNamespacesController()
+	public NamespacesController getNamespacesController()
     {
 		return namespacesController;
     }
 
-	public Object getCollectionsController()
+	public CollectionsController getCollectionsController()
     {
 		return collectionsController;
     }
 
-	public Object getDocumentsController()
+	public DocumentsController getDocumentsController()
     {
 		return documentsController;
     }
 
-	public Object getIndexesController()
+	public IndexesController getIndexesController()
     {
-		return indexesController;
+		return indexController;
     }
 
-	public Object getQueryController()
+	public QueriesController getQueryController()
     {
 		return queriesController;
     }

@@ -1,17 +1,19 @@
 package com.strategicgains.docussandra.controller;
 
+import java.util.List;
+
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
-import org.restexpress.exception.BadRequestException;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.SampleUuidEntity;
-import com.strategicgains.docussandra.service.SampleUuidEntityService;
+import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.service.IndexService;
 import com.strategicgains.hyperexpress.HyperExpress;
+import com.strategicgains.hyperexpress.builder.TokenBinder;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
-import com.strategicgains.repoexpress.adapter.Identifiers;
+import com.strategicgains.repoexpress.domain.Identifier;
 
 /**
  * This is the 'controller' layer, where HTTP details are converted to domain concepts and passed to the service layer.
@@ -24,62 +26,95 @@ public class IndexesController
 {
 	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
 
-	private SampleUuidEntityService service;
+	private IndexService indexes;
 	
-	public IndexesController(SampleUuidEntityService sampleService)
+	public IndexesController(IndexService indexService)
 	{
 		super();
-		this.service = sampleService;
+		this.indexes = indexService;
 	}
 
-	public SampleUuidEntity create(Request request, Response response)
+	public Index create(Request request, Response response)
 	{
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
-		SampleUuidEntity saved = service.create(entity);
+		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
+		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
+		String name = request.getHeader(Constants.Url.INDEX_ID, "No index name provided");
+		Index entity = request.getBodyAs(Index.class, "Resource details not provided");
+		entity.setNamespace(namespace);
+		entity.setCollection(collection);
+		entity.setName(name);
+		Index saved = indexes.create(entity);
 
 		// Construct the response for create...
 		response.setResponseCreated();
 
 		// enrich the resource with links, etc. here...
-		TokenResolver resolver = HyperExpress.bind(Constants.Url.UUID, Identifiers.UUID.format(saved.getUuid()));
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.COLLECTION, saved.getCollection())
+			.bind(Constants.Url.NAMESPACE, saved.getNamespace())
+			.bind(Constants.Url.INDEX_ID, saved.getName());
 
 		// Include the Location header...
-		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.SINGLE_UUID_SAMPLE);
+		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);
 		response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
 		// Return the newly-created resource...
 		return saved;
 	}
 
-	public SampleUuidEntity read(Request request, Response response)
+	public Index read(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = service.read(Identifiers.UUID.parse(id));
+		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
+		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
+		String name = request.getHeader(Constants.Url.INDEX_ID, "No index name provided");
+		Index entity = indexes.read(new Identifier(namespace, collection, name));
 
 		// enrich the entity with links, etc. here...
-		HyperExpress.bind(Constants.Url.UUID, Identifiers.UUID.format(entity.getUuid()));
+		HyperExpress.bind(Constants.Url.COLLECTION, entity.getCollection())
+			.bind(Constants.Url.NAMESPACE, entity.getNamespace())
+			.bind(Constants.Url.INDEX_ID, entity.getName());
 
 		return entity;
 	}
 
+	public List<Index> readAll(Request request, Response response)
+	{
+		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
+		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
+
+		HyperExpress.tokenBinder(new TokenBinder<Index>()
+		{
+			@Override
+            public void bind(Index object, TokenResolver resolver)
+            {
+				resolver.bind(Constants.Url.COLLECTION, object.getCollection())
+					.bind(Constants.Url.NAMESPACE, object.getNamespace())
+					.bind(Constants.Url.INDEX_ID, object.getName());
+
+            }
+		});
+
+		return indexes.readAll(namespace, collection);
+	}
+
 	public void update(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
-		
-		if (!Identifiers.UUID.parse(id).equals(entity.getId()))
-		{
-			throw new BadRequestException("ID in URL and ID in resource body must match");
-		}
-
-		service.update(entity);
+		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
+		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
+		String name = request.getHeader(Constants.Url.INDEX_ID, "No index name provided");
+		Index entity = request.getBodyAs(Index.class, "Resource details not provided");
+		entity.setNamespace(namespace);
+		entity.setCollection(collection);
+		entity.setName(name);
+		indexes.update(entity);
 		response.setResponseNoContent();
 	}
 
 	public void delete(Request request, Response response)
 	{
-		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		service.delete(Identifiers.UUID.parse(id));
+		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
+		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
+		String name = request.getHeader(Constants.Url.INDEX_ID, "No index name provided");
+		indexes.delete(new Identifier(namespace, collection, name));
 		response.setResponseNoContent();
 	}
 }

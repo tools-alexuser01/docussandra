@@ -23,7 +23,10 @@ public class CollectionsService
 
 	public Collection create(Collection entity)
 	{
-		if (!namespaces.exists(new Identifier(entity.getNamespace()))) throw new ItemNotFoundException("Namespace not found: " + entity.getNamespace());
+		if (!namespaces.exists(new Identifier(entity.getNamespace())))
+		{
+			throw new ItemNotFoundException("Namespace not found: " + entity.getNamespace());
+		}
 
 		ValidationEngine.validateAndThrow(entity);
 		return collections.create(entity);

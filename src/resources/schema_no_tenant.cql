@@ -39,11 +39,13 @@ drop table if exists doc_idx;
 create table doc_idx (
 	namespace text,
 	collection text,
-	id uuid,	// Entity ID
-	key blob,	// Indexed column name(s)
-	value blob,	// Indexed value
-	object blob,
-	primary key ((namespace, collection, key, value), id)
+	name text,
+	is_unique boolean,
+	bucket_size bigint,
+	properties map<text, text>,
+	created_at timestamp,
+	updated_at timestamp,
+	primary key ((namespace, collection), name)
 );
 
 //==================================
