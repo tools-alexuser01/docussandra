@@ -31,10 +31,16 @@ public class CollectionsController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String name = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
-		Collection entity = request.getBodyAs(Collection.class, "Collection details not provided");
-		entity.setNamespace(namespace);
-		entity.setName(name);
-		Collection saved = service.create(entity);
+		Collection collection = request.getBodyAs(Collection.class);
+
+		if (collection == null)
+		{
+			collection = new Collection();
+		}
+
+		collection.setNamespace(namespace);
+		collection.setName(name);
+		Collection saved = service.create(collection);
 
 		// Construct the response for create...
 		response.setResponseCreated();

@@ -47,9 +47,15 @@ public class NamespacesController
 	public Namespace create(Request request, Response response)
 	{
 		String name = request.getHeader(Constants.Url.NAMESPACE, "No namespace name provided");
-		Namespace entity = request.getBodyAs(Namespace.class, "Resource details not provided");
-		entity.setName(name);
-		Namespace saved = service.create(entity);
+		Namespace namespace = request.getBodyAs(Namespace.class);
+
+		if (namespace == null)
+		{
+			namespace = new Namespace();
+		}
+
+		namespace.setName(name);
+		Namespace saved = service.create(namespace);
 
 		// Construct the response for create...
 		response.setResponseCreated();
