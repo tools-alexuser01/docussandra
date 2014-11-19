@@ -37,14 +37,12 @@ public abstract class Routes
 			.method(GET, PUT, DELETE)
 			.name(Constants.Routes.DOCUMENT);
 
-//		server.uri("/{namespace}/{collection}/indexes.{format}", config.getIndexesController())
-//			.alias("/tables/{collectionId}/indexes.{format}")
+//		server.uri("/{namespace}/{collection}/indexes", config.getIndexesController())
 //			.action("readAll", GET)
 //			.method(PUT)
 //			.name(Constants.Routes.INDEXES);
 //
-//		server.uri("/{namespace}/{collection}/indexes/{index}.{format}", config.getIndexesController())
-//			.alias("/tables/{collectionId}/indexes/{indexId}.{format}")
+//		server.uri("/{namespace}/{collection}/indexes/{index}", config.getIndexesController())
 //			.method(GET, PUT, DELETE)
 //			.name(Constants.Routes.INDEX);
 //

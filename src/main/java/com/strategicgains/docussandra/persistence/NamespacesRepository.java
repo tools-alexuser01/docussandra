@@ -10,6 +10,10 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Namespace;
+import com.strategicgains.docussandra.event.EventFactory;
+import com.strategicgains.docussandra.event.NamespaceCreatedEvent;
+import com.strategicgains.docussandra.event.NamespaceDeletedEvent;
+import com.strategicgains.docussandra.event.NamespaceUpdatedEvent;
 import com.strategicgains.repoexpress.cassandra.CassandraTimestampedEntityRepository;
 
 public class NamespacesRepository
@@ -42,6 +46,13 @@ extends CassandraTimestampedEntityRepository<Namespace>
 	    super(session, Tables.BY_ID, Columns.NAME);
 	    initializeStatements();
     }
+
+	@Override
+	protected void initializeObservers()
+	{
+		super.initializeObservers();
+		addObserver(new StateChangeEventingObserver<Namespace>(new NamespaceEventFactory()));
+	}
 
 	protected void initializeStatements()
 	{
@@ -122,4 +133,26 @@ extends CassandraTimestampedEntityRepository<Namespace>
 		n.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return n;
     }
+
+	private class NamespaceEventFactory
+	implements EventFactory<Namespace>
+	{
+		@Override
+        public Object newCreatedEvent(Namespace object)
+        {
+	        return new NamespaceCreatedEvent(object);
+        }
+
+		@Override
+        public Object newUpdatedEvent(Namespace object)
+        {
+	        return new NamespaceUpdatedEvent(object);
+        }
+
+		@Override
+        public Object newDeletedEvent(Namespace object)
+        {
+	        return new NamespaceDeletedEvent(object);
+        }
+	}
 }

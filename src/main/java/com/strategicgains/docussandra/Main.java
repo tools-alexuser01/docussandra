@@ -21,12 +21,12 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import com.strategicgains.docussandra.config.Configuration;
-import com.strategicgains.docussandra.config.MetricsConfig;
 import com.strategicgains.docussandra.serialization.SerializationProvider;
 import com.strategicgains.repoexpress.adapter.Identifiers;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
+import com.strategicgains.restexpress.plugin.metrics.MetricsConfig;
 import com.strategicgains.restexpress.plugin.metrics.MetricsPlugin;
 import com.strategicgains.syntaxe.ValidationException;
 

@@ -10,6 +10,10 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Collection;
+import com.strategicgains.docussandra.event.CollectionCreatedEvent;
+import com.strategicgains.docussandra.event.CollectionDeletedEvent;
+import com.strategicgains.docussandra.event.CollectionUpdatedEvent;
+import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
@@ -52,6 +56,7 @@ extends AbstractCassandraRepository<Collection>
 	{
 		super(session, Tables.BY_ID);
 		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Collection>());
+		addObserver(new StateChangeEventingObserver<Collection>(new CollectionEventFactory()));
 		initialize();
 	}
 
@@ -167,4 +172,26 @@ extends AbstractCassandraRepository<Collection>
 		c.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return c;
     }
+
+	private class CollectionEventFactory
+	implements EventFactory<Collection>
+	{
+		@Override
+        public Object newCreatedEvent(Collection object)
+        {
+	        return new CollectionCreatedEvent(object);
+        }
+
+		@Override
+        public Object newUpdatedEvent(Collection object)
+        {
+	        return new CollectionUpdatedEvent(object);
+        }
+
+		@Override
+        public Object newDeletedEvent(Collection object)
+        {
+	        return new CollectionDeletedEvent(object);
+        }
+	}
 }

@@ -10,13 +10,20 @@ import com.strategicgains.docussandra.controller.DocumentsController;
 import com.strategicgains.docussandra.controller.IndexesController;
 import com.strategicgains.docussandra.controller.NamespacesController;
 import com.strategicgains.docussandra.controller.QueriesController;
+import com.strategicgains.docussandra.handler.IndexCreatedHandler;
+import com.strategicgains.docussandra.handler.IndexDeletedHandler;
+import com.strategicgains.docussandra.handler.NamespaceDeletedHandler;
 import com.strategicgains.docussandra.persistence.CollectionsRepository;
 import com.strategicgains.docussandra.persistence.DocumentsRepository;
 import com.strategicgains.docussandra.persistence.NamespacesRepository;
 import com.strategicgains.docussandra.service.CollectionsService;
 import com.strategicgains.docussandra.service.DocumentsService;
 import com.strategicgains.docussandra.service.NamespacesService;
+import com.strategicgains.eventing.DomainEvents;
+import com.strategicgains.eventing.EventBus;
+import com.strategicgains.eventing.local.LocalEventBusBuilder;
 import com.strategicgains.repoexpress.cassandra.CassandraConfig;
+import com.strategicgains.restexpress.plugin.metrics.MetricsConfig;
 
 public class Configuration
 extends Environment
@@ -67,6 +74,14 @@ extends Environment
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
 //		indexesController = new IndexesController(SampleUuidEntityService);
 //		queriesController = new QueriesController(SampleUuidEntityService);
+
+		EventBus bus = new LocalEventBusBuilder()
+			.subscribe(new IndexCreatedHandler())
+			.subscribe(new IndexDeletedHandler())
+			.subscribe(new NamespaceDeletedHandler())
+			.build();
+		DomainEvents.addBus("local", bus);
+
 	}
 
 	public int getPort()

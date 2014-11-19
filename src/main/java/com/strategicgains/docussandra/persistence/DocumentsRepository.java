@@ -15,6 +15,10 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.event.DocumentCreatedEvent;
+import com.strategicgains.docussandra.event.DocumentDeletedEvent;
+import com.strategicgains.docussandra.event.DocumentUpdatedEvent;
+import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.repoexpress.cassandra.CassandraUuidTimestampedEntityRepository;
 
 public class DocumentsRepository
@@ -51,6 +55,13 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 	    super(session, Tables.BY_ID, Columns.ID);
 	    initializeStatements();
     }
+
+	@Override
+	protected void initializeObservers()
+	{
+		super.initializeObservers();
+		addObserver(new StateChangeEventingObserver<Document>(new DocumentEventFactory()));
+	}
 
 	protected void initializeStatements()
 	{
@@ -155,4 +166,26 @@ extends CassandraUuidTimestampedEntityRepository<Document>
 		d.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return d;
     }
+
+	private class DocumentEventFactory
+	implements EventFactory<Document>
+	{
+		@Override
+        public Object newCreatedEvent(Document object)
+        {
+	        return new DocumentCreatedEvent(object);
+        }
+
+		@Override
+        public Object newUpdatedEvent(Document object)
+        {
+	        return new DocumentUpdatedEvent(object);
+        }
+
+		@Override
+        public Object newDeletedEvent(Document object)
+        {
+	        return new DocumentDeletedEvent(object);
+        }
+	}
 }
