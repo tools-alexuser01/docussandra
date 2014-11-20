@@ -1,7 +1,7 @@
-drop keyspace if exists mongossandra;
-create keyspace mongossandra
+drop keyspace if exists docussandra;
+create keyspace docussandra
 with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-use mongossandra;
+use docussandra;
 
 drop table if exists namespaces;
 create table namespaces (
