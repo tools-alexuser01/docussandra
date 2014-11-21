@@ -1,15 +1,17 @@
 package com.strategicgains.docussandra.domain;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.restexpress.plugin.hyperexpress.Linkable;
+import org.restexpress.util.Callback;
 
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
+import com.strategicgains.syntaxe.annotation.Required;
 
 public class Index
 extends AbstractTimestampedIdentifiable
@@ -31,7 +33,12 @@ implements Linkable
 	 */
 	private long bucketSize = 2000l;
 
-	private Map<String, IndexProperties> properties = new HashMap<String, Index.IndexProperties>();
+	/**
+	 * The list of fields, in order, that are being indexed. Prefixing a field with a dash ('-') means
+	 * it's order in descending order.
+	 */
+	@Required("Fields")
+	private List<String> fields;
 
 	public Index()
 	{
@@ -85,31 +92,14 @@ implements Linkable
 		return this;
 	}
 
-	public void setProperties(Map<String, IndexProperties> props)
+	public void setFields(List<String> props)
 	{
-		this.properties = new HashMap<String, Index.IndexProperties>(props);
+		this.fields = new ArrayList<String>(props);
 	}
 
-	public Map<String, IndexProperties> getProperties()
+	public List<String> getFields()
 	{
-		return properties;
-	}
-
-	public Index addProperty(String name, String type)
-	{
-		addProperty(name, type, true);
-		return this;
-	}
-
-	public Index addProperty(String name, String type, boolean isAscending)
-	{
-		properties.put(name, new IndexProperties(type, isAscending));
-		return this;
-	}
-
-	public Set<String> getPropertyNames()
-	{
-		return properties.keySet();
+		return (fields == null ? Collections.<String>emptyList() : Collections.unmodifiableList(fields));
 	}
 
 	@Override
@@ -134,35 +124,38 @@ implements Linkable
 		this.bucketSize = bucketSize;
 	}
 
-	public class IndexProperties
+	public void iterateFields(Callback<IndexField> callback)
 	{
-		private boolean isAscending = true;
-		private String type;
-
-		public IndexProperties(String type, boolean isAscending)
+		for (String field : fields)
 		{
-			super();
-			setType(type);
-			setAscending(isAscending);
+			callback.process(new IndexField(field));
 		}
+	}
+
+	public class IndexField
+	{
+		private String field;
+		private boolean isAscending = true;
+
+		public IndexField(String value)
+		{
+			field = value.trim();
+
+			if (field.startsWith("-"))
+			{
+				field = value.substring(1);
+				isAscending = false;
+			}
+		}
+
+		public String field()
+		{
+			return field;
+		}
+
 		public boolean isAscending()
 		{
 			return isAscending;
-		}
-
-		public void setAscending(boolean isReversed)
-		{
-			this.isAscending = isReversed;
-		}
-
-		public String getType()
-		{
-			return type;
-		}
-
-		public void setType(String type)
-		{
-			this.type = type;
 		}
 	}
 }

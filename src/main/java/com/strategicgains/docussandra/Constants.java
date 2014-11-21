@@ -17,8 +17,8 @@ public class Constants
 		public static final String KEY3 = "key3";
 		public static final String NAMESPACE = "namespace";
 		public static final String COLLECTION = "collection";
+		public static final String INDEX = "index";
 		public static final String DOCUMENT_ID = "documentId";
-		public static final String INDEX_ID = "indexId";
 		public static final String QUERY_ID = "queryId";
 	}
 

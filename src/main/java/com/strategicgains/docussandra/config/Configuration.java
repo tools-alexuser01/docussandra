@@ -68,7 +68,7 @@ extends Environment
 		NamespacesService namespacesService = new NamespacesService(namespacesRepository);
 		CollectionsService collectionsService = new CollectionsService(namespacesRepository, collectionsRepository);
 		DocumentsService documentsService = new DocumentsService(collectionsRepository, documentsRepository);
-		IndexService indexService = new IndexService(indexRepository);
+		IndexService indexService = new IndexService(collectionsRepository, indexRepository);
 
 		namespacesController = new NamespacesController(namespacesService);
 		collectionsController = new CollectionsController(collectionsService);

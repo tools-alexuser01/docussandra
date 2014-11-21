@@ -38,7 +38,7 @@ public class IndexesController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
-		String name = request.getHeader(Constants.Url.INDEX_ID, "No index name provided");
+		String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
 		Index entity = request.getBodyAs(Index.class, "Resource details not provided");
 		entity.setNamespace(namespace);
 		entity.setCollection(collection);
@@ -51,7 +51,7 @@ public class IndexesController
 		// enrich the resource with links, etc. here...
 		TokenResolver resolver = HyperExpress.bind(Constants.Url.COLLECTION, saved.getCollection())
 			.bind(Constants.Url.NAMESPACE, saved.getNamespace())
-			.bind(Constants.Url.INDEX_ID, saved.getName());
+			.bind(Constants.Url.INDEX, saved.getName());
 
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);
@@ -65,13 +65,13 @@ public class IndexesController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
-		String name = request.getHeader(Constants.Url.INDEX_ID, "No index name provided");
+		String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
 		Index entity = indexes.read(new Identifier(namespace, collection, name));
 
 		// enrich the entity with links, etc. here...
 		HyperExpress.bind(Constants.Url.COLLECTION, entity.getCollection())
 			.bind(Constants.Url.NAMESPACE, entity.getNamespace())
-			.bind(Constants.Url.INDEX_ID, entity.getName());
+			.bind(Constants.Url.INDEX, entity.getName());
 
 		return entity;
 	}
@@ -88,7 +88,7 @@ public class IndexesController
             {
 				resolver.bind(Constants.Url.COLLECTION, object.getCollection())
 					.bind(Constants.Url.NAMESPACE, object.getNamespace())
-					.bind(Constants.Url.INDEX_ID, object.getName());
+					.bind(Constants.Url.INDEX, object.getName());
 
             }
 		});
@@ -100,7 +100,7 @@ public class IndexesController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
-		String name = request.getHeader(Constants.Url.INDEX_ID, "No index name provided");
+		String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
 		Index entity = request.getBodyAs(Index.class, "Resource details not provided");
 		entity.setNamespace(namespace);
 		entity.setCollection(collection);
@@ -113,7 +113,7 @@ public class IndexesController
 	{
 		String namespace = request.getHeader(Constants.Url.NAMESPACE, "No namespace provided");
 		String collection = request.getHeader(Constants.Url.COLLECTION, "No collection provided");
-		String name = request.getHeader(Constants.Url.INDEX_ID, "No index name provided");
+		String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
 		indexes.delete(new Identifier(namespace, collection, name));
 		response.setResponseNoContent();
 	}

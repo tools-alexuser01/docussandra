@@ -35,11 +35,10 @@ public abstract class Routes
 
 		server.uri("/{namespace}/{collection}/indexes", config.getIndexesController())
 			.action("readAll", GET)
-//			.method(PUT)
 			.name(Constants.Routes.INDEXES);
 
 		server.uri("/{namespace}/{collection}/indexes/{index}", config.getIndexesController())
-			.method(GET, PUT, DELETE)
+			.method(GET, PUT, DELETE, POST)
 			.name(Constants.Routes.INDEX);
 
 		server.uri("/{namespace}/{collection}/{documentId}", config.getDocumentsController())

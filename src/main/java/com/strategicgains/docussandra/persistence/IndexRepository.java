@@ -23,7 +23,7 @@ extends AbstractCassandraRepository<Index>
 {
 	private class Tables
 	{
-		static final String BY_ID = "doc_idx";
+		static final String BY_ID = "indexes";
 	}
 
 	private class Columns
@@ -33,14 +33,14 @@ extends AbstractCassandraRepository<Index>
 		static final String COLLECTION = "collection";
 		static final String IS_UNIQUE = "is_unique";
 		static final String BUCKET_SIZE = "bucket_size";
-		static final String PROPERTIES = "properties";
+		static final String FIELDS = "fields";
 		static final String CREATED_AT = "created_at";
 		static final String UPDATED_AT = "updated_at";
 	}
 
 	private static final String IDENTITY_CQL = " where namespace = ? and collection = ? and name = ?";
 	private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-	private static final String CREATE_CQL = "insert into %s (%s, namespace, collection, is_unique, bucket_size, properties, created_at, updated_at) values (?, ?, ?, ?, ?, ? , ?, ?)";
+	private static final String CREATE_CQL = "insert into %s (%s, namespace, collection, is_unique, bucket_size, fields, created_at, updated_at) values (?, ?, ?, ?, ?, ? , ?, ?)";
 	private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
 	private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
 	private static final String UPDATE_CQL = "update %s set bucket_size = ?, updated_at = ?" + IDENTITY_CQL;
@@ -140,12 +140,11 @@ extends AbstractCassandraRepository<Index>
 			entity.getCollection(),
 			entity.isUnique(),
 			entity.getBucketSize(),
-			entity.getProperties(),
+			entity.getFields(),
 		    entity.getCreatedAt(),
 		    entity.getUpdatedAt());
 	}
 
-	// 	"update %s set bucket_size = ?, updated_at = ?" + IDENTITY_CQL;
 	private void bindUpdate(BoundStatement bs, Index entity)
 	{
 		bs.bind(entity.getBucketSize(),
@@ -178,7 +177,7 @@ extends AbstractCassandraRepository<Index>
 		i.setCollection(row.getString(Columns.COLLECTION));
 		i.setUnique(row.getBool(Columns.IS_UNIQUE));
 		i.setBucketSize(row.getLong(Columns.BUCKET_SIZE));
-		i.setProperties(row.getMap(Columns.PROPERTIES, String.class, Index.IndexProperties.class));
+		i.setFields(row.getList(Columns.FIELDS, String.class));
 		i.setCreatedAt(row.getDate(Columns.CREATED_AT));
 		i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return i;

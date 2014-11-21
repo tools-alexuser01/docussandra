@@ -35,36 +35,26 @@ create table documents (
 create index on documents (namespace);
 create index on documents (collection);
 
-drop table if exists doc_idx;
-create table doc_idx (
+drop table if exists indexes;
+create table indexes (
 	namespace text,
 	collection text,
 	name text,
 	is_unique boolean,
 	bucket_size bigint,
-	properties map<text, text>,
+	fields list<text>,
 	created_at timestamp,
 	updated_at timestamp,
 	primary key ((namespace, collection), name)
 );
 
-//==================================
-// From Data Extension Framework:
-//----------------------------------
-CREATE TABLE data_entity (
-	id uuid PRIMARY KEY,
-	type text,
-	object text
+ drop table if exists doc_idx;
+ create table doc_idx (
+ 	namespace text,
+ 	collection text,
+	name text,		// Index name
+	key blob,		// Indexed column name(s)
+	id uuid,		// Entity ID
+	object blob,	// Entity in BSON
+	primary key ((namespace, collection, name), key, id)
 );
-
-CREATE INDEX ON data_entity (type);
-
-CREATE TABLE data_entity_attribute (
-	entity_type text,
-	attribute_name text,
-	attribute_value text,
-	entity_id uuid,
-	data_entity_object text,
-	PRIMARY KEY ((entity_type, attribute_name, attribute_value), entity_id)
-);
-//==================================
