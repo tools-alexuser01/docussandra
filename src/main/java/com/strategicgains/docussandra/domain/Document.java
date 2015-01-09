@@ -10,12 +10,17 @@ public class Document
 extends AbstractUuidEntity
 implements Linkable
 {
+	//TODO: use a composed ID that is serialized to a blob.
+	//TODO: add any necessary metadata regarding a document.
+	//TODO: documents are versioned per transaction.
+
 	@RegexValidation(name = "Namespace", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
 	private String namespace;
 
 	@RegexValidation(name = "Collection", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
 	private String collection;
 
+	// The JSON document.
 	private String object;
 
 	public Document()

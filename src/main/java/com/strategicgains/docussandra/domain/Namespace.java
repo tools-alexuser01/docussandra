@@ -15,6 +15,8 @@ implements Linkable
 	private String name;
 	private String description;
 
+	//TODO: add consistency & distro metadata here.
+
 	public Namespace()
 	{
 		super();
