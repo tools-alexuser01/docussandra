@@ -27,7 +27,7 @@ implements Linkable
 	private String name;
 
 	private boolean isUnique = false;
-	
+
 	/**
 	 * This is how many items will be stored in a single wide row, before creating another wide row.
 	 */
@@ -39,6 +39,9 @@ implements Linkable
 	 */
 	@Required("Fields")
 	private List<String> fields;
+
+	@Required("Index Type")
+	private IndexType type;
 
 	public Index()
 	{
