@@ -6,8 +6,8 @@ import org.restexpress.Response;
 import org.restexpress.exception.BadRequestException;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.SampleUuidEntity;
-import com.strategicgains.docussandra.service.SampleUuidEntityService;
+import com.strategicgains.docussandra.domain.XXXUuidEntity;
+import com.strategicgains.docussandra.service.XXXUuidEntityService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
@@ -20,22 +20,22 @@ import com.strategicgains.repoexpress.adapter.Identifiers;
  * This controller demonstrates how to process a Cassandra entity that is identified by a single, primary row key such
  * as a UUID.
  */
-public class SampleUuidEntityController
+public class XXXUuidEntityController
 {
 	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
 
-	private SampleUuidEntityService service;
+	private XXXUuidEntityService service;
 	
-	public SampleUuidEntityController(SampleUuidEntityService sampleService)
+	public XXXUuidEntityController(XXXUuidEntityService sampleService)
 	{
 		super();
 		this.service = sampleService;
 	}
 
-	public SampleUuidEntity create(Request request, Response response)
+	public XXXUuidEntity create(Request request, Response response)
 	{
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
-		SampleUuidEntity saved = service.create(entity);
+		XXXUuidEntity entity = request.getBodyAs(XXXUuidEntity.class, "Resource details not provided");
+		XXXUuidEntity saved = service.create(entity);
 
 		// Construct the response for create...
 		response.setResponseCreated();
@@ -51,10 +51,10 @@ public class SampleUuidEntityController
 		return saved;
 	}
 
-	public SampleUuidEntity read(Request request, Response response)
+	public XXXUuidEntity read(Request request, Response response)
 	{
 		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = service.read(Identifiers.UUID.parse(id));
+		XXXUuidEntity entity = service.read(Identifiers.UUID.parse(id));
 
 		// enrich the entity with links, etc. here...
 
@@ -64,7 +64,7 @@ public class SampleUuidEntityController
 	public void update(Request request, Response response)
 	{
 		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
+		XXXUuidEntity entity = request.getBodyAs(XXXUuidEntity.class, "Resource details not provided");
 		
 		if (!Identifiers.UUID.parse(id).equals(entity.getId()))
 		{

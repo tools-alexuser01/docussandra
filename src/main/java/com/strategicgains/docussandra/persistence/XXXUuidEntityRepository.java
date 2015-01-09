@@ -1,14 +1,14 @@
 package com.strategicgains.docussandra.persistence;
 
-import com.strategicgains.docussandra.domain.SampleUuidEntity;
+import com.strategicgains.docussandra.domain.XXXUuidEntity;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.repoexpress.cassandra.CassandraTimestampedEntityRepository;
 
-public class SampleUuidEntityRepository
-extends CassandraTimestampedEntityRepository<SampleUuidEntity>
+public class XXXUuidEntityRepository
+extends CassandraTimestampedEntityRepository<XXXUuidEntity>
 {
 	private static final String UPDATE_CQL = "update %s set updatedat = ? where %s = ?";
 	private static final String CREATE_CQL = "insert into %s (%s, createdat, updatedat) values (?, ?, ?)";
@@ -16,7 +16,7 @@ extends CassandraTimestampedEntityRepository<SampleUuidEntity>
 	private PreparedStatement createStmt;
 	private PreparedStatement updateStmt;
 
-	public SampleUuidEntityRepository(Session session)
+	public XXXUuidEntityRepository(Session session)
     {
 	    super(session, "sampleuuidentities", "id");
 	    initializeStatements();
@@ -29,7 +29,7 @@ extends CassandraTimestampedEntityRepository<SampleUuidEntity>
 	}
 
 	@Override
-    protected SampleUuidEntity createEntity(SampleUuidEntity entity)
+    protected XXXUuidEntity createEntity(XXXUuidEntity entity)
     {
 		BoundStatement bs = new BoundStatement(createStmt);
 		bindCreate(bs, entity);
@@ -38,7 +38,7 @@ extends CassandraTimestampedEntityRepository<SampleUuidEntity>
     }
 
 	@Override
-    protected SampleUuidEntity updateEntity(SampleUuidEntity entity)
+    protected XXXUuidEntity updateEntity(XXXUuidEntity entity)
     {
 		BoundStatement bs = new BoundStatement(updateStmt);
 		bindUpdate(bs, entity);
@@ -46,25 +46,25 @@ extends CassandraTimestampedEntityRepository<SampleUuidEntity>
 		return entity;
     }
 
-	private void bindCreate(BoundStatement bs, SampleUuidEntity entity)
+	private void bindCreate(BoundStatement bs, XXXUuidEntity entity)
 	{
 		bs.bind(entity.getUuid(),
 		    entity.getCreatedAt(),
 		    entity.getUpdatedAt());
 	}
 
-	private void bindUpdate(BoundStatement bs, SampleUuidEntity entity)
+	private void bindUpdate(BoundStatement bs, XXXUuidEntity entity)
 	{
 		bs.bind(entity.getUpdatedAt(),
 		    entity.getUuid());
 	}
 
 	@Override
-    protected SampleUuidEntity marshalRow(Row row)
+    protected XXXUuidEntity marshalRow(Row row)
     {
 		if (row == null) return null;
 
-		SampleUuidEntity s = new SampleUuidEntity();
+		XXXUuidEntity s = new XXXUuidEntity();
 		s.setUuid(row.getUUID(getIdentifierColumn()));
 		s.setCreatedAt(row.getDate("createdat"));
 		s.setUpdatedAt(row.getDate("updatedat"));

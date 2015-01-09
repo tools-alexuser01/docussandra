@@ -6,7 +6,7 @@ import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.syntaxe.annotation.Required;
 
-public class SampleCompoundIdentifierEntity
+public class XXXCompoundIdentifierEntity
 extends AbstractTimestampedIdentifiable
 implements Linkable
 {
@@ -19,7 +19,7 @@ implements Linkable
 	@Required
 	private String key3;
 
-	public SampleCompoundIdentifierEntity()
+	public XXXCompoundIdentifierEntity()
 	{
 	}
 

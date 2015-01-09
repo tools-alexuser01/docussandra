@@ -10,8 +10,8 @@ import org.restexpress.exception.BadRequestException;
 import org.restexpress.query.QueryRanges;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.SampleCompoundIdentifierEntity;
-import com.strategicgains.docussandra.service.SampleCompoundIdentifierEntityService;
+import com.strategicgains.docussandra.domain.XXXCompoundIdentifierEntity;
+import com.strategicgains.docussandra.service.XXXCompoundIdentifierEntityService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
@@ -24,23 +24,23 @@ import com.strategicgains.repoexpress.domain.Identifier;
  * This controller demonstrates how to process a Cassandra entity that has a compound row key, instead of one that has
  * a single, primary row key such as a UUID.
  */
-public class SampleCompoundIdentifierEntityController
+public class XXXCompoundIdentifierEntityController
 {
 	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
 
-	private SampleCompoundIdentifierEntityService service;
+	private XXXCompoundIdentifierEntityService service;
 	
-	public SampleCompoundIdentifierEntityController(SampleCompoundIdentifierEntityService service)
+	public XXXCompoundIdentifierEntityController(XXXCompoundIdentifierEntityService service)
 	{
 		super();
 		this.service = service;
 	}
 
-	public SampleCompoundIdentifierEntity create(Request request, Response response)
+	public XXXCompoundIdentifierEntity create(Request request, Response response)
 	{
 		String key1 = request.getHeader(Constants.Url.KEY1, "Key1 not provided");
 		String key2 = request.getHeader(Constants.Url.KEY2, "Key2 not provided");
-		SampleCompoundIdentifierEntity toCreate = request.getBodyAs(SampleCompoundIdentifierEntity.class, "Resource details not provided");
+		XXXCompoundIdentifierEntity toCreate = request.getBodyAs(XXXCompoundIdentifierEntity.class, "Resource details not provided");
 
 		if (!key1.equals(toCreate.getKey1()))
 		{
@@ -52,7 +52,7 @@ public class SampleCompoundIdentifierEntityController
 			throw new BadRequestException("Key2 in URL and Key2 in resource body must match");
 		}
 
-		SampleCompoundIdentifierEntity saved = service.create(toCreate);
+		XXXCompoundIdentifierEntity saved = service.create(toCreate);
 
 		// Construct the response for create...
 		response.setResponseCreated();
@@ -70,24 +70,24 @@ public class SampleCompoundIdentifierEntityController
 		return saved;
 	}
 
-	public SampleCompoundIdentifierEntity read(Request request, Response response)
+	public XXXCompoundIdentifierEntity read(Request request, Response response)
 	{
 		String key1 = request.getHeader(Constants.Url.KEY1, "Key1 not provided");
 		String key2 = request.getHeader(Constants.Url.KEY2, "Key2 not provided");
 		String key3 = request.getHeader(Constants.Url.KEY3, "Key3 not provided");
-		SampleCompoundIdentifierEntity entity = service.read(new Identifier(key1, key2, key3));
+		XXXCompoundIdentifierEntity entity = service.read(new Identifier(key1, key2, key3));
 
 		// enrich the resource with links, etc. here...
 
 		return entity;
 	}
 
-	public List<SampleCompoundIdentifierEntity> readAll(Request request, Response response)
+	public List<XXXCompoundIdentifierEntity> readAll(Request request, Response response)
 	{
 		String key1 = request.getHeader(Constants.Url.KEY1, "Key1 not provided");
 		String key2 = request.getHeader(Constants.Url.KEY2, "Key2 not provided");
 		QueryRange range = QueryRanges.parseFrom(request);
-		List<SampleCompoundIdentifierEntity> entities = service.readAll(key1, key2);
+		List<XXXCompoundIdentifierEntity> entities = service.readAll(key1, key2);
 		long count = service.count(key1, key2);
 		response.setCollectionResponse(range, entities.size(), count);
 
@@ -101,7 +101,7 @@ public class SampleCompoundIdentifierEntityController
 		String key1 = request.getHeader(Constants.Url.KEY1, "Key1 not provided");
 		String key2 = request.getHeader(Constants.Url.KEY2, "Key2 not provided");
 		String key3 = request.getHeader(Constants.Url.KEY3, "Key3 not provided");
-		SampleCompoundIdentifierEntity toUpdate = request.getBodyAs(SampleCompoundIdentifierEntity.class, "Resource details not provided");
+		XXXCompoundIdentifierEntity toUpdate = request.getBodyAs(XXXCompoundIdentifierEntity.class, "Resource details not provided");
 
 		if (!toUpdate.getId().equals(new Identifier(key1, key2, key3)))
 		{

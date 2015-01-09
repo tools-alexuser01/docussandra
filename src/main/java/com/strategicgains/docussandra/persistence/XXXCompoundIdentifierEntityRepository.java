@@ -9,13 +9,13 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.strategicgains.docussandra.domain.SampleCompoundIdentifierEntity;
+import com.strategicgains.docussandra.domain.XXXCompoundIdentifierEntity;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
 
-public class SampleCompoundIdentifierEntityRepository
-extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
+public class XXXCompoundIdentifierEntityRepository
+extends AbstractCassandraRepository<XXXCompoundIdentifierEntity>
 {
 	private static final String IDENTITY_CQL = " where key1 = ? and key2 = ? and key3 = ?";
 	private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
@@ -34,10 +34,10 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 	private PreparedStatement readAllStmt;
 	private PreparedStatement readAllCountStmt;
 
-	public SampleCompoundIdentifierEntityRepository(Session session)
+	public XXXCompoundIdentifierEntityRepository(Session session)
 	{
 		super(session, "samplecompoundidentities");
-		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<SampleCompoundIdentifierEntity>());
+		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<XXXCompoundIdentifierEntity>());
 		initialize();
 	}
 
@@ -62,7 +62,7 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 		return (getSession().execute(bs).one().getLong(0) > 0);
 	}
 
-	protected SampleCompoundIdentifierEntity readEntityById(Identifier identifier)
+	protected XXXCompoundIdentifierEntity readEntityById(Identifier identifier)
 	{
 		if (identifier == null || identifier.isEmpty()) return null;
 
@@ -72,7 +72,7 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 	}
 
 	@Override
-	protected SampleCompoundIdentifierEntity createEntity(SampleCompoundIdentifierEntity entity)
+	protected XXXCompoundIdentifierEntity createEntity(XXXCompoundIdentifierEntity entity)
 	{
 		BoundStatement bs = new BoundStatement(createStmt);
 		bindCreate(bs, entity);
@@ -81,7 +81,7 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 	}
 
 	@Override
-	protected SampleCompoundIdentifierEntity updateEntity(SampleCompoundIdentifierEntity entity)
+	protected XXXCompoundIdentifierEntity updateEntity(XXXCompoundIdentifierEntity entity)
 	{
 		BoundStatement bs = new BoundStatement(updateStmt);
 		bindUpdate(bs, entity);
@@ -90,14 +90,14 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 	}
 
 	@Override
-	protected void deleteEntity(SampleCompoundIdentifierEntity entity)
+	protected void deleteEntity(XXXCompoundIdentifierEntity entity)
 	{
 		BoundStatement bs = new BoundStatement(deleteStmt);
 		bindIdentifier(bs, entity.getId());
 		getSession().execute(bs);
 	}
 
-	public List<SampleCompoundIdentifierEntity> readAll(String context, String nodeType)
+	public List<XXXCompoundIdentifierEntity> readAll(String context, String nodeType)
 	{
 		BoundStatement bs = new BoundStatement(readAllStmt);
 		bs.bind(context, nodeType);
@@ -111,9 +111,9 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 		return (getSession().execute(bs).one().getLong(0));
 	}
 
-	protected List<SampleCompoundIdentifierEntity> marshalAll(ResultSet rs)
+	protected List<XXXCompoundIdentifierEntity> marshalAll(ResultSet rs)
 	{
-		List<SampleCompoundIdentifierEntity> results = new ArrayList<SampleCompoundIdentifierEntity>();
+		List<XXXCompoundIdentifierEntity> results = new ArrayList<XXXCompoundIdentifierEntity>();
 		Iterator<Row> i = rs.iterator();
 
 		while (i.hasNext())
@@ -124,11 +124,11 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 		return results;
 	}
 
-	protected SampleCompoundIdentifierEntity marshalRow(Row row)
+	protected XXXCompoundIdentifierEntity marshalRow(Row row)
 	{
 		if (row == null) return null;
 
-		SampleCompoundIdentifierEntity s = new SampleCompoundIdentifierEntity();
+		XXXCompoundIdentifierEntity s = new XXXCompoundIdentifierEntity();
 		s.setKey1(row.getString("key1"));
 		s.setKey2(row.getString("key2"));
 		s.setKey3(row.getString("key3"));
@@ -137,7 +137,7 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 		return s;
 	}
 
-	private void bindCreate(BoundStatement bs, SampleCompoundIdentifierEntity entity)
+	private void bindCreate(BoundStatement bs, XXXCompoundIdentifierEntity entity)
 	{
 		bs.bind(entity.getKey1(),
 			entity.getKey2(),
@@ -146,7 +146,7 @@ extends AbstractCassandraRepository<SampleCompoundIdentifierEntity>
 		    entity.getUpdatedAt());
 	}
 
-	private void bindUpdate(BoundStatement bs, SampleCompoundIdentifierEntity entity)
+	private void bindUpdate(BoundStatement bs, XXXCompoundIdentifierEntity entity)
 	{
 		bs.bind(entity.getUpdatedAt(),
 		    entity.getKey1(),

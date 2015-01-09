@@ -4,11 +4,11 @@ import org.restexpress.plugin.hyperexpress.Linkable;
 
 import com.strategicgains.repoexpress.domain.AbstractUuidEntity;
 
-public class SampleUuidEntity
+public class XXXUuidEntity
 extends AbstractUuidEntity
 implements Linkable
 {
-	public SampleUuidEntity()
+	public XXXUuidEntity()
 	{
 	}
 }
