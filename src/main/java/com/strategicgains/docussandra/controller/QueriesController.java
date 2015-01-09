@@ -6,8 +6,8 @@ import org.restexpress.Response;
 import org.restexpress.exception.BadRequestException;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.SampleUuidEntity;
-import com.strategicgains.docussandra.service.SampleUuidEntityService;
+import com.strategicgains.docussandra.domain.Query;
+import com.strategicgains.docussandra.service.QueryService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
@@ -24,18 +24,18 @@ public class QueriesController
 {
 	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
 
-	private SampleUuidEntityService service;
+	private QueryService service;
 	
-	public QueriesController(SampleUuidEntityService sampleService)
+	public QueriesController(QueryService queryService)
 	{
 		super();
-		this.service = sampleService;
+		this.service = queryService;
 	}
 
-	public SampleUuidEntity create(Request request, Response response)
+	public Query create(Request request, Response response)
 	{
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
-		SampleUuidEntity saved = service.create(entity);
+		Query entity = request.getBodyAs(Query.class, "Resource details not provided");
+		Query saved = service.create(entity);
 
 		// Construct the response for create...
 		response.setResponseCreated();
@@ -51,10 +51,10 @@ public class QueriesController
 		return saved;
 	}
 
-	public SampleUuidEntity read(Request request, Response response)
+	public Query read(Request request, Response response)
 	{
 		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = service.read(Identifiers.UUID.parse(id));
+		Query entity = service.read(Identifiers.UUID.parse(id));
 
 		// enrich the entity with links, etc. here...
 
@@ -64,7 +64,7 @@ public class QueriesController
 	public void update(Request request, Response response)
 	{
 		String id = request.getHeader(Constants.Url.UUID, "No resource ID supplied");
-		SampleUuidEntity entity = request.getBodyAs(SampleUuidEntity.class, "Resource details not provided");
+		Query entity = request.getBodyAs(Query.class, "Resource details not provided");
 		
 		if (!Identifiers.UUID.parse(id).equals(entity.getId()))
 		{

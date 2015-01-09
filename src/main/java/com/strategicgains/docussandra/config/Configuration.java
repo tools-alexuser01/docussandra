@@ -17,10 +17,12 @@ import com.strategicgains.docussandra.persistence.CollectionsRepository;
 import com.strategicgains.docussandra.persistence.DocumentsRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.NamespacesRepository;
+import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.service.CollectionsService;
 import com.strategicgains.docussandra.service.DocumentsService;
 import com.strategicgains.docussandra.service.IndexService;
 import com.strategicgains.docussandra.service.NamespacesService;
+import com.strategicgains.docussandra.service.QueryService;
 import com.strategicgains.eventing.DomainEvents;
 import com.strategicgains.eventing.EventBus;
 import com.strategicgains.eventing.local.LocalEventBusBuilder;
@@ -64,21 +66,22 @@ extends Environment
 		CollectionsRepository collectionsRepository = new CollectionsRepository(dbConfig.getSession());
 		DocumentsRepository documentsRepository = new DocumentsRepository(dbConfig.getSession());
 		IndexRepository indexRepository = new IndexRepository(dbConfig.getSession());
+		QueryRepository queryRepository = new QueryRepository(dbConfig.getSession());
 
 		NamespacesService namespacesService = new NamespacesService(namespacesRepository);
 		CollectionsService collectionsService = new CollectionsService(namespacesRepository, collectionsRepository);
 		DocumentsService documentsService = new DocumentsService(collectionsRepository, documentsRepository);
 		IndexService indexService = new IndexService(collectionsRepository, indexRepository);
+		QueryService queryService = new QueryService(queryRepository);
 
 		namespacesController = new NamespacesController(namespacesService);
 		collectionsController = new CollectionsController(collectionsService);
 		documentsController = new DocumentsController(documentsService);
 		indexController = new IndexesController(indexService);
+		queriesController = new QueriesController(queryService);
 
 		// TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
-//		indexesController = new IndexesController(SampleUuidEntityService);
-//		queriesController = new QueriesController(SampleUuidEntityService);
 
 		EventBus bus = new LocalEventBusBuilder()
 			.subscribe(new IndexCreatedHandler())
