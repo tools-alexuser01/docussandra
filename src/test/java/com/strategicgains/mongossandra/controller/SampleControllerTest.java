@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -38,10 +38,9 @@ public class SampleControllerTest {
         server.shutdown();
     }
 
-
     @Before
     public void beforeEach() {
-        httpClient = new DefaultHttpClient();
+        httpClient = HttpClientBuilder.create().build();
     }
 
 
