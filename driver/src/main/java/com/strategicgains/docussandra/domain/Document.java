@@ -1,6 +1,5 @@
 package com.strategicgains.docussandra.domain;
 
-import java.util.Date;
 import java.util.UUID;
 
 import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
@@ -15,9 +14,11 @@ implements UuidIdentifiable
 {
 	//TODO: use a composed ID that is serialized to a blob.
 	//TODO: add any necessary metadata regarding a document.
-	//TODO: documents are versioned per transaction.
+	//TODO: documents are versioned per transaction via updateAt timestamp.
 	private UUID id;
-	private Date version;
+
+	// need a separate version (as opposed to updatedAt)?
+//	private long version;
 
 	@Required("Table")
 	@ChildValidation
@@ -32,7 +33,7 @@ implements UuidIdentifiable
 
 	public Identifier getId()
 	{
-		return new Identifier(databaseName(), tableName(), id, version);
+		return new Identifier(databaseName(), tableName(), id, getUpdatedAt());
 	}
 
 	public void setId(Identifier id)

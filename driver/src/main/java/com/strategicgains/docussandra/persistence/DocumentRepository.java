@@ -19,17 +19,23 @@ import com.strategicgains.docussandra.event.DocumentCreatedEvent;
 import com.strategicgains.docussandra.event.DocumentDeletedEvent;
 import com.strategicgains.docussandra.event.DocumentUpdatedEvent;
 import com.strategicgains.docussandra.event.EventFactory;
-import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
+import com.strategicgains.repoexpress.AbstractObservableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
 import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
+import com.strategicgains.repoexpress.exception.DuplicateItemException;
+import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
+import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 
 public class DocumentRepository
-extends AbstractCassandraRepository<Document>
+extends AbstractObservableRepository<Document>
 {
+	private Session session;
+
 	private class Columns
 	{
 		static final String ID = "id";
+//		static final String VERSION = "version";
 		static final String OBJECT = "object";
 		static final String CREATED_AT = "created_at";
 		static final String UPDATED_AT = "updated_at";
@@ -49,11 +55,115 @@ extends AbstractCassandraRepository<Document>
 
 	public DocumentRepository(Session session)
     {
-	    super(session, null);
+	    super();
+	    this.session = session;
 	    addObserver(new UuidIdentityRepositoryObserver<Document>());
 		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Document>());
 		addObserver(new StateChangeEventingObserver<Document>(new DocumentEventFactory()));
     }
+
+	protected Session session()
+    {
+    	return session;
+    }
+
+	@Override
+	public Document doCreate(Document entity)
+	{
+		if (exists(entity.getId()))
+		{
+			throw new DuplicateItemException(entity.getClass().getSimpleName()
+			    + " ID already exists: " + entity.getId().toString());
+		}
+
+		Table table = entity.table();
+		PreparedStatement createStmt = createStmts.get(table);
+
+		if (createStmt == null)
+		{
+			createStmt = session().prepare(String.format(CREATE_CQL, table.toDbTable(), Columns.ID));
+			createStmts.put(table, createStmt);
+		}
+
+		BoundStatement bs = new BoundStatement(createStmt);
+		bindCreate(bs, entity);
+		session().execute(bs);
+		return entity;
+	}
+
+	@Override
+	public Document doRead(Identifier identifier)
+	{
+		Table table = extractTable(identifier);
+		Identifier id = extractId(identifier);
+		PreparedStatement readStmt = readStmts.get(table);
+
+		if (readStmt == null)
+		{
+			readStmt = session().prepare(String.format(READ_CQL, table.toDbTable(), Columns.ID));
+			readStmts.put(table, readStmt);
+		}
+		
+		BoundStatement bs = new BoundStatement(readStmt);
+		bindIdentifier(bs, id);
+		Document item = marshalRow(session().execute(bs).one());
+
+		if (item == null)
+		{
+			throw new ItemNotFoundException("ID not found: " + identifier.toString());
+		}
+
+		return item;
+	}
+
+	@Override
+	public Document doUpdate(Document entity)
+	{
+		if (!exists(entity.getId()))
+		{
+			throw new ItemNotFoundException(entity.getClass().getSimpleName()
+			    + " ID not found: " + entity.getId().toString());
+		}
+
+		Table table = entity.table();
+		PreparedStatement updateStmt = updateStmts.get(table);
+
+		if (updateStmt == null)
+		{
+			updateStmt = session().prepare(String.format(UPDATE_CQL, table.toDbTable(), Columns.ID));
+			updateStmts.put(table, updateStmt);
+		}
+
+		BoundStatement bs = new BoundStatement(updateStmt);
+		bindUpdate(bs, entity);
+		session().execute(bs);
+		return entity;
+	}
+
+	@Override
+	public void doDelete(Document entity)
+	{
+		try
+		{
+			Table table = entity.table();
+			Identifier id = extractId(entity.getId());
+			PreparedStatement deleteStmt = deleteStmts.get(table);
+
+			if (deleteStmt == null)
+			{
+				deleteStmt = session().prepare(String.format(DELETE_CQL, table.toDbTable(), Columns.ID));
+				deleteStmts.put(table, deleteStmt);
+			}
+
+			BoundStatement bs = new BoundStatement(deleteStmt);
+			bindIdentifier(bs, id);
+			session().execute(bs);
+		}
+		catch (InvalidObjectIdException e)
+		{
+			throw new ItemNotFoundException("ID not found: " + entity.getId().toString());
+		}
+	}
 
 	@Override
 	public boolean exists(Identifier identifier)
@@ -61,90 +171,24 @@ extends AbstractCassandraRepository<Document>
 		if (identifier == null || identifier.isEmpty()) return false;
 
 		Table table = extractTable(identifier);
+		Identifier id = extractId(identifier);
 		PreparedStatement existStmt = existsStmts.get(table);
 
 		if (existStmt == null)
 		{
-			existStmt = getSession().prepare(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID));
+			existStmt = session().prepare(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID));
 			existsStmts.put(table, existStmt);
 		}
 
 		BoundStatement bs = new BoundStatement(existStmt);
-		bs.bind(extractId(identifier));
-		return (getSession().execute(bs).one().getLong(0) > 0);
+		bindIdentifier(bs, id);
+		return (session().execute(bs).one().getLong(0) > 0);
 	}
 
-	@Override
-	protected Document readEntityById(Identifier identifier)
+	private void bindIdentifier(BoundStatement bs, Identifier identifier)
 	{
-		if (identifier == null || identifier.isEmpty()) return null;
-
-		Table table = extractTable(identifier);
-		PreparedStatement readStmt = readStmts.get(table);
-
-		if (readStmt == null)
-		{
-			readStmt = getSession().prepare(String.format(READ_CQL, table.toDbTable(), Columns.ID));
-			readStmts.put(table, readStmt);
-		}
-		
-		BoundStatement bs = new BoundStatement(readStmt);
-		bs.bind(extractId(identifier));
-		return marshalRow(getSession().execute(bs).one());
+		bs.bind(identifier.components().toArray());
 	}
-
-	@Override
-    protected Document createEntity(Document entity)
-    {
-		Table table = entity.table();
-		PreparedStatement createStmt = createStmts.get(table);
-
-		if (createStmt == null)
-		{
-			createStmt = getSession().prepare(String.format(CREATE_CQL, table.toDbTable(), Columns.ID));
-			createStmts.put(table, createStmt);
-		}
-
-		BoundStatement bs = new BoundStatement(createStmt);
-		bindCreate(bs, entity);
-		getSession().execute(bs);
-		return entity;
-    }
-
-	@Override
-    protected Document updateEntity(Document entity)
-    {
-		Table table = entity.table();
-		PreparedStatement updateStmt = updateStmts.get(table);
-
-		if (updateStmt == null)
-		{
-			updateStmt = getSession().prepare(String.format(UPDATE_CQL, table.toDbTable(), Columns.ID));
-			updateStmts.put(table, updateStmt);
-		}
-
-		BoundStatement bs = new BoundStatement(updateStmt);
-		bindUpdate(bs, entity);
-		getSession().execute(bs);
-		return entity;
-    }
-
-	@Override
-    protected void deleteEntity(Document entity)
-    {
-		Table table = entity.table();
-		PreparedStatement deleteStmt = deleteStmts.get(table);
-
-		if (deleteStmt == null)
-		{
-			deleteStmt = getSession().prepare(String.format(DELETE_CQL, table.toDbTable(), Columns.ID));
-			deleteStmts.put(table, deleteStmt);
-		}
-
-		BoundStatement bs = new BoundStatement(deleteStmt);
-		bindIdentifier(bs, entity.getId());
-		getSession().execute(bs);
-    }
 
 	private void bindCreate(BoundStatement bs, Document entity)
 	{
@@ -165,10 +209,10 @@ extends AbstractCassandraRepository<Document>
 		    entity.getUuid());
 	}
 
-	private Object[] extractId(Identifier identifier)
+	private Identifier extractId(Identifier identifier)
     {
 		List<Object> l = identifier.components().subList(2, 3);
-		return l.toArray();
+		return new Identifier(l.toArray());
     }
 
 	private Table extractTable(Identifier identifier)
@@ -180,7 +224,7 @@ extends AbstractCassandraRepository<Document>
 		return t;
     }
 
-    protected Document marshalRow(Row row)
+    private Document marshalRow(Row row)
     {
 		if (row == null) return null;
 

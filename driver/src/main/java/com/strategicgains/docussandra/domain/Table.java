@@ -21,6 +21,12 @@ extends AbstractTimestampedIdentifiable
 	private String description;
 
 	//TODO: add consistency & distro metadata here.
+	
+	// How long should this data live?
+	private long ttl;
+
+	// After delete or update, how long should the old versions live?
+	private long deleteTtl;
 
 	public Table()
 	{
