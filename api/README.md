@@ -2,14 +2,13 @@ A REST-based, Document-Oriented Cassandra
 =========================================
 
 A REST API that makes Cassandra behave much like MongoDB. Stores arbitrary payloads as
-BSON in Cassandra, supporting indexing, filtering, sorting, querying and pagination
-via limit and offset semantics.
+BSON in Cassandra, supporting indexing, filtering, sorting, querying.
 
 All with a great scale story, multi-datacenter or otherwise.
 
 To run the project:
 	Make sure Cassandra is running
-	Load the schema in src/main/resources/docussandra.cql (e.g. 'cqlsh -f src/main/resources/docussandra.cql')
+	Load the schema in src/resources/schema_no_tenant.cql (e.g. 'cqlsh -f src/resources/schema_no_tenant.cql')
 	mvn clean package exec:java
 
 To create a project deployable assembly (zip file):
