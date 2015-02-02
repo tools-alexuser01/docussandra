@@ -16,6 +16,7 @@ implements UuidIdentifiable
 	//TODO: add any necessary metadata regarding a document.
 	//TODO: documents are versioned per transaction via updateAt timestamp.
 	private UUID id;
+	private Key docId;
 
 	// need a separate version (as opposed to updatedAt)?
 //	private long version;
