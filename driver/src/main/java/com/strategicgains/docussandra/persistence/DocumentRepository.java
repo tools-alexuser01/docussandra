@@ -22,7 +22,6 @@ import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.repoexpress.AbstractObservableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
-import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
@@ -57,7 +56,8 @@ extends AbstractObservableRepository<Document>
     {
 	    super();
 	    this.session = session;
-	    addObserver(new UuidIdentityRepositoryObserver<Document>());
+	    //TODO: set the id property if it doesn't exist.
+//	    addObserver(new UuidIdentityRepositoryObserver<Document>());
 		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Document>());
 		addObserver(new StateChangeEventingObserver<Document>(new DocumentEventFactory()));
     }
@@ -193,8 +193,9 @@ extends AbstractObservableRepository<Document>
 	private void bindCreate(BoundStatement bs, Document entity)
 	{
 		BSONObject bson = (BSONObject) JSON.parse(entity.object());
+		BSONObject key = (BSONObject) JSON.parse(entity.key().asJson());
 
-		bs.bind(entity.getUuid(),
+		bs.bind(ByteBuffer.wrap(BSON.encode(key)),
 			ByteBuffer.wrap(BSON.encode(bson)),
 		    entity.getCreatedAt(),
 		    entity.getUpdatedAt());
@@ -203,10 +204,11 @@ extends AbstractObservableRepository<Document>
 	private void bindUpdate(BoundStatement bs, Document entity)
 	{
 		BSONObject bson = (BSONObject) JSON.parse(entity.object());
+		BSONObject key = (BSONObject) JSON.parse(entity.key().asJson());
 
 		bs.bind(ByteBuffer.wrap(BSON.encode(bson)),
 			entity.getUpdatedAt(),
-		    entity.getUuid());
+			ByteBuffer.wrap(BSON.encode(key)));
 	}
 
 	private Identifier extractId(Identifier identifier)
@@ -229,7 +231,7 @@ extends AbstractObservableRepository<Document>
 		if (row == null) return null;
 
 		Document d = new Document();
-		d.setUuid(row.getUUID(Columns.ID));
+		d.key(row.getBytes(Columns.ID));
 		ByteBuffer b = row.getBytes(Columns.OBJECT);
 
 		if (b != null && b.hasArray())
@@ -238,10 +240,10 @@ extends AbstractObservableRepository<Document>
 			b.get(result);
 			BSONObject o = BSON.decode(result);
 
-			if (!o.containsField(Columns.ID))
-			{
-				o.put(Columns.ID, d.getUuid().toString());
-			}
+//			if (!o.containsField(Columns.ID))
+//			{
+//				o.put(Columns.ID, d.getUuid().toString());
+//			}
 
 			d.object(JSON.serialize(o));
 		}

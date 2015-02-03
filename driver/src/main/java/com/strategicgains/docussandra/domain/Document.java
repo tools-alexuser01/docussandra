@@ -1,22 +1,18 @@
 package com.strategicgains.docussandra.domain;
 
-import java.util.UUID;
+import java.nio.ByteBuffer;
 
 import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
 import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.domain.UuidIdentifiable;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.Required;
 
 public class Document
 extends AbstractTimestampedIdentifiable
-implements UuidIdentifiable
 {
-	//TODO: use a composed ID that is serialized to a blob.
 	//TODO: add any necessary metadata regarding a document.
 	//TODO: documents are versioned per transaction via updateAt timestamp.
-	private UUID id;
-	private Key docId;
+	private Key id;
 
 	// need a separate version (as opposed to updatedAt)?
 //	private long version;
@@ -40,6 +36,16 @@ implements UuidIdentifiable
 	public void setId(Identifier id)
 	{
 		// Do nothing. Throw?
+	}
+
+	public Key key()
+	{
+		return id;
+	}
+
+	public void key(ByteBuffer bytes)
+	{
+		this.id = new Key(bytes);
 	}
 
 	public boolean hasTable()
@@ -81,16 +87,4 @@ implements UuidIdentifiable
 	{
 		this.object = json;
 	}
-
-	@Override
-    public UUID getUuid()
-    {
-	    return id;
-    }
-
-	@Override
-    public void setUuid(UUID uuid)
-    {
-		this.id = uuid;
-    }
 }

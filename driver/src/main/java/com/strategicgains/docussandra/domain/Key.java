@@ -15,6 +15,11 @@
 */
 package com.strategicgains.docussandra.domain;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author toddf
@@ -23,13 +28,13 @@ package com.strategicgains.docussandra.domain;
 public class Key
 {
 	private KeyType type;
-	private byte[] bytes;
+	private Object object;
 
-	public Key(KeyType type, byte[] bytes)
+	public Key(Object o)
 	{
 		super();
-		this.type = type;
-		this.bytes = bytes;
+		this.object = o;
+		this.type = typeOf(o);
 	}
 
 	public boolean isType(KeyType type)
@@ -37,9 +42,9 @@ public class Key
 		return this.type == type;
 	}
 
-	public byte[] bytes()
+	public Object object()
 	{
-		return bytes;
+		return object;
 	}
 
 	@Override
@@ -53,4 +58,39 @@ public class Key
 	{
 		return 0;
 	}
+
+	public String asJson()
+	{
+		return String.format("{\"t\":%d,\"o\":\"%s\"}", type, object.toString());
+	}
+
+	private KeyType typeOf(Object o)
+    {
+		if (o instanceof UUID)
+		{
+			return KeyType.UUID;
+		}
+
+		if (o instanceof String)
+		{
+			return KeyType.STRING;
+		}
+
+		if (o instanceof Date)
+		{
+			return KeyType.TIMESTAMP;
+		}
+
+		if (o instanceof Long)
+		{
+			return KeyType.INT64;
+		}
+
+		if (o instanceof Integer)
+		{
+			return KeyType.INT32;
+		}
+
+		throw new InvalidKeyType(o.getClass().getName());
+    }
 }

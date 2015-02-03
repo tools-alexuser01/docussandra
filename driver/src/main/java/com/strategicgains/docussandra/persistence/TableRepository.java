@@ -47,7 +47,7 @@ extends AbstractCassandraRepository<Table>
 	private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where db_name = ?";
 
 	private static final String CREATE_DOC_TABLE_CQL = "create table %s"
-		+ " (id uuid, object blob, created_at timestamp, updated_at timestamp,"
+		+ " (id blob, object blob, created_at timestamp, updated_at timestamp,"
 		+ " primary key ((id), updated_at))"
 		+ " with clustering order by (updated_at DESC);";
 	private static final String DROP_DOC_TABLE_CQL = "drop table if exists %s;";
