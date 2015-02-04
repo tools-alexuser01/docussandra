@@ -30,16 +30,6 @@
 			<version>0.4.8</version>
 		</dependency>
 		<dependency>
-			<groupId>com.strategicgains.repoexpress</groupId>
-			<artifactId>repoexpress-cassandra</artifactId>
-			<version>0.4.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.strategicgains.domain-eventing</groupId>
-			<artifactId>domain-eventing-core</artifactId>
-			<version>0.4.5</version>
-		</dependency>
-		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>HyperExpressPlugin</artifactId>
 			<version>2.2</version>
@@ -70,16 +60,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.0</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -115,14 +95,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.0</version>
-			</plugin>
-		</plugins>
-	</reporting>
 </project>
