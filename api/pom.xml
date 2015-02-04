@@ -85,7 +85,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
 				<configuration>
-					<mainClass>com.strategicgains.megadoc.Main</mainClass>
+					<mainClass>com.strategicgains.docussandra.Main</mainClass>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -98,7 +98,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>./lib/</classpathPrefix>
-							<mainClass>com.strategicgains.megadoc.Main</mainClass>
+							<mainClass>com.strategicgains.docussandra.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
