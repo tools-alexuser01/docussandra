@@ -22,6 +22,7 @@ import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.repoexpress.AbstractObservableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
+import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
@@ -56,8 +57,7 @@ extends AbstractObservableRepository<Document>
     {
 	    super();
 	    this.session = session;
-	    //TODO: set the id property if it doesn't exist.
-//	    addObserver(new UuidIdentityRepositoryObserver<Document>());
+	    addObserver(new UuidIdentityRepositoryObserver<Document>());
 		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Document>());
 		addObserver(new StateChangeEventingObserver<Document>(new DocumentEventFactory()));
     }
@@ -187,15 +187,15 @@ extends AbstractObservableRepository<Document>
 
 	private void bindIdentifier(BoundStatement bs, Identifier identifier)
 	{
-		bs.bind(identifier.components().toArray());
+		bs.bind(identifier.primaryKey());
+//		bs.bind(identifier.components().toArray());
 	}
 
 	private void bindCreate(BoundStatement bs, Document entity)
 	{
 		BSONObject bson = (BSONObject) JSON.parse(entity.object());
-		BSONObject key = (BSONObject) JSON.parse(entity.key().asJson());
-
-		bs.bind(ByteBuffer.wrap(BSON.encode(key)),
+		bson.put(Columns.ID, entity.getUuid());
+		bs.bind(entity.getUuid(),
 			ByteBuffer.wrap(BSON.encode(bson)),
 		    entity.getCreatedAt(),
 		    entity.getUpdatedAt());
@@ -204,15 +204,18 @@ extends AbstractObservableRepository<Document>
 	private void bindUpdate(BoundStatement bs, Document entity)
 	{
 		BSONObject bson = (BSONObject) JSON.parse(entity.object());
-		BSONObject key = (BSONObject) JSON.parse(entity.key().asJson());
 
 		bs.bind(ByteBuffer.wrap(BSON.encode(bson)),
 			entity.getUpdatedAt(),
-			ByteBuffer.wrap(BSON.encode(key)));
+			entity.getUuid());
 	}
 
 	private Identifier extractId(Identifier identifier)
     {
+		// This includes the date/version on the end...
+//		List<Object> l = identifier.components().subList(2, 4);
+
+		//TODO: determine what to do with version here.
 		List<Object> l = identifier.components().subList(2, 3);
 		return new Identifier(l.toArray());
     }
@@ -231,7 +234,7 @@ extends AbstractObservableRepository<Document>
 		if (row == null) return null;
 
 		Document d = new Document();
-		d.key(row.getBytes(Columns.ID));
+		d.setUuid(row.getUUID(Columns.ID));
 		ByteBuffer b = row.getBytes(Columns.OBJECT);
 
 		if (b != null && b.hasArray())
@@ -239,12 +242,6 @@ extends AbstractObservableRepository<Document>
 			byte[] result = new byte[b.remaining()];
 			b.get(result);
 			BSONObject o = BSON.decode(result);
-
-//			if (!o.containsField(Columns.ID))
-//			{
-//				o.put(Columns.ID, d.getUuid().toString());
-//			}
-
 			d.object(JSON.serialize(o));
 		}
 
