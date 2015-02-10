@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/tfredrich/docussandra.png?label=ready&title=Ready)](https://waffle.io/tfredrich/docussandra)
 A REST-based, Document-Oriented Cassandra
 =========================================
 
