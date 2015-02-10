@@ -1,6 +1,8 @@
 A REST-based, Document-Oriented Cassandra
 =========================================
 
+[![Stories in Ready](https://badge.waffle.io/tfredrich/docussandra.svg?label=ready&title=Ready)](http://waffle.io/tfredrich/docussandra)
+
 A REST API that makes Cassandra behave much like MongoDB. Stores arbitrary payloads as
 BSON in Cassandra, supporting indexing, filtering, sorting, querying and pagination
 via limit and offset semantics.
