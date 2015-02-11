@@ -23,7 +23,7 @@ public class IndexService
 
 	public Index create(Index index)
 	{
-		verifyTable(index.database(), index.table());
+		verifyTable(index.databaseName(), index.tableName());
 		ValidationEngine.validateAndThrow(index);
 		return indexes.create(index);
 	}

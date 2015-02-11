@@ -10,6 +10,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.event.IndexDeletedEvent;
@@ -23,29 +24,30 @@ extends AbstractCassandraRepository<Index>
 {
 	private class Tables
 	{
-		static final String BY_ID = "indexes";
+		static final String BY_ID = "sys_idx";
 	}
 
 	private class Columns
 	{
+		static final String DATABASE = "db_name";
+		static final String TABLE = "tbl_name";
 		static final String NAME = "name";
-		static final String DATABASE = "database";
-		static final String TABLE = "table_nm";
 		static final String IS_UNIQUE = "is_unique";
-		static final String BUCKET_SIZE = "bucket_size";
+		static final String BUCKET_SIZE = "bucket_sz";
 		static final String FIELDS = "fields";
+		static final String ONLY = "only";
 		static final String CREATED_AT = "created_at";
 		static final String UPDATED_AT = "updated_at";
 	}
 
-	private static final String IDENTITY_CQL = " where database = ? and table_nm = ? and name = ?";
+	private static final String IDENTITY_CQL = " where db_name = ? and tbl_name = ? and name = ?";
 	private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-	private static final String CREATE_CQL = "insert into %s (%s, database, table_nm, is_unique, bucket_size, fields, created_at, updated_at) values (?, ?, ?, ?, ?, ? , ?, ?)";
+	private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, only, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
 	private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
-	private static final String UPDATE_CQL = "update %s set bucket_size = ?, updated_at = ?" + IDENTITY_CQL;
-	private static final String READ_ALL_CQL = "select * from %s where database = ? and table_nm = ?";
-	private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where database = ? and table_nm = ?";
+	private static final String UPDATE_CQL = "update %s set bucket_sz = ?, updated_at = ?" + IDENTITY_CQL;
+	private static final String READ_ALL_CQL = "select * from %s where db_name = ? and tbl_name = ?";
+	private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where db_name = ? and tbl_name = ?";
 
 	private PreparedStatement existStmt;
 	private PreparedStatement readStmt;
@@ -136,11 +138,12 @@ extends AbstractCassandraRepository<Index>
 	private void bindCreate(BoundStatement bs, Index entity)
 	{
 		bs.bind(entity.name(),
-			entity.database(),
-			entity.table(),
+			entity.databaseName(),
+			entity.tableName(),
 			entity.isUnique(),
 			entity.bucketSize(),
 			entity.fields(),
+			entity.includeOnly(),
 		    entity.getCreatedAt(),
 		    entity.getUpdatedAt());
 	}
@@ -149,8 +152,8 @@ extends AbstractCassandraRepository<Index>
 	{
 		bs.bind(entity.bucketSize(),
 			entity.getUpdatedAt(),
-			entity.database(),
-			entity.table(),
+			entity.databaseName(),
+			entity.tableName(),
 			entity.name());
 	}
 
@@ -173,11 +176,14 @@ extends AbstractCassandraRepository<Index>
 
 		Index i = new Index();
 		i.name(row.getString(Columns.NAME));
-		i.database(row.getString(Columns.DATABASE));
-		i.table(row.getString(Columns.TABLE));
+		Table t = new Table();
+		t.database(row.getString(Columns.DATABASE));
+		t.name(row.getString(Columns.TABLE));
+		i.table(t);
 		i.isUnique(row.getBool(Columns.IS_UNIQUE));
 		i.bucketSize(row.getLong(Columns.BUCKET_SIZE));
 		i.fields(row.getList(Columns.FIELDS, String.class));
+		i.fields(row.getList(Columns.ONLY, String.class));
 		i.setCreatedAt(row.getDate(Columns.CREATED_AT));
 		i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return i;

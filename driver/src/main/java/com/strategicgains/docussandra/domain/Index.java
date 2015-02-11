@@ -7,17 +7,17 @@ import java.util.List;
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
 import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;
 
 public class Index
 extends AbstractTimestampedIdentifiable
 {
-	@RegexValidation(name = "Database", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
-	private String database;
 
-	@RegexValidation(name = "Table", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
-	private String table;
+	@Required("Table")
+	@ChildValidation
+	private TableReference table;
 
 	@RegexValidation(name = "Index name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
 	private String name;
@@ -36,14 +36,14 @@ extends AbstractTimestampedIdentifiable
 	@Required("Fields")
 	private List<String> fields;
 
-	@Required("Index Type")
-	private IndexType type;
+//	@Required("Index Type")
+//	private IndexType type;
 
 	/**
 	 * Consider the index is only concerned with only a partial dataset. In this case, instead of storing the entire BSON
 	 * payload, we store only a subset--those listed in includeOnly.
 	 */
-//	private List<String> includeOnly;
+	private List<String> includeOnly;
 
 	public Index()
 	{
@@ -55,24 +55,34 @@ extends AbstractTimestampedIdentifiable
 		name(name);
 	}
 
-	public String database()
+	public boolean hasTable()
 	{
-		return database;
+		return (table != null);
 	}
 
-	public void database(String name)
+	public Table table()
 	{
-		this.database = name;
+		return (hasTable() ? table.asObject() : null);
 	}
 
-	public String table()
+	public void table(String database, String table)
 	{
-		return table;
+		this.table = new TableReference(database, table);
 	}
 
-	public void table(String name)
+	public void table(Table table)
 	{
-		this.table = name;
+		this.table = (table != null ? new TableReference(table) : null);
+	}
+
+	public String tableName()
+	{
+		return (hasTable() ? table.name() : null);
+	}
+
+	public String databaseName()
+	{
+		return (hasTable() ? table.database() : null);
 	}
 
 	public String name()
@@ -107,10 +117,20 @@ extends AbstractTimestampedIdentifiable
 		return (fields == null ? Collections.<String>emptyList() : Collections.unmodifiableList(fields));
 	}
 
+	public void includeOnly(List<String> props)
+	{
+		this.includeOnly = new ArrayList<String>(props);
+	}
+
+	public List<String> includeOnly()
+	{
+		return (includeOnly == null ? Collections.<String>emptyList() : Collections.unmodifiableList(includeOnly));
+	}
+
 	@Override
     public Identifier getId()
     {
-		return new Identifier(database, table, name);
+		return new Identifier(databaseName(), tableName(), name);
     }
 
 	@Override
@@ -146,7 +166,7 @@ extends AbstractTimestampedIdentifiable
 		{
 			field = value.trim();
 
-			if (field.startsWith("-"))
+			if (field.trim().startsWith("-"))
 			{
 				field = value.substring(1);
 				isAscending = false;
