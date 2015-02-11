@@ -3,16 +3,20 @@ package com.strategicgains.docussandra.domain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
 import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.syntaxe.Validatable;
+import com.strategicgains.syntaxe.ValidationException;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;
 
 public class Index
 extends AbstractTimestampedIdentifiable
+implements Validatable
 {
 
 	@Required("Table")
@@ -183,4 +187,30 @@ extends AbstractTimestampedIdentifiable
 			return isAscending;
 		}
 	}
+
+	@Override
+    public void validate()
+    {
+		final List<String> errors = new ArrayList<String>();
+
+		if (fields.isEmpty())
+		{
+			errors.add("Fields is required.");
+		}
+
+		Pattern p = Pattern.compile("^[\\+-]?\\w+");
+
+		for (String field : fields)
+		{
+			if (!p.matcher(field).matches())
+			{
+				errors.add("Invalid index field name: " + field);
+			}
+		}
+
+		if (!errors.isEmpty())
+		{
+			throw new ValidationException(errors);
+		}
+    }
 }
