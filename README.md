@@ -1,4 +1,6 @@
 [![Stories in Ready](https://badge.waffle.io/tfredrich/docussandra.png?label=ready&title=Ready)](https://waffle.io/tfredrich/docussandra)
+[![Build Status](https://buildhive.cloudbees.com/job/tfredrich/job/docussandra/badge/icon)](https://buildhive.cloudbees.com/job/tfredrich/job/docussandra/)
+
 A REST-based, Document-Oriented Cassandra
 =========================================
 
