@@ -198,13 +198,31 @@ implements Validatable
 			errors.add("Fields is required.");
 		}
 
-		Pattern p = Pattern.compile("^[\\+-]?\\w+");
+		Pattern fieldPattern = Pattern.compile("^[\\+-]?\\w+");
 
 		for (String field : fields)
 		{
-			if (!p.matcher(field).matches())
+			if (!fieldPattern.matcher(field).matches())
 			{
 				errors.add("Invalid index field name: " + field);
+			}
+		}
+
+		Pattern includePattern = Pattern.compile("^\\w+");
+
+		if (includeOnly != null)
+		{
+			if (includeOnly.isEmpty())
+			{
+				errors.add("'includeOnly' cannot be empty, if included.");
+			}
+
+			for (String field : includeOnly)
+			{
+				if (!includePattern.matcher(field).matches())
+				{
+					errors.add("Invalid 'includeOnly' field name: " + field);
+				}
 			}
 		}
 
