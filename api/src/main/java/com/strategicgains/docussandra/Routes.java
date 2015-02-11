@@ -33,14 +33,14 @@ public abstract class Routes
 //			.action("readAll", GET)
 			.method(POST)
 			.name(Constants.Routes.DOCUMENTS);
-//
-//		server.uri("/{namespace}/{collection}/indexes", config.getIndexController())
-//			.action("readAll", GET)
-//			.name(Constants.Routes.INDEXES);
-//
-//		server.uri("/{database}/{table}/indexes/{index}", config.getIndexController())
-//			.method(GET, PUT, DELETE, POST)
-//			.name(Constants.Routes.INDEX);
+
+		server.uri("/{database}/{table}/indexes", config.getIndexController())
+			.action("readAll", GET)
+			.name(Constants.Routes.INDEXES);
+
+		server.uri("/{database}/{table}/indexes/{index}", config.getIndexController())
+			.method(GET, PUT, DELETE, POST)
+			.name(Constants.Routes.INDEX);
 
 		server.uri("/{database}/{table}/{documentId}", config.getDocumentController())
 			.method(GET, PUT, DELETE)
