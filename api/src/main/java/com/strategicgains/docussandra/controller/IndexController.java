@@ -8,6 +8,7 @@ import org.restexpress.Response;
 
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.service.IndexService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenBinder;
@@ -36,12 +37,14 @@ public class IndexController
 
 	public Index create(Request request, Response response)
 	{
-		String namespace = request.getHeader(Constants.Url.DATABASE, "No namespace provided");
-		String collection = request.getHeader(Constants.Url.TABLE, "No collection provided");
+		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
 		String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
 		Index entity = request.getBodyAs(Index.class, "Resource details not provided");
-		entity.database(namespace);
-		entity.table(collection);
+		Table t = new Table();
+		t.database(database);
+		t.name(table);
+		entity.table(t);
 		entity.name(name);
 		Index saved = indexes.create(entity);
 
@@ -49,8 +52,8 @@ public class IndexController
 		response.setResponseCreated();
 
 		// enrich the resource with links, etc. here...
-		TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, saved.table())
-			.bind(Constants.Url.DATABASE, saved.database())
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, saved.tableName())
+			.bind(Constants.Url.DATABASE, saved.databaseName())
 			.bind(Constants.Url.INDEX, saved.name());
 
 		// Include the Location header...
@@ -63,14 +66,14 @@ public class IndexController
 
 	public Index read(Request request, Response response)
 	{
-		String namespace = request.getHeader(Constants.Url.DATABASE, "No namespace provided");
-		String collection = request.getHeader(Constants.Url.TABLE, "No collection provided");
+		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
 		String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
-		Index entity = indexes.read(new Identifier(namespace, collection, name));
+		Index entity = indexes.read(new Identifier(database, table, name));
 
 		// enrich the entity with links, etc. here...
-		HyperExpress.bind(Constants.Url.TABLE, entity.table())
-			.bind(Constants.Url.DATABASE, entity.database())
+		HyperExpress.bind(Constants.Url.TABLE, entity.tableName())
+			.bind(Constants.Url.DATABASE, entity.databaseName())
 			.bind(Constants.Url.INDEX, entity.name());
 
 		return entity;
@@ -78,32 +81,34 @@ public class IndexController
 
 	public List<Index> readAll(Request request, Response response)
 	{
-		String namespace = request.getHeader(Constants.Url.DATABASE, "No namespace provided");
-		String collection = request.getHeader(Constants.Url.TABLE, "No collection provided");
+		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
 
 		HyperExpress.tokenBinder(new TokenBinder<Index>()
 		{
 			@Override
             public void bind(Index object, TokenResolver resolver)
             {
-				resolver.bind(Constants.Url.TABLE, object.table())
-					.bind(Constants.Url.DATABASE, object.database())
+				resolver.bind(Constants.Url.TABLE, object.tableName())
+					.bind(Constants.Url.DATABASE, object.databaseName())
 					.bind(Constants.Url.INDEX, object.name());
 
             }
 		});
 
-		return indexes.readAll(namespace, collection);
+		return indexes.readAll(database, table);
 	}
 
 	public void update(Request request, Response response)
 	{
-		String namespace = request.getHeader(Constants.Url.DATABASE, "No namespace provided");
-		String collection = request.getHeader(Constants.Url.TABLE, "No collection provided");
+		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
 		String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
 		Index entity = request.getBodyAs(Index.class, "Resource details not provided");
-		entity.database(namespace);
-		entity.table(collection);
+		Table t = new Table();
+		t.database(database);
+		t.name(table);
+		entity.table(t);
 		entity.name(name);
 		indexes.update(entity);
 		response.setResponseNoContent();
@@ -111,10 +116,10 @@ public class IndexController
 
 	public void delete(Request request, Response response)
 	{
-		String namespace = request.getHeader(Constants.Url.DATABASE, "No namespace provided");
-		String collection = request.getHeader(Constants.Url.TABLE, "No collection provided");
+		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
 		String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
-		indexes.delete(new Identifier(namespace, collection, name));
+		indexes.delete(new Identifier(database, table, name));
 		response.setResponseNoContent();
 	}
 }

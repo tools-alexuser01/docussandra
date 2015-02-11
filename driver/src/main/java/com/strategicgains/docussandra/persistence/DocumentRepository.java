@@ -35,7 +35,6 @@ extends AbstractObservableRepository<Document>
 	private class Columns
 	{
 		static final String ID = "id";
-//		static final String VERSION = "version";
 		static final String OBJECT = "object";
 		static final String CREATED_AT = "created_at";
 		static final String UPDATED_AT = "updated_at";
@@ -194,7 +193,6 @@ extends AbstractObservableRepository<Document>
 	private void bindCreate(BoundStatement bs, Document entity)
 	{
 		BSONObject bson = (BSONObject) JSON.parse(entity.object());
-		bson.put(Columns.ID, entity.getUuid());
 		bs.bind(entity.getUuid(),
 			ByteBuffer.wrap(BSON.encode(bson)),
 		    entity.getCreatedAt(),
