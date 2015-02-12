@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.restexpress.RestExpress;
 
 import com.strategicgains.docussandra.Main;
+import org.junit.Ignore;
 
 public class SampleControllerTest {
 
@@ -49,6 +50,7 @@ public class SampleControllerTest {
         httpClient = null;
     }
 
+    @Ignore
     @Test
     public void postDirectiveReplayRequest() throws IOException {
         HttpGet getRequest = new HttpGet(BASE_URL + "/samples/uuid/123.json");
