@@ -81,7 +81,7 @@ extends AbstractObservableRepository<Document>
 		if (createStmt == null)
 		{
 			createStmt = session().prepare(String.format(CREATE_CQL, table.toDbTable(), Columns.ID));
-			createStmts.put(table, createStmt);
+			createStmts.put(table, createStmt);//udeyoje: This seems dangrous; should we use a caching lib instead?
 		}
 
 		BoundStatement bs = new BoundStatement(createStmt);
