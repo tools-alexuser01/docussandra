@@ -42,12 +42,13 @@ public class IndexChangeObserver<T extends Identifiable>
         Index index = (Index) object;
     }
 
-    @Override
-    public void afterUpdate(T object) {
-        Index index = (Index) object;
-        //TODO: (maybe) schedule job to handle this at a later time (off hours); very expensive operation
-        //drop the iTable
-        //recreate the iTable
-        //repopulate the iTable with existing data
-    }
+//    @Override
+//    public void afterUpdate(T object) {
+//        Index index = (Index) object;
+//        //TODO: (maybe) schedule job to handle this at a later time (off hours); very expensive operation
+//        //create a new iTable
+//        //repopulate the iTable with existing data        
+//        //drop the old iTable
+//        
+//    }
 }
