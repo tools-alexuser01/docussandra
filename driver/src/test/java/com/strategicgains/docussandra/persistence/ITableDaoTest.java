@@ -5,7 +5,6 @@ import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import com.strategicgains.repoexpress.domain.Identifier;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
