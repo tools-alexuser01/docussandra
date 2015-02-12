@@ -26,6 +26,22 @@ public class ITableDao {
         this.session = session;
     }
     
+    public boolean iTableExists(Index index){
+        throw new UnsupportedOperationException("Not done yet");
+    }
+    
+    public void createITable(Index index){
+        throw new UnsupportedOperationException("Not done yet");
+    }
+    
+    public void deleteITable(Index index){
+        throw new UnsupportedOperationException("Not done yet");
+    }
+    
+    
+    
+    
+    
 
     
 }
