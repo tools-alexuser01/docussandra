@@ -52,7 +52,12 @@
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
-                    <version>1.7.7</version> <!--needed for MDC testing-->
+                    <version>1.7.7</version> <!--needed for MDC testing-->                    
+                </dependency>
+                <dependency>
+                    <groupId>net.logstash.log4j</groupId>
+                    <artifactId>jsonevent-layout</artifactId>
+                    <version>1.3</version>
                 </dependency>
 	</dependencies>
 
