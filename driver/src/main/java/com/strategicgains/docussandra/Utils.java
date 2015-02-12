@@ -13,6 +13,8 @@ public class Utils {
 
     /**
      * Calculates the name of an iTable based on the dataBaseName, the tableName, and the indexName.
+     * 
+     * Note: No null checks.
      *
      * @param databaseName dbName for the iTable.
      * @param tableName table name for the iTable. 
@@ -32,6 +34,8 @@ public class Utils {
 
     /**
      * Calculates the name of an iTable based on an index.
+     * 
+     * Note: No null checks.
      *
      * @param index Index whose iTable name you would like.
      * @return The name of the iTable for that index.
