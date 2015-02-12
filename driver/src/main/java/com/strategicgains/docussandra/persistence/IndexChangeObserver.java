@@ -10,47 +10,41 @@ import com.strategicgains.repoexpress.event.AbstractRepositoryObserver;
  * @since Feb 12, 2015
  */
 public class IndexChangeObserver<T extends Identifiable>
-extends AbstractRepositoryObserver<T>
-{
-	private EventFactory<T> factory;
+        extends AbstractRepositoryObserver<T> {
 
-	public IndexChangeObserver(EventFactory<T> eventFactory)
-	{
-		super();
-		this.factory = eventFactory;
-	}
+    private EventFactory<T> factory;
 
-	@Override
-    public void afterCreate(T object)
-    {
-		if (factory != null)
-		{
-			publish(factory.newCreatedEvent(object));
-		}
+    public IndexChangeObserver(EventFactory<T> eventFactory) {
+        super();
+        this.factory = eventFactory;
     }
 
-	@Override
-    public void afterDelete(T object)
-    {
-		if (factory != null)
-		{
-			publish(factory.newDeletedEvent(object));
-		}
+    @Override
+    public void afterCreate(T object) {
+        if (factory != null) {
+            publish(factory.newCreatedEvent(object));
+        }
     }
 
-	@Override
-    public void afterUpdate(T object)
-    {
-		if (factory != null)
-		{
-			publish(factory.newUpdatedEvent(object));
-		}
+    @Override
+    public void afterDelete(T object) {
+        if (factory != null) {
+            publish(factory.newDeletedEvent(object));
+        }
     }
 
-	private void publish(Object event)
-    {
-		if (event == null) return;
+    @Override
+    public void afterUpdate(T object) {
+        if (factory != null) {
+            publish(factory.newUpdatedEvent(object));
+        }
+    }
 
-		DomainEvents.publish(event);
+    private void publish(Object event) {
+        if (event == null) {
+            return;
+        }
+
+        DomainEvents.publish(event);
     }
 }
