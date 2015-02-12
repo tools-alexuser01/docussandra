@@ -21,9 +21,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         Identifier id =  entity.getId();
         //check for any indices that should exist on this table per the index table
         
-        //determine which index tables need to be written to
-        
-        //create an index table(s) if it does not already exist https://github.com/tfredrich/docussandra/issues/25
+        //determine which index tables need to be written to       
         
         //add row to the index table(s)
         
