@@ -42,7 +42,7 @@ public class UtilsTest {
         String databaseName = "myDb";
         String tableName = "myTable";
         String indexName = "yoIndex";
-        String expResult = "myDb_myTable_yoIndex";
+        String expResult = "mydb_mytable_yoindex";
         String result = Utils.calculateITableName(databaseName, tableName, indexName);
         assertEquals(expResult, result);
     }
@@ -58,7 +58,7 @@ public class UtilsTest {
         String indexName = "yoIndex";       
         Index index = new Index(indexName);
         index.table(databaseName, tableName);
-        String expResult = "myDb_myTable_yoIndex";
+        String expResult = "mydb_mytable_yoindex";
         String result = Utils.calculateITableName(index);
         assertEquals(expResult, result);
     }
