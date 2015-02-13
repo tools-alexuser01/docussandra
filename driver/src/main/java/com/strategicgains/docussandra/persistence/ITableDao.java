@@ -98,7 +98,7 @@ public class ITableDao {
             primaryKeyCreateStatement.append(field);
         }
         String finalStatement = String.format(TABLE_CREATE_CQL, newTableName, fieldCreateStatement, primaryKeyCreateStatement);
-        logger.debug("For index: " + index.toString() + ", the table create SQL: " + finalStatement);
+        logger.debug("For index: " + index.toString() + ", the table create SQL is: " + finalStatement);
         return finalStatement;
     }
 
