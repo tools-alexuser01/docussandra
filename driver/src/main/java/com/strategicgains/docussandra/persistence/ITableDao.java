@@ -60,6 +60,7 @@ public class ITableDao {
     }
 
     public boolean iTableExists(Index index) {
+        logger.info("Checking for existance of iTable for index: " + index.toString());
         PreparedStatement createStmt = session.prepare(TABLE_EXISTENCE_CQL);
         BoundStatement bs = new BoundStatement(createStmt);
         bs.bind(Utils.calculateITableName(index));
@@ -73,6 +74,7 @@ public class ITableDao {
     }
 
     public void createITable(Index index) {
+        logger.info("Creating iTable for index: " + index.toString());
         PreparedStatement createStmt = session.prepare(generateTableCreationSyntax(index));
         BoundStatement bs = new BoundStatement(createStmt);
         session.execute(bs);
@@ -100,12 +102,13 @@ public class ITableDao {
         return finalStatement;
     }
 
-    public void deleteITable(Index index) {
+    public void deleteITable(Index index) {        
         String tableToDelete = Utils.calculateITableName(index);
         deleteITable(tableToDelete);
     }
 
     public void deleteITable(String tableName) {
+        logger.info("Deleting iTable: " + tableName);
         String stmt = String.format(TABLE_DELETE_CQL, tableName);
         PreparedStatement createStmt = session.prepare(stmt);
         BoundStatement bs = new BoundStatement(createStmt);
