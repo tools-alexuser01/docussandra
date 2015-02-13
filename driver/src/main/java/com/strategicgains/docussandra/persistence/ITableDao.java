@@ -4,6 +4,7 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
+import com.pearson.grid.pearsonlibrary.string.StringUtil;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Index;
 import java.util.Iterator;
@@ -24,13 +25,28 @@ public class ITableDao {
      * Session for interacting with the Cassandra database.
      */
     private Session session;
-    
+
     /**
      * Logger for this class.
      */
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * CQL statement for determining if a iTable exists.
+     */
     private static final String TABLE_EXISTENCE_CQL = "select columnfamily_name from system.schema_columnfamilies where columnfamily_name = ? ALLOW FILTERING;";
+
+    /**
+     * CQL statement for dynamically creating an iTable.
+     */
+    private static final String TABLE_CREATE_CQL = "CREATE TABLE docussandra.%s (object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY (%s));";
+    //TODO: --------------------remove hard coding of keyspace name--^^^----
+
+    /**
+     * CQL statement for deleting an iTable (or for that matter, any table).
+     */
+    private static final String TABLE_DELETE_CQL = "DROP TABLE docussandra.%s;";
+    //TODO: --------------------remove hard coding of keyspace name--^^^----
 
     /**
      * Constructor. Creates a new ITableDao.
@@ -43,26 +59,55 @@ public class ITableDao {
 
     public boolean iTableExists(Index index) {
         PreparedStatement createStmt = session.prepare(TABLE_EXISTENCE_CQL);
-
         BoundStatement bs = new BoundStatement(createStmt);
         bs.bind(Utils.calculateITableName(index));
         ResultSet rs = session.execute(bs);
         Iterator ite = rs.iterator();
-        
         while (ite.hasNext()) {
             logger.debug(ite.next().toString());
             return true;
         }
         return false;
-        
     }
 
     public void createITable(Index index) {
-        throw new UnsupportedOperationException("Not done yet");
+        PreparedStatement createStmt = session.prepare(generateTableCreationSyntax(index));
+        BoundStatement bs = new BoundStatement(createStmt);
+        session.execute(bs);
+    }
+
+    private String generateTableCreationSyntax(Index index) {
+        String newTableName = Utils.calculateITableName(index);
+        StringBuilder fieldCreateStatement = new StringBuilder();
+        StringUtil.combineList(index.fields(), " varchar, ");
+        StringBuilder primaryKeyCreateStatement = new StringBuilder();
+        StringUtil.combineList(index.fields(), ", ");
+        boolean first = true;
+        for (String field : index.fields()) {
+            if (!first) {
+                fieldCreateStatement.append(", ");
+                primaryKeyCreateStatement.append(", ");
+            } else {
+                first = false;
+            }
+            fieldCreateStatement.append(field).append(" varchar");
+            primaryKeyCreateStatement.append(field);
+        }
+        String finalStatement = String.format(TABLE_CREATE_CQL, newTableName, fieldCreateStatement, primaryKeyCreateStatement);
+        logger.debug("For index: " + index.toString() + ", the table create SQL: " + finalStatement);
+        return finalStatement;
     }
 
     public void deleteITable(Index index) {
-        throw new UnsupportedOperationException("Not done yet");
+        String tableToDelete = Utils.calculateITableName(index);
+        deleteITable(tableToDelete);
+    }
+
+    public void deleteITable(String tableName) {
+        String stmt = String.format(TABLE_DELETE_CQL, tableName);
+        PreparedStatement createStmt = session.prepare(stmt);
+        BoundStatement bs = new BoundStatement(createStmt);
+        session.execute(bs);
     }
 
 }

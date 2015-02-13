@@ -3,10 +3,14 @@ package com.strategicgains.docussandra.persistence;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.exceptions.InvalidQueryException;
+import com.pearson.grid.pearsonlibrary.common.ReflectionUtil;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import java.util.ArrayList;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -21,29 +25,42 @@ import org.slf4j.LoggerFactory;
  * @author udeyoje
  */
 public class ITableDaoTest {
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Session session;
-    
+
     public ITableDaoTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
         Fixtures f = Fixtures.getInstance();
         Cluster cluster = Cluster.builder().addContactPoints(f.getCassandraSeeds()).build();
         final Metadata metadata = cluster.getMetadata();
         session = cluster.connect();
-        logger.info("Connected to cluster: "+metadata.getClusterName()+'\n');   
+        logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
+        ITableDao cleanUpInstance = new ITableDao(session);
+        try {
+            cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
+        } catch (InvalidQueryException e) {
+            logger.debug("Not clearning iTable, probably doesn't exist.");
+        }
+        try {
+            cleanUpInstance.deleteITable("mydb_mytable_myindexwithtwofields");
+        } catch (InvalidQueryException e) {
+            logger.debug("Not clearning iTable, probably doesn't exist.");
+
+        }
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -54,10 +71,9 @@ public class ITableDaoTest {
     @Test
     public void testITableExists() {
         System.out.println("iTableExists");
-        Index index = new Index("myIndexName");
-        index.table("myDB", "myTable");
+        Index index = createTestIndexOneField();
         ITableDao instance = new ITableDao(session);
-        boolean expResult = false;
+        boolean expResult = false;//Note: Negative Test Only
         boolean result = instance.iTableExists(index);
         assertEquals(expResult, result);
     }
@@ -65,15 +81,28 @@ public class ITableDaoTest {
     /**
      * Test of createITable method, of class ITableDao.
      */
-    @Ignore   
     @Test
     public void testCreateITable() {
         System.out.println("createITable");
-        Index index = null;
-        ITableDao instance = null;
+        Index index = createTestIndexOneField();
+        ITableDao instance = new ITableDao(session);
         instance.createITable(index);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+
+    }
+
+    /**
+     * Test of generateTableCreationSyntax method, of class ITableDao.
+     */
+    @Test
+    public void testGenerateTableCreationSyntax() {
+        System.out.println("generateTableCreationSyntax");
+        ITableDao instance = new ITableDao(session);
+        String response = (String) ReflectionUtil.callMethodOnObject("generateTableCreationSyntax", instance, createTestIndexOneField());
+        Assert.assertNotNull(response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (object blob, created_at timestamp, updated_at timestamp, myIndexedField varchar, PRIMARY KEY (myIndexedField));", response);
+        response = (String) ReflectionUtil.callMethodOnObject("generateTableCreationSyntax", instance, createTestIndexTwoField());
+        Assert.assertNotNull(response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (object blob, created_at timestamp, updated_at timestamp, myIndexedField1 varchar, myIndexedField2 varchar, PRIMARY KEY (myIndexedField1, myIndexedField2));", response);
     }
 
     /**
@@ -89,5 +118,33 @@ public class ITableDaoTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-    
+
+    /**
+     * Creates at test index with one field.
+     *
+     * @return
+     */
+    private static Index createTestIndexOneField() {
+        Index index = new Index("myIndexWithOneField");
+        index.table("myDB", "myTable");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("myIndexedField");
+        index.fields(fields);
+        return index;
+    }
+
+    /**
+     * Creates at test index with two fields.
+     *
+     * @return
+     */
+    private static Index createTestIndexTwoField() {
+        Index index = new Index("myIndexWithTwoFields");
+        index.table("myDB", "myTable");
+        ArrayList<String> fields = new ArrayList<>();
+        fields.add("myIndexedField1");
+        fields.add("myIndexedField2");
+        index.fields(fields);
+        return index;
+    }
 }
