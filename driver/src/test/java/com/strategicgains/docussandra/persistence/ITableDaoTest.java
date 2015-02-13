@@ -47,22 +47,26 @@ public class ITableDaoTest {
         final Metadata metadata = cluster.getMetadata();
         session = cluster.connect();
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
+        clearTestITables();
+    }
+
+    private void clearTestITables() {
         ITableDao cleanUpInstance = new ITableDao(session);
         try {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
         } catch (InvalidQueryException e) {
-            logger.debug("Not clearning iTable, probably doesn't exist.");
+            logger.debug("Not dropping iTable, probably doesn't exist.");
         }
         try {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithtwofields");
         } catch (InvalidQueryException e) {
-            logger.debug("Not clearning iTable, probably doesn't exist.");
-
+            logger.debug("Not dropping iTable, probably doesn't exist.");
         }
     }
 
     @After
     public void tearDown() {
+        clearTestITables();
     }
 
     /**
@@ -86,8 +90,20 @@ public class ITableDaoTest {
         System.out.println("createITable");
         Index index = createTestIndexOneField();
         ITableDao instance = new ITableDao(session);
-        instance.createITable(index);
+        boolean result = instance.iTableExists(index);
+        assertEquals(false, result);//make sure it doesn't exist yet
 
+        instance.createITable(index);
+        result = instance.iTableExists(index);
+        assertEquals(true, result);
+
+        Index index2 = createTestIndexTwoField();
+        result = instance.iTableExists(index2);
+        assertEquals(false, result);//make sure it doesn't exist yet
+
+        instance.createITable(index2);
+        result = instance.iTableExists(index2);
+        assertEquals(true, result);
     }
 
     /**
@@ -109,14 +125,18 @@ public class ITableDaoTest {
      * Test of deleteITable method, of class ITableDao.
      */
     @Test
-    @Ignore
     public void testDeleteITable() {
         System.out.println("deleteITable");
-        Index index = null;
-        ITableDao instance = null;
+        ITableDao instance = new ITableDao(session);
+        Index index = createTestIndexOneField();
+        boolean result = instance.iTableExists(index);
+        assertEquals(false, result);//not here        
+        instance.createITable(index);
+        result = instance.iTableExists(index);
+        assertEquals(true, result);//now it's here
         instance.deleteITable(index);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        result = instance.iTableExists(index);
+        assertEquals(false, result);//now it's not
     }
 
     /**
