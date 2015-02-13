@@ -1,10 +1,13 @@
 package com.strategicgains.docussandra;
 
-import static org.jboss.netty.handler.codec.http.HttpMethod.*;
+import static io.netty.handler.codec.http.HttpMethod.DELETE;
+import static io.netty.handler.codec.http.HttpMethod.GET;
+import static io.netty.handler.codec.http.HttpMethod.OPTIONS;
+import static io.netty.handler.codec.http.HttpMethod.POST;
+import static io.netty.handler.codec.http.HttpMethod.PUT;
 
 import org.restexpress.RestExpress;
 
-import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.config.Configuration;
 
 public abstract class Routes

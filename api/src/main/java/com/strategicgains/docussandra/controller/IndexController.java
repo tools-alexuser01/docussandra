@@ -1,8 +1,9 @@
 package com.strategicgains.docussandra.controller;
 
+import io.netty.handler.codec.http.HttpMethod;
+
 import java.util.List;
 
-import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
 

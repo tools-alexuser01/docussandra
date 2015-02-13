@@ -1,11 +1,12 @@
 package com.strategicgains.docussandra.controller;
 
-import static com.strategicgains.docussandra.Constants.Routes.*;
+import static com.strategicgains.docussandra.Constants.Routes.DATABASE;
+import static com.strategicgains.docussandra.Constants.Routes.DATABASES;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 
 import java.util.List;
 
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
 

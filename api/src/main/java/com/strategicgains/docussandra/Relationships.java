@@ -15,7 +15,10 @@
 */
 package com.strategicgains.docussandra;
 
-import static com.strategicgains.docussandra.Constants.Routes.*;
+import static com.strategicgains.docussandra.Constants.Routes.DATABASE;
+import static com.strategicgains.docussandra.Constants.Routes.DATABASES;
+import static com.strategicgains.docussandra.Constants.Routes.TABLE;
+import static com.strategicgains.docussandra.Constants.Routes.TABLES;
 import static com.strategicgains.hyperexpress.RelTypes.SELF;
 import static com.strategicgains.hyperexpress.RelTypes.UP;
 
@@ -24,7 +27,6 @@ import java.util.Map;
 import org.restexpress.RestExpress;
 
 import com.strategicgains.docussandra.domain.Database;
-import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.hyperexpress.HyperExpress;
 
