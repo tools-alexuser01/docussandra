@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ITableDao {
 
+    //TODO: create interface for this class
+    
     /**
      * Session for interacting with the Cassandra database.
      */
