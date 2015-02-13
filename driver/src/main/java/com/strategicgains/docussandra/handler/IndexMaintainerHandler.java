@@ -3,6 +3,8 @@ package com.strategicgains.docussandra.handler;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.repoexpress.domain.Identifier;
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     //here, and we might want to move this to a helper package
     //(and change class name) or something
     
-    public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity){
+    public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, Index index){
         Identifier id =  entity.getId();
         //check for any indices that should exist on this table per the index table
         
@@ -29,13 +31,18 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         throw new UnsupportedOperationException("Not done yet");
     }
     
-    public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity){
+    public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, Index index){
         Identifier id =  entity.getId();
         throw new UnsupportedOperationException("Not done yet");
     }
     
-    public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity){
+    public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, Index index){
         Identifier id =  entity.getId();
+        throw new UnsupportedOperationException("Not done yet");
+    }
+    
+    //just a concept right now
+    public static void reindex(Session session, Table t, Index index){
         throw new UnsupportedOperationException("Not done yet");
     }
     
