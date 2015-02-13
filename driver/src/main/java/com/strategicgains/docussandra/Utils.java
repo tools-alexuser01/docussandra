@@ -29,7 +29,7 @@ public class Utils {
         sb.append(tableName);
         sb.append('_');
         sb.append(indexName);
-        return sb.toString();
+        return sb.toString().toLowerCase();
     }
 
     /**
