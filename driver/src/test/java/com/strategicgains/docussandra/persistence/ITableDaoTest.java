@@ -5,6 +5,7 @@ import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.pearson.grid.pearsonlibrary.common.ReflectionUtil;
+import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
@@ -25,21 +26,21 @@ import org.slf4j.LoggerFactory;
  * @author udeyoje
  */
 public class ITableDaoTest {
-
+    
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Session session;
-
+    
     public ITableDaoTest() {
     }
-
+    
     @BeforeClass
     public static void setUpClass() {
     }
-
+    
     @AfterClass
     public static void tearDownClass() {
     }
-
+    
     @Before
     public void setUp() {
         Fixtures f = Fixtures.getInstance();
@@ -49,7 +50,7 @@ public class ITableDaoTest {
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
         clearTestITables();
     }
-
+    
     private void clearTestITables() {
         ITableDao cleanUpInstance = new ITableDao(session);
         try {
@@ -63,7 +64,7 @@ public class ITableDaoTest {
             logger.debug("Not dropping iTable, probably doesn't exist.");
         }
     }
-
+    
     @After
     public void tearDown() {
         clearTestITables();
@@ -96,7 +97,7 @@ public class ITableDaoTest {
         instance.createITable(index);
         result = instance.iTableExists(index);
         assertEquals(true, result);
-
+        
         Index index2 = createTestIndexTwoField();
         result = instance.iTableExists(index2);
         assertEquals(false, result);//make sure it doesn't exist yet
@@ -135,6 +136,24 @@ public class ITableDaoTest {
         result = instance.iTableExists(index);
         assertEquals(true, result);//now it's here
         instance.deleteITable(index);
+        result = instance.iTableExists(index);
+        assertEquals(false, result);//now it's not
+    }
+
+    /**
+     * Test of deleteITable method, of class ITableDao.
+     */
+    @Test
+    public void testDeleteITable_String() {
+        System.out.println("deleteITable");
+        ITableDao instance = new ITableDao(session);
+        Index index = createTestIndexOneField();
+        boolean result = instance.iTableExists(index);
+        assertEquals(false, result);//not here        
+        instance.createITable(index);
+        result = instance.iTableExists(index);
+        assertEquals(true, result);//now it's here
+        instance.deleteITable(Utils.calculateITableName(index));
         result = instance.iTableExists(index);
         assertEquals(false, result);//now it's not
     }
