@@ -86,6 +86,7 @@ extends AbstractCassandraRepository<Index>
 		return (getSession().execute(bs).one().getLong(0) > 0);
 	}
 
+        @Override
 	protected Index readEntityById(Identifier identifier)
 	{
 		if (identifier == null || identifier.isEmpty()) return null;
