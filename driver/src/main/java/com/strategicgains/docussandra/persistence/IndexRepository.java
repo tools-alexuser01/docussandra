@@ -62,6 +62,7 @@ extends AbstractCassandraRepository<Index>
 		super(session, Tables.BY_ID);
 		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Index>());
 		addObserver(new StateChangeEventingObserver<Index>(new IndexEventFactory()));
+                addObserver(new IndexChangeObserver(session));
 		initialize();
 	}
 
