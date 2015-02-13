@@ -107,10 +107,11 @@ extends AbstractCassandraRepository<Index>
 	@Override
 	protected Index updateEntity(Index entity)
 	{
-		BoundStatement bs = new BoundStatement(updateStmt);
-		bindUpdate(bs, entity);
-		getSession().execute(bs);
-		return entity;
+            throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
+//		BoundStatement bs = new BoundStatement(updateStmt);
+//		bindUpdate(bs, entity);
+//		getSession().execute(bs);
+//		return entity;
 	}
 
 	@Override
