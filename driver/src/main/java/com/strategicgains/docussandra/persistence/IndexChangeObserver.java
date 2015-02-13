@@ -43,7 +43,7 @@ public class IndexChangeObserver<T extends Identifiable>
     public void afterCreate(T object) {
         //create the iTable
         Index index = (Index) object;
-        if (dao.iTableExists(index)) {
+        if (!dao.iTableExists(index)) {
             dao.createITable(index);
         }
         //TODO: what if it already exists?
