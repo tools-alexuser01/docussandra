@@ -100,7 +100,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     }
 
     /**
-     * Helper for generating insert CQL statements. This would be private but
+     * Helper for generating insert CQL statements for iTables. This would be private but
      * keeping public for ease of testing.
      *
      * @param index Index to generate the statement for.
@@ -122,5 +122,37 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         }
         //create final CQL statement for adding a row to an iTable(s)
         return String.format(ITABLE_INSERT_CQL, iTableToUpdate, fieldNamesInsertSyntax, fieldValueInsertSyntax);
+    }
+    
+        /**
+     * Helper for generating update CQL statements for iTables. This would be private but
+     * keeping public for ease of testing.
+     *
+     * @param index Index to generate the statement for.
+     * @return CQL statement.
+     */
+    public static String generateCQLStatementForUpdate(Index index) {
+        //determine which iTables need to be updated
+        String iTableToUpdate = Utils.calculateITableName(index);
+        //determine which fields need to write as PKs
+        List<String> fields = index.fields();
+        StringBuilder setValues = new StringBuilder();        
+        for (int i = 0; i < fields.size(); i++) {
+            String field = fields.get(i);
+            if (i != 0) {
+                setValues.append(", ");
+            }
+            setValues.append(field).append(" = ?");
+        }
+        //determine the where clause
+        String whereClause;
+        if(!index.isUnique()){//if the index is not unique,
+            whereClause = "id = ?";//we will use a where statement based on id
+        } else {// if the index is unique, we use the field list
+            whereClause = setValues.toString().replaceAll("\\Q, \\E", " AND ");
+        }
+        
+        //create final CQL statement for updating a row in an iTable(s)        
+        return String.format(ITABLE_UPDATE_CQL, iTableToUpdate, setValues, whereClause);
     }
 }

@@ -209,6 +209,21 @@ public class IndexMaintainerHandlerTest {
     }
 
     /**
+     * Test of generateCQLStatementForUpdate method, of class
+     * IndexMaintainerHandler.
+     */
+    @Test
+    public void testGenerateCQLStatementForUpdate() {
+        System.out.println("generateCQLStatementForUpdate");
+        String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ?, myIndexedField = ?) WHERE id = ?;";
+        String result = IndexMaintainerHandler.generateCQLStatementForUpdate(index1);
+        assertEquals(expResult, result);
+        expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ?, myIndexedField1 = ?, myIndexedField2 = ?) WHERE myIndexedField1 = ? AND myIndexedField2 = ?;";
+        result = IndexMaintainerHandler.generateCQLStatementForUpdate(index2);
+        assertEquals(expResult, result);
+    }
+
+    /**
      * Creates at test index with one field.
      *
      * @return
@@ -219,6 +234,7 @@ public class IndexMaintainerHandlerTest {
         ArrayList<String> fields = new ArrayList<>();
         fields.add("myIndexedField");
         index.fields(fields);
+        index.isUnique(false);
         return index;
     }
 
@@ -234,6 +250,7 @@ public class IndexMaintainerHandlerTest {
         fields.add("myIndexedField1");
         fields.add("myIndexedField2");
         index.fields(fields);
+        index.isUnique(true);
         return index;
     }
 
