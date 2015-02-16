@@ -73,6 +73,9 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     }
 
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity) {
+        
+        //NOTE: This does not yet handle updating iTable entries where the indexed field has changed
+        
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
