@@ -113,18 +113,18 @@ public class IndexMaintainerHandlerTest {
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
-        for (int i = 0; i < 4; i++) {
-            assertTrue(one.isSet(i));// 0 is the blob, 1 and 2 are dates, 3 is the single index field for index1
+        for (int i = 0; i < 5; i++) {
+            assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
         }
         assertEquals("docussandra", one.getKeyspace());
-        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithonefield (object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?);", one.preparedStatement().getQueryString());
+        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithonefield (id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
         BoundStatement two = result.get(1);
         assertNotNull(two);
-        for (int i = 0; i < 5; i++) {
-            assertTrue(two.isSet(i));// 0 is the blob, 1 and 2 are dates, 3 and 4 are the indexed fields for index2
+        for (int i = 0; i < 6; i++) {
+            assertTrue(two.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 4 and 5 are the indexed fields for index2
         }
         assertEquals("docussandra", two.getKeyspace());
-        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
+        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (id, object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
     }
 
     /**
@@ -200,10 +200,10 @@ public class IndexMaintainerHandlerTest {
     @Test
     public void testGenerateCQLStatementForInsert() {
         System.out.println("generateCQLStatementForInsert");
-        String expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithonefield (object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?);";
+        String expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithonefield (id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?);";
         String result = IndexMaintainerHandler.generateCQLStatementForInsert(index1);
         assertEquals(expResult, result);
-        expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?);";
+        expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (id, object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?, ?);";
         result = IndexMaintainerHandler.generateCQLStatementForInsert(index2);
         assertEquals(expResult, result);
     }
