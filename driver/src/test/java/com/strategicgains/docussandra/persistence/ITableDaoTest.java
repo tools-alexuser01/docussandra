@@ -46,7 +46,7 @@ public class ITableDaoTest {
         Fixtures f = Fixtures.getInstance();
         Cluster cluster = Cluster.builder().addContactPoints(f.getCassandraSeeds()).build();
         final Metadata metadata = cluster.getMetadata();
-        session = cluster.connect();
+        session = cluster.connect(f.getCassandraKeyspace());
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
         clearTestITables();
     }
