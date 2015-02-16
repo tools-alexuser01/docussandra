@@ -131,17 +131,26 @@ public class IndexMaintainerHandlerTest {
      * Test of generateDocumentUpdateIndexEntriesStatements method, of class
      * IndexMaintainerHandler.
      */
-    @Ignore
     @Test
     public void testGenerateDocumentUpdateIndexEntriesStatements() {
         System.out.println("generateDocumentUpdateIndexEntriesStatements");
-        Session session = null;
-        Document entity = null;
-        List<BoundStatement> expResult = null;
+        Document entity = new Document();
+        entity.table("myDB", "myTable");
+        entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
         List<BoundStatement> result = IndexMaintainerHandler.generateDocumentUpdateIndexEntriesStatements(session, entity);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.size() == 2);//one for each of our indices
+        BoundStatement one = result.get(0);
+        assertNotNull(one);
+        for (int i = 0; i < 3; i++) {
+            assertTrue(one.isSet(i));// 0 is the blob, 1 is the date, 2 is the UUID
+        }
+        assertEquals("docussandra", one.getKeyspace());
+        BoundStatement two = result.get(1);
+        assertNotNull(two);
+        for (int i = 0; i < 4; i++) {
+            assertTrue(two.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
+        }
+        assertEquals("docussandra", two.getKeyspace());
     }
 
     /**
@@ -215,10 +224,10 @@ public class IndexMaintainerHandlerTest {
     @Test
     public void testGenerateCQLStatementForUpdate() {
         System.out.println("generateCQLStatementForUpdate");
-        String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ?) WHERE id = ?;";
+        String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE id = ?;";
         String result = IndexMaintainerHandler.generateCQLStatementForUpdate(index1);
         assertEquals(expResult, result);
-        expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ?) WHERE myIndexedField1 = ? AND myIndexedField2 = ?;";
+        expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE myIndexedField1 = ? AND myIndexedField2 = ?;";
         result = IndexMaintainerHandler.generateCQLStatementForUpdate(index2);
         assertEquals(expResult, result);
     }

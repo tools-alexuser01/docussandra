@@ -31,7 +31,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
 
     private static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
-    private static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ?) WHERE %s;";
+    private static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ? WHERE %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
 
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity) {
@@ -71,8 +71,40 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     }
 
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity) {
-        Identifier id = entity.getId();
-        throw new UnsupportedOperationException("Not done yet");
+        //check for any indices that should exist on this table per the index table
+        List<Index> indices = getIndexForDocument(session, entity);
+        ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
+        //for each index
+        for (Index index : indices) {
+            //determine which fields need to write as PKs
+            List<String> fields = index.fields();
+            String finalCQL = generateCQLStatementForUpdate(index);
+            PreparedStatement ps = session.prepare(finalCQL);
+            BoundStatement bs = new BoundStatement(ps);
+
+            //set the blob
+            BSONObject bson = (BSONObject) JSON.parse(entity.object());
+            bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
+            //set the date
+            bs.setDate(1, entity.getUpdatedAt());
+
+            if (!index.isUnique()) { //if the index is not unique, use a where clause based on UUID
+                bs.setUUID(2, entity.getUuid());
+            } else { //if it is unique, we will use a where clause based on index
+                //pull the index fields out of the document for binding
+                String documentJSON = entity.object();
+                DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+                for (int i = 0; i < fields.size(); i++) {
+                    String field = fields.get(i);
+                    String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+                    bs.setString(i + 2, fieldValue);//offset from the first four non-dynamic fields
+                }
+            }
+            //add row to the iTable(s)
+            statementList.add(bs);
+        }
+        //return a list of commands to accomplish all of this
+        return statementList;
     }
 
     public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity) {
