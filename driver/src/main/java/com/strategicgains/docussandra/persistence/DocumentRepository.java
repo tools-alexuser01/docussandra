@@ -19,6 +19,7 @@ import com.strategicgains.docussandra.event.DocumentCreatedEvent;
 import com.strategicgains.docussandra.event.DocumentDeletedEvent;
 import com.strategicgains.docussandra.event.DocumentUpdatedEvent;
 import com.strategicgains.docussandra.event.EventFactory;
+import com.strategicgains.docussandra.handler.IndexMaintainerHelper;
 import com.strategicgains.repoexpress.AbstractObservableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
@@ -87,6 +88,10 @@ extends AbstractObservableRepository<Document>
 		BoundStatement bs = new BoundStatement(createStmt);
 		bindCreate(bs, entity);
 		session().execute(bs);
+                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity);
+                for(BoundStatement boundIndexStatement : indexStatements){
+                    session().execute(boundIndexStatement);//TODO: run in batch
+                }
 		return entity;
 	}
 
@@ -136,6 +141,10 @@ extends AbstractObservableRepository<Document>
 		BoundStatement bs = new BoundStatement(updateStmt);
 		bindUpdate(bs, entity);
 		session().execute(bs);
+                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity);
+                for(BoundStatement boundIndexStatement : indexStatements){
+                    session().execute(boundIndexStatement);//TODO: run in batch
+                }
 		return entity;
 	}
 
@@ -157,6 +166,10 @@ extends AbstractObservableRepository<Document>
 			BoundStatement bs = new BoundStatement(deleteStmt);
 			bindIdentifier(bs, id);
 			session().execute(bs);
+                        List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity);
+                        for(BoundStatement boundIndexStatement : indexStatements){
+                            session().execute(boundIndexStatement);//TODO: run in batch
+                        }
 		}
 		catch (InvalidObjectIdException e)
 		{
