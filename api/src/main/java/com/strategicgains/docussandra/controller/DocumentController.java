@@ -1,6 +1,7 @@
 package com.strategicgains.docussandra.controller;
 
-import org.jboss.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpMethod;
+
 import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
@@ -12,7 +13,6 @@ import com.strategicgains.docussandra.service.DocumentService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
-import com.strategicgains.repoexpress.adapter.Identifiers;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.util.UuidConverter;
 
