@@ -48,7 +48,7 @@ public class Index
      * case, instead of storing the entire BSON payload, we store only a
      * subset--those listed in includeOnly.
      */
-    private List<String> includeOnly;
+    private List<String> includeOnly = new ArrayList<>(0);
 
     public Index() {
     }
