@@ -38,7 +38,6 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
         for (Index index : indices) {
-
             //determine which fields need to write as PKs
             List<String> fields = index.fields();
             String finalCQL = generateCQLStatementForInsert(index);
@@ -48,6 +47,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
             //set the blob
             BSONObject bson = (BSONObject) JSON.parse(entity.object());
             bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
+            //set the dates
             bs.setDate(1, entity.getCreatedAt());
             bs.setDate(2, entity.getUpdatedAt());
 
