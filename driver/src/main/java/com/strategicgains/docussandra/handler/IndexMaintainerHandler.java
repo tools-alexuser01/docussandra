@@ -29,9 +29,11 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     //here, and we might want to move this to a helper package
     //(and change class name) or something
 
-    private static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (object, created_at, updated_at, %s) VALUES (?, ?, ?, %s);";
+    private static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (object, created_at, updated_at, %s) VALUES (?, ?, ?, %s);";    
     //TODO: --------------------remove hard coding of keyspace name--^^^----
-
+    private static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ?, %s) WHERE %s;";
+    //TODO: ----------------remove hard coding of keyspace name--^^^--------
+    
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity) {
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
