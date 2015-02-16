@@ -20,17 +20,16 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
-import com.pearson.grid.pearsonlibrary.common.ReflectionUtil;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.persistence.IndexChangeObserver;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,20 +63,22 @@ public class IndexMaintainerHandlerTest {
     }
 
     @Before
-    public void setUp() {        
+    public void setUp() {
         Fixtures f = Fixtures.getInstance();
         Cluster cluster = Cluster.builder().addContactPoints(f.getCassandraSeeds()).build();
         final Metadata metadata = cluster.getMetadata();
         session = cluster.connect(f.getCassandraKeyspace());
+        IndexChangeObserver ico = new IndexChangeObserver(session);
         indexRepo = new IndexRepository(session);
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
         clearTestData();// clear anything that might be there already
         //reinsert with some fresh data
         index1 = createTestIndexOneField();
         index2 = createTestIndexTwoField();
-
         indexRepo.doCreate(index1);
+        ico.afterCreate(index1);//not sure why i have to call this explicitly
         indexRepo.doCreate(index2);
+        ico.afterCreate(index2);
 
     }
 
@@ -102,17 +103,28 @@ public class IndexMaintainerHandlerTest {
      * Test of generateDocumentCreateIndexEntriesStatements method, of class
      * IndexMaintainerHandler.
      */
-    @Ignore
     @Test
     public void testGenerateDocumentCreateIndexEntriesStatements() {
         System.out.println("generateDocumentCreateIndexEntriesStatements");
-        Session session = null;
-        Document entity = null;
-        List<BoundStatement> expResult = null;
+        Document entity = new Document();
+        entity.table("myDB", "myTable");
+        entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
         List<BoundStatement> result = IndexMaintainerHandler.generateDocumentCreateIndexEntriesStatements(session, entity);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.size() == 2);//one for each of our indices
+        BoundStatement one = result.get(0);
+        assertNotNull(one);
+        for (int i = 0; i < 4; i++) {
+            assertTrue(one.isSet(i));// 0 is the blob, 1 and 2 are dates, 3 is the single index field for index1
+        }
+        assertEquals("docussandra", one.getKeyspace());
+        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithonefield (object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?);", one.preparedStatement().getQueryString());
+        BoundStatement two = result.get(1);
+        assertNotNull(two);
+        for (int i = 0; i < 5; i++) {
+            assertTrue(two.isSet(i));// 0 is the blob, 1 and 2 are dates, 3 and 4 are the indexed fields for index2
+        }
+        assertEquals("docussandra", two.getKeyspace());
+        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
     }
 
     /**
@@ -140,7 +152,6 @@ public class IndexMaintainerHandlerTest {
     @Test
     public void testGenerateDocumentDeleteIndexEntriesStatements() {
         System.out.println("generateDocumentDeleteIndexEntriesStatements");
-        Session session = null;
         Document entity = null;
         List<BoundStatement> expResult = null;
         List<BoundStatement> result = IndexMaintainerHandler.generateDocumentDeleteIndexEntriesStatements(session, entity);
@@ -179,8 +190,7 @@ public class IndexMaintainerHandlerTest {
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 2);
-        //TODO: investigate: is this a bug? the result isn't returning any fields
-        //assertEquals(exp, result);
+        assertEquals(exp, result);
     }
 
     /**
