@@ -48,7 +48,7 @@ public class Index
      * case, instead of storing the entire BSON payload, we store only a
      * subset--those listed in includeOnly.
      */
-    private List<String> includeOnly = new ArrayList<>(0);
+    private List<String> includeOnly;
 
     public Index() {
     }
@@ -109,7 +109,9 @@ public class Index
     }
 
     public void includeOnly(List<String> props) {
-        this.includeOnly = new ArrayList<String>(props);
+        if(props != null && !props.isEmpty()){
+            this.includeOnly = new ArrayList<String>(props);
+        }
     }
 
     public List<String> includeOnly() {
