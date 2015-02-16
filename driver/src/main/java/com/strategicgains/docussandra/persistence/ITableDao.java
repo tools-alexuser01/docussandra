@@ -41,7 +41,7 @@ public class ITableDao {
     /**
      * CQL statement for dynamically creating an iTable.
      */
-    private static final String TABLE_CREATE_CQL = "CREATE TABLE docussandra.%s (object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY (%s));";
+    private static final String TABLE_CREATE_CQL = "CREATE TABLE docussandra.%s (id uuid, object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY (%s));";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
 
     /**
@@ -99,6 +99,9 @@ public class ITableDao {
         StringBuilder fieldCreateStatement = new StringBuilder();
         StringUtil.combineList(index.fields(), " varchar, ");
         StringBuilder primaryKeyCreateStatement = new StringBuilder();
+        if(!index.isUnique()){
+            primaryKeyCreateStatement.append("(id), ");//if the index is not unique, set the pk to include the id 
+        }
         StringUtil.combineList(index.fields(), ", ");
         boolean first = true;
         for (String field : index.fields()) {
