@@ -29,7 +29,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     //here, and we might want to move this to a helper package
     //(and change class name) or something
 
-    private static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (object, created_at, updated_at, %s) VALUES (?, ?, ?, %s);";    
+    private static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";    
     //TODO: --------------------remove hard coding of keyspace name--^^^----
     private static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ?, %s) WHERE %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
@@ -46,12 +46,14 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
             PreparedStatement ps = session.prepare(finalCQL);
             BoundStatement bs = new BoundStatement(ps);
 
+            //set the id
+            bs.setUUID(0, entity.getUuid());
             //set the blob
             BSONObject bson = (BSONObject) JSON.parse(entity.object());
-            bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
+            bs.setBytes(1, ByteBuffer.wrap(BSON.encode(bson)));
             //set the dates
-            bs.setDate(1, entity.getCreatedAt());
-            bs.setDate(2, entity.getUpdatedAt());
+            bs.setDate(2, entity.getCreatedAt());
+            bs.setDate(3, entity.getUpdatedAt());
 
             //pull the index fields out of the document for binding
             String documentJSON = entity.object();
@@ -59,7 +61,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
             for (int i = 0; i < fields.size(); i++) {
                 String field = fields.get(i);
                 String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-                bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
+                bs.setString(i + 4, fieldValue);//offset from the first four non-dynamic fields
             }
             //add row to the iTable(s)
             statementList.add(bs);
