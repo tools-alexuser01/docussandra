@@ -38,21 +38,10 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
         for (Index index : indices) {
-            //determine which iTables need to be written to
-            String iTableToUpdate = Utils.calculateITableName(index);
+
             //determine which fields need to write as PKs
             List<String> fields = index.fields();
-            String fieldNamesInsertSyntax = StringUtil.combineList(fields);
-            //calculate the number of '?'s we need to append on the values clause
-            StringBuilder fieldValueInsertSyntax = new StringBuilder();
-            for (int i = 0; i < fields.size(); i++) {
-                if (i != 0) {
-                    fieldValueInsertSyntax.append(", ");
-                }
-                fieldValueInsertSyntax.append("?");
-            }
-            //create final CQL statement for adding a row to an iTable(s)
-            String finalCQL = String.format(ITABLE_INSERT_CQL, iTableToUpdate, fieldNamesInsertSyntax, fieldValueInsertSyntax);
+            String finalCQL = generateCQLStatementForInsert(index);
             PreparedStatement ps = session.prepare(finalCQL);
             BoundStatement bs = new BoundStatement(ps);
 
@@ -60,7 +49,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
             BSONObject bson = (BSONObject) JSON.parse(entity.object());
             bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
             bs.setDate(1, entity.getCreatedAt());
-            bs.setDate(2, entity.getUpdatedAt());            
+            bs.setDate(2, entity.getUpdatedAt());
 
             //pull the index fields out of the document for binding
             String documentJSON = entity.object();
@@ -106,4 +95,28 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         return indexRepo.readAll(entity.databaseName(), entity.tableName());
     }
 
+    /**
+     * Helper for generating insert CQL statements. This would be private but
+     * keeping public for ease of testing.
+     *
+     * @param index Index to generate the statement for.
+     * @return CQL statement.
+     */
+    public static String generateCQLStatementForInsert(Index index) {
+        //determine which iTables need to be written to
+        String iTableToUpdate = Utils.calculateITableName(index);
+        //determine which fields need to write as PKs
+        List<String> fields = index.fields();
+        String fieldNamesInsertSyntax = StringUtil.combineList(fields);
+        //calculate the number of '?'s we need to append on the values clause
+        StringBuilder fieldValueInsertSyntax = new StringBuilder();
+        for (int i = 0; i < fields.size(); i++) {
+            if (i != 0) {
+                fieldValueInsertSyntax.append(", ");
+            }
+            fieldValueInsertSyntax.append("?");
+        }
+        //create final CQL statement for adding a row to an iTable(s)
+        return String.format(ITABLE_INSERT_CQL, iTableToUpdate, fieldNamesInsertSyntax, fieldValueInsertSyntax);
+    }
 }
