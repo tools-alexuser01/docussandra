@@ -145,28 +145,40 @@ public class IndexMaintainerHandlerTest {
             assertTrue(one.isSet(i));// 0 is the blob, 1 is the date, 2 is the UUID
         }
         assertEquals("docussandra", one.getKeyspace());
+        assertEquals("UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE id = ?;", one.preparedStatement().getQueryString());
         BoundStatement two = result.get(1);
         assertNotNull(two);
         for (int i = 0; i < 4; i++) {
             assertTrue(two.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
         }
         assertEquals("docussandra", two.getKeyspace());
+        assertEquals("UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE myIndexedField1 = ? AND myIndexedField2 = ?;", two.preparedStatement().getQueryString());
     }
 
     /**
      * Test of generateDocumentDeleteIndexEntriesStatements method, of class
      * IndexMaintainerHandler.
      */
-    @Ignore
     @Test
     public void testGenerateDocumentDeleteIndexEntriesStatements() {
         System.out.println("generateDocumentDeleteIndexEntriesStatements");
-        Document entity = null;
-        List<BoundStatement> expResult = null;
+        Document entity = new Document();
+        entity.table("myDB", "myTable");
+        entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
         List<BoundStatement> result = IndexMaintainerHandler.generateDocumentDeleteIndexEntriesStatements(session, entity);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertTrue(result.size() == 2);//one for each of our indices
+        BoundStatement one = result.get(0);
+        assertNotNull(one);
+        assertTrue(one.isSet(0));//the UUID
+        assertEquals("docussandra", one.getKeyspace());
+        assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithonefield WHERE id = ?;", one.preparedStatement().getQueryString());
+        BoundStatement two = result.get(1);
+        assertNotNull(two);
+        for (int i = 0; i < 1; i++) {
+            assertTrue(two.isSet(i));// 0 and 1 are indexed fields 
+        }
+        assertEquals("docussandra", two.getKeyspace());
+        assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithtwofields WHERE myIndexedField1 = ? AND myIndexedField2 = ?;", two.preparedStatement().getQueryString());
     }
 
     /**
@@ -218,17 +230,17 @@ public class IndexMaintainerHandlerTest {
     }
 
     /**
-     * Test of generateCQLStatementForUpdate method, of class
+     * Test of generateCQLStatementForWhereClauses method, of class
      * IndexMaintainerHandler.
      */
     @Test
     public void testGenerateCQLStatementForUpdate() {
         System.out.println("generateCQLStatementForUpdate");
         String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE id = ?;";
-        String result = IndexMaintainerHandler.generateCQLStatementForUpdate(index1);
+        String result = IndexMaintainerHandler.generateCQLStatementForWhereClauses(IndexMaintainerHandler.ITABLE_UPDATE_CQL, index1);
         assertEquals(expResult, result);
         expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE myIndexedField1 = ? AND myIndexedField2 = ?;";
-        result = IndexMaintainerHandler.generateCQLStatementForUpdate(index2);
+        result = IndexMaintainerHandler.generateCQLStatementForWhereClauses(IndexMaintainerHandler.ITABLE_UPDATE_CQL, index2);
         assertEquals(expResult, result);
     }
 
