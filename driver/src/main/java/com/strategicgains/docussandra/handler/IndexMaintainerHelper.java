@@ -24,10 +24,7 @@ import org.bson.BSONObject;
  *
  * @author udeyoje
  */
-public class IndexMaintainerHandler { //extends AbstractObservableRepository<Document> { //implements EventHandler {
-    //note: we might not actually want to implement EventHandler
-    //here, and we might want to move this to a helper package
-    //(and change class name) or something
+public class IndexMaintainerHelper { 
 
     public static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
