@@ -240,4 +240,10 @@ public class Index
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "Index{" + "table=" + table + ", name=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + '}';
+    }
+
+    
 }
