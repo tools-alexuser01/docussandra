@@ -13,6 +13,7 @@ import com.strategicgains.syntaxe.ValidationException;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;
+import java.util.Objects;
 
 public class Index
 extends AbstractTimestampedIdentifiable
@@ -231,4 +232,47 @@ implements Validatable
 			throw new ValidationException(errors);
 		}
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 83 * hash + Objects.hashCode(this.table);
+        hash = 83 * hash + Objects.hashCode(this.name);
+        hash = 83 * hash + (this.isUnique ? 1 : 0);
+        hash = 83 * hash + (int) (this.bucketSize ^ (this.bucketSize >>> 32));
+        hash = 83 * hash + Objects.hashCode(this.fields);
+        hash = 83 * hash + Objects.hashCode(this.includeOnly);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Index other = (Index) obj;
+        if (!Objects.equals(this.table, other.table)) {
+            return false;
+        }
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (this.isUnique != other.isUnique) {
+            return false;
+        }
+        if (this.bucketSize != other.bucketSize) {
+            return false;
+        }
+        if (!Objects.equals(this.fields, other.fields)) {
+            return false;
+        }
+        if (!Objects.equals(this.includeOnly, other.includeOnly)) {
+            return false;
+        }
+        return true;
+    }
+    
 }
