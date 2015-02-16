@@ -116,10 +116,10 @@ public class ITableDaoTest {
         ITableDao instance = new ITableDao(session);
         String response = (String) ReflectionUtil.callMethodOnObject("generateTableCreationSyntax", instance, createTestIndexOneField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (object blob, created_at timestamp, updated_at timestamp, myIndexedField varchar, PRIMARY KEY (myIndexedField));", response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField varchar, PRIMARY KEY ((id), myIndexedField));", response);
         response = (String) ReflectionUtil.callMethodOnObject("generateTableCreationSyntax", instance, createTestIndexTwoField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (object blob, created_at timestamp, updated_at timestamp, myIndexedField1 varchar, myIndexedField2 varchar, PRIMARY KEY (myIndexedField1, myIndexedField2));", response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField1 varchar, myIndexedField2 varchar, PRIMARY KEY (myIndexedField1, myIndexedField2));", response);
     }
 
     /**
@@ -169,6 +169,7 @@ public class ITableDaoTest {
         ArrayList<String> fields = new ArrayList<>();
         fields.add("myIndexedField");
         index.fields(fields);
+        index.isUnique(false);
         return index;
     }
 
@@ -184,6 +185,7 @@ public class ITableDaoTest {
         fields.add("myIndexedField1");
         fields.add("myIndexedField2");
         index.fields(fields);
+        index.isUnique(true);
         return index;
     }
 }
