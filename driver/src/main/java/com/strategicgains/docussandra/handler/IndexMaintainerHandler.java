@@ -29,9 +29,11 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     //here, and we might want to move this to a helper package
     //(and change class name) or something
 
-    private static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";
+    public static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
-    private static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ? WHERE %s;";
+    public static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ? WHERE %s;";
+    //TODO: ----------------remove hard coding of keyspace name--^^^--------
+    public static final String ITABLE_DELETE_CQL = "DELETE FROM docussandra.%s WHERE %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
 
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity) {
@@ -76,9 +78,9 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
         for (Index index : indices) {
-            //determine which fields need to write as PKs
+            //determine which fields need to use as PKs
             List<String> fields = index.fields();
-            String finalCQL = generateCQLStatementForUpdate(index);
+            String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
             PreparedStatement ps = session.prepare(finalCQL);
             BoundStatement bs = new BoundStatement(ps);
 
@@ -97,7 +99,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
                 for (int i = 0; i < fields.size(); i++) {
                     String field = fields.get(i);
                     String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-                    bs.setString(i + 2, fieldValue);//offset from the first four non-dynamic fields
+                    bs.setString(i + 2, fieldValue);//offset from the first two non-dynamic fields
                 }
             }
             //add row to the iTable(s)
@@ -108,8 +110,31 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     }
 
     public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity) {
-        Identifier id = entity.getId();
-        throw new UnsupportedOperationException("Not done yet");
+        //check for any indices that should exist on this table per the index table
+        List<Index> indices = getIndexForDocument(session, entity);
+        ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
+        //for each index
+        for (Index index : indices) {
+            //determine which fields need to write as PKs
+            List<String> fields = index.fields();
+            String finalCQL = generateCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
+            PreparedStatement ps = session.prepare(finalCQL);
+            BoundStatement bs = new BoundStatement(ps);
+            if (!index.isUnique()) { //if the index is not unique, use a where clause based on UUID
+                bs.setUUID(0, entity.getUuid());
+            } else { //if it is unique, we will use a where clause based on index
+                //pull the index fields out of the document for binding
+                String documentJSON = entity.object();
+                DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+                for (int i = 0; i < fields.size(); i++) {
+                    String field = fields.get(i);
+                    String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+                    bs.setString(i, fieldValue);
+                }
+            }
+            statementList.add(bs);
+        }
+        return statementList;
     }
 
     //just a concept right now
@@ -160,10 +185,11 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
      * Helper for generating update CQL statements for iTables. This would be
      * private but keeping public for ease of testing.
      *
+     * @param CQL statement that is not yet formatted.
      * @param index Index to generate the statement for.
      * @return CQL statement.
      */
-    public static String generateCQLStatementForUpdate(Index index) {
+    public static String generateCQLStatementForWhereClauses(String CQL, Index index) {
         //determine which iTables need to be updated
         String iTableToUpdate = Utils.calculateITableName(index);
         //determine which fields need to write as PKs
@@ -184,6 +210,7 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
             whereClause = setValues.toString();
         }
         //create final CQL statement for updating a row in an iTable(s)        
-        return String.format(ITABLE_UPDATE_CQL, iTableToUpdate, whereClause);
+        return String.format(CQL, iTableToUpdate, whereClause);
     }
+
 }
