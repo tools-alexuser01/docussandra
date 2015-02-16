@@ -194,6 +194,21 @@ public class IndexMaintainerHandlerTest {
     }
 
     /**
+     * Test of generateCQLStatementForInsert method, of class
+     * IndexMaintainerHandler.
+     */
+    @Test
+    public void testGenerateCQLStatementForInsert() {
+        System.out.println("generateCQLStatementForInsert");
+        String expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithonefield (object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?);";
+        String result = IndexMaintainerHandler.generateCQLStatementForInsert(index1);
+        assertEquals(expResult, result);
+        expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?);";
+        result = IndexMaintainerHandler.generateCQLStatementForInsert(index2);
+        assertEquals(expResult, result);
+    }
+
+    /**
      * Creates at test index with one field.
      *
      * @return
