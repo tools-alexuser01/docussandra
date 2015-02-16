@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class IndexMaintainerHandlerTest {
+public class IndexMaintainerHelperTest {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Session session;
@@ -51,7 +51,7 @@ public class IndexMaintainerHandlerTest {
     private Index index1 = createTestIndexOneField();
     private Index index2 = createTestIndexTwoField();
 
-    public IndexMaintainerHandlerTest() {
+    public IndexMaintainerHelperTest() {
     }
 
     @BeforeClass
@@ -101,7 +101,7 @@ public class IndexMaintainerHandlerTest {
 
     /**
      * Test of generateDocumentCreateIndexEntriesStatements method, of class
-     * IndexMaintainerHandler.
+ IndexMaintainerHelper.
      */
     @Test
     public void testGenerateDocumentCreateIndexEntriesStatements() {
@@ -109,7 +109,7 @@ public class IndexMaintainerHandlerTest {
         Document entity = new Document();
         entity.table("myDB", "myTable");
         entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
-        List<BoundStatement> result = IndexMaintainerHandler.generateDocumentCreateIndexEntriesStatements(session, entity);
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity);
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
@@ -129,7 +129,7 @@ public class IndexMaintainerHandlerTest {
 
     /**
      * Test of generateDocumentUpdateIndexEntriesStatements method, of class
-     * IndexMaintainerHandler.
+ IndexMaintainerHelper.
      */
     @Test
     public void testGenerateDocumentUpdateIndexEntriesStatements() {
@@ -137,7 +137,7 @@ public class IndexMaintainerHandlerTest {
         Document entity = new Document();
         entity.table("myDB", "myTable");
         entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
-        List<BoundStatement> result = IndexMaintainerHandler.generateDocumentUpdateIndexEntriesStatements(session, entity);
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity);
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
@@ -157,7 +157,7 @@ public class IndexMaintainerHandlerTest {
 
     /**
      * Test of generateDocumentDeleteIndexEntriesStatements method, of class
-     * IndexMaintainerHandler.
+ IndexMaintainerHelper.
      */
     @Test
     public void testGenerateDocumentDeleteIndexEntriesStatements() {
@@ -165,7 +165,7 @@ public class IndexMaintainerHandlerTest {
         Document entity = new Document();
         entity.table("myDB", "myTable");
         entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
-        List<BoundStatement> result = IndexMaintainerHandler.generateDocumentDeleteIndexEntriesStatements(session, entity);
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity);
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
@@ -182,7 +182,7 @@ public class IndexMaintainerHandlerTest {
     }
 
     /**
-     * Test of reindex method, of class IndexMaintainerHandler.
+     * Test of reindex method, of class IndexMaintainerHelper.
      */
     @Ignore
     @Test
@@ -191,13 +191,13 @@ public class IndexMaintainerHandlerTest {
         Session session = null;
         Table t = null;
         Index index = null;
-        IndexMaintainerHandler.reindex(session, t, index);
+        IndexMaintainerHelper.reindex(session, t, index);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
     /**
-     * Test of getIndexForDocument method, of class IndexMaintainerHandler.
+     * Test of getIndexForDocument method, of class IndexMaintainerHelper.
      */
     @Test
     public void testGetIndexForDocument() {
@@ -207,7 +207,7 @@ public class IndexMaintainerHandlerTest {
         ArrayList<Index> exp = new ArrayList<>(2);
         exp.add(index1);
         exp.add(index2);
-        List<Index> result = IndexMaintainerHandler.getIndexForDocument(session, entity);
+        List<Index> result = IndexMaintainerHelper.getIndexForDocument(session, entity);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 2);
@@ -216,31 +216,31 @@ public class IndexMaintainerHandlerTest {
 
     /**
      * Test of generateCQLStatementForInsert method, of class
-     * IndexMaintainerHandler.
+ IndexMaintainerHelper.
      */
     @Test
     public void testGenerateCQLStatementForInsert() {
         System.out.println("generateCQLStatementForInsert");
         String expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithonefield (id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?);";
-        String result = IndexMaintainerHandler.generateCQLStatementForInsert(index1);
+        String result = IndexMaintainerHelper.generateCQLStatementForInsert(index1);
         assertEquals(expResult, result);
         expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (id, object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?, ?);";
-        result = IndexMaintainerHandler.generateCQLStatementForInsert(index2);
+        result = IndexMaintainerHelper.generateCQLStatementForInsert(index2);
         assertEquals(expResult, result);
     }
 
     /**
      * Test of generateCQLStatementForWhereClauses method, of class
-     * IndexMaintainerHandler.
+ IndexMaintainerHelper.
      */
     @Test
     public void testGenerateCQLStatementForUpdate() {
         System.out.println("generateCQLStatementForUpdate");
         String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE id = ?;";
-        String result = IndexMaintainerHandler.generateCQLStatementForWhereClauses(IndexMaintainerHandler.ITABLE_UPDATE_CQL, index1);
+        String result = IndexMaintainerHelper.generateCQLStatementForWhereClauses(IndexMaintainerHelper.ITABLE_UPDATE_CQL, index1);
         assertEquals(expResult, result);
         expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE myIndexedField1 = ? AND myIndexedField2 = ?;";
-        result = IndexMaintainerHandler.generateCQLStatementForWhereClauses(IndexMaintainerHandler.ITABLE_UPDATE_CQL, index2);
+        result = IndexMaintainerHelper.generateCQLStatementForWhereClauses(IndexMaintainerHelper.ITABLE_UPDATE_CQL, index2);
         assertEquals(expResult, result);
     }
 
