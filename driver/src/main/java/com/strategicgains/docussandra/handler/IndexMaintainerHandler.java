@@ -29,11 +29,11 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     //here, and we might want to move this to a helper package
     //(and change class name) or something
 
-    private static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";    
+    private static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
-    private static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ?, %s) WHERE %s;";
+    private static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ?) WHERE %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
-    
+
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity) {
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
@@ -100,8 +100,8 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
     }
 
     /**
-     * Helper for generating insert CQL statements for iTables. This would be private but
-     * keeping public for ease of testing.
+     * Helper for generating insert CQL statements for iTables. This would be
+     * private but keeping public for ease of testing.
      *
      * @param index Index to generate the statement for.
      * @return CQL statement.
@@ -123,10 +123,10 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         //create final CQL statement for adding a row to an iTable(s)
         return String.format(ITABLE_INSERT_CQL, iTableToUpdate, fieldNamesInsertSyntax, fieldValueInsertSyntax);
     }
-    
-        /**
-     * Helper for generating update CQL statements for iTables. This would be private but
-     * keeping public for ease of testing.
+
+    /**
+     * Helper for generating update CQL statements for iTables. This would be
+     * private but keeping public for ease of testing.
      *
      * @param index Index to generate the statement for.
      * @return CQL statement.
@@ -136,23 +136,22 @@ public class IndexMaintainerHandler { //extends AbstractObservableRepository<Doc
         String iTableToUpdate = Utils.calculateITableName(index);
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
-        StringBuilder setValues = new StringBuilder();        
-        for (int i = 0; i < fields.size(); i++) {
-            String field = fields.get(i);
-            if (i != 0) {
-                setValues.append(", ");
-            }
-            setValues.append(field).append(" = ?");
-        }
         //determine the where clause
         String whereClause;
-        if(!index.isUnique()){//if the index is not unique,
+        if (!index.isUnique()) {//if the index is not unique,
             whereClause = "id = ?";//we will use a where statement based on id
         } else {// if the index is unique, we use the field list
-            whereClause = setValues.toString().replaceAll("\\Q, \\E", " AND ");
+            StringBuilder setValues = new StringBuilder();
+            for (int i = 0; i < fields.size(); i++) {
+                String field = fields.get(i);
+                if (i != 0) {
+                    setValues.append(" AND ");
+                }
+                setValues.append(field).append(" = ?");
+            }
+            whereClause = setValues.toString();
         }
-        
         //create final CQL statement for updating a row in an iTable(s)        
-        return String.format(ITABLE_UPDATE_CQL, iTableToUpdate, setValues, whereClause);
+        return String.format(ITABLE_UPDATE_CQL, iTableToUpdate, whereClause);
     }
 }

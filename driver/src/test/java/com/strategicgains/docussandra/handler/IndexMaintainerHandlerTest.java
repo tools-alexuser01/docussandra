@@ -215,10 +215,10 @@ public class IndexMaintainerHandlerTest {
     @Test
     public void testGenerateCQLStatementForUpdate() {
         System.out.println("generateCQLStatementForUpdate");
-        String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ?, myIndexedField = ?) WHERE id = ?;";
+        String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ?) WHERE id = ?;";
         String result = IndexMaintainerHandler.generateCQLStatementForUpdate(index1);
         assertEquals(expResult, result);
-        expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ?, myIndexedField1 = ?, myIndexedField2 = ?) WHERE myIndexedField1 = ? AND myIndexedField2 = ?;";
+        expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ?) WHERE myIndexedField1 = ? AND myIndexedField2 = ?;";
         result = IndexMaintainerHandler.generateCQLStatementForUpdate(index2);
         assertEquals(expResult, result);
     }
