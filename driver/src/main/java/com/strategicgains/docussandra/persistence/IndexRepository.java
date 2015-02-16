@@ -186,7 +186,7 @@ extends AbstractCassandraRepository<Index>
 		i.isUnique(row.getBool(Columns.IS_UNIQUE));
 		i.bucketSize(row.getLong(Columns.BUCKET_SIZE));
 		i.fields(row.getList(Columns.FIELDS, String.class));
-		i.fields(row.getList(Columns.ONLY, String.class));
+		i.includeOnly(row.getList(Columns.ONLY, String.class));
 		i.setCreatedAt(row.getDate(Columns.CREATED_AT));
 		i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return i;
