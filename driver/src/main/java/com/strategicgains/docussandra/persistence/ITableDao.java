@@ -4,7 +4,6 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
-import com.pearson.grid.pearsonlibrary.string.StringUtil;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Index;
 import java.util.Iterator;
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory;
 public class ITableDao {
 
     //TODO: create interface for this class
-    
     /**
      * Session for interacting with the Cassandra database.
      */
@@ -61,7 +59,9 @@ public class ITableDao {
 
     /**
      * Checks to see if an iTable exists for the specified index.
-     * @param index Index that you want to check if it has a corresponding iTable.
+     *
+     * @param index Index that you want to check if it has a corresponding
+     * iTable.
      * @return True if the iTable exists for the index, false otherwise.
      */
     public boolean iTableExists(Index index) {
@@ -80,6 +80,7 @@ public class ITableDao {
 
     /**
      * Creates an iTable for the specified index.
+     *
      * @param index Index that needs an iTable created for it.
      */
     public void createITable(Index index) {
@@ -90,19 +91,21 @@ public class ITableDao {
     }
 
     /**
-     * Dynamically generates a table creation command for an iTable based on an index.
+     * Dynamically generates a table creation command for an iTable based on an
+     * index. This would be private, the only reason it is public is for
+     * testing.
+     *
      * @param index Index that needs an iTable generated for it.
-     * @return A CQL table creation command that will create the specified iTable.
+     * @return A CQL table creation command that will create the specified
+     * iTable.
      */
-    private String generateTableCreationSyntax(Index index) {
+    public String generateTableCreationSyntax(Index index) {
         String newTableName = Utils.calculateITableName(index);
         StringBuilder fieldCreateStatement = new StringBuilder();
-        StringUtil.combineList(index.fields(), " varchar, ");
         StringBuilder primaryKeyCreateStatement = new StringBuilder();
-        if(!index.isUnique()){
+        if (!index.isUnique()) {
             primaryKeyCreateStatement.append("(id), ");//if the index is not unique, set the pk to include the id 
         }
-        StringUtil.combineList(index.fields(), ", ");
         boolean first = true;
         for (String field : index.fields()) {
             if (!first) {
@@ -119,18 +122,19 @@ public class ITableDao {
         return finalStatement;
     }
 
-    
     /**
      * Deletes an iTable
+     *
      * @param index index whose iTable should be deleted
      */
-    public void deleteITable(Index index) {        
+    public void deleteITable(Index index) {
         String tableToDelete = Utils.calculateITableName(index);
         deleteITable(tableToDelete);
     }
 
     /**
      * Deletes an iTable
+     *
      * @param tableName iTable name to delete.
      */
     public void deleteITable(String tableName) {
@@ -140,5 +144,5 @@ public class ITableDao {
         BoundStatement bs = new BoundStatement(createStmt);
         session.execute(bs);
     }
-    
+
 }

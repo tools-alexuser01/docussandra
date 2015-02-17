@@ -5,18 +5,17 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import com.pearson.grid.pearsonlibrary.string.StringUtil;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.BSON;
 import org.bson.BSONObject;
+import org.restexpress.common.util.StringUtils;
 
 /**
  * EventHandler for maintaining indices (really just additional tables with the
@@ -168,7 +167,7 @@ public class IndexMaintainerHelper {
         String iTableToUpdate = Utils.calculateITableName(index);
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
-        String fieldNamesInsertSyntax = StringUtil.combineList(fields);
+        String fieldNamesInsertSyntax = StringUtils.join(",", fields);
         //calculate the number of '?'s we need to append on the values clause
         StringBuilder fieldValueInsertSyntax = new StringBuilder();
         for (int i = 0; i < fields.size(); i++) {
