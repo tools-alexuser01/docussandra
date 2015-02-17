@@ -9,6 +9,7 @@ import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -69,7 +70,6 @@ public class IndexMaintainerHelper {
     }
 
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity) {
-
         //NOTE: This does not yet handle updating iTable entries where the indexed field has changed -- issue #35
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
@@ -82,8 +82,12 @@ public class IndexMaintainerHelper {
             //issue #35: we need to be able to update indexed fields as well,
             //which will require us to:
             //1. determine if an indexed field has changed
-            //2. if the field has changed, create a new index entry
-            //3. after creating the new index entry, we must delete the old one
+            
+            //2a. if the field has changed, create a new index entry
+            //2b. after creating the new index entry, we must delete the old one
+            
+            //3. if an indexed field has not changed, do a normal update
+            
 
             String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
             PreparedStatement ps = session.prepare(finalCQL);
@@ -160,6 +164,25 @@ public class IndexMaintainerHelper {
     public static List<Index> getIndexForDocument(Session session, Document entity) {
         IndexRepository indexRepo = new IndexRepository(session);
         return indexRepo.readAll(entity.databaseName(), entity.tableName());
+    }
+    
+    /**
+     * Determines if an indexed field has changed as part of an update.
+     * @param session DB session.
+     * @param index Index containing the fields to check for changes.
+     * @param entity New version of a document.
+     * @return True if an indexed field has changed. False if there is no change of indexed fields.
+     */
+    public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity){
+        DocumentRepository docRepo = new DocumentRepository(session);//TODO: if we do any sycronization on doc repo, this could be a problem
+        BSONObject newObject = (BSONObject) JSON.parse(entity.object());
+        BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
+        for(String field : index.fields()){
+            if(!newObject.get(field).equals(oldObject.get(field))){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
