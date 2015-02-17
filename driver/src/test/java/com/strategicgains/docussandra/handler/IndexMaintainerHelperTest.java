@@ -101,14 +101,12 @@ public class IndexMaintainerHelperTest {
 
     /**
      * Test of generateDocumentCreateIndexEntriesStatements method, of class
- IndexMaintainerHelper.
+     * IndexMaintainerHelper.
      */
     @Test
     public void testGenerateDocumentCreateIndexEntriesStatements() {
         System.out.println("generateDocumentCreateIndexEntriesStatements");
-        Document entity = new Document();
-        entity.table("myDB", "myTable");
-        entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
+        Document entity = createTestDocument();
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity);
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
@@ -129,14 +127,12 @@ public class IndexMaintainerHelperTest {
 
     /**
      * Test of generateDocumentUpdateIndexEntriesStatements method, of class
- IndexMaintainerHelper.
+     * IndexMaintainerHelper.
      */
     @Test
     public void testGenerateDocumentUpdateIndexEntriesStatements() {
         System.out.println("generateDocumentUpdateIndexEntriesStatements");
-        Document entity = new Document();
-        entity.table("myDB", "myTable");
-        entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
+        Document entity = createTestDocument();
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity);
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
@@ -157,13 +153,12 @@ public class IndexMaintainerHelperTest {
 
     /**
      * Test of generateDocumentDeleteIndexEntriesStatements method, of class
- IndexMaintainerHelper.
+     * IndexMaintainerHelper.
      */
     @Test
     public void testGenerateDocumentDeleteIndexEntriesStatements() {
         System.out.println("generateDocumentDeleteIndexEntriesStatements");
-        Document entity = new Document();
-        entity.table("myDB", "myTable");
+        Document entity = createTestDocument();
         entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity);
         assertTrue(result.size() == 2);//one for each of our indices
@@ -182,7 +177,8 @@ public class IndexMaintainerHelperTest {
     }
 
     /**
-     * Test of populateNewIndexWithExistingData method, of class IndexMaintainerHelper.
+     * Test of populateNewIndexWithExistingData method, of class
+     * IndexMaintainerHelper.
      */
     @Ignore
     @Test
@@ -202,8 +198,7 @@ public class IndexMaintainerHelperTest {
     @Test
     public void testGetIndexForDocument() {
         System.out.println("getIndexForDocument");
-        Document entity = new Document();
-        entity.table("myDB", "myTable");
+        Document entity = createTestDocument();
         ArrayList<Index> exp = new ArrayList<>(2);
         exp.add(index1);
         exp.add(index2);
@@ -216,7 +211,7 @@ public class IndexMaintainerHelperTest {
 
     /**
      * Test of generateCQLStatementForInsert method, of class
- IndexMaintainerHelper.
+     * IndexMaintainerHelper.
      */
     @Test
     public void testGenerateCQLStatementForInsert() {
@@ -231,7 +226,7 @@ public class IndexMaintainerHelperTest {
 
     /**
      * Test of generateCQLStatementForWhereClauses method, of class
- IndexMaintainerHelper.
+     * IndexMaintainerHelper.
      */
     @Test
     public void testGenerateCQLStatementForUpdate() {
@@ -275,4 +270,21 @@ public class IndexMaintainerHelperTest {
         return index;
     }
 
+    private static Document createTestDocument() {
+        Document entity = new Document();
+        entity.table("myDB", "myTable");
+        entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
+        return entity;
+    }
+
+//    /**
+//     * Test of hasIndexedFieldChanged method, of class IndexMaintainerHelper.
+//     */
+//    @Test
+//    public void testHasIndexedFieldChanged() {
+//        System.out.println("hasIndexedFieldChanged");     
+//        Document entity = null;
+//        boolean result = IndexMaintainerHelper.hasIndexedFieldChanged(session, index1, entity);
+//        assertEquals(false, result);
+//    }
 }
