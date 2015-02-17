@@ -62,6 +62,7 @@ extends AbstractCassandraRepository<Index>
 		super(session, Tables.BY_ID);
 		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Index>());
 		addObserver(new StateChangeEventingObserver<Index>(new IndexEventFactory()));
+                addObserver(new IndexChangeObserver(session));
 		initialize();
 	}
 
@@ -86,6 +87,7 @@ extends AbstractCassandraRepository<Index>
 		return (getSession().execute(bs).one().getLong(0) > 0);
 	}
 
+        @Override
 	protected Index readEntityById(Identifier identifier)
 	{
 		if (identifier == null || identifier.isEmpty()) return null;
@@ -107,10 +109,11 @@ extends AbstractCassandraRepository<Index>
 	@Override
 	protected Index updateEntity(Index entity)
 	{
-		BoundStatement bs = new BoundStatement(updateStmt);
-		bindUpdate(bs, entity);
-		getSession().execute(bs);
-		return entity;
+            throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
+//		BoundStatement bs = new BoundStatement(updateStmt);
+//		bindUpdate(bs, entity);
+//		getSession().execute(bs);
+//		return entity;
 	}
 
 	@Override
@@ -183,7 +186,7 @@ extends AbstractCassandraRepository<Index>
 		i.isUnique(row.getBool(Columns.IS_UNIQUE));
 		i.bucketSize(row.getLong(Columns.BUCKET_SIZE));
 		i.fields(row.getList(Columns.FIELDS, String.class));
-		i.fields(row.getList(Columns.ONLY, String.class));
+		i.includeOnly(row.getList(Columns.ONLY, String.class));
 		i.setCreatedAt(row.getDate(Columns.CREATED_AT));
 		i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
 		return i;
