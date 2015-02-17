@@ -23,11 +23,16 @@ import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexChangeObserver;
 import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import com.strategicgains.repoexpress.domain.Identifier;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -47,9 +52,12 @@ public class IndexMaintainerHelperTest {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Session session;
     private IndexRepository indexRepo;
+    private DocumentRepository docRepo;
+    private TableRepository tableRepo;
     //some test records
     private Index index1 = createTestIndexOneField();
     private Index index2 = createTestIndexTwoField();
+    private Table table;
 
     public IndexMaintainerHelperTest() {
     }
@@ -70,6 +78,12 @@ public class IndexMaintainerHelperTest {
         session = cluster.connect(f.getCassandraKeyspace());
         IndexChangeObserver ico = new IndexChangeObserver(session);
         indexRepo = new IndexRepository(session);
+        docRepo = new DocumentRepository(session);
+        tableRepo = new TableRepository(session);
+        table = new Table();
+        table.database(index1.databaseName().toLowerCase());
+        table.name(index1.tableName().toLowerCase());
+        table.setCreatedAt(new Date());
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
         clearTestData();// clear anything that might be there already
         //reinsert with some fresh data
@@ -92,6 +106,16 @@ public class IndexMaintainerHelperTest {
             indexRepo.delete(index2);
         } catch (InvalidQueryException e) {
             logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try {
+            docRepo.doDelete(createTestDocument());
+        } catch (InvalidQueryException e) {
+            logger.debug("Not deleting test document, probably doesn't exist.");
+        }
+        try {
+            tableRepo.delete(table);
+        } catch (InvalidQueryException e) {
+            logger.debug("Not deleting test document, probably doesn't exist.");
         }
     }
 
@@ -240,6 +264,23 @@ public class IndexMaintainerHelperTest {
     }
 
     /**
+     * Test of hasIndexedFieldChanged method, of class IndexMaintainerHelper.
+     */
+    @Test
+    public void testHasIndexedFieldChanged() {
+        System.out.println("hasIndexedFieldChanged");
+        tableRepo.create(table);//create the table so we have a place to store the test data
+        Document entity = createTestDocument();
+        docRepo.doCreate(entity);//insert
+        entity.object("{'greeting':'hola', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");//change a non-index field        
+        boolean result = IndexMaintainerHelper.hasIndexedFieldChanged(session, index1, entity);
+        assertEquals(false, result);
+        entity.object("{'greeting':'hello', 'myIndexedField': 'this is NOT my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");//change an indexed field
+        result = IndexMaintainerHelper.hasIndexedFieldChanged(session, index1, entity);
+        assertEquals(true, result);
+    }
+
+    /**
      * Creates at test index with one field.
      *
      * @return
@@ -270,21 +311,19 @@ public class IndexMaintainerHelperTest {
         return index;
     }
 
+    /**
+     * Creates a test document.
+     *
+     * @return
+     */
     private static Document createTestDocument() {
         Document entity = new Document();
         entity.table("myDB", "myTable");
         entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
+        entity.setUuid(new UUID(0l, 1l));
+        entity.setCreatedAt(new Date());
+        entity.setUpdatedAt(new Date());
         return entity;
     }
 
-//    /**
-//     * Test of hasIndexedFieldChanged method, of class IndexMaintainerHelper.
-//     */
-//    @Test
-//    public void testHasIndexedFieldChanged() {
-//        System.out.println("hasIndexedFieldChanged");     
-//        Document entity = null;
-//        boolean result = IndexMaintainerHelper.hasIndexedFieldChanged(session, index1, entity);
-//        assertEquals(false, result);
-//    }
 }
