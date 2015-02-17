@@ -136,7 +136,7 @@ public class IndexMaintainerHelper {
         return statementList;
     }
 
-    //just a concept right now
+    //just a concept right now -- issue #4
     public static void populateNewIndexWithExistingData(Session session, Table t, Index index) {
         throw new UnsupportedOperationException("Not done yet");
     }
