@@ -182,16 +182,16 @@ public class IndexMaintainerHelperTest {
     }
 
     /**
-     * Test of reindex method, of class IndexMaintainerHelper.
+     * Test of populateNewIndexWithExistingData method, of class IndexMaintainerHelper.
      */
     @Ignore
     @Test
-    public void testReindex() {
+    public void testPopulateNewIndexWithExistingData() {
         System.out.println("reindex");
         Session session = null;
         Table t = null;
         Index index = null;
-        IndexMaintainerHelper.reindex(session, t, index);
+        IndexMaintainerHelper.populateNewIndexWithExistingData(session, t, index);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
