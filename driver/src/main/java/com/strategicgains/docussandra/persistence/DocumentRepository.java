@@ -90,7 +90,7 @@ extends AbstractObservableRepository<Document>
 		session().execute(bs);
                 List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity);
                 for(BoundStatement boundIndexStatement : indexStatements){
-                    session().execute(boundIndexStatement);//TODO: run in batch
+                    session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
                 }
 		return entity;
 	}
@@ -143,7 +143,7 @@ extends AbstractObservableRepository<Document>
 		session().execute(bs);
                 List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity);
                 for(BoundStatement boundIndexStatement : indexStatements){
-                    session().execute(boundIndexStatement);//TODO: run in batch
+                    session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
                 }
 		return entity;
 	}
@@ -168,7 +168,7 @@ extends AbstractObservableRepository<Document>
 			session().execute(bs);
                         List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity);
                         for(BoundStatement boundIndexStatement : indexStatements){
-                            session().execute(boundIndexStatement);//TODO: run in batch
+                            session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
                         }
 		}
 		catch (InvalidObjectIdException e)
