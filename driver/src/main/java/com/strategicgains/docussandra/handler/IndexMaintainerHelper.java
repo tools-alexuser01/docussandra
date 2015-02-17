@@ -179,7 +179,7 @@ public class IndexMaintainerHelper {
         BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
         for(String field : index.fields()){
             if(!newObject.get(field).equals(oldObject.get(field))){
-                return true;
+                return true; 
             }
         }
         return false;
