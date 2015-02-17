@@ -44,14 +44,14 @@ public class IndexService
 		indexes.delete(identifier);
     }
 
-	public List<Index> readAll(String context, String nodeType)
+	public List<Index> readAll(String namespace, String collection)
     {
-	    return indexes.readAll(context, nodeType);
+	    return indexes.readAll(namespace, collection);
     }
 
-	public long count(String context, String nodeType)
+	public long count(String namespace, String collection)
     {
-	    return indexes.countAll(context, nodeType);
+	    return indexes.countAll(namespace, collection);
     }
 
 	private void verifyTable(String database, String table)
