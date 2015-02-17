@@ -51,7 +51,7 @@ public class IndexChangeObserver<T extends Identifiable>
         //-----check to see if it is correct, suggest the user delete and try again if it's not -- probably
         //-----automatically re-index; hard to actually do, it would need a different name if the index was in use -- probably not
         //-----do nothing -- maybe?
-        //TODO: populate the index!
+        //TODO: populate the index! -- issue #4
         //IndexMaintainerHandler.populateNewIndexWithExistingData(session, table?, index);
     }
 
