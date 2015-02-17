@@ -4,7 +4,6 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
-import com.pearson.grid.pearsonlibrary.common.ReflectionUtil;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.testhelper.Fixtures;
@@ -114,10 +113,10 @@ public class ITableDaoTest {
     public void testGenerateTableCreationSyntax() {
         System.out.println("generateTableCreationSyntax");
         ITableDao instance = new ITableDao(session);
-        String response = (String) ReflectionUtil.callMethodOnObject("generateTableCreationSyntax", instance, createTestIndexOneField());
+        String response = instance.generateTableCreationSyntax(createTestIndexOneField());
         Assert.assertNotNull(response);
         assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField varchar, PRIMARY KEY ((id), myIndexedField));", response);
-        response = (String) ReflectionUtil.callMethodOnObject("generateTableCreationSyntax", instance, createTestIndexTwoField());
+        response = instance.generateTableCreationSyntax(createTestIndexTwoField());
         Assert.assertNotNull(response);
         assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField1 varchar, myIndexedField2 varchar, PRIMARY KEY (myIndexedField1, myIndexedField2));", response);
     }
