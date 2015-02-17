@@ -23,7 +23,7 @@ import org.restexpress.common.util.StringUtils;
  *
  * @author udeyoje
  */
-public class IndexMaintainerHelper { 
+public class IndexMaintainerHelper {
 
     public static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
@@ -69,9 +69,8 @@ public class IndexMaintainerHelper {
     }
 
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity) {
-        
-        //NOTE: This does not yet handle updating iTable entries where the indexed field has changed
-        
+
+        //NOTE: This does not yet handle updating iTable entries where the indexed field has changed -- issue #35
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
@@ -79,6 +78,13 @@ public class IndexMaintainerHelper {
         for (Index index : indices) {
             //determine which fields need to use as PKs
             List<String> fields = index.fields();
+            
+            //issue #35: we need to be able to update indexed fields as well,
+            //which will require us to:
+            //1. determine if an indexed field has changed
+            //2. if the field has changed, create a new index entry
+            //3. after creating the new index entry, we must delete the old one
+
             String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
             PreparedStatement ps = session.prepare(finalCQL);
             BoundStatement bs = new BoundStatement(ps);
@@ -142,7 +148,8 @@ public class IndexMaintainerHelper {
     }
 
     /**
-     * Gets all the indexes that a document is or needs to be stored in.
+     * Gets all the indexes that a document is or needs to be stored in. Note
+     * that this actually makes a database call.
      *
      * @param session Cassandra session for interacting with the database.
      * @param entity Document that we are trying to determine which indices it
