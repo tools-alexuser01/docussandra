@@ -39,38 +39,49 @@ public class IndexMaintainerHelper {
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
         for (Index index : indices) {
-            //determine which fields need to write as PKs
-            List<String> fields = index.fields();
-            String finalCQL = generateCQLStatementForInsert(index);
-            PreparedStatement ps = session.prepare(finalCQL);
-            BoundStatement bs = new BoundStatement(ps);
-
-            //set the id
-            bs.setUUID(0, entity.getUuid());
-            //set the blob
-            BSONObject bson = (BSONObject) JSON.parse(entity.object());
-            bs.setBytes(1, ByteBuffer.wrap(BSON.encode(bson)));
-            //set the dates
-            bs.setDate(2, entity.getCreatedAt());
-            bs.setDate(3, entity.getUpdatedAt());
-
-            //pull the index fields out of the document for binding
-            String documentJSON = entity.object();
-            DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
-            for (int i = 0; i < fields.size(); i++) {
-                String field = fields.get(i);
-                String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-                bs.setString(i + 4, fieldValue);//offset from the first four non-dynamic fields
-            }
             //add row to the iTable(s)
-            statementList.add(bs);
+            statementList.add(generateDocumentCreateIndexEntryStatement(session, index, entity));
         }
         //return a list of commands to accomplish all of this
         return statementList;
     }
 
+    /**
+     * Helper method for above.
+     *
+     * @param session
+     * @param index
+     * @param entity
+     * @return
+     */
+    private static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity) {
+        //determine which fields need to write as PKs
+        List<String> fields = index.fields();
+        String finalCQL = generateCQLStatementForInsert(index);
+        PreparedStatement ps = session.prepare(finalCQL);
+        BoundStatement bs = new BoundStatement(ps);
+
+        //set the id
+        bs.setUUID(0, entity.getUuid());
+        //set the blob
+        BSONObject bson = (BSONObject) JSON.parse(entity.object());
+        bs.setBytes(1, ByteBuffer.wrap(BSON.encode(bson)));
+        //set the dates
+        bs.setDate(2, entity.getCreatedAt());
+        bs.setDate(3, entity.getUpdatedAt());
+
+        //pull the index fields out of the document for binding
+        String documentJSON = entity.object();
+        DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+        for (int i = 0; i < fields.size(); i++) {
+            String field = fields.get(i);
+            String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+            bs.setString(i + 4, fieldValue);//offset from the first four non-dynamic fields
+        }
+        return bs;
+    }
+
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity) {
-        //NOTE: This does not yet handle updating iTable entries where the indexed field has changed -- issue #35
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
@@ -78,41 +89,41 @@ public class IndexMaintainerHelper {
         for (Index index : indices) {
             //determine which fields need to use as PKs
             List<String> fields = index.fields();
-            
+
             //issue #35: we need to be able to update indexed fields as well,
             //which will require us to:
             //1. determine if an indexed field has changed
-            
-            //2a. if the field has changed, create a new index entry
-            //2b. after creating the new index entry, we must delete the old one
-            
-            //3. if an indexed field has not changed, do a normal update
-            
+            if (hasIndexedFieldChanged(session, index, entity)) {
+                //2a. if the field has changed, create a new index entry
+                statementList.add(generateDocumentCreateIndexEntryStatement(session, index, entity));
+                //2b. after creating the new index entry, we must delete the old one
+                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity));
+            } else {//3. if an indexed field has not changed, do a normal CQL update
+                String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
+                PreparedStatement ps = session.prepare(finalCQL);
+                BoundStatement bs = new BoundStatement(ps);
 
-            String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
-            PreparedStatement ps = session.prepare(finalCQL);
-            BoundStatement bs = new BoundStatement(ps);
+                //set the blob
+                BSONObject bson = (BSONObject) JSON.parse(entity.object());
+                bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
+                //set the date
+                bs.setDate(1, entity.getUpdatedAt());
 
-            //set the blob
-            BSONObject bson = (BSONObject) JSON.parse(entity.object());
-            bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
-            //set the date
-            bs.setDate(1, entity.getUpdatedAt());
-
-            if (!index.isUnique()) { //if the index is not unique, use a where clause based on UUID
-                bs.setUUID(2, entity.getUuid());
-            } else { //if it is unique, we will use a where clause based on index
-                //pull the index fields out of the document for binding
-                String documentJSON = entity.object();
-                DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
-                for (int i = 0; i < fields.size(); i++) {
-                    String field = fields.get(i);
-                    String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-                    bs.setString(i + 2, fieldValue);//offset from the first two non-dynamic fields
+                if (!index.isUnique()) { //if the index is not unique, use a where clause based on UUID
+                    bs.setUUID(2, entity.getUuid());
+                } else { //if it is unique, we will use a where clause based on index
+                    //pull the index fields out of the document for binding
+                    String documentJSON = entity.object();
+                    DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+                    for (int i = 0; i < fields.size(); i++) {
+                        String field = fields.get(i);
+                        String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+                        bs.setString(i + 2, fieldValue);//offset from the first two non-dynamic fields
+                    }
                 }
+                //add row to the iTable(s)
+                statementList.add(bs);
             }
-            //add row to the iTable(s)
-            statementList.add(bs);
         }
         //return a list of commands to accomplish all of this
         return statementList;
@@ -124,26 +135,37 @@ public class IndexMaintainerHelper {
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
         for (Index index : indices) {
-            //determine which fields need to write as PKs
-            List<String> fields = index.fields();
-            String finalCQL = generateCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
-            PreparedStatement ps = session.prepare(finalCQL);
-            BoundStatement bs = new BoundStatement(ps);
-            if (!index.isUnique()) { //if the index is not unique, use a where clause based on UUID
-                bs.setUUID(0, entity.getUuid());
-            } else { //if it is unique, we will use a where clause based on index
-                //pull the index fields out of the document for binding
-                String documentJSON = entity.object();
-                DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
-                for (int i = 0; i < fields.size(); i++) {
-                    String field = fields.get(i);
-                    String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-                    bs.setString(i, fieldValue);
-                }
-            }
-            statementList.add(bs);
+            statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity));
         }
         return statementList;
+    }
+
+    /**
+     * Helper method for above.
+     *
+     * @param session
+     * @param entity
+     * @return
+     */
+    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity) {
+        //determine which fields need to write as PKs
+        List<String> fields = index.fields();
+        String finalCQL = generateCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
+        PreparedStatement ps = session.prepare(finalCQL);
+        BoundStatement bs = new BoundStatement(ps);
+        if (!index.isUnique()) { //if the index is not unique, use a where clause based on UUID
+            bs.setUUID(0, entity.getUuid());
+        } else { //if it is unique, we will use a where clause based on index
+            //pull the index fields out of the document for binding
+            String documentJSON = entity.object();
+            DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+            for (int i = 0; i < fields.size(); i++) {
+                String field = fields.get(i);
+                String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+                bs.setString(i, fieldValue);
+            }
+        }
+        return bs;
     }
 
     //just a concept right now -- issue #4
@@ -165,21 +187,24 @@ public class IndexMaintainerHelper {
         IndexRepository indexRepo = new IndexRepository(session);
         return indexRepo.readAll(entity.databaseName(), entity.tableName());
     }
-    
+
     /**
-     * Determines if an indexed field has changed as part of an update.
+     * Determines if an indexed field has changed as part of an update. This
+     * would be private but keeping public for ease of testing.
+     *
      * @param session DB session.
      * @param index Index containing the fields to check for changes.
      * @param entity New version of a document.
-     * @return True if an indexed field has changed. False if there is no change of indexed fields.
+     * @return True if an indexed field has changed. False if there is no change
+     * of indexed fields.
      */
-    public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity){
+    public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity) {
         DocumentRepository docRepo = new DocumentRepository(session);//TODO: if we do any sycronization on doc repo, this could be a problem
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
         BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
-        for(String field : index.fields()){
-            if(!newObject.get(field).equals(oldObject.get(field))){
-                return true; 
+        for (String field : index.fields()) {
+            if (!newObject.get(field).equals(oldObject.get(field))) {
+                return true;//fail early
             }
         }
         return false;
