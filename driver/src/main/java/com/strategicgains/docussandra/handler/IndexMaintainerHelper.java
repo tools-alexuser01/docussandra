@@ -137,7 +137,7 @@ public class IndexMaintainerHelper {
     }
 
     //just a concept right now
-    public static void reindex(Session session, Table t, Index index) {
+    public static void populateNewIndexWithExistingData(Session session, Table t, Index index) {
         throw new UnsupportedOperationException("Not done yet");
     }
 

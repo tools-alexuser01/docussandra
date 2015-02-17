@@ -52,7 +52,7 @@ public class IndexChangeObserver<T extends Identifiable>
         //-----automatically re-index; hard to actually do, it would need a different name if the index was in use -- probably not
         //-----do nothing -- maybe?
         //TODO: populate the index!
-        //IndexMaintainerHandler.reindex(session, table?, index);
+        //IndexMaintainerHandler.populateNewIndexWithExistingData(session, table?, index);
     }
 
     @Override
