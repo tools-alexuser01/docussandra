@@ -50,8 +50,9 @@ public class SampleControllerTest {
         httpClient = null;
     }
 
-    @Ignore
+    
     @Test
+    @Ignore
     public void postDirectiveReplayRequest() throws IOException {
         HttpGet getRequest = new HttpGet(BASE_URL + "/samples/uuid/123.json");
         final HttpResponse response = httpClient.execute(getRequest);
