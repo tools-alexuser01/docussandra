@@ -39,9 +39,9 @@ public class QueryController {
     public Object query(Request request, Response response) {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
-        Query toQuery = request.getBodyAs(Query.class, "Resource details not provided");
+        Query toQuery = request.getBodyAs(Query.class, "Query details not provided");
         toQuery.setTable(table);//change of plans, no longer getting it from the query object, but from the URL instead
-        Object queryResponse = service.query(toQuery);
+        Object queryResponse = service.query(database, toQuery);
         //Document document = documents.read(database, table, new Identifier(database, table, UuidConverter.parse(id)));
         // enrich the entity with links, etc. here...
         //TODO: come back to thisHyperExpress.bind(Constants.Url.DOCUMENT_ID, document.getUuid().toString());
