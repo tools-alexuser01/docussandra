@@ -20,7 +20,7 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
         //initializeStatements();
     }
 
-    public Object doQuery(Query query) {
+    public Object doQuery(String db, Query query) {
         throw new UnsupportedOperationException("Not done yet");
     }
 

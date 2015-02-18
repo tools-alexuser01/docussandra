@@ -13,8 +13,8 @@ public class QueryService
 		this.queries = queryRepository;
 	}
         
-        public Object query(Query toQuery){
-            return queries.doQuery(toQuery);
+        public Object query(String db, Query toQuery){
+            return queries.doQuery(db, toQuery);
         }
 //
 //	public Query create(Query entity)
