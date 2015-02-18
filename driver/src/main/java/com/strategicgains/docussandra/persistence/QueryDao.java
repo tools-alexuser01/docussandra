@@ -10,7 +10,8 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 //
 //	private PreparedStatement createStmt;
 //	private PreparedStatement updateStmt;
-//        
+//      
+    private static final String QUERY_CQL = "select * from %s where %s";
 
     private Session session;
 
@@ -21,6 +22,12 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
     }
 
     public Object doQuery(String db, Query query) {
+        //determine if the query is valid; in other words is it searching on valid fields that we have indexed (should this be done in the service layer?)
+        
+        //determine which iTable we need to query on
+        //format QUERY_CQL
+        //run query
+        //return result(s)
         throw new UnsupportedOperationException("Not done yet");
     }
 

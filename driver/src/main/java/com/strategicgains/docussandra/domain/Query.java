@@ -93,4 +93,11 @@ public class Query
     public void setLimit(int limit) {
         this.limit = limit;
     }
+
+    @Override
+    public String toString() {
+        return "Query{" + "table=" + table + ", columns=" + columns + ", where=" + where + ", limit=" + limit + ", offset=" + offset + '}';
+    }
+    
+    
 }
