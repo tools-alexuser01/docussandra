@@ -22,11 +22,11 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
     }
 
     public Object doQuery(String db, Query query) {
-        //determine if the query is valid; in other words is it searching on valid fields that we have indexed (should this be done in the service layer?)
-        
-        //determine which iTable we need to query on
+        //determine if the query is valid; in other words is it searching on valid fields that we have indexed (should this be done in the service layer?)        
+        //determine which iTable(s) we need to query on -- the field could be in more than one iTable, so which one do we pick?
         //format QUERY_CQL
         //run query
+        //deconflict any duplicate results
         //return result(s)
         throw new UnsupportedOperationException("Not done yet");
     }
