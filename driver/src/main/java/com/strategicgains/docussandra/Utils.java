@@ -45,7 +45,8 @@ public class Utils {
         return calculateITableName(index.databaseName(), index.tableName(), index.name());
     }
     
-//    public static List<String> parseWhereClause(String whereClause){
+//    public static List<String> parseWhereClause(String whereClause){ 
+    //will have to parse more than the fields, but the field values as well!
 //    
 //    }
 
