@@ -12,6 +12,7 @@ import org.restexpress.exception.NotFoundException;
 import org.restexpress.pipeline.SimpleConsoleLogMessageObserver;
 import org.restexpress.plugin.hyperexpress.HyperExpressPlugin;
 import org.restexpress.plugin.hyperexpress.Linkable;
+import org.restexpress.plugin.version.VersionPlugin;
 import org.restexpress.util.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +50,13 @@ public class Main
 
 		Configuration config = loadEnvironment(args);
 		RestExpress server = new RestExpress()
-				.setName(SERVICE_NAME)
+				.setName(config.getProjectName(SERVICE_NAME))
 				.setBaseUrl(config.getBaseUrl())
 				.setExecutorThreadCount(config.getExecutorThreadPoolSize())
 				.addMessageObserver(new SimpleConsoleLogMessageObserver());
+
+		new VersionPlugin(config.getProjectVersion())
+			.register(server);
 
 		Routes.define(config, server);
 		Relationships.define(server);
@@ -63,12 +67,12 @@ public class Main
     }
 
 	private static void configurePlugins(Configuration config, RestExpress server)
-    {
-	    configureMetrics(config, server);
+	{
+		configureMetrics(config, server);
 
-	    new HyperExpressPlugin(Linkable.class)
-	    	.register(server);
-    }
+		new HyperExpressPlugin(Linkable.class)
+			.register(server);
+	}
 
 	private static void configureMetrics(Configuration config, RestExpress server)
     {
