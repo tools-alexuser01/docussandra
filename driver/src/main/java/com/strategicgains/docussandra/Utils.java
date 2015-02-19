@@ -1,6 +1,7 @@
 package com.strategicgains.docussandra;
 
 import com.strategicgains.docussandra.domain.Index;
+import java.util.List;
 
 /**
  * A collection of public static helper methods for various docussandra related
@@ -43,5 +44,9 @@ public class Utils {
     public static String calculateITableName(Index index) {
         return calculateITableName(index.databaseName(), index.tableName(), index.name());
     }
+    
+//    public static List<String> parseWhereClause(String whereClause){
+//    
+//    }
 
 }
