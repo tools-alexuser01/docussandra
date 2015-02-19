@@ -16,6 +16,7 @@ import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import com.strategicgains.repoexpress.adapter.Identifiers;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.util.UuidConverter;
+import java.util.List;
 
 /**
  * This is the 'controller' layer, where HTTP details are converted to domain
@@ -36,12 +37,12 @@ public class QueryController {
         this.service = queryService;
     }
 
-    public Object query(Request request, Response response) {
+    public List<Document> query(Request request, Response response) {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
         Query toQuery = request.getBodyAs(Query.class, "Query details not provided");
         toQuery.setTable(table);//change of plans, no longer getting it from the query object, but from the URL instead
-        Object queryResponse = service.query(database, toQuery);
+        List<Document> queryResponse = service.query(database, toQuery);
         //Document document = documents.read(database, table, new Identifier(database, table, UuidConverter.parse(id)));
         // enrich the entity with links, etc. here...
         //TODO: come back to thisHyperExpress.bind(Constants.Url.DOCUMENT_ID, document.getUuid().toString());

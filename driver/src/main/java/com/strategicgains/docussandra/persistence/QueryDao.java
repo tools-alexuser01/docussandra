@@ -1,7 +1,12 @@
 package com.strategicgains.docussandra.persistence;
 
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.DefaultPreparedStatement;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
+import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
+import java.util.List;
 
 public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 {
@@ -21,12 +26,14 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
         //initializeStatements();
     }
 
-    public Object doQuery(String db, Query query) {
-        //determine if the query is valid; in other words is it searching on valid fields that we have indexed (should this be done in the service layer?)        
-        //determine which iTable(s) we need to query on -- the field could be in more than one iTable, so which one do we pick?
+    public List<Document> doQuery(String db, Query query, String table) {                
         //format QUERY_CQL
+        String finalQuery = String.format(QUERY_CQL, table, query.getWhere());
         //run query
-        //deconflict any duplicate results
+        PreparedStatement ps = session.prepare(finalQuery);//TODO: Cache
+        BoundStatement bs = new BoundStatement(ps);
+        //bs.bind(values) - oh, crud; binding dynamic where clause... hm...
+        //deconflict any duplicate results (if we query more than on table?)
         //return result(s)
         throw new UnsupportedOperationException("Not done yet");
     }
@@ -78,4 +85,18 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 //		q.setUpdatedAt(row.getDate("updatedat"));
 //		return q;
 //    }
+
+    /**
+     * @return the session
+     */
+    public Session getSession() {
+        return session;
+    }
+
+    /**
+     * @param session the session to set
+     */
+    public void setSession(Session session) {
+        this.session = session;
+    }
 }
