@@ -46,7 +46,7 @@ public class Utils {
     public static String calculateITableName(Index index) {
         return calculateITableName(index.databaseName(), index.tableName(), index.name());
     }
-    
+
     /**
      * Converts a string to a fuzzy UUID. Fuzzy, as in it isn't going to be
      * unique and is only for the first 8 bytes. Should only be used for
