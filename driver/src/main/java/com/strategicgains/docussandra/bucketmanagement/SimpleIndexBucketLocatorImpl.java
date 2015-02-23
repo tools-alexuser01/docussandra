@@ -40,8 +40,8 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
     public static final BigInteger MINIMUM = BigInteger.ZERO;
     public static final BigInteger MAXIMUM = new BigInteger( "" + 2 ).pow( 127 );
 
-    private final List<BigInteger> buckets = new ArrayList<BigInteger>( 100 );
-    private final List<String> bucketsString = new ArrayList<String>( 100 );
+    private final List<BigInteger> buckets = new ArrayList<>( 100 );
+    private final List<String> bucketsString = new ArrayList<>( 100 );
     private final int size;
 
 
@@ -101,7 +101,7 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
      * java.lang.String[])
      */
     @Override
-    public String getBucket( UUID applicationId, IndexType type, UUID entityId, String... components ) {
+    public String getBucket( UUID applicationId, UUID entityId, String... components ) {
         return getClosestToken( entityId );
     }
 
@@ -115,7 +115,7 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
      * java.lang.String[])
      */
     @Override
-    public List<String> getBuckets( UUID applicationId, IndexType type, String... components ) {
+    public List<String> getBuckets( UUID applicationId, String... components ) {
         return bucketsString;
     }
 }

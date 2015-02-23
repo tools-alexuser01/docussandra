@@ -23,7 +23,6 @@ import static com.strategicgains.docussandra.bucketmanagement.DbConstants.DICTIO
 import static com.strategicgains.docussandra.bucketmanagement.DbConstants.DICTIONARY_CONNECTING_ENTITIES;
 import static com.strategicgains.docussandra.bucketmanagement.DbConstants.INDEX_CONNECTIONS;
 import static com.strategicgains.docussandra.bucketmanagement.DbConstants.TYPE_APPLICATION;
-import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator.IndexType;
 import static com.strategicgains.docussandra.bucketmanagement.IndexUpdate.indexValueCode;
 import static com.strategicgains.docussandra.bucketmanagement.IndexUpdate.toIndexableValue;
 import static com.strategicgains.docussandra.bucketmanagement.IndexUpdate.validIndexableValue;
