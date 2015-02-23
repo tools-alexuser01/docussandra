@@ -23,7 +23,7 @@ import org.apache.cassandra.config.ColumnDefinition;
 
 
 
-
+@Deprecated
 public enum ApplicationCF implements CFEnum {
 
     /** This is where the entity objects are stored */

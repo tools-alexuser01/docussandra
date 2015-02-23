@@ -17,6 +17,7 @@
 package com.strategicgains.docussandra.bucketmanagement;
 
 
+import com.datastax.driver.core.BoundStatement;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -53,7 +54,7 @@ public class IndexUpdate {
 
     public static int INDEX_STRING_VALUE_LENGTH = 1024;
 
-    private Mutator<ByteBuffer> batch;
+    private List<BoundStatement> batch;
     private Document entity;
     private String entryName;
     private Object entryValue;
@@ -68,7 +69,7 @@ public class IndexUpdate {
     private UUID associatedId;
 
 
-    public IndexUpdate( Mutator<ByteBuffer> batch, Document entity, String entryName, Object entryValue,
+    public IndexUpdate( List<BoundStatement> batch, Document entity, String entryName, Object entryValue,
                         boolean schemaHasProperty, boolean isMultiValue, boolean removeListEntry, UUID timestampUuid ) {
         this.batch = batch;
         this.entity = entity;
@@ -82,12 +83,12 @@ public class IndexUpdate {
     }
 
 
-    public Mutator<ByteBuffer> getBatch() {
+    public List<BoundStatement> getBatch() {
         return batch;
     }
 
 
-    public void setBatch( Mutator<ByteBuffer> batch ) {
+    public void setBatch( List<BoundStatement> batch ) {
         this.batch = batch;
     }
 
