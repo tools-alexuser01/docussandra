@@ -19,6 +19,7 @@ package com.strategicgains.docussandra.bucketmanagement;
  *
  * @author udeyoje
  */
+@Deprecated
 public class Mutator<K>  {
     
 }
