@@ -5,6 +5,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.Utils;
+import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.domain.Index;
 import java.util.Iterator;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class ITableDao {
     /**
      * CQL statement for dynamically creating an iTable.
      */
-    private static final String TABLE_CREATE_CQL = "CREATE TABLE docussandra.%s (id uuid, object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY (%s));";
+    private static final String TABLE_CREATE_CQL = "CREATE TABLE docussandra.%s (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY ((bucket), %s));";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
 
     /**
@@ -47,13 +48,13 @@ public class ITableDao {
      */
     private static final String TABLE_DELETE_CQL = "DROP TABLE docussandra.%s;";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
-
+    
     /**
      * Constructor. Creates a new ITableDao.
      *
      * @param session Session for interacting with the Cassandra database.
      */
-    public ITableDao(Session session) {
+    public ITableDao(Session session) {;
         this.session = session;
     }
 
@@ -103,9 +104,9 @@ public class ITableDao {
         String newTableName = Utils.calculateITableName(index);
         StringBuilder fieldCreateStatement = new StringBuilder();
         StringBuilder primaryKeyCreateStatement = new StringBuilder();
-        if (!index.isUnique()) {
-            primaryKeyCreateStatement.append("(id), ");//if the index is not unique, set the pk to include the id 
-        }
+//        if (!index.isUnique()) {
+//            primaryKeyCreateStatement.append("(id), ");//if the index is not unique, set the pk to include the id 
+//        }
         boolean first = true;
         for (String field : index.fields()) {
             if (!first) {
