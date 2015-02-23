@@ -17,7 +17,6 @@
 package com.strategicgains.docussandra.bucketmanagement;
 
 
-import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator.IndexType;
 import static com.strategicgains.docussandra.bucketmanagement.NewCassandraPersistanceUtils.key;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -48,7 +47,6 @@ public class IndexBucketScanner implements IndexScanner {
     private final boolean reversed;
     private final int pageSize;
     private final String[] indexPath;
-    private final IndexType indexType;
     private final boolean skipFirst;
 
     /** Pointer to our next start read */
@@ -66,7 +64,7 @@ public class IndexBucketScanner implements IndexScanner {
 
 
     public IndexBucketScanner( IndexCassandraDao cass, IndexBucketLocator locator, ApplicationCF columnFamily,
-                               UUID applicationId, IndexType indexType, Object keyPrefix, Object start, Object finish,
+                               UUID applicationId, Object keyPrefix, Object start, Object finish,
                                boolean reversed, int pageSize, boolean skipFirst, String... indexPath) {
         this.cass = cass;
         this.indexBucketLocator = locator;
@@ -81,7 +79,6 @@ public class IndexBucketScanner implements IndexScanner {
         //we always add 1 to the page size.  This is because we pop the last column for the next page of results
         this.pageSize = pageSize+1;
         this.indexPath = indexPath;
-        this.indexType = indexType;
         this.scanStart = start;
     }
 
@@ -110,7 +107,7 @@ public class IndexBucketScanner implements IndexScanner {
             return false;
         }
 
-        List<String> keys = indexBucketLocator.getBuckets( applicationId, indexType, indexPath );
+        List<String> keys = indexBucketLocator.getBuckets( applicationId, indexPath );
 
         List<Object> cassKeys = new ArrayList<Object>( keys.size() );
 
