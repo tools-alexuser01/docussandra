@@ -20,7 +20,7 @@ public class WhereClause {
 
     private final String whereClause;
 
-    private final String boundStatementSyntax = "";
+    private String boundStatementSyntax = "";
 
     /**
      * Field Names in a where clause. Corresponds to values.
@@ -36,6 +36,7 @@ public class WhereClause {
         parse(whereClause);
     }
 
+    //TODO: this will need improvment
     private void parse(String whereClause) {
 
         StringBuilder boundStatementBuilder = new StringBuilder();
@@ -47,22 +48,29 @@ public class WhereClause {
                 case FIELD:
                     fields.add(token);
                     boundStatementBuilder.append(token);
+                    currentOperator = OPERATOR;
                     break;
                 case OPERATOR:
                     boundStatementBuilder.append(token);
+                    currentOperator = VALUE;
                     break;
                 case VALUE:
-                    boundStatementBuilder.append(token);
+                    boundStatementBuilder.append("?");
+                    values.add(token.replaceAll("\\Q'\\E", ""));
+                    currentOperator = CONJUNCTION;
                     break;
                 case CONJUNCTION:
-                    
+                    boundStatementBuilder.append(token);
+                    currentOperator = FIELD;
+                    //TODO: we could have CQL injection here; it pretty much just appends the end of the statement; should check specifically
                     break;
-                case END:
-
+                default:// this should not run; defaults to conjunction
+                    boundStatementBuilder.append(token);
                     break;
             }
             boundStatementBuilder.append(" ");//tokens need to be re-space seperated
         }
+        boundStatementSyntax = boundStatementBuilder.toString().trim();
 
     }
 
