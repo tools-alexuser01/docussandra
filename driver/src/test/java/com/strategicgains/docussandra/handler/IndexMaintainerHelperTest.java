@@ -20,6 +20,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
+import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
@@ -131,7 +132,7 @@ public class IndexMaintainerHelperTest {
     public void testGenerateDocumentCreateIndexEntriesStatements() {
         System.out.println("generateDocumentCreateIndexEntriesStatements");
         Document entity = createTestDocument();
-        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity);
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity, new SimpleIndexBucketLocatorImpl());
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
@@ -139,14 +140,14 @@ public class IndexMaintainerHelperTest {
             assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
         }
         assertEquals("docussandra", one.getKeyspace());
-        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithonefield (id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
+        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
         BoundStatement two = result.get(1);
         assertNotNull(two);
         for (int i = 0; i < 6; i++) {
             assertTrue(two.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 4 and 5 are the indexed fields for index2
         }
         assertEquals("docussandra", two.getKeyspace());
-        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (id, object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
+        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
     }
 
     /**
@@ -159,7 +160,7 @@ public class IndexMaintainerHelperTest {
         Document entity = createTestDocument();
         tableRepo.create(table);//create the table so we have a place to store the test data
         docRepo.doCreate(entity);//insert a document so we have something to reference
-        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity);
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, new SimpleIndexBucketLocatorImpl());
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
@@ -167,14 +168,14 @@ public class IndexMaintainerHelperTest {
             assertTrue(one.isSet(i));// 0 is the blob, 1 is the date, 2 is the UUID
         }
         assertEquals("docussandra", one.getKeyspace());
-        assertEquals("UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE id = ?;", one.preparedStatement().getQueryString());
+        assertEquals("UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE bucket = ? AND myIndexedField = ?;", one.preparedStatement().getQueryString());
         BoundStatement two = result.get(1);
         assertNotNull(two);
         for (int i = 0; i < 4; i++) {
             assertTrue(two.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
         }
         assertEquals("docussandra", two.getKeyspace());
-        assertEquals("UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE myIndexedField1 = ? AND myIndexedField2 = ?;", two.preparedStatement().getQueryString());
+        assertEquals("UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myIndexedField1 = ? AND myIndexedField2 = ?;", two.preparedStatement().getQueryString());
     }
 
     /**
@@ -189,7 +190,7 @@ public class IndexMaintainerHelperTest {
         tableRepo.create(table);//create the table so we have a place to store the test data
         docRepo.doCreate(entity);//insert a document so we have something to reference
         entity.object("{'greeting':'hello', 'myIndexedField': 'this is NOT my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");//change an indexed field
-        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity);
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, new SimpleIndexBucketLocatorImpl());
         assertTrue(result.size() == 3);//one for the create, one for the delete, one for the second index
 
         //create
@@ -199,13 +200,13 @@ public class IndexMaintainerHelperTest {
             assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
         }
         assertEquals("docussandra", one.getKeyspace());
-        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithonefield (id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
+        assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
         //delete
         BoundStatement two = result.get(1);
         assertNotNull(one);
         assertTrue(two.isSet(0));//the UUID
         assertEquals("docussandra", two.getKeyspace());
-        assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithonefield WHERE id = ?;", two.preparedStatement().getQueryString());
+        assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithonefield WHERE bucket = ? AND myIndexedField = ?;", two.preparedStatement().getQueryString());
 
         //the index update should proceed like a normal update
         BoundStatement three = result.get(2);
@@ -214,7 +215,7 @@ public class IndexMaintainerHelperTest {
             assertTrue(three.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
         }
         assertEquals("docussandra", three.getKeyspace());
-        assertEquals("UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE myIndexedField1 = ? AND myIndexedField2 = ?;", three.preparedStatement().getQueryString());
+        assertEquals("UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myIndexedField1 = ? AND myIndexedField2 = ?;", three.preparedStatement().getQueryString());
     }
 
     /**
@@ -226,20 +227,20 @@ public class IndexMaintainerHelperTest {
         System.out.println("generateDocumentDeleteIndexEntriesStatements");
         Document entity = createTestDocument();
         entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
-        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity);
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, new SimpleIndexBucketLocatorImpl());
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
         assertTrue(one.isSet(0));//the UUID
         assertEquals("docussandra", one.getKeyspace());
-        assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithonefield WHERE id = ?;", one.preparedStatement().getQueryString());
+        assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithonefield WHERE bucket = ? AND myIndexedField = ?;", one.preparedStatement().getQueryString());
         BoundStatement two = result.get(1);
         assertNotNull(two);
         for (int i = 0; i < 1; i++) {
             assertTrue(two.isSet(i));// 0 and 1 are indexed fields 
         }
         assertEquals("docussandra", two.getKeyspace());
-        assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithtwofields WHERE myIndexedField1 = ? AND myIndexedField2 = ?;", two.preparedStatement().getQueryString());
+        assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithtwofields WHERE bucket = ? AND myIndexedField1 = ? AND myIndexedField2 = ?;", two.preparedStatement().getQueryString());
     }
 
     /**
@@ -282,10 +283,10 @@ public class IndexMaintainerHelperTest {
     @Test
     public void testGenerateCQLStatementForInsert() {
         System.out.println("generateCQLStatementForInsert");
-        String expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithonefield (id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?);";
+        String expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myIndexedField) VALUES (?, ?, ?, ?, ?, ?);";
         String result = IndexMaintainerHelper.generateCQLStatementForInsert(index1);
         assertEquals(expResult, result);
-        expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (id, object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?, ?);";
+        expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myIndexedField1,myIndexedField2) VALUES (?, ?, ?, ?, ?, ?, ?);";
         result = IndexMaintainerHelper.generateCQLStatementForInsert(index2);
         assertEquals(expResult, result);
     }
@@ -297,10 +298,10 @@ public class IndexMaintainerHelperTest {
     @Test
     public void testGenerateCQLStatementForUpdate() {
         System.out.println("generateCQLStatementForUpdate");
-        String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE id = ?;";
+        String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE bucket = ? AND myIndexedField = ?;";
         String result = IndexMaintainerHelper.generateCQLStatementForWhereClauses(IndexMaintainerHelper.ITABLE_UPDATE_CQL, index1);
         assertEquals(expResult, result);
-        expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE myIndexedField1 = ? AND myIndexedField2 = ?;";
+        expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myIndexedField1 = ? AND myIndexedField2 = ?;";
         result = IndexMaintainerHelper.generateCQLStatementForWhereClauses(IndexMaintainerHelper.ITABLE_UPDATE_CQL, index2);
         assertEquals(expResult, result);
     }
