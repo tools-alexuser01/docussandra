@@ -70,7 +70,7 @@ public class IndexMaintainerHelper {
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         //set the bucket
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
-        logger.debug("Bucket ID for entity: " + entity.toString() + " is: " + bucketId);
+        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         //set the id
         bs.setUUID(1, entity.getUuid());
@@ -120,7 +120,7 @@ public class IndexMaintainerHelper {
                 DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
                 //set the bucket
                 String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
-                logger.debug("Bucket ID for entity: " + entity.toString() + " is: " + bucketId);
+                logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
                 bs.setString(2, bucketId);
                 for (int i = 0; i < fields.size(); i++) {
                     String field = fields.get(i);
@@ -164,7 +164,7 @@ public class IndexMaintainerHelper {
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         //set the bucket
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
-        logger.debug("Bucket ID for entity: " + entity.toString() + " is: " + bucketId);
+        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++) {
             String field = fields.get(i);
