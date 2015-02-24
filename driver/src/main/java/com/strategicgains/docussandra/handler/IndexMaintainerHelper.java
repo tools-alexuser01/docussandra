@@ -63,7 +63,11 @@ public class IndexMaintainerHelper {
         BoundStatement bs = new BoundStatement(ps);
 
         //set the bucket Id
-        bs.setString(0, bucketLocator.getBucket(null, entity.getUuid()));
+        //pull the index fields out of the document for binding
+        String documentJSON = entity.object();
+        DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+        //set the bucket
+        bs.setString(0, bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0)))));//note, could have parse problems here with non-string types
         //set the id
         bs.setUUID(1, entity.getUuid());
         //set the blob
@@ -72,10 +76,6 @@ public class IndexMaintainerHelper {
         //set the dates
         bs.setDate(3, entity.getCreatedAt());
         bs.setDate(4, entity.getUpdatedAt());
-
-        //pull the index fields out of the document for binding
-        String documentJSON = entity.object();
-        DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         for (int i = 0; i < fields.size(); i++) {
             String field = fields.get(i);
             String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
@@ -111,11 +111,11 @@ public class IndexMaintainerHelper {
                 bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
                 //set the date
                 bs.setDate(1, entity.getUpdatedAt());
-                //set the bucket
-                bs.setString(2, bucketLocator.getBucket(null, entity.getUuid()));
                 //pull the index fields out of the document for binding
                 String documentJSON = entity.object();
                 DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+                //set the bucket
+                bs.setString(2, bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0)))));//note, could have parse problems here with non-string types
                 for (int i = 0; i < fields.size(); i++) {
                     String field = fields.get(i);
                     String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
