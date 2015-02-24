@@ -18,14 +18,13 @@ package com.strategicgains.docussandra.bucketmanagement;
 
 
 import static com.strategicgains.docussandra.bucketmanagement.ConversionUtils.bytes;
-import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 
-import static org.apache.commons.codec.digest.DigestUtils.md5;
 
 
 /**
@@ -37,10 +36,10 @@ import static org.apache.commons.codec.digest.DigestUtils.md5;
  */
 public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
 
-    public static final BigInteger MINIMUM = BigInteger.ZERO;
-    public static final BigInteger MAXIMUM = new BigInteger( "" + 2 ).pow( 127 );
+    public static final Long MINIMUM = 0l;
+    public static final Long MAXIMUM = Long.MAX_VALUE;
 
-    private final List<BigInteger> buckets = new ArrayList<>( 100 );
+    private final List<Long> buckets = new ArrayList<>( 100 );
     private final List<String> bucketsString = new ArrayList<>( 100 );
     private final int size;
 
@@ -48,7 +47,7 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
     /** Create a bucket locator with the specified size */
     public SimpleIndexBucketLocatorImpl( int size ) {
         for ( int i = 0; i < size; i++ ) {
-            BigInteger integer = initialToken( size, i );
+            Long integer = initialToken( size, i );
             buckets.add( integer );
             bucketsString.add( String.format( "%039d", integer ) );
         }
@@ -64,11 +63,10 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
 
 
     /** Get a token */
-    private static BigInteger initialToken( int size, int position ) {
-        BigInteger decValue = MINIMUM;
+    private static Long initialToken( int size, int position ) {
+        Long decValue = MINIMUM;
         if ( position != 0 ) {
-            decValue = MAXIMUM.divide( new BigInteger( "" + size ) ).multiply( new BigInteger( "" + position ) )
-                              .subtract( BigInteger.ONE );
+            decValue = ((MAXIMUM / size) * position) - 1;
         }
         return decValue;
     }
@@ -76,8 +74,18 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
 
     /** Get the next token in the ring for this big int. */
     private String getClosestToken( UUID entityId ) {
-        BigInteger location = new BigInteger( md5( bytes( entityId ) ) );
-        location = location.abs();
+        byte[] bytes = bytes( entityId );
+        byte[] finalBytes = new byte[8];
+        if(bytes.length > 8){
+            for(int i = 0; i < finalBytes.length; i++){
+                finalBytes[i] = bytes[i];
+            }
+        } else {
+            finalBytes = bytes;//i doubt this will ever happen
+        }
+        ByteBuffer bb = ByteBuffer.wrap(finalBytes);
+        Long location = bb.getLong();
+        location = Math.abs(location);
 
         int index = Collections.binarySearch( buckets, location );
 
