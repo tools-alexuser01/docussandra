@@ -136,8 +136,8 @@ public class UtilsTest {
         assertTrue(bUUID.getMostSignificantBits() < cUUID.getMostSignificantBits());
         assertTrue(cUUID.getMostSignificantBits() < zUUID.getMostSignificantBits());
     }
-    
-        /**
+
+    /**
      * Test of convertStringToUUID method, of class Utils. Tests UUID ordering.
      * This test isn't so much of a unit test as a proof of concept.
      */
@@ -161,8 +161,8 @@ public class UtilsTest {
         assertTrue(bUUID.getMostSignificantBits() < cUUID.getMostSignificantBits());
         assertTrue(cUUID.getMostSignificantBits() < zUUID.getMostSignificantBits());
     }
-    
-        /**
+
+    /**
      * Test of convertStringToUUID method, of class Utils. Tests special chars.
      */
     @Test
@@ -177,6 +177,6 @@ public class UtilsTest {
         result = Utils.convertStringToFuzzyUUID(s);
         result2 = Utils.convertStringToFuzzyUUID(s);
         assertEquals(result2, result);
-        assertEquals("e38193e3-81ae-e382-0000-000000000000", result.toString());        
+        assertEquals("e38193e3-81ae-e382-0000-000000000000", result.toString());
     }
 }
