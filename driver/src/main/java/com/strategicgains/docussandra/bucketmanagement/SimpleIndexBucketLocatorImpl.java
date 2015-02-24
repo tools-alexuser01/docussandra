@@ -73,7 +73,7 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
 
 
     /** Get the next token in the ring for this big int. */
-    private String getClosestToken( UUID entityId ) {
+    private String getClosestToken( UUID entityId ) { //TODO: consider scrapping UUIDs and just going with longs
         byte[] bytes = bytes( entityId );
         byte[] finalBytes = new byte[8];
         if(bytes.length > 8){
