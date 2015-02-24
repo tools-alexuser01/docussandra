@@ -11,13 +11,13 @@ import com.strategicgains.syntaxe.annotation.Required;
 public class Document
         extends AbstractTimestampedIdentifiable
         implements UuidIdentifiable {
-	//TODO: allow something other than UUID as object id.
+    //TODO: allow something other than UUID as object id.
     //TODO: add any necessary metadata regarding a document.
     //TODO: documents are versioned per transaction via updateAt timestamp.
 
     private UUID id;
 
-	// need a separate version (as opposed to updatedAt)?
+    // need a separate version (as opposed to updatedAt)?
 //	private long version;
     @Required("Table")
     @ChildValidation
@@ -75,6 +75,11 @@ public class Document
 
     public void object(String json) {
         this.object = json;
+    }
+
+    @Override
+    public String toString() {
+        return "Document{" + "id=" + id + ", table=" + table + ", object=" + object + '}';
     }
 
 }
