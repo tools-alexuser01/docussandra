@@ -58,10 +58,10 @@ public class Utils {
     public static UUID convertStringToFuzzyUUID(String s) {
         s = s.toLowerCase();
         byte[] string = s.getBytes();
-        if(string.length < 8){//need to pad!
+        if (string.length < 8) {//need to pad!
             byte[] newString = new byte[8];
-            for(int i = 0; i < newString.length; i++){
-                if(i < string.length){
+            for (int i = 0; i < newString.length; i++) {
+                if (i < string.length) {
                     newString[i] = string[i];
                 } else {
                     newString[i] = Character.MIN_VALUE;//
