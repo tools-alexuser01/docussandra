@@ -18,6 +18,8 @@ import java.util.List;
 import org.bson.BSON;
 import org.bson.BSONObject;
 import org.restexpress.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * EventHandler for maintaining indices (really just additional tables with the
@@ -26,6 +28,8 @@ import org.restexpress.common.util.StringUtils;
  * @author udeyoje
  */
 public class IndexMaintainerHelper {
+
+    private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
 
     public static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
@@ -61,13 +65,13 @@ public class IndexMaintainerHelper {
         String finalCQL = generateCQLStatementForInsert(index);
         PreparedStatement ps = session.prepare(finalCQL);
         BoundStatement bs = new BoundStatement(ps);
-
-        //set the bucket Id
         //pull the index fields out of the document for binding
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         //set the bucket
-        bs.setString(0, bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0)))));//note, could have parse problems here with non-string types
+        String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
+        logger.debug("Bucket ID for entity: " + entity.toString() + " is: " + bucketId);
+        bs.setString(0, bucketId);
         //set the id
         bs.setUUID(1, entity.getUuid());
         //set the blob
@@ -115,7 +119,9 @@ public class IndexMaintainerHelper {
                 String documentJSON = entity.object();
                 DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
                 //set the bucket
-                bs.setString(2, bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0)))));//note, could have parse problems here with non-string types
+                String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
+                logger.debug("Bucket ID for entity: " + entity.toString() + " is: " + bucketId);
+                bs.setString(2, bucketId);
                 for (int i = 0; i < fields.size(); i++) {
                     String field = fields.get(i);
                     String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
@@ -153,11 +159,13 @@ public class IndexMaintainerHelper {
         String finalCQL = generateCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
         PreparedStatement ps = session.prepare(finalCQL);
         BoundStatement bs = new BoundStatement(ps);
-        //set the bucket
-        bs.setString(0, bucketLocator.getBucket(null, entity.getUuid()));
         //pull the index fields out of the document for binding
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+        //set the bucket
+        String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
+        logger.debug("Bucket ID for entity: " + entity.toString() + " is: " + bucketId);
+        bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++) {
             String field = fields.get(i);
             String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
