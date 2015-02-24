@@ -5,6 +5,7 @@ import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.strategicgains.docussandra.Utils;
+import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
@@ -76,9 +77,9 @@ public class ITableDaoTest {
     public void testITableExists() {
         System.out.println("iTableExists");
         Index index = createTestIndexOneField();
-        ITableDao instance = new ITableDao(session);
+        ITableDao cleanUpInstance = new ITableDao(session);
         boolean expResult = false;//Note: Negative Test Only
-        boolean result = instance.iTableExists(index);
+        boolean result = cleanUpInstance.iTableExists(index);
         assertEquals(expResult, result);
     }
 
@@ -115,10 +116,10 @@ public class ITableDaoTest {
         ITableDao instance = new ITableDao(session);
         String response = instance.generateTableCreationSyntax(createTestIndexOneField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField varchar, PRIMARY KEY ((id), myIndexedField));", response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField varchar, PRIMARY KEY ((bucket), myIndexedField));", response);
         response = instance.generateTableCreationSyntax(createTestIndexTwoField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField1 varchar, myIndexedField2 varchar, PRIMARY KEY (myIndexedField1, myIndexedField2));", response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField1 varchar, myIndexedField2 varchar, PRIMARY KEY ((bucket), myIndexedField1, myIndexedField2));", response);
     }
 
     /**

@@ -6,6 +6,7 @@ import com.datastax.driver.core.Session;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.Utils;
+import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
@@ -17,6 +18,8 @@ import java.util.List;
 import org.bson.BSON;
 import org.bson.BSONObject;
 import org.restexpress.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * EventHandler for maintaining indices (really just additional tables with the
@@ -26,21 +29,23 @@ import org.restexpress.common.util.StringUtils;
  */
 public class IndexMaintainerHelper {
 
-    public static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, %s);";
+    private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
+
+    public static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
-    public static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ? WHERE %s;";
+    public static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ? WHERE bucket = ? AND %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
-    public static final String ITABLE_DELETE_CQL = "DELETE FROM docussandra.%s WHERE %s;";
+    public static final String ITABLE_DELETE_CQL = "DELETE FROM docussandra.%s WHERE bucket = ? AND %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
 
-    public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity) {
+    public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator) {
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
         for (Index index : indices) {
             //add row to the iTable(s)
-            statementList.add(generateDocumentCreateIndexEntryStatement(session, index, entity));
+            statementList.add(generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator));
         }
         //return a list of commands to accomplish all of this
         return statementList;
@@ -54,34 +59,36 @@ public class IndexMaintainerHelper {
      * @param entity
      * @return
      */
-    private static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity) {
+    private static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
         String finalCQL = generateCQLStatementForInsert(index);
         PreparedStatement ps = session.prepare(finalCQL);
         BoundStatement bs = new BoundStatement(ps);
-
-        //set the id
-        bs.setUUID(0, entity.getUuid());
-        //set the blob
-        BSONObject bson = (BSONObject) JSON.parse(entity.object());
-        bs.setBytes(1, ByteBuffer.wrap(BSON.encode(bson)));
-        //set the dates
-        bs.setDate(2, entity.getCreatedAt());
-        bs.setDate(3, entity.getUpdatedAt());
-
         //pull the index fields out of the document for binding
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+        //set the bucket
+        String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
+        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        bs.setString(0, bucketId);
+        //set the id
+        bs.setUUID(1, entity.getUuid());
+        //set the blob
+        BSONObject bson = (BSONObject) JSON.parse(entity.object());
+        bs.setBytes(2, ByteBuffer.wrap(BSON.encode(bson)));
+        //set the dates
+        bs.setDate(3, entity.getCreatedAt());
+        bs.setDate(4, entity.getUpdatedAt());
         for (int i = 0; i < fields.size(); i++) {
             String field = fields.get(i);
             String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-            bs.setString(i + 4, fieldValue);//offset from the first four non-dynamic fields
+            bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
         }
         return bs;
     }
 
-    public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity) {
+    public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator) {
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
@@ -95,9 +102,9 @@ public class IndexMaintainerHelper {
             //1. determine if an indexed field has changed
             if (hasIndexedFieldChanged(session, index, entity)) {
                 //2a. if the field has changed, create a new index entry
-                statementList.add(generateDocumentCreateIndexEntryStatement(session, index, entity));
+                statementList.add(generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator));
                 //2b. after creating the new index entry, we must delete the old one
-                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity));
+                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
             } else {//3. if an indexed field has not changed, do a normal CQL update
                 String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
                 PreparedStatement ps = session.prepare(finalCQL);
@@ -108,18 +115,17 @@ public class IndexMaintainerHelper {
                 bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
                 //set the date
                 bs.setDate(1, entity.getUpdatedAt());
-
-                if (!index.isUnique()) { //if the index is not unique, use a where clause based on UUID
-                    bs.setUUID(2, entity.getUuid());
-                } else { //if it is unique, we will use a where clause based on index
-                    //pull the index fields out of the document for binding
-                    String documentJSON = entity.object();
-                    DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
-                    for (int i = 0; i < fields.size(); i++) {
-                        String field = fields.get(i);
-                        String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-                        bs.setString(i + 2, fieldValue);//offset from the first two non-dynamic fields
-                    }
+                //pull the index fields out of the document for binding
+                String documentJSON = entity.object();
+                DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+                //set the bucket
+                String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
+                logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+                bs.setString(2, bucketId);
+                for (int i = 0; i < fields.size(); i++) {
+                    String field = fields.get(i);
+                    String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+                    bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
                 }
                 //add row to the iTable(s)
                 statementList.add(bs);
@@ -129,13 +135,13 @@ public class IndexMaintainerHelper {
         return statementList;
     }
 
-    public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity) {
+    public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator) {
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
         for (Index index : indices) {
-            statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity));
+            statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
         }
         return statementList;
     }
@@ -147,23 +153,23 @@ public class IndexMaintainerHelper {
      * @param entity
      * @return
      */
-    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity) {
+    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
         String finalCQL = generateCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
         PreparedStatement ps = session.prepare(finalCQL);
         BoundStatement bs = new BoundStatement(ps);
-        if (!index.isUnique()) { //if the index is not unique, use a where clause based on UUID
-            bs.setUUID(0, entity.getUuid());
-        } else { //if it is unique, we will use a where clause based on index
-            //pull the index fields out of the document for binding
-            String documentJSON = entity.object();
-            DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
-            for (int i = 0; i < fields.size(); i++) {
-                String field = fields.get(i);
-                String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-                bs.setString(i, fieldValue);
-            }
+        //pull the index fields out of the document for binding
+        String documentJSON = entity.object();
+        DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+        //set the bucket
+        String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
+        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        bs.setString(0, bucketId);
+        for (int i = 0; i < fields.size(); i++) {
+            String field = fields.get(i);
+            String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+            bs.setString(i + 1, fieldValue);
         }
         return bs;
     }
@@ -250,19 +256,15 @@ public class IndexMaintainerHelper {
         List<String> fields = index.fields();
         //determine the where clause
         String whereClause;
-        if (!index.isUnique()) {//if the index is not unique,
-            whereClause = "id = ?";//we will use a where statement based on id
-        } else {// if the index is unique, we use the field list
-            StringBuilder setValues = new StringBuilder();
-            for (int i = 0; i < fields.size(); i++) {
-                String field = fields.get(i);
-                if (i != 0) {
-                    setValues.append(" AND ");
-                }
-                setValues.append(field).append(" = ?");
+        StringBuilder setValues = new StringBuilder();
+        for (int i = 0; i < fields.size(); i++) {
+            String field = fields.get(i);
+            if (i != 0) {
+                setValues.append(" AND ");
             }
-            whereClause = setValues.toString();
+            setValues.append(field).append(" = ?");
         }
+        whereClause = setValues.toString();
         //create final CQL statement for updating a row in an iTable(s)        
         return String.format(CQL, iTableToUpdate, whereClause);
     }

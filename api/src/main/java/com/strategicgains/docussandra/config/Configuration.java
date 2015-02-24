@@ -1,8 +1,12 @@
 package com.strategicgains.docussandra.config;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
+import java.util.jar.Manifest;
 
 import org.restexpress.RestExpress;
+import org.restexpress.common.exception.ConfigurationException;
 import org.restexpress.util.Environment;
 
 import com.strategicgains.docussandra.controller.DatabaseController;
@@ -42,6 +46,7 @@ extends Environment
 	private String baseUrl;
 	private int executorThreadPoolSize;
 	private MetricsConfig metricsSettings;
+	private Manifest manifest;
 
 	private DatabaseController databaseController;
 	private TableController tableController;
@@ -58,6 +63,7 @@ extends Environment
 		this.metricsSettings = new MetricsConfig(p);
 		CassandraConfig dbConfig = new CassandraConfig(p);
 		initialize(dbConfig);
+		loadManifest();
 	}
 
 	private void initialize(CassandraConfig dbConfig)
@@ -136,4 +142,62 @@ extends Environment
     {
 		return queryController;
     }
+
+	public String getProjectName(String defaultName)
+    {
+		if (hasManifest())
+		{
+    		String name = manifest.getMainAttributes().getValue("Project-Name");
+
+    		if (name != null)
+    		{
+    			return name;
+    		}
+		}
+
+		return defaultName;
+    }
+
+	public String getProjectVersion()
+    {
+		if (hasManifest())
+		{
+    		String version = manifest.getMainAttributes().getValue("Project-Version");
+
+    		if (version != null)
+    		{
+    			return version;
+    		}
+
+    		return "0.0.0 (Project version not found in manifest)";
+		}
+
+	    return "0.0.0 (Development version)";
+    }
+
+	private void loadManifest()
+	{
+		Class<?> type = this.getClass();
+		String name = type.getSimpleName() + ".class";
+		URL classUrl = type.getResource(name);
+
+		if (classUrl != null && classUrl.getProtocol().startsWith("jar"))
+		{
+			String path = classUrl.toString();
+			String manifestPath = path.substring(0, path.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+			try
+			{
+				manifest = new Manifest(new URL(manifestPath).openStream());
+			}
+			catch (IOException e)
+			{
+				throw new ConfigurationException(e);
+			}
+		}
+	}
+
+	private boolean hasManifest()
+	{
+		return (manifest != null);
+	}
 }
