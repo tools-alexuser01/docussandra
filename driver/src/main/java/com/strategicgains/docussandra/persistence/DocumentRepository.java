@@ -60,7 +60,7 @@ public class DocumentRepository
     public DocumentRepository(Session session) {
         super();
         this.session = session;
-        this.bucketLocator = new SimpleIndexBucketLocatorImpl();
+        this.bucketLocator = new SimpleIndexBucketLocatorImpl(10000);
         addObserver(new UuidIdentityRepositoryObserver<Document>());
         addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Document>());
         addObserver(new StateChangeEventingObserver<Document>(new DocumentEventFactory()));
