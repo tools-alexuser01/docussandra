@@ -115,10 +115,10 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
         return session;
     }
 
-    /**
-     * @param session the session to set
-     */
-    public void setSession(Session session) {
-        this.session = session;
-    }
+//    /**
+//     * @param session the session to set
+//     */
+//    public void setSession(Session session) {
+//        this.session = session;
+//    }
 }
