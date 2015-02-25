@@ -96,4 +96,11 @@ public class WhereClause {
         return values;
     }
 
+    /**
+     * @return the original where clause passed in. Use as a reference only.
+     */
+    public String getWhereClause() {
+        return whereClause;
+    }
+
 }
