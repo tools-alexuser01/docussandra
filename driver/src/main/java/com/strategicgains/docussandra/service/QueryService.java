@@ -24,20 +24,21 @@ public class QueryService {
 
     public List<Document> query(String db, Query toQuery) {
         ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
-            return queries.doQuery(db, parsedQuery);
-        
+        return queries.doQuery(db, parsedQuery);
+
     }
 
-    
     /**
-     * Parses a query to determine if it is valid and determine the information we actually need to perform the query.
+     * Parses a query to determine if it is valid and determine the information
+     * we actually need to perform the query.
+     *
      * @param db Database that the query will run against
      * @param toParse
      * @return A ParsedQuery object for the query.
-     * @throws FieldNotIndexedException 
+     * @throws FieldNotIndexedException
      */
     //TODO: consider caching the results of this method; could be expensive and frequent
-    public ParsedQuery parseQuery(String db, Query toParse) throws FieldNotIndexedException {        
+    public ParsedQuery parseQuery(String db, Query toParse) throws FieldNotIndexedException {
         //let's parse the where clause so we know what we are actually searching for
         WhereClause where = new WhereClause(toParse.getWhere());
         //determine if the query is valid; in other words is it searching on valid fields that we have indexed
@@ -52,24 +53,24 @@ public class QueryService {
             }
         }
         if (indexToUse == null) {//whoops, no perfect match, let try for a partial match (ie, the index has more fields than the query)
-            //TODO: querying on non-primary fields will lead to us being unable to determine which bucket to search
+            //TODO: querying on non-primary fields will lead to us being unable to determine which bucket to search -- give the user an override option, but for now just throw an exception
             for (Index index : indices) {
                 //make a copy of the fieldsToQueryOn so we don't mutate the orginal
                 ArrayList<String> fieldsToQueryOnCopy = new ArrayList<>(fieldsToQueryOn);
                 ArrayList<String> indexFields = new ArrayList<>(index.fields());//make a copy here too
                 fieldsToQueryOnCopy.removeAll(indexFields);//we remove all the fields we have, from the fields we want
                 //if there are not any fields left in fields we want
-                if(fieldsToQueryOn.isEmpty()){
-                   //we have an index that will work (even though we have extra fields in it)
-                   indexToUse = index;
-                   break;
+                if (fieldsToQueryOn.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0))) {//second clause in this statement is what ensure we have a primary index; see TODO above.
+                    //we have an index that will work (even though we have extra fields in it)
+                    indexToUse = index;
+                    break;
                 }
             }
         }
-        if(indexToUse == null){
+        if (indexToUse == null) {
             throw new FieldNotIndexedException(fieldsToQueryOn);
         }
-        ParsedQuery toReturn = new ParsedQuery(toParse, where, Utils.calculateITableName(indexToUse));        
+        ParsedQuery toReturn = new ParsedQuery(toParse, where, Utils.calculateITableName(indexToUse));
         return toReturn;
     }
 
