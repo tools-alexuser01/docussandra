@@ -5,6 +5,7 @@ import com.datastax.driver.core.DefaultPreparedStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import java.util.List;
 
@@ -26,9 +27,9 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
         //initializeStatements();
     }
 
-    public List<Document> doQuery(String db, Query query, String table) {                
+    public List<Document> doQuery(String db, ParsedQuery query) {                
         //format QUERY_CQL
-        String finalQuery = String.format(QUERY_CQL, table, query.getWhere());
+        String finalQuery = String.format(QUERY_CQL, query.getiTable(), query.getWhereClause().getBoundStatementSyntax());
         //run query
         PreparedStatement ps = session.prepare(finalQuery);//TODO: Cache
         BoundStatement bs = new BoundStatement(ps);
