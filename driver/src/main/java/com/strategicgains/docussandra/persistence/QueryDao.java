@@ -52,6 +52,7 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
             bs.bind(i, bindValue);
             i++;
         }
+        //run the query
         ResultSet results = session.execute(bs);
         //process result(s)
         //right now we just are going go return a list of documents
