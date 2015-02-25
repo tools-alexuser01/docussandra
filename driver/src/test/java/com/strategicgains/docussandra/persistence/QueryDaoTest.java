@@ -100,19 +100,25 @@ public class QueryDaoTest {
      * Test of doQuery method, of class QueryDao.
      */
     @Test
-    public void testDoQuery() {
-        System.out.println("doQuery");
-        String db = ITableDaoTest.DB;
+    public void testDoQueryNoResults() {
+        System.out.println("doQuery");                
+        QueryDao instance = new QueryDao(session);
+        List<Document> result = instance.doQuery(ITableDaoTest.DB, createTestParsedQuery());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());//no data yet, should get an empty set
+    }
+    
+    /**
+     * Creates a simple parsed query based on a single index for testing.
+     * @return 
+     */
+    private ParsedQuery createTestParsedQuery(){
         Query query = new Query();
         query.setWhere("myIndexedField = 'foobar'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
         String iTable = "mydb_mytable_myindexwithonefield";
-        ParsedQuery parsedQuery = new ParsedQuery(query, whereClause, iTable);
-        QueryDao instance = new QueryDao(session);
-        List<Document> result = instance.doQuery(db, parsedQuery);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());//no data yet, should get an empty set
+        return new ParsedQuery(query, whereClause, iTable);
     }
 
 }
