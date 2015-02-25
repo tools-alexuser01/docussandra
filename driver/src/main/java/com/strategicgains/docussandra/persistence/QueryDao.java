@@ -42,10 +42,10 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
         PreparedStatement ps = session.prepare(finalQuery);//TODO: Cache
         BoundStatement bs = new BoundStatement(ps);
         //set the bucket
-        bs.bind(0, ibl.getBucket(null, Utils.convertStringToFuzzyUUID(query.getWhereClause().getFields().get(0))));//fuzzy UUID is based on first field value
+        bs.setString(0, ibl.getBucket(null, Utils.convertStringToFuzzyUUID(query.getWhereClause().getFields().get(0))));//fuzzy UUID is based on first field value
         int i = 1;
         for (String bindValue : query.getWhereClause().getValues()) {//no great reason for not using the other loop format
-            bs.bind(i, bindValue);
+            bs.setString(i, bindValue);
             i++;
         }
         //run the query
