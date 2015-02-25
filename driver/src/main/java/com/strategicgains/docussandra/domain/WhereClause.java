@@ -37,6 +37,7 @@ public class WhereClause {
     }
 
     //TODO: this will need improvment; handle exceptions
+    //TODO: bug! can't handle spaces
     private void parse(String whereClause) {
 
         StringBuilder boundStatementBuilder = new StringBuilder();
