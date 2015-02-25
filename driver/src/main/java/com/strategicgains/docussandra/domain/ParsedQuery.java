@@ -70,7 +70,7 @@ public class ParsedQuery {
      * The iTable (index table) that needs to be queried in order to retrieve results.
      * @return 
      */
-    public String getiTable() {
+    public String getITable() {
         return iTable;
     }
 
