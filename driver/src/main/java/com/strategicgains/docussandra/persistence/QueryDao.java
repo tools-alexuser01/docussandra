@@ -6,6 +6,9 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.mongodb.util.JSON;
+import com.strategicgains.docussandra.Utils;
+import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
+import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import java.nio.ByteBuffer;
@@ -23,7 +26,10 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 //	private PreparedStatement createStmt;
 //	private PreparedStatement updateStmt;
 //      
-    private static final String QUERY_CQL = "select * from %s where %s";
+
+    private static final String QUERY_CQL = "select * from %s where bucket = ? AND %s";
+
+    private IndexBucketLocator ibl = new SimpleIndexBucketLocatorImpl(200);
 
     private Session session;
 
@@ -33,24 +39,26 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
         //initializeStatements();
     }
 
-    public List<Document> doQuery(String db, ParsedQuery query) {                
+    public List<Document> doQuery(String db, ParsedQuery query) {
         //format QUERY_CQL
         String finalQuery = String.format(QUERY_CQL, query.getITable(), query.getWhereClause().getBoundStatementSyntax());
         //run query
         PreparedStatement ps = session.prepare(finalQuery);//TODO: Cache
         BoundStatement bs = new BoundStatement(ps);
-        int i = 0;
-        for(String bindValue : query.getWhereClause().getValues()){//no great reason for not using the other loop format
+        //set the bucket
+        bs.bind(0, ibl.getBucket(null, Utils.convertStringToFuzzyUUID(query.getWhereClause().getFields().get(0))));//fuzzy UUID is based on first field value
+        int i = 1;
+        for (String bindValue : query.getWhereClause().getValues()) {//no great reason for not using the other loop format
             bs.bind(i, bindValue);
             i++;
-        }        
+        }
         ResultSet results = session.execute(bs);
         //process result(s)
         //right now we just are going go return a list of documents
         ArrayList<Document> toReturn = new ArrayList<>();
         Iterator<Row> ite = results.iterator();
-        while(ite.hasNext()){
-            Row row = ite.next();                        
+        while (ite.hasNext()) {
+            Row row = ite.next();
             toReturn.add(DocumentRepository.marshalRow(row));
         }
         return toReturn;
@@ -103,7 +111,6 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 //		q.setUpdatedAt(row.getDate("updatedat"));
 //		return q;
 //    }
-
     /**
      * @return the session
      */
