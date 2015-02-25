@@ -36,7 +36,7 @@ public class ParsedQuery {
     /**
      * The iTable (index table) that needs to be queried in order to retrieve results.
      */
-    private String iTable;
+    private String iTable;   
 
     /**
      * Constructor.
@@ -108,8 +108,5 @@ public class ParsedQuery {
     public String toString() {
         return "ParsedQuery{" + "query=" + query + ", whereClause=" + whereClause + ", iTable=" + iTable + '}';
     }
-    
-    
-    
     
 }
