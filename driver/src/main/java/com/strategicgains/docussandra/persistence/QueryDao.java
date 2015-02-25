@@ -1,13 +1,19 @@
 package com.strategicgains.docussandra.persistence;
 
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.DefaultPreparedStatement;
 import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
-import com.strategicgains.docussandra.domain.Query;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import org.bson.BSON;
+import org.bson.BSONObject;
 
 public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 {
@@ -29,14 +35,25 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 
     public List<Document> doQuery(String db, ParsedQuery query) {                
         //format QUERY_CQL
-        String finalQuery = String.format(QUERY_CQL, query.getiTable(), query.getWhereClause().getBoundStatementSyntax());
+        String finalQuery = String.format(QUERY_CQL, query.getITable(), query.getWhereClause().getBoundStatementSyntax());
         //run query
         PreparedStatement ps = session.prepare(finalQuery);//TODO: Cache
         BoundStatement bs = new BoundStatement(ps);
-        //bs.bind(values) - oh, crud; binding dynamic where clause... hm...
-        //deconflict any duplicate results (if we query more than on table?)
-        //return result(s)
-        throw new UnsupportedOperationException("Not done yet");
+        int i = 0;
+        for(String bindValue : query.getWhereClause().getValues()){//no great reason for not using the other loop format
+            bs.bind(i, bindValue);
+            i++;
+        }        
+        ResultSet results = session.execute(bs);
+        //process result(s)
+        //right now we just are going go return a list of documents
+        ArrayList<Document> toReturn = new ArrayList<>();
+        Iterator<Row> ite = results.iterator();
+        while(ite.hasNext()){
+            Row row = ite.next();                        
+            toReturn.add(DocumentRepository.marshalRow(row));
+        }
+        return toReturn;
     }
 
 //	protected void initializeStatements()
