@@ -103,4 +103,11 @@ public class WhereClause {
         return whereClause;
     }
 
+    @Override
+    public String toString() {
+        return "WhereClause{" + "whereClause=" + whereClause + ", boundStatementSyntax=" + boundStatementSyntax + ", fields=" + fields + ", values=" + values + '}';
+    }
+    
+    
+
 }
