@@ -28,24 +28,14 @@ public class QueryService {
         
     }
 
-//    /**
-//     * Parses a query to determine if it is valid and which table we need to
-//     * query on. Will return null if the query is not valid.
-//     *
-//     * @param db Database that the query will run against
-//     * @param toValidate Query to be validated.
-//     * @return A string of the table name that the query will need to execute
-//     * against. Null if the query is not valid.
-//     */
-//    public ParsedQuery validateQueryAndDetermineTable(String db, Query toValidate) {
-//        //determine if the query is valid; in other words is it searching on valid fields that we have indexed
-//        IndexRepository indexRepo = new IndexRepository(queries.getSession());
-//        List<Index> indices = indexRepo.readAll(db, toValidate.getTable());
-//
-//        //determine which iTable(s) we need to query on -- the field could be in more than one iTable, so which one do we pick? the one with the least number of additional fields?
-//        return null;
-//    }
     
+    /**
+     * Parses a query to determine if it is valid and determine the information we actually need to perform the query.
+     * @param db Database that the query will run against
+     * @param toParse
+     * @return A ParsedQuery object for the query.
+     * @throws FieldNotIndexedException 
+     */
     //TODO: consider caching the results of this method; could be expensive and frequent
     public ParsedQuery parseQuery(String db, Query toParse) throws FieldNotIndexedException {        
         //let's parse the where clause so we know what we are actually searching for
