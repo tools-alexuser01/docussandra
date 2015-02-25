@@ -359,7 +359,8 @@ public class IndexMaintainerHelperTest {
      *
      * @return
      */
-    private static Document createTestDocument() {
+    //TODO: move to a TestHelper class
+    public static final Document createTestDocument() {
         Document entity = new Document();
         entity.table("myDB", "myTable");
         entity.object("{'greeting':'hello', 'myIndexedField': 'this is my field', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
