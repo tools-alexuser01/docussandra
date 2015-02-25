@@ -62,6 +62,7 @@ public class QueryService {
             }
         }
         if (indexToUse == null) {//whoops, no perfect match, let try for a partial match (ie, the index has more fields than the query)
+            //TODO: querying on non-primary fields will lead to us being unable to determine which bucket to search
             for (Index index : indices) {
                 //make a copy of the fieldsToQueryOn so we don't mutate the orginal
                 ArrayList<String> fieldsToQueryOnCopy = new ArrayList<>(fieldsToQueryOn);
