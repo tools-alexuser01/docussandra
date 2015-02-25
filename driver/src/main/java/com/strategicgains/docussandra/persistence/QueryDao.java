@@ -13,6 +13,7 @@ import com.strategicgains.docussandra.domain.ParsedQuery;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 {
@@ -42,7 +43,9 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
         PreparedStatement ps = session.prepare(finalQuery);//TODO: Cache
         BoundStatement bs = new BoundStatement(ps);
         //set the bucket
-        bs.setString(0, ibl.getBucket(null, Utils.convertStringToFuzzyUUID(query.getWhereClause().getFields().get(0))));//fuzzy UUID is based on first field value
+        UUID fuzzyUUID = Utils.convertStringToFuzzyUUID(query.getWhereClause().getValues().get(0));//fuzzy UUID is based on first field value
+        String bucket = ibl.getBucket(null, fuzzyUUID);
+        bs.setString(0, bucket);
         int i = 1;
         for (String bindValue : query.getWhereClause().getValues()) {//no great reason for not using the other loop format
             bs.setString(i, bindValue);
