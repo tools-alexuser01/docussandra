@@ -36,7 +36,7 @@ public class WhereClause {
         parse(whereClause);
     }
 
-    //TODO: this will need improvment
+    //TODO: this will need improvment; handle exceptions
     private void parse(String whereClause) {
 
         StringBuilder boundStatementBuilder = new StringBuilder();
