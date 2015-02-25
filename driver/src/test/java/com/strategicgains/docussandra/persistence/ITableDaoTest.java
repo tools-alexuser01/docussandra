@@ -30,6 +30,8 @@ public class ITableDaoTest {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Session session;
     
+    public static final String DB = "myDB";
+    
     public ITableDaoTest() {
     }
     
@@ -163,9 +165,9 @@ public class ITableDaoTest {
      *
      * @return
      */
-    private static Index createTestIndexOneField() {
+    public static final Index createTestIndexOneField() {
         Index index = new Index("myIndexWithOneField");
-        index.table("myDB", "myTable");
+        index.table(DB, "myTable");
         ArrayList<String> fields = new ArrayList<>();
         fields.add("myIndexedField");
         index.fields(fields);
@@ -178,9 +180,9 @@ public class ITableDaoTest {
      *
      * @return
      */
-    private static Index createTestIndexTwoField() {
+    public static final Index createTestIndexTwoField() {
         Index index = new Index("myIndexWithTwoFields");
-        index.table("myDB", "myTable");
+        index.table(DB, "myTable");
         ArrayList<String> fields = new ArrayList<>();
         fields.add("myIndexedField1");
         fields.add("myIndexedField2");
