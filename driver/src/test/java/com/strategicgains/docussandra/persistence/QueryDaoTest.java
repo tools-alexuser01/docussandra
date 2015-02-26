@@ -194,7 +194,7 @@ public class QueryDaoTest {
     //TODO: move to a TestHelper class
     public static final Query createTestQuery() {
         Query query = new Query();
-        query.setWhere("myIndexedField = 'thisismyfield'");
+        query.setWhere("myindexedfield = 'thisismyfield'");
         query.setTable("mytable");
         return query;
     }
@@ -207,7 +207,7 @@ public class QueryDaoTest {
     //TODO: move to a TestHelper class
     public static final ParsedQuery createTestParsedQuery2() {
         Query query = new Query();
-        query.setWhere("myIndexedField = 'foo'");
+        query.setWhere("myindexedfield = 'foo'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
         String iTable = "mydb_mytable_myindexwithonefield";
@@ -230,7 +230,7 @@ public class QueryDaoTest {
     public static final Document createTestDocument() {
         Document entity = new Document();
         entity.table("myDB", "myTable");
-        entity.object("{'greeting':'hello', 'myIndexedField': 'thisismyfield', 'myIndexedField1':'my second field', 'myIndexedField2':'my third field'}");
+        entity.object("{'greeting':'hello', 'myindexedfield': 'thisismyfield', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");
         entity.setUuid(new UUID(0l, 1l));
         entity.setCreatedAt(new Date());
         entity.setUpdatedAt(new Date());
