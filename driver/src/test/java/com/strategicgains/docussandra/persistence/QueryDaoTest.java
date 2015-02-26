@@ -180,12 +180,23 @@ public class QueryDaoTest {
      */
     //TODO: move to a TestHelper class
     public static final ParsedQuery createTestParsedQuery() {
-        Query query = new Query();
-        query.setWhere("myIndexedField = 'thisismyfield'");
-        query.setTable("mytable");
+        Query query = createTestQuery();
         WhereClause whereClause = new WhereClause(query.getWhere());
         String iTable = "mydb_mytable_myindexwithonefield";
         return new ParsedQuery(query, whereClause, iTable);
+    }
+
+    /**
+     * Creates a simple query based on a single index for testing.
+     *
+     * @return
+     */
+    //TODO: move to a TestHelper class
+    public static final Query createTestQuery() {
+        Query query = new Query();
+        query.setWhere("myIndexedField = 'thisismyfield'");
+        query.setTable("mytable");
+        return query;
     }
 
     /**
