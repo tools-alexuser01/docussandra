@@ -118,10 +118,10 @@ public class ITableDaoTest {
         ITableDao instance = new ITableDao(session);
         String response = instance.generateTableCreationSyntax(createTestIndexOneField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField varchar, PRIMARY KEY ((bucket), myIndexedField));", response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield));", response);
         response = instance.generateTableCreationSyntax(createTestIndexTwoField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myIndexedField1 varchar, myIndexedField2 varchar, PRIMARY KEY ((bucket), myIndexedField1, myIndexedField2));", response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield1 varchar, myindexedfield2 varchar, PRIMARY KEY ((bucket), myindexedfield1, myindexedfield2));", response);
     }
 
     /**
@@ -168,9 +168,9 @@ public class ITableDaoTest {
     //TODO: move to a TestHelper class
     public static final Index createTestIndexOneField() {
         Index index = new Index("myIndexWithOneField");
-        index.table(DB, "myTable");
+        index.table(DB, "mytable");
         ArrayList<String> fields = new ArrayList<>();
-        fields.add("myIndexedField");
+        fields.add("myindexedfield");
         index.fields(fields);
         index.isUnique(false);
         return index;
@@ -183,11 +183,11 @@ public class ITableDaoTest {
      */
     //TODO: move to a TestHelper class
     public static final Index createTestIndexTwoField() {
-        Index index = new Index("myIndexWithTwoFields");
-        index.table(DB, "myTable");
+        Index index = new Index("myindexwithtwofields");
+        index.table(DB, "mytable");
         ArrayList<String> fields = new ArrayList<>();
-        fields.add("myIndexedField1");
-        fields.add("myIndexedField2");
+        fields.add("myindexedfield1");
+        fields.add("myindexedfield2");
         index.fields(fields);
         index.isUnique(true);
         return index;
