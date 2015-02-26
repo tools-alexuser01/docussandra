@@ -22,10 +22,12 @@ import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.QueryDao;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.lucene.index.IndexReader;
 import org.bson.BSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -54,6 +56,8 @@ public class QueryServiceTest {
         f.clearTestTables();
         f.createTestTables();
         instance = new QueryService(new QueryDao(f.getSession()));
+        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        indexRepo.create(Fixtures.createTestIndexTwoField());
     }
 
     @After
@@ -96,6 +100,33 @@ public class QueryServiceTest {
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery();
         ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithonefield");
+        ParsedQuery result = instance.parseQuery(db, toParse);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of parseQuery method, of class QueryService.
+     */
+    @Test
+    public void testParseQueryTwoFields() {
+        System.out.println("testParseQueryTwoFields");
+        String db = Fixtures.DB;
+        Query toParse = Fixtures.createTestQuery2();
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithtwofields");
+        ParsedQuery result = instance.parseQuery(db, toParse);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of parseQuery method, of class QueryService.
+     */
+    @Test
+    public void testParseQueryTwoFieldsImperfectMatch() {
+        System.out.println("testParseQueryTwoFieldsImperfectMatch");
+        String db = Fixtures.DB;
+        Query toParse = Fixtures.createTestQuery2();
+        toParse.setWhere("myindexedfield1 = 'thisismyfield'");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithtwofields");
         ParsedQuery result = instance.parseQuery(db, toParse);
         assertEquals(expResult, result);
     }
