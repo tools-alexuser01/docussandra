@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.controller;
 
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
+import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.Main;
 import com.strategicgains.docussandra.domain.Database;
 import org.junit.BeforeClass;
@@ -87,8 +88,21 @@ public class DatabaseControllerTest {
         f.clearTestTables();
     }
 
+//    /**
+//     * Tests that the GET / properly retrieves all existing database
+//     */
+//    @Test
+//    public void getDatabasesTest() {
+//        Database testDb = Fixtures.createTestDatabase();
+//        f.insertDatabase(testDb);
+//        //not the best test
+//        expect().statusCode(200)
+//                .body("", contains(testDb.name()))
+//                .body("", contains(testDb.description())).when()
+//                .get("/");
+//    }
     /**
-     * Tests that the GET /{databases}/ properly retrieves an existing database
+     * Tests that the GET /{databases} properly retrieves an existing database
      */
     @Test
     public void getDatabaseTest() {
@@ -100,6 +114,24 @@ public class DatabaseControllerTest {
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
                 .get("/" + testDb.getId());
+    }
+
+    /**
+     * Tests that the POST /{databases} endpoint properly creates a database.
+     */
+    @Test
+    public void postDatabaseTest() {
+        Database testDb = Fixtures.createTestDatabase();
+        String categoryStr = "{" + "\"description\" : \"" + testDb.description()
+                + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
+
+        given().body(categoryStr).expect().statusCode(201)
+                //.header("Location", startsWith(RestAssured.basePath + "/"))
+                .body("name", equalTo(testDb.name()))
+                .body("description", equalTo(testDb.description()))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue())
+                .when().post(testDb.name());
     }
 
 }
