@@ -13,6 +13,7 @@
 		<module>driver</module>
 		<module>cli</module>
 		<module>api</module>
+		<module>integration_test</module>
 	</modules>
 
 	<dependencies>
@@ -90,6 +91,10 @@
 			<id>tfredrich</id>
 			<name>Todd Fredrich</name>
 			<email>tfredrich@gmail.com</email>
+		</developer>
+		<developer>
+			<id>JeffreyDeYoung</id>
+			<name>Jeffrey DeYoung</name>
 		</developer>
 	</developers>
 </project>
