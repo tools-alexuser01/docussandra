@@ -53,3 +53,7 @@ Naming restrictions on the table name are similar to the database: unique *to th
 * unzip 'assembly file created in above step'
 * cd 'artifact sub-directory'
 * java -jar 'artifact jar file' [environment name]
+
+To run the integration tests:
+
+*mvn clean install -P integration
