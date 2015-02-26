@@ -4,12 +4,14 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
+import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.domain.WhereClause;
+import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.ITableDao;
 import com.strategicgains.docussandra.persistence.IndexRepository;
@@ -135,7 +137,7 @@ public class Fixtures {
     public void clearTestTables() {
         ITableDao cleanUpInstance = new ITableDao(getSession());
         IndexRepository indexRepo = new IndexRepository(getSession());
-
+        DatabaseRepository databaseRepo = new DatabaseRepository(getSession());
         try {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
         } catch (InvalidQueryException e) {
@@ -168,6 +170,11 @@ public class Fixtures {
             indexRepo.delete(Fixtures.createTestIndexTwoField());
         } catch (InvalidQueryException e) {
             logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try {
+            databaseRepo.delete(Fixtures.createTestDatabase());
+        } catch (InvalidQueryException e) {
+            logger.debug("Not deleting database, probably doesn't exist.");
         }
     }
 
@@ -220,8 +227,8 @@ public class Fixtures {
         query.setTable("mytable");
         return query;
     }
-    
-        /**
+
+    /**
      * Creates a simple query based on a single index for testing.
      *
      * @return
@@ -269,6 +276,16 @@ public class Fixtures {
         t.name("mytable");
         t.database(Fixtures.DB);
         return t;
+    }
+
+    public static Database createTestDatabase() {
+        Database database = new Database(DB);
+        database.description("This is a test database.");
+        return database;
+    }
+    public void insertDatabase(Database database) {
+        DatabaseRepository databaseRepo = new DatabaseRepository(getSession());
+        databaseRepo.create(database);
     }
 
     /**

@@ -16,14 +16,19 @@
 package com.strategicgains.docussandra.controller;
 
 import com.jayway.restassured.RestAssured;
+import static com.jayway.restassured.RestAssured.expect;
 import com.strategicgains.docussandra.Main;
+import com.strategicgains.docussandra.domain.Database;
 import org.junit.BeforeClass;
 import org.restexpress.RestExpress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  *
@@ -57,8 +62,12 @@ public class DatabaseControllerTest {
 //        String[] env = {testEnv};
         LOGGER.debug("Loading RestExpress Environment... ");
 
-        server = Main.initializeServer(null);
+        server = Main.initializeServer(new String[0]);
+    }
 
+    @Before
+    public void beforeTest() {
+        f.clearTestTables();
     }
 
     /**
@@ -75,9 +84,22 @@ public class DatabaseControllerTest {
      */
     @After
     public void afterTest() {
-        //f.cleanupTestTables();
+        f.clearTestTables();
     }
-    
-    
+
+    /**
+     * Tests that the GET /{databases}/ properly retrieves an existing database
+     */
+    @Test
+    public void getDatabaseTest() {
+        Database testDb = Fixtures.createTestDatabase();
+        f.insertDatabase(testDb);
+        expect().statusCode(200)
+                .body("name", equalTo(testDb.name()))
+                .body("description", equalTo(testDb.description()))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue()).when()
+                .get("/" + testDb.getId());
+    }
 
 }
