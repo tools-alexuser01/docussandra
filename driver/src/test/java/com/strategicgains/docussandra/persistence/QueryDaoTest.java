@@ -19,6 +19,8 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
+import com.google.common.net.MediaType;
+import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
@@ -33,6 +35,7 @@ import com.strategicgains.repoexpress.domain.Identifier;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import org.bson.BSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -142,6 +145,32 @@ public class QueryDaoTest {
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 1);
+        Document res = result.get(0);
+        assertNotNull(res);
+        assertNotNull(res.getCreatedAt());
+        assertNotNull(res.getUpdatedAt());
+        assertNotNull(res.getUuid());
+        assertNotNull(res.getId());
+        assertNotNull(res.object());
+        BSONObject expected = (BSONObject) JSON.parse(doc.object());
+        BSONObject actual = (BSONObject) JSON.parse(res.object());
+        assertEquals(expected, actual);
+    }
+
+    /**
+     * Test of doQuery method, of class QueryDao.
+     */
+    @Test
+    public void testDoQueryWithDataButNoResults() {
+        System.out.println("testDoQueryWithDataButNoResults");
+        Document doc = this.createTestDocument();
+        //put a test doc in
+        DocumentRepository docRepo = new DocumentRepository(session);
+        docRepo.doCreate(doc);
+        QueryDao instance = new QueryDao(session);
+        List<Document> result = instance.doQuery(ITableDaoTest.DB, createTestParsedQuery2());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     /**
@@ -153,6 +182,21 @@ public class QueryDaoTest {
     public static final ParsedQuery createTestParsedQuery() {
         Query query = new Query();
         query.setWhere("myIndexedField = 'thisismyfield'");
+        query.setTable("mytable");
+        WhereClause whereClause = new WhereClause(query.getWhere());
+        String iTable = "mydb_mytable_myindexwithonefield";
+        return new ParsedQuery(query, whereClause, iTable);
+    }
+
+    /**
+     * Creates a simple parsed query based on a single index for testing.
+     *
+     * @return
+     */
+    //TODO: move to a TestHelper class
+    public static final ParsedQuery createTestParsedQuery2() {
+        Query query = new Query();
+        query.setWhere("myIndexedField = 'foo'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
         String iTable = "mydb_mytable_myindexwithonefield";
