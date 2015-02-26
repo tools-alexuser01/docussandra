@@ -204,20 +204,6 @@ public class Fixtures {
     }
 
     /**
-     * Creates a simple parsed query based on a single index for testing.
-     *
-     * @return
-     */
-    public static final ParsedQuery createTestParsedQuery2() {
-        Query query = new Query();
-        query.setWhere("myindexedfield = 'foo'");
-        query.setTable("mytable");
-        WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexwithonefield";
-        return new ParsedQuery(query, whereClause, iTable);
-    }
-
-    /**
      * Creates a simple query based on a single index for testing.
      *
      * @return
@@ -237,6 +223,20 @@ public class Fixtures {
      */
     public static final ParsedQuery createTestParsedQuery() {
         Query query = createTestQuery();
+        WhereClause whereClause = new WhereClause(query.getWhere());
+        String iTable = "mydb_mytable_myindexwithonefield";
+        return new ParsedQuery(query, whereClause, iTable);
+    }
+
+    /**
+     * Creates a simple parsed query based on a single index for testing.
+     *
+     * @return
+     */
+    public static final ParsedQuery createTestParsedQuery2() {
+        Query query = new Query();
+        query.setWhere("myindexedfield = 'foo'");
+        query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
         String iTable = "mydb_mytable_myindexwithonefield";
         return new ParsedQuery(query, whereClause, iTable);
