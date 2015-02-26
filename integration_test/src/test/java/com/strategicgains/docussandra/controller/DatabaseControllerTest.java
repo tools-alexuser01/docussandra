@@ -22,6 +22,8 @@ import org.restexpress.RestExpress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import org.junit.After;
+import org.junit.AfterClass;
 
 /**
  *
@@ -58,5 +60,24 @@ public class DatabaseControllerTest {
         server = Main.initializeServer(null);
 
     }
+
+    /**
+     * Cleanup that is performed once after all of the tests in this class are
+     * executed.
+     */
+    @AfterClass
+    public static void afterClass() {
+        server.shutdown();
+    }
+
+    /**
+     * Cleanup that is performed after each test is executed.
+     */
+    @After
+    public void afterTest() {
+        //f.cleanupTestTables();
+    }
+    
+    
 
 }
