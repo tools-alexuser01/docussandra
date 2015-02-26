@@ -56,7 +56,6 @@ public class QueryServiceTest {
         instance = new QueryService(new QueryDao(f.getSession()));
     }
 
-
     @After
     public void tearDown() {
         f.clearTestTables();
@@ -100,8 +99,8 @@ public class QueryServiceTest {
         ParsedQuery result = instance.parseQuery(db, toParse);
         assertEquals(expResult, result);
     }
-    
-        /**
+
+    /**
      * Test of parseQuery method, of class QueryService.
      */
     @Test
@@ -113,7 +112,7 @@ public class QueryServiceTest {
         boolean expectedExceptionThrown = false;
         try {
             ParsedQuery result = instance.parseQuery(db, toParse);
-        } catch (FieldNotIndexedException e){
+        } catch (FieldNotIndexedException e) {
             expectedExceptionThrown = true;
             assertTrue(e.getLocalizedMessage().contains("nonIndexedField"));
         }
