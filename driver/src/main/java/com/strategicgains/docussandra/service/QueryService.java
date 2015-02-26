@@ -74,6 +74,7 @@ public class QueryService {
         return toReturn;
     }
 
+    //TODO: move this to PearsonLibrary
     public boolean equalLists(List<String> one, List<String> two) {
         if (one == null && two == null) {
             return true;
