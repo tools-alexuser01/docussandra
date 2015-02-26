@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -134,4 +135,36 @@ public class DatabaseControllerTest {
                 .when().post(testDb.name());
     }
 
+    /**
+     * Tests that the PUT /{databases} endpoint properly updates a database.
+     */
+    @Test
+    @Ignore
+    public void putDatabaseTest() {
+        Database testDb = Fixtures.createTestDatabase();
+        f.insertDatabase(testDb);
+        String newDesciption = "this is a new description";
+        String categoryStr = "{" + "\"description\" : \"" + newDesciption
+                + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
+
+        given().body(categoryStr).expect().statusCode(201)
+                //.header("Location", startsWith(RestAssured.basePath + "/"))
+                .body("name", equalTo(testDb.name()))
+                .body("description", equalTo(newDesciption))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue())
+                .when().put(testDb.name());
+    }
+
+    /**
+     * Tests that the DELETE /{databases} endpoint properly updates a database.
+     */
+    @Test
+    public void deleteDatabaseTest() {
+        Database testDb = Fixtures.createTestDatabase();
+        f.insertDatabase(testDb);
+
+        given().expect().statusCode(204)
+                .when().delete(testDb.name());
+    }
 }
