@@ -60,7 +60,7 @@ public class QueryService {
                 ArrayList<String> indexFields = new ArrayList<>(index.fields());//make a copy here too
                 fieldsToQueryOnCopy.removeAll(indexFields);//we remove all the fields we have, from the fields we want
                 //if there are not any fields left in fields we want
-                if (fieldsToQueryOn.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0))) {//second clause in this statement is what ensure we have a primary index; see TODO above.
+                if (fieldsToQueryOnCopy.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0))) {//second clause in this statement is what ensure we have a primary index; see TODO above.
                     //we have an index that will work (even though we have extra fields in it)
                     indexToUse = index;
                     break;
