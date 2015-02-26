@@ -20,6 +20,7 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.WhereClause;
+import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.QueryDao;
 import com.strategicgains.docussandra.testhelper.Fixtures;
@@ -91,13 +92,32 @@ public class QueryServiceTest {
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQuery() {
-        System.out.println("parseQuery");
+    public void testParseQueryBasic() {
+        System.out.println("testParseQueryBasic");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery();
         ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithonefield");
         ParsedQuery result = instance.parseQuery(db, toParse);
         assertEquals(expResult, result);
+    }
+    
+        /**
+     * Test of parseQuery method, of class QueryService.
+     */
+    @Test
+    public void testParseQueryException() {
+        System.out.println("testParseQueryException");
+        String db = Fixtures.DB;
+        Query toParse = Fixtures.createTestQuery();
+        toParse.setWhere("nonIndexedField = 'boo'");
+        boolean expectedExceptionThrown = false;
+        try {
+            ParsedQuery result = instance.parseQuery(db, toParse);
+        } catch (FieldNotIndexedException e){
+            expectedExceptionThrown = true;
+            assertTrue(e.getLocalizedMessage().contains("nonIndexedField"));
+        }
+        assertTrue("Expected exception not thrown", expectedExceptionThrown);
     }
 
     /**
