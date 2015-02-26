@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<name>Docussandra-Integration_test</name>
-	<description>An HTTP/REST document database API</description>
-	<artifactId>docussandra-integration_test</artifactId>
-	<parent>
-		<groupId>com.strategicgains.docussandra</groupId>
-		<artifactId>docussandra-parent</artifactId>
-		<version>1.0-SNAPSHOT</version>
-	</parent> <!-- build settings -->
+    <name>Docussandra-Integration_test</name>
+    <description>An HTTP/REST document database API</description>
+    <artifactId>docussandra-integration_test</artifactId>
+    <parent>
+        <groupId>com.strategicgains.docussandra</groupId>
+        <artifactId>docussandra-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent> <!-- build settings -->
     <profiles>
         <profile>
             <activation>
@@ -117,5 +117,34 @@
             </plugin>
         </plugins>
     </build>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>1.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jcl</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.strategicgains.docussandra</groupId>
+            <artifactId>docussandra-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.strategicgains.docussandra</groupId>
+            <artifactId>docussandra-driver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
 
