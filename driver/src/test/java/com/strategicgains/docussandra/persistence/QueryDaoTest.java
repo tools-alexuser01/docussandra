@@ -15,26 +15,10 @@
  */
 package com.strategicgains.docussandra.persistence;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Metadata;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.exceptions.InvalidQueryException;
-import com.google.common.net.MediaType;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
-import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.ParsedQuery;
-import com.strategicgains.docussandra.domain.Query;
-import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.domain.WhereClause;
-import com.strategicgains.docussandra.handler.IndexMaintainerHelperTest;
-import static com.strategicgains.docussandra.persistence.ITableDaoTest.createTestIndexOneField;
-import static com.strategicgains.docussandra.persistence.ITableDaoTest.createTestIndexTwoField;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import com.strategicgains.repoexpress.domain.Identifier;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import org.bson.BSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -52,9 +36,9 @@ import org.slf4j.LoggerFactory;
 public class QueryDaoTest {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Session session;
-
+    private Fixtures f;
     public QueryDaoTest() {
+        f = Fixtures.getInstance();
     }
 
     @BeforeClass
@@ -67,55 +51,13 @@ public class QueryDaoTest {
 
     @Before
     public void setUp() {
-        Fixtures f = Fixtures.getInstance();
-        Cluster cluster = Cluster.builder().addContactPoints(f.getCassandraSeeds()).build();
-        final Metadata metadata = cluster.getMetadata();
-        session = cluster.connect(f.getCassandraKeyspace());
-        logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
-        clearTestTables();
-        createTestTables();
-    }
-
-    private void clearTestTables() {
-        ITableDao cleanUpInstance = new ITableDao(session);
-        try {
-            cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping iTable, probably doesn't exist.");
-        }
-        try {
-            cleanUpInstance.deleteITable("mydb_mytable_myindexwithtwofields");
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping iTable, probably doesn't exist.");
-        }
-        try {
-            DocumentRepository docRepo = new DocumentRepository(session);
-            docRepo.delete(this.createTestDocument());
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping document, probably doesn't exist.");
-        }
-        try {
-            TableRepository tableRepo = new TableRepository(session);
-            tableRepo.deleteEntity(createTestTable());
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping table, probably doesn't exist.");
-        }
-    }
-
-    private void createTestTables() {
-        System.out.println("createTestITables");
-        Index index = ITableDaoTest.createTestIndexOneField();
-        ITableDao instance = new ITableDao(session);
-        instance.createITable(index);
-        Index index2 = ITableDaoTest.createTestIndexTwoField();
-        instance.createITable(index2);
-        TableRepository tableRepo = new TableRepository(session);
-        tableRepo.createEntity(createTestTable());
+        f.clearTestTables();
+        f.createTestTables();
     }
 
     @After
     public void tearDown() {
-        clearTestTables();
+        f.clearTestTables();
     }
 
     /**
@@ -124,8 +66,8 @@ public class QueryDaoTest {
     @Test
     public void testDoQueryNoResults() {
         System.out.println("testDoQueryNoResults");
-        QueryDao instance = new QueryDao(session);
-        List<Document> result = instance.doQuery(ITableDaoTest.DB, createTestParsedQuery());
+        QueryDao instance = new QueryDao(f.getSession());
+        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(result.isEmpty());//no data yet, should get an empty set
     }
@@ -136,12 +78,12 @@ public class QueryDaoTest {
     @Test
     public void testDoQueryWithResults() {
         System.out.println("testDoQueryWithResults");
-        Document doc = this.createTestDocument();
+        Document doc = Fixtures.createTestDocument();
         //put a test doc in
-        DocumentRepository docRepo = new DocumentRepository(session);
+        DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
-        QueryDao instance = new QueryDao(session);
-        List<Document> result = instance.doQuery(ITableDaoTest.DB, createTestParsedQuery());
+        QueryDao instance = new QueryDao(f.getSession());
+        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 1);
@@ -163,77 +105,14 @@ public class QueryDaoTest {
     @Test
     public void testDoQueryWithDataButNoResults() {
         System.out.println("testDoQueryWithDataButNoResults");
-        Document doc = this.createTestDocument();
+        Document doc = Fixtures.createTestDocument();
         //put a test doc in
-        DocumentRepository docRepo = new DocumentRepository(session);
+        DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
-        QueryDao instance = new QueryDao(session);
-        List<Document> result = instance.doQuery(ITableDaoTest.DB, createTestParsedQuery2());
+        QueryDao instance = new QueryDao(f.getSession());
+        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery2());
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
-    /**
-     * Creates a simple parsed query based on a single index for testing.
-     *
-     * @return
-     */
-    //TODO: move to a TestHelper class
-    public static final ParsedQuery createTestParsedQuery() {
-        Query query = createTestQuery();
-        WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexwithonefield";
-        return new ParsedQuery(query, whereClause, iTable);
-    }
-
-    /**
-     * Creates a simple query based on a single index for testing.
-     *
-     * @return
-     */
-    //TODO: move to a TestHelper class
-    public static final Query createTestQuery() {
-        Query query = new Query();
-        query.setWhere("myindexedfield = 'thisismyfield'");
-        query.setTable("mytable");
-        return query;
-    }
-
-    /**
-     * Creates a simple parsed query based on a single index for testing.
-     *
-     * @return
-     */
-    //TODO: move to a TestHelper class
-    public static final ParsedQuery createTestParsedQuery2() {
-        Query query = new Query();
-        query.setWhere("myindexedfield = 'foo'");
-        query.setTable("mytable");
-        WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexwithonefield";
-        return new ParsedQuery(query, whereClause, iTable);
-    }
-
-    /**
-     * Creates a simple table for testing.
-     *
-     * @return
-     */
-    //TODO: move to a TestHelper class
-    public static final Table createTestTable() {
-        Table t = new Table();
-        t.name("mytable");
-        t.database(ITableDaoTest.DB);
-        return t;
-    }
-
-    public static final Document createTestDocument() {
-        Document entity = new Document();
-        entity.table("myDB", "myTable");
-        entity.object("{'greeting':'hello', 'myindexedfield': 'thisismyfield', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");
-        entity.setUuid(new UUID(0l, 1l));
-        entity.setCreatedAt(new Date());
-        entity.setUpdatedAt(new Date());
-        return entity;
-    }
 }
