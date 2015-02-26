@@ -2,8 +2,6 @@ package com.strategicgains.docussandra.domain;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.StringTokenizer;
-import org.restexpress.common.util.StringUtils;
 
 /**
  * Object that represents a CQL where clause to the extent that we need to
@@ -38,14 +36,14 @@ public class WhereClause {
     }
 
     //TODO: this will need improvment; handle exceptions
-    //TODO: bug! can't handle spaces
     private void parse(String whereClause) {
 
         StringBuilder boundStatementBuilder = new StringBuilder();
         //foo = 'fooish' AND bar < 'barish'... [ORDER BY] foo
         String[] tokens = whereClause.split("\\Q \\E");
         int currentOperator = FIELD;
-        for (String token : tokens) {
+        for (int i = 0; i < tokens.length; i++) {
+            String token = tokens[i];
             switch (currentOperator) {
                 case FIELD:
                     fields.add(token);
@@ -58,7 +56,18 @@ public class WhereClause {
                     break;
                 case VALUE:
                     boundStatementBuilder.append("?");
-                    values.add(token.replaceAll("\\Q'\\E", ""));
+                    StringBuilder sb = new StringBuilder();
+                    if (token.charAt(0) == '\'') {
+                        token = token.substring(1);//take out the quote
+                    }
+                    while (token.charAt(token.length() - 1) != '\'') {
+                        sb.append(token);
+                        sb.append(" ");//put the spaces back in
+                        token = tokens[++i];
+                    }
+                    token = token.substring(0, token.length() - 1);//take out the quote
+                    sb.append(token);//last token
+                    values.add(sb.toString());
                     currentOperator = CONJUNCTION;
                     break;
                 case CONJUNCTION:
@@ -143,7 +152,5 @@ public class WhereClause {
         }
         return true;
     }
-    
-    
 
 }
