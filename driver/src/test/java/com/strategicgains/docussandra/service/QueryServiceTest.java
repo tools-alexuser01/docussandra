@@ -153,14 +153,11 @@ public class QueryServiceTest {
     @Ignore
     public void testParseQuery() {
         System.out.println("parseQuery");
-        String db = "";
+        String db = ITableDaoTest.DB;
         Query toParse = null;
-        QueryService instance = null;
         ParsedQuery expResult = null;
         ParsedQuery result = instance.parseQuery(db, toParse);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
