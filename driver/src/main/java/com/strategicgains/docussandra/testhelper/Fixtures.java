@@ -20,10 +20,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
+
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ * Used for testing only! Allows us to quickly establish a database connection
+ * and work with test data.
+ *
+ * @author udeyoje
+ */
 public class Fixtures {
 
     private static final Fixtures INSTANCE = new Fixtures();
@@ -34,6 +42,7 @@ public class Fixtures {
     private Session session;
     private final String[] cassandraSeeds;
     private final String cassandraKeyspace;
+
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -57,7 +66,8 @@ public class Fixtures {
     }
 
     /**
-     * Get this singleton instance
+
+     * Get this singleton instance. THIS CLASS IS FOR TESTING ONLY.
      *
      * @return the singleton instance
      */
