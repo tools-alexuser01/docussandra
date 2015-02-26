@@ -19,6 +19,7 @@ import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
+import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.QueryDao;
 import com.strategicgains.docussandra.testhelper.Fixtures;
@@ -90,12 +91,11 @@ public class QueryServiceTest {
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    @Ignore
     public void testParseQuery() {
         System.out.println("parseQuery");
         String db = Fixtures.DB;
-        Query toParse = null;
-        ParsedQuery expResult = null;
+        Query toParse = Fixtures.createTestQuery();
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithonefield");
         ParsedQuery result = instance.parseQuery(db, toParse);
         assertEquals(expResult, result);
     }
