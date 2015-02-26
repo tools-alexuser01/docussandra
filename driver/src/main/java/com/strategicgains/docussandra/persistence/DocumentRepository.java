@@ -224,7 +224,7 @@ public class DocumentRepository
         return t;
     }
 
-    private Document marshalRow(Row row) {
+    public static Document marshalRow(Row row) {
         if (row == null) {
             return null;
         }
