@@ -1,6 +1,7 @@
 package com.strategicgains.docussandra.domain;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.StringTokenizer;
 import org.restexpress.common.util.StringUtils;
 
@@ -107,6 +108,40 @@ public class WhereClause {
     @Override
     public String toString() {
         return "WhereClause{" + "whereClause=" + whereClause + ", boundStatementSyntax=" + boundStatementSyntax + ", fields=" + fields + ", values=" + values + '}';
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 23 * hash + Objects.hashCode(this.whereClause);
+        hash = 23 * hash + Objects.hashCode(this.boundStatementSyntax);
+        hash = 23 * hash + Objects.hashCode(this.fields);
+        hash = 23 * hash + Objects.hashCode(this.values);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final WhereClause other = (WhereClause) obj;
+        if (!Objects.equals(this.whereClause, other.whereClause)) {
+            return false;
+        }
+        if (!Objects.equals(this.boundStatementSyntax, other.boundStatementSyntax)) {
+            return false;
+        }
+        if (!Objects.equals(this.fields, other.fields)) {
+            return false;
+        }
+        if (!Objects.equals(this.values, other.values)) {
+            return false;
+        }
+        return true;
     }
     
     
