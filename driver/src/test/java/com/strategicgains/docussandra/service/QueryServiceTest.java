@@ -15,24 +15,13 @@
  */
 package com.strategicgains.docussandra.service;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Metadata;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
-import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
-import com.strategicgains.docussandra.persistence.ITableDao;
-import com.strategicgains.docussandra.persistence.ITableDaoTest;
-import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.QueryDao;
-import com.strategicgains.docussandra.persistence.QueryDaoTest;
-import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import com.strategicgains.repoexpress.domain.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.BSONObject;
@@ -51,73 +40,24 @@ import org.slf4j.LoggerFactory;
 public class QueryServiceTest {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Session session;
     private QueryService instance;
+    private Fixtures f;
 
     public QueryServiceTest() {
+        f = Fixtures.getInstance();
     }
 
     @Before
     public void setUp() {
-        Fixtures f = Fixtures.getInstance();
-        Cluster cluster = Cluster.builder().addContactPoints(f.getCassandraSeeds()).build();
-        final Metadata metadata = cluster.getMetadata();
-        session = cluster.connect(f.getCassandraKeyspace());
-        logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
-        clearTestTables();
-        createTestTables();
-        instance = new QueryService(new QueryDao(session));
+        f.clearTestTables();
+        f.createTestTables();
+        instance = new QueryService(new QueryDao(f.getSession()));
     }
 
-    private void clearTestTables() {
-        ITableDao cleanUpInstance = new ITableDao(session);
-        try {
-            cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping iTable, probably doesn't exist.");
-        }
-        try {
-            cleanUpInstance.deleteITable("mydb_mytable_myindexwithtwofields");
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping iTable, probably doesn't exist.");
-        }
-        try {
-            DocumentRepository docRepo = new DocumentRepository(session);
-            docRepo.delete(QueryDaoTest.createTestDocument());
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping document, probably doesn't exist.");
-        }
-        try {
-            TableRepository tableRepo = new TableRepository(session);
-            tableRepo.delete(QueryDaoTest.createTestTable());
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping table, probably doesn't exist.");
-        }
-        try {
-            IndexRepository indexRepo = new IndexRepository(session);
-            indexRepo.delete(ITableDaoTest.createTestIndexOneField());
-        } catch (InvalidQueryException e) {
-            logger.debug("Not dropping table, probably doesn't exist.");
-        }
-    }
-
-    private void createTestTables() {
-        System.out.println("createTestITables");
-        Index index = ITableDaoTest.createTestIndexOneField();
-        IndexRepository indexRepo = new IndexRepository(session);
-        indexRepo.create(index);
-        ITableDao instance = new ITableDao(session);
-        //instance.createITable(index);
-        Index index2 = ITableDaoTest.createTestIndexTwoField();
-        instance.createITable(index2);
-        TableRepository tableRepo = new TableRepository(session);
-        tableRepo.create(QueryDaoTest.createTestTable());
-
-    }
 
     @After
     public void tearDown() {
-        clearTestTables();
+        f.clearTestTables();
     }
 
     /**
@@ -126,11 +66,11 @@ public class QueryServiceTest {
     @Test
     public void testQuery() {
         System.out.println("query");
-        Document doc = QueryDaoTest.createTestDocument();
+        Document doc = Fixtures.createTestDocument();
         //put a test doc in
-        DocumentRepository docRepo = new DocumentRepository(session);
+        DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
-        List<Document> result = instance.query(ITableDaoTest.DB, QueryDaoTest.createTestQuery());
+        List<Document> result = instance.query(Fixtures.DB, Fixtures.createTestQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 1);
@@ -153,7 +93,7 @@ public class QueryServiceTest {
     @Ignore
     public void testParseQuery() {
         System.out.println("parseQuery");
-        String db = ITableDaoTest.DB;
+        String db = Fixtures.DB;
         Query toParse = null;
         ParsedQuery expResult = null;
         ParsedQuery result = instance.parseQuery(db, toParse);
