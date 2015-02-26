@@ -103,7 +103,7 @@ public class DatabaseControllerTest {
 //                .get("/");
 //    }
     /**
-     * Tests that the GET /{databases} properly retrieves an existing database
+     * Tests that the GET /{databases} properly retrieves an existing database.
      */
     @Test
     public void getDatabaseTest() {
@@ -123,10 +123,10 @@ public class DatabaseControllerTest {
     @Test
     public void postDatabaseTest() {
         Database testDb = Fixtures.createTestDatabase();
-        String categoryStr = "{" + "\"description\" : \"" + testDb.description()
+        String dbStr = "{" + "\"description\" : \"" + testDb.description()
                 + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
 
-        given().body(categoryStr).expect().statusCode(201)
+        given().body(dbStr).expect().statusCode(201)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
                 .body("name", equalTo(testDb.name()))
                 .body("description", equalTo(testDb.description()))
@@ -144,10 +144,10 @@ public class DatabaseControllerTest {
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         String newDesciption = "this is a new description";
-        String categoryStr = "{" + "\"description\" : \"" + newDesciption
+        String dbStr = "{" + "\"description\" : \"" + newDesciption
                 + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
 
-        given().body(categoryStr).expect().statusCode(201)
+        given().body(dbStr).expect().statusCode(201)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
                 .body("name", equalTo(testDb.name()))
                 .body("description", equalTo(newDesciption))
@@ -157,7 +157,7 @@ public class DatabaseControllerTest {
     }
 
     /**
-     * Tests that the DELETE /{databases} endpoint properly updates a database.
+     * Tests that the DELETE /{databases} endpoint properly deletes a database.
      */
     @Test
     public void deleteDatabaseTest() {
