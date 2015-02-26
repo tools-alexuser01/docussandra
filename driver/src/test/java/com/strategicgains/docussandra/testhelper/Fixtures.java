@@ -168,12 +168,13 @@ public class Fixtures {
 
     public void createTestTables() {
         System.out.println("createTestITables");
+        ITableDao iTableDao = new ITableDao(getSession());
         Index index = Fixtures.createTestIndexOneField();
+        Index index2 = Fixtures.createTestIndexTwoField();
         IndexRepository indexRepo = new IndexRepository(getSession());
         indexRepo.create(index);
-        ITableDao instance = new ITableDao(getSession());
-        Index index2 = Fixtures.createTestIndexTwoField();
-        instance.createITable(index2);
+        //indexRepo.create(index2);
+        iTableDao.createITable(index2);
         TableRepository tableRepo = new TableRepository(getSession());
         tableRepo.create(Fixtures.createTestTable());
     }
@@ -208,10 +209,21 @@ public class Fixtures {
      *
      * @return
      */
-    //TODO: move to a TestHelper class
     public static final Query createTestQuery() {
         Query query = new Query();
         query.setWhere("myindexedfield = 'thisismyfield'");
+        query.setTable("mytable");
+        return query;
+    }
+    
+        /**
+     * Creates a simple query based on a single index for testing.
+     *
+     * @return
+     */
+    public static final Query createTestQuery2() {
+        Query query = new Query();
+        query.setWhere("myindexedfield1 = 'thisismyfield' AND myindexedfield2 = 'blah'");
         query.setTable("mytable");
         return query;
     }
