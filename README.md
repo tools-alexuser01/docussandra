@@ -26,3 +26,7 @@ To run the project via the assembly (zip file):
 * unzip 'assembly file created in above step'
 * cd 'artifact sub-directory'
 * java -jar 'artifact jar file' [environment name]
+
+To run the integration tests:
+
+*mvn clean install -P integration
