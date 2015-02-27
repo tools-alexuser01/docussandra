@@ -221,6 +221,11 @@ public class Fixtures {
         return entity;
     }
 
+    public void insertDocument(Document document) {
+        DocumentRepository documentRepo = new DocumentRepository(getSession());
+        documentRepo.create(document);
+    }
+
     /**
      * Creates a simple query based on a single index for testing.
      *
