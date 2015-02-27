@@ -18,12 +18,20 @@ package com.strategicgains.docussandra.controller;
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
+import com.jayway.restassured.parsing.Parser;
+import com.jayway.restassured.response.Response;
+import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import com.strategicgains.repoexpress.domain.Identifier;
+import java.util.UUID;
+import org.bson.BSONObject;
 import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -60,7 +68,6 @@ public class DocumentControllerTest {
 
 //        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
 //        String[] env = {testEnv};
-        LOGGER.debug("Loading RestExpress Environment... ");
         //Thread.sleep(10000);
         RestExpressManager.getManager().ensureRestExpressRunning();
     }
@@ -70,7 +77,9 @@ public class DocumentControllerTest {
         f.clearTestTables();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
-        RestAssured.basePath = "/" + testDb.name();
+        Table testTable = Fixtures.createTestTable();
+        f.insertTable(testTable);
+        RestAssured.basePath = "/" + testDb.name() + "/" + testTable.name();
     }
 
     /**
@@ -98,38 +107,46 @@ public class DocumentControllerTest {
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
         expect().statusCode(200)
-                .body("id", equalTo(testDocument.getId().toString()))
-                .body("object", containsString(testDocument.object()))
+                .body("id", equalTo(testDocument.getUuid().toString()))
+                .body("object", notNullValue())
+                .body("object", containsString("greeting"))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get(testDocument.getId().toString());
+                .get(testDocument.getUuid().toString());
     }
 
-//    /**
-//     * Tests that the POST /{databases}/{table} endpoint properly creates a
-//     * table.
-//     */
-//    @Test
-//    public void postDocumentTest() {
-//        Document testDocument = Fixtures.createTestDocument();
-//        String tableStr = "{" + "\"description\" : \"" + testDocument.description()
-//                + "\"," + "\"name\" : \"" + testDocument.name() + "\"}";
-//        //act
-//        given().body(tableStr).expect().statusCode(201)
-//                //.header("Location", startsWith(RestAssured.basePath + "/"))
-//                .body("name", equalTo(testDocument.name()))
-//                .body("description", equalTo(testDocument.description()))
-//                .body("createdAt", notNullValue())
-//                .body("updatedAt", notNullValue())
-//                .when().post(testDocument.name());
-//        //check
-//        expect().statusCode(200)
-//                .body("name", equalTo(testDocument.name()))
-//                .body("description", equalTo(testDocument.description()))
-//                .body("createdAt", notNullValue())
-//                .body("updatedAt", notNullValue()).when()
-//                .get(testDocument.name());
-//    }
+    /**
+     * Tests that the POST /{databases}/{table} endpoint properly creates a
+     * table.
+     */
+    @Test
+    public void postDocumentTest() {
+        Document testDocument = Fixtures.createTestDocument();
+        String tableStr = testDocument.object();
+
+        //act
+        Response r = given().body(tableStr).expect().statusCode(201)
+                .body("id", notNullValue())
+                .body("object", notNullValue())
+                .body("object", containsString("greeting"))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue())
+                .when().post("/").andReturn();
+
+        BSONObject bson = (BSONObject) JSON.parse(r.getBody().asString());
+        String id = (String) bson.get("id");
+        //check
+        expect().statusCode(200)
+                .body("id", equalTo(id))
+                .body("object", notNullValue())
+                .body("object", containsString("greeting"))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue())
+                .get(id);
+        testDocument.setUuid(UUID.fromString(id));
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
+    }
 //
 //    /**
 //     * Tests that the PUT /{databases}/{table} endpoint properly updates a
