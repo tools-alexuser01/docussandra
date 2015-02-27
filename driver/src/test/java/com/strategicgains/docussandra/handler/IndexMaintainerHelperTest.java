@@ -92,7 +92,7 @@ public class IndexMaintainerHelperTest {
 
     @After
     public void tearDown() {
-         f.clearTestTables();// clear anything that might be there already
+        f.clearTestTables();// clear anything that might be there already
     }
 
     /**
@@ -119,6 +119,19 @@ public class IndexMaintainerHelperTest {
         }
         assertEquals("docussandra", two.getKeyspace());
         assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1,myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
+    }
+
+    /**
+     * Test of generateDocumentCreateIndexEntriesStatements method, of class
+     * IndexMaintainerHelper.
+     */
+    @Test
+    public void testGenerateDocumentCreateIndexEntriesStatementsNoIndexField() {
+        System.out.println("testGenerateDocumentCreateIndexEntriesStatementsNoIndexField");
+        Document entity = Fixtures.createTestDocument2();
+        entity.object("{}");//good luck indexing that!
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
+        assertTrue(result.isEmpty());
     }
 
     /**
