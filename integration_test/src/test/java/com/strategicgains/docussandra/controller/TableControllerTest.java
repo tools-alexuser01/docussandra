@@ -18,20 +18,16 @@ package com.strategicgains.docussandra.controller;
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
-import com.strategicgains.docussandra.Main;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Table;
 import org.junit.BeforeClass;
-import org.restexpress.RestExpress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import java.io.IOException;
 import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import testhelper.RestExpressManager;
 
@@ -118,7 +114,7 @@ public class TableControllerTest {
         Table testTable = Fixtures.createTestTable();
         String tableStr = "{" + "\"description\" : \"" + testTable.description()
                 + "\"," + "\"name\" : \"" + testTable.name() + "\"}";
-
+        //act
         given().body(tableStr).expect().statusCode(201)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
                 .body("name", equalTo(testTable.name()))
@@ -126,6 +122,13 @@ public class TableControllerTest {
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
                 .when().post(testTable.name());
+        //check
+        expect().statusCode(200)
+                .body("name", equalTo(testTable.name()))
+                .body("description", equalTo(testTable.description()))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue()).when()
+                .get(testTable.name());
     }
 
     /**
@@ -140,8 +143,17 @@ public class TableControllerTest {
         String tableStr = "{" + "\"description\" : \"" + newDesciption
                 + "\"," + "\"name\" : \"" + testTable.name() + "\"}";
 
+        //act
         given().body(tableStr).expect().statusCode(204)
                 .when().put(testTable.name());
+
+        //check
+        expect().statusCode(200)
+                .body("name", equalTo(testTable.name()))
+                .body("description", equalTo(newDesciption))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue()).when()
+                .get(testTable.name());
     }
 
     /**
@@ -152,8 +164,11 @@ public class TableControllerTest {
     public void deleteTableTest() {
         Table testTable = Fixtures.createTestTable();
         f.insertTable(testTable);
-
+        //act
         given().expect().statusCode(204)
                 .when().delete(testTable.name());
+        //check
+        expect().statusCode(404).when()
+                .get(testTable.name());
     }
 }
