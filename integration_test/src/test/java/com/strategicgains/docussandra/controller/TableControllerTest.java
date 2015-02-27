@@ -82,7 +82,7 @@ public class TableControllerTest {
      * executed.
      */
     @AfterClass
-    public static void afterClass(){  
+    public static void afterClass() {
     }
 
     /**
@@ -133,7 +133,6 @@ public class TableControllerTest {
      * table.
      */
     @Test
-    @Ignore
     public void putTableTest() {
         Table testTable = Fixtures.createTestTable();
         f.insertTable(testTable);
@@ -141,12 +140,7 @@ public class TableControllerTest {
         String tableStr = "{" + "\"description\" : \"" + newDesciption
                 + "\"," + "\"name\" : \"" + testTable.name() + "\"}";
 
-        given().body(tableStr).expect().statusCode(201)
-                //.header("Location", startsWith(RestAssured.basePath + "/"))
-                .body("name", equalTo(testTable.name()))
-                .body("description", equalTo(newDesciption))
-                .body("createdAt", notNullValue())
-                .body("updatedAt", notNullValue())
+        given().body(tableStr).expect().statusCode(204)
                 .when().put(testTable.name());
     }
 
