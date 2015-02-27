@@ -55,7 +55,7 @@ public class DatabaseControllerTest {
     public static void beforeClass() throws Exception {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
-        //RestAssured.basePath = "/courses/" + COURSE_ID + "/categories";
+        RestAssured.basePath = "/";
 
 //        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
 //        String[] env = {testEnv};
