@@ -90,7 +90,7 @@ public class TableControllerTest {
 
     /**
      * Tests that the GET /{databases}/{table} properly retrieves an existing
-     * database.
+     * table.
      */
     @Test
     public void getTableTest() {
