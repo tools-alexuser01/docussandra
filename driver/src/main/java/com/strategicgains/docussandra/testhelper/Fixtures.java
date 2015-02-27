@@ -16,6 +16,7 @@ import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.ITableDao;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
+import com.strategicgains.repoexpress.domain.Identifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -219,6 +220,11 @@ public class Fixtures {
     public void insertDocument(Document document) {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
         documentRepo.create(document);
+    }
+    
+    public void deleteDocument(Document document) {
+        DocumentRepository documentRepo = new DocumentRepository(getSession());
+        documentRepo.delete(document);
     }
 
     /**
