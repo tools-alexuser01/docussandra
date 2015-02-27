@@ -18,10 +18,8 @@ package com.strategicgains.docussandra.controller;
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
-import com.strategicgains.docussandra.Main;
 import com.strategicgains.docussandra.domain.Database;
 import org.junit.BeforeClass;
-import org.restexpress.RestExpress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
@@ -29,7 +27,6 @@ import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import testhelper.RestExpressManager;
 
@@ -124,7 +121,7 @@ public class DatabaseControllerTest {
         Database testDb = Fixtures.createTestDatabase();
         String dbStr = "{" + "\"description\" : \"" + testDb.description()
                 + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
-
+        //act
         given().body(dbStr).expect().statusCode(201)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
                 .body("name", equalTo(testDb.name()))
@@ -132,6 +129,13 @@ public class DatabaseControllerTest {
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
                 .when().post(testDb.name());
+        //check
+        expect().statusCode(200)
+                .body("name", equalTo(testDb.name()))
+                .body("description", equalTo(testDb.description()))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue()).when()
+                .get("/" + testDb.getId());
     }
 
     /**
@@ -144,9 +148,17 @@ public class DatabaseControllerTest {
         String newDesciption = "this is a new description";
         String dbStr = "{" + "\"description\" : \"" + newDesciption
                 + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
-
+        //act
         given().body(dbStr).expect().statusCode(204)
                 .when().put(testDb.name());
+        //check
+        expect().statusCode(200)
+                .body("name", equalTo(testDb.name()))
+                .body("description", equalTo(newDesciption))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue()).when()
+                .get("/" + testDb.getId());
+
     }
 
     /**
@@ -156,8 +168,11 @@ public class DatabaseControllerTest {
     public void deleteDatabaseTest() {
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
-
+        //act
         given().expect().statusCode(204)
                 .when().delete(testDb.name());
+        //check
+        expect().statusCode(404).when()
+                .get(testDb.name());
     }
 }
