@@ -16,7 +16,6 @@ import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.ITableDao;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -131,13 +130,18 @@ public class Fixtures {
      * @return
      */
     public static final Index createTestIndexOneField() {
-        Index index = new Index("myIndexWithOneField");
+        Index index = new Index("myindexwithonefield");
         index.table(DB, "mytable");
         ArrayList<String> fields = new ArrayList<>();
         fields.add("myindexedfield");
         index.fields(fields);
         index.isUnique(false);
         return index;
+    }
+    
+    public void insertIndex(Index index){
+        IndexRepository indexRepo = new IndexRepository(session);
+        indexRepo.create(index);
     }
 
     public void clearTestTables() {
