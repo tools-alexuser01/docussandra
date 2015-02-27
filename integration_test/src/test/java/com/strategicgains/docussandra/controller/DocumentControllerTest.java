@@ -36,6 +36,7 @@ import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import testhelper.RestExpressManager;
 
@@ -64,11 +65,6 @@ public class DocumentControllerTest {
     public static void beforeClass() throws Exception {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
-        //RestAssured.basePath = "/courses/" + COURSE_ID + "/categories";
-
-//        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
-//        String[] env = {testEnv};
-        //Thread.sleep(10000);
         RestExpressManager.getManager().ensureRestExpressRunning();
     }
 
@@ -99,8 +95,8 @@ public class DocumentControllerTest {
     }
 
     /**
-     * Tests that the GET /{databases}/{table} properly retrieves an existing
-     * database.
+     * Tests that the GET /{databases}/{table}/{document} properly retrieves an existing
+     * document.
      */
     @Test
     public void getDocumentTest() {
@@ -116,8 +112,8 @@ public class DocumentControllerTest {
     }
 
     /**
-     * Tests that the POST /{databases}/{table} endpoint properly creates a
-     * table.
+     * Tests that the POST /{databases}/{table}/ endpoint properly creates a
+     * document.
      */
     @Test
     public void postDocumentTest() {
@@ -147,45 +143,45 @@ public class DocumentControllerTest {
         //cleanup the random uuid'ed doc
         f.deleteDocument(testDocument);
     }
-//
-//    /**
-//     * Tests that the PUT /{databases}/{table} endpoint properly updates a
-//     * table.
-//     */
-//    @Test
-//    public void putDocumentTest() {
-//        Document testDocument = Fixtures.createTestDocument();
-//        f.insertDocument(testDocument);
-//        String newDesciption = "this is a new description";
-//        String tableStr = "{" + "\"description\" : \"" + newDesciption
-//                + "\"," + "\"name\" : \"" + testDocument.name() + "\"}";
-//
-//        //act
-//        given().body(tableStr).expect().statusCode(204)
-//                .when().put(testDocument.name());
-//
-//        //check
-//        expect().statusCode(200)
-//                .body("name", equalTo(testDocument.name()))
-//                .body("description", equalTo(newDesciption))
-//                .body("createdAt", notNullValue())
-//                .body("updatedAt", notNullValue()).when()
-//                .get(testDocument.name());
-//    }
-//
-//    /**
-//     * Tests that the DELETE /{databases}/{table} endpoint properly deletes a
-//     * table.
-//     */
-//    @Test
-//    public void deleteDocumentTest() {
-//        Document testDocument = Fixtures.createTestDocument();
-//        f.insertDocument(testDocument);
-//        //act
-//        given().expect().statusCode(204)
-//                .when().delete(testDocument.name());
-//        //check
-//        expect().statusCode(404).when()
-//                .get(testDocument.name());
-//    }
+
+    /**
+     * Tests that the PUT /{databases}/{table}/{document} endpoint properly updates a
+     * document.
+     */
+    @Test
+    @Ignore //Test should be correct, application has bug!
+    public void putDocumentTest() {
+        Document testDocument = Fixtures.createTestDocument();
+        f.insertDocument(testDocument);
+        String newObject = "{\"newjson\": \"object\"}";
+        //act
+        given().body(newObject).expect().statusCode(204)
+                .when().put(testDocument.getUuid().toString());
+
+        //check
+        expect().statusCode(200)
+                .body("id", equalTo(testDocument.getUuid().toString()))
+                .body("object", notNullValue())
+                .body("object", equalTo(newObject))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue()).when()
+                .get(testDocument.getUuid().toString());
+    }
+
+    /**
+     * Tests that the DELETE /{databases}/{table}/{document} endpoint properly deletes a
+     * document.
+     */
+    @Test
+    @Ignore //Test should be correct, application has bug!
+    public void deleteDocumentTest() {
+        Document testDocument = Fixtures.createTestDocument();
+        f.insertDocument(testDocument);
+        //act
+        given().expect().statusCode(204)
+                .when().delete(testDocument.getUuid().toString());
+        //check
+        expect().statusCode(404).when()
+                .get(testDocument.getUuid().toString());
+    }
 }
