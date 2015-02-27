@@ -56,6 +56,9 @@ public class Utils {
      * @return a Fuzzy UUID to use for bucket placement.
      */
     public static UUID convertStringToFuzzyUUID(String s) {
+        if(s == null){
+            return null;
+        }
         s = s.toLowerCase();
         byte[] string = s.getBytes();
         if (string.length < 8) {//need to pad!
