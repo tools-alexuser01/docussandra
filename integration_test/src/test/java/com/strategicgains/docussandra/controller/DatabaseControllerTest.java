@@ -138,7 +138,6 @@ public class DatabaseControllerTest {
      * Tests that the PUT /{databases} endpoint properly updates a database.
      */
     @Test
-    @Ignore
     public void putDatabaseTest() {
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
@@ -146,12 +145,7 @@ public class DatabaseControllerTest {
         String dbStr = "{" + "\"description\" : \"" + newDesciption
                 + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
 
-        given().body(dbStr).expect().statusCode(201)
-                //.header("Location", startsWith(RestAssured.basePath + "/"))
-                .body("name", equalTo(testDb.name()))
-                .body("description", equalTo(newDesciption))
-                .body("createdAt", notNullValue())
-                .body("updatedAt", notNullValue())
+        given().body(dbStr).expect().statusCode(204)
                 .when().put(testDb.name());
     }
 
