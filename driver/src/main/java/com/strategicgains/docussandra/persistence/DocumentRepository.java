@@ -218,7 +218,7 @@ public class DocumentRepository
 
     private Table extractTable(Identifier identifier) {
         Table t = new Table();
-        List<Object> l = identifier.components().subList(0, 2);
+        List<Object> l = identifier.components().subList(0, 2);//NOTE/TODO: frequent IndexOutOfBounds here
         t.database((String) l.get(0));
         t.name((String) l.get(1));
         return t;
