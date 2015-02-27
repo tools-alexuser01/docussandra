@@ -60,7 +60,6 @@ public class TableControllerTest {
 
 //        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
 //        String[] env = {testEnv};
-        LOGGER.debug("Loading RestExpress Environment... ");
         //Thread.sleep(10000);
         RestExpressManager.getManager().ensureRestExpressRunning();
     }
