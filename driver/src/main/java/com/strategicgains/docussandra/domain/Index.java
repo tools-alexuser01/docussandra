@@ -32,6 +32,7 @@ public class Index
      * This is how many items will be stored in a single wide row, before
      * creating another wide row.
      */
+    //TODO: refactor to new concept of infinately sized buckets, but with a limit number of buckets
     private long bucketSize = 2000l;
 
     /**
