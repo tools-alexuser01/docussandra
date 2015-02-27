@@ -275,7 +275,13 @@ public class Fixtures {
         Table t = new Table();
         t.name("mytable");
         t.database(Fixtures.DB);
+        t.description("My Table stores a lot of data.");
         return t;
+    }
+
+    public void insertTable(Table table) {
+        TableRepository tableRepo = new TableRepository(getSession());
+        tableRepo.create(table);
     }
 
     public static Database createTestDatabase() {
@@ -283,6 +289,7 @@ public class Fixtures {
         database.description("This is a test database.");
         return database;
     }
+
     public void insertDatabase(Database database) {
         DatabaseRepository databaseRepo = new DatabaseRepository(getSession());
         databaseRepo.create(database);
