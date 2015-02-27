@@ -215,7 +215,7 @@ public class Fixtures {
         Document entity = new Document();
         entity.table("mydb", "mytable");
         entity.object("{'greeting':'hello', 'myindexedfield': 'this is my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");
-        entity.setUuid(new UUID(0L, 1L));
+        entity.setUuid(new UUID(0L, 2L));
         entity.setCreatedAt(new Date());
         entity.setUpdatedAt(new Date());
         return entity;
