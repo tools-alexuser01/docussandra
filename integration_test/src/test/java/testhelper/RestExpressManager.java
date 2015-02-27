@@ -18,6 +18,8 @@ package testhelper;
 import com.strategicgains.docussandra.Main;
 import java.io.IOException;
 import org.restexpress.RestExpress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class for managing testing of RestExpress so we are not tearing down and
@@ -33,6 +35,8 @@ import org.restexpress.RestExpress;
  * @author udeyoje
  */
 public class RestExpressManager {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestExpressManager.class);
 
     private static RestExpressManager manager = null;
 
@@ -65,8 +69,9 @@ public class RestExpressManager {
      */
     public synchronized void ensureRestExpressRunning() throws IOException {
         if (restExpressRunning == false) {
+            LOGGER.info("Starting RestExpress server...");
             server = Main.initializeServer(new String[0]);
-            restExpressRunning = true;
+            restExpressRunning = true;            
         }
     }
 
