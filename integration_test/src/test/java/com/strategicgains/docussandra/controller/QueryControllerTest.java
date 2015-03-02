@@ -107,9 +107,9 @@ public class QueryControllerTest {
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
                 .body("", notNullValue())
                 .body("id", notNullValue())
-//                .body("id", equalTo("00000000-0000-0000-0000-000000000001"))
-                .body("object", notNullValue())
-                //.body("object", containsString("greeting"))
+                .body("id[0]", equalTo("00000000-0000-0000-0000-000000000001"))
+                .body("object[0]", notNullValue())
+                .body("object[0]", containsString("hello"))
                 .when().post("");
     }
 
