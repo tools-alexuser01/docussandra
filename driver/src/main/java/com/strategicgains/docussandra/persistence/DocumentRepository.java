@@ -146,10 +146,10 @@ public class DocumentRepository
     public void doDelete(Document entity) {
         try {
             Table table = entity.table();//TODO: this doesn't seem like it will ever work
-            Identifier id = extractId(entity.getId());
-            if(table == null){
+            if (table == null) {
                 table = extractTable(entity.getId());
             }
+            Identifier id = extractId(entity.getId());//TODO: bug! this never works
             PreparedStatement deleteStmt = deleteStmts.get(table);
 
             if (deleteStmt == null) {
