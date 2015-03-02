@@ -41,18 +41,21 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class QueryServiceTest {
+public class QueryServiceTest
+{
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private QueryService instance;
     private Fixtures f;
 
-    public QueryServiceTest() {
+    public QueryServiceTest()
+    {
         f = Fixtures.getInstance();
     }
 
     @Before
-    public void setUp() {
+    public void setUp()
+    {
         f.clearTestTables();
         f.createTestTables();
         instance = new QueryService(new QueryRepository(f.getSession()));
@@ -61,7 +64,8 @@ public class QueryServiceTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+    {
         f.clearTestTables();
     }
 
@@ -69,7 +73,8 @@ public class QueryServiceTest {
      * Test of query method, of class QueryService.
      */
     @Test
-    public void testQuery() {
+    public void testQuery()
+    {
         System.out.println("query");
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
@@ -95,7 +100,8 @@ public class QueryServiceTest {
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryBasic() {
+    public void testParseQueryBasic()
+    {
         System.out.println("testParseQueryBasic");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery();
@@ -108,7 +114,8 @@ public class QueryServiceTest {
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryTwoFields() {
+    public void testParseQueryTwoFields()
+    {
         System.out.println("testParseQueryTwoFields");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery2();
@@ -121,7 +128,8 @@ public class QueryServiceTest {
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryTwoFieldsImperfectMatch() {
+    public void testParseQueryTwoFieldsImperfectMatch()
+    {
         System.out.println("testParseQueryTwoFieldsImperfectMatch");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery2();
@@ -135,15 +143,18 @@ public class QueryServiceTest {
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryException() {
+    public void testParseQueryException()
+    {
         System.out.println("testParseQueryException");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery();
         toParse.setWhere("nonIndexedField = 'boo'");
         boolean expectedExceptionThrown = false;
-        try {
+        try
+        {
             ParsedQuery result = instance.parseQuery(db, toParse);
-        } catch (FieldNotIndexedException e) {
+        } catch (FieldNotIndexedException e)
+        {
             expectedExceptionThrown = true;
             assertTrue(e.getLocalizedMessage().contains("nonIndexedField"));
         }
@@ -154,7 +165,8 @@ public class QueryServiceTest {
      * Test of equalLists method, of class QueryService.
      */
     @Test
-    public void testEqualLists() {
+    public void testEqualLists()
+    {
         System.out.println("equalLists");
         List<String> one = new ArrayList<>();
         List<String> two = new ArrayList<>();

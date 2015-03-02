@@ -30,13 +30,15 @@ public class QueryRepository //extends CassandraTimestampedEntityRepository<Quer
 
     private Session session;
 
-    public QueryRepository(Session session) {
+    public QueryRepository(Session session)
+    {
         //super(session, "queries", "id");
         this.session = session;
         //initializeStatements();
     }
 
-    public List<Document> doQuery(String db, ParsedQuery query) {
+    public List<Document> doQuery(String db, ParsedQuery query)
+    {
         //format QUERY_CQL
         String finalQuery = String.format(QUERY_CQL, query.getITable(), query.getWhereClause().getBoundStatementSyntax());
         //run query
@@ -47,7 +49,8 @@ public class QueryRepository //extends CassandraTimestampedEntityRepository<Quer
         String bucket = ibl.getBucket(null, fuzzyUUID);
         bs.setString(0, bucket);
         int i = 1;
-        for (String bindValue : query.getWhereClause().getValues()) {//no great reason for not using the other loop format
+        for (String bindValue : query.getWhereClause().getValues())//no great reason for not using the other loop format
+        {
             bs.setString(i, bindValue);
             i++;
         }
@@ -57,7 +60,8 @@ public class QueryRepository //extends CassandraTimestampedEntityRepository<Quer
         //right now we just are going go return a list of documents
         ArrayList<Document> toReturn = new ArrayList<>();
         Iterator<Row> ite = results.iterator();
-        while (ite.hasNext()) {
+        while (ite.hasNext())
+        {
             Row row = ite.next();
             toReturn.add(DocumentRepository.marshalRow(row));
         }
@@ -114,7 +118,8 @@ public class QueryRepository //extends CassandraTimestampedEntityRepository<Quer
     /**
      * @return the session
      */
-    public Session getSession() {
+    public Session getSession()
+    {
         return session;
     }
 

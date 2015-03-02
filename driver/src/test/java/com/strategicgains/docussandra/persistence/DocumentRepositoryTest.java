@@ -30,35 +30,40 @@ import org.junit.Ignore;
  *
  * @author udeyoje
  */
-public class DocumentRepositoryTest {
-    
-    public DocumentRepositoryTest() {
+public class DocumentRepositoryTest
+{
+
+    public DocumentRepositoryTest()
+    {
     }
-    
+
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass()
+    {
     }
-    
+
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass()
+    {
     }
-    
+
     @Before
-    public void setUp() {
+    public void setUp()
+    {
     }
-    
+
     @After
-    public void tearDown() {
+    public void tearDown()
+    {
     }
-
-
 
     /**
      * Test of doCreate method, of class DocumentRepository.
      */
     @Test
     @Ignore
-    public void testDoCreate() {
+    public void testDoCreate()
+    {
         System.out.println("doCreate");
         Document entity = null;
         DocumentRepository instance = null;
@@ -74,7 +79,8 @@ public class DocumentRepositoryTest {
      */
     @Test
     @Ignore
-    public void testDoRead() {
+    public void testDoRead()
+    {
         System.out.println("doRead");
         Identifier identifier = null;
         DocumentRepository instance = null;
@@ -90,7 +96,8 @@ public class DocumentRepositoryTest {
      */
     @Test
     @Ignore
-    public void testDoUpdate() {
+    public void testDoUpdate()
+    {
         System.out.println("doUpdate");
         Document entity = null;
         DocumentRepository instance = null;
@@ -106,7 +113,8 @@ public class DocumentRepositoryTest {
      */
     @Test
     @Ignore
-    public void testDoDelete() {
+    public void testDoDelete()
+    {
         System.out.println("doDelete");
         Document entity = null;
         DocumentRepository instance = null;
@@ -120,7 +128,8 @@ public class DocumentRepositoryTest {
      */
     @Test
     @Ignore
-    public void testExists() {
+    public void testExists()
+    {
         System.out.println("exists");
         Identifier identifier = null;
         DocumentRepository instance = null;
@@ -131,5 +140,4 @@ public class DocumentRepositoryTest {
         fail("The test case is a prototype.");
     }
 
-    
 }

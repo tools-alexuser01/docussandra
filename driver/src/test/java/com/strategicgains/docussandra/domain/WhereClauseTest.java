@@ -15,7 +15,6 @@
  */
 package com.strategicgains.docussandra.domain;
 
-import java.util.ArrayList;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -27,29 +26,36 @@ import static org.junit.Assert.*;
  *
  * @author udeyoje
  */
-public class WhereClauseTest {
+public class WhereClauseTest
+{
 
-    public WhereClauseTest() {
+    public WhereClauseTest()
+    {
     }
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass()
+    {
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass()
+    {
     }
 
     @Before
-    public void setUp() {
+    public void setUp()
+    {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+    {
     }
 
     @Test
-    public void testIt0() {
+    public void testIt0()
+    {
         WhereClause wc = new WhereClause("blah = 'nonsense'");
         assertEquals("blah = ?", wc.getBoundStatementSyntax());
         assertEquals("blah", wc.getFields().get(0));
@@ -57,7 +63,8 @@ public class WhereClauseTest {
     }
 
     @Test
-    public void testIt1() {
+    public void testIt1()
+    {
         WhereClause wc = new WhereClause("blah = 'blah' AND foo = 'bar'");
         assertEquals("blah = ? AND foo = ?", wc.getBoundStatementSyntax());
         assertEquals("blah", wc.getFields().get(0));
@@ -67,7 +74,8 @@ public class WhereClauseTest {
     }
 
     @Test
-    public void testIt2() {
+    public void testIt2()
+    {
         WhereClause wc = new WhereClause("blah = 'blah' AND foo = 'bar' ORDER BY foo");
         assertEquals("blah = ? AND foo = ? ORDER BY foo", wc.getBoundStatementSyntax());
         assertEquals("blah", wc.getFields().get(0));
@@ -77,7 +85,8 @@ public class WhereClauseTest {
     }
 
     @Test
-    public void testIt3() {
+    public void testIt3()
+    {
         WhereClause wc = new WhereClause("blah = 'blah' AND foo < 'bar' ORDER BY foo");
         assertEquals("blah = ? AND foo < ? ORDER BY foo", wc.getBoundStatementSyntax());
         assertEquals("blah", wc.getFields().get(0));
@@ -87,7 +96,8 @@ public class WhereClauseTest {
     }
 
     @Test
-    public void testIt4() {
+    public void testIt4()
+    {
         WhereClause wc = new WhereClause("blah = 'non sense'");
         assertEquals("blah = ?", wc.getBoundStatementSyntax());
         assertEquals("blah", wc.getFields().get(0));
@@ -95,7 +105,8 @@ public class WhereClauseTest {
     }
 
     @Test
-    public void testIt5() {
+    public void testIt5()
+    {
         WhereClause wc = new WhereClause("blah = 'blah blah' AND foo = 'bar bar bar'");
         assertEquals("blah = ? AND foo = ?", wc.getBoundStatementSyntax());
         assertEquals("blah", wc.getFields().get(0));

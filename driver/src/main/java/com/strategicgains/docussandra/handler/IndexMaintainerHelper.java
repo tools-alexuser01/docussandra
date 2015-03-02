@@ -27,7 +27,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class IndexMaintainerHelper {
+public class IndexMaintainerHelper
+{
 
     private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
 
@@ -38,15 +39,18 @@ public class IndexMaintainerHelper {
     public static final String ITABLE_DELETE_CQL = "DELETE FROM docussandra.%s WHERE bucket = ? AND %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
 
-    public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator) {
+    public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
+    {
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
-        for (Index index : indices) {
+        for (Index index : indices)
+        {
             //add row to the iTable(s)
             BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
-            if (bs != null) {
+            if (bs != null)
+            {
                 statementList.add(bs);
             }
         }
@@ -62,7 +66,8 @@ public class IndexMaintainerHelper {
      * @param entity
      * @return
      */
-    private static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) {
+    private static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
+    {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
         String finalCQL = generateCQLStatementForInsert(index);
@@ -73,7 +78,8 @@ public class IndexMaintainerHelper {
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         //set the bucket
         String fieldToBucketOn = (String) jsonObject.get(fields.get(0));
-        if (fieldToBucketOn == null) {
+        if (fieldToBucketOn == null)
+        {
             // we do not have an indexable field in our document -- therefore, it shouldn't be added to an index! (right?) -- is this right Todd?
             logger.trace("Warning: document: " + entity.toString() + " does not have an indexed field for index: " + index.toString());
             return null;
@@ -89,7 +95,8 @@ public class IndexMaintainerHelper {
         //set the dates
         bs.setDate(3, entity.getCreatedAt());
         bs.setDate(4, entity.getUpdatedAt());
-        for (int i = 0; i < fields.size(); i++) {
+        for (int i = 0; i < fields.size(); i++)
+        {
             String field = fields.get(i);
             String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
             bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
@@ -97,27 +104,32 @@ public class IndexMaintainerHelper {
         return bs;
     }
 
-    public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator) {
+    public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
+    {
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
-        for (Index index : indices) {
+        for (Index index : indices)
+        {
             //determine which fields need to use as PKs
             List<String> fields = index.fields();
 
             //issue #35: we need to be able to update indexed fields as well,
             //which will require us to:
             //1. determine if an indexed field has changed
-            if (hasIndexedFieldChanged(session, index, entity)) {
+            if (hasIndexedFieldChanged(session, index, entity))
+            {
                 //2a. if the field has changed, create a new index entry
-                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);                
-                if (bs != null) {
+                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
+                if (bs != null)
+                {
                     statementList.add(bs);
                 }
                 //2b. after creating the new index entry, we must delete the old one
                 statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
-            } else {//3. if an indexed field has not changed, do a normal CQL update
+            } else
+            {//3. if an indexed field has not changed, do a normal CQL update
                 String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
                 PreparedStatement ps = session.prepare(finalCQL);
                 BoundStatement bs = new BoundStatement(ps);
@@ -134,7 +146,8 @@ public class IndexMaintainerHelper {
                 String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
                 logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
                 bs.setString(2, bucketId);
-                for (int i = 0; i < fields.size(); i++) {
+                for (int i = 0; i < fields.size(); i++)
+                {
                     String field = fields.get(i);
                     String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
                     bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
@@ -147,12 +160,14 @@ public class IndexMaintainerHelper {
         return statementList;
     }
 
-    public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator) {
+    public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
+    {
         //check for any indices that should exist on this table per the index table
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
-        for (Index index : indices) {
+        for (Index index : indices)
+        {
             statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
         }
         return statementList;
@@ -165,7 +180,8 @@ public class IndexMaintainerHelper {
      * @param entity
      * @return
      */
-    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) {
+    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
+    {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
         String finalCQL = generateCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
@@ -178,7 +194,8 @@ public class IndexMaintainerHelper {
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
         logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
-        for (int i = 0; i < fields.size(); i++) {
+        for (int i = 0; i < fields.size(); i++)
+        {
             String field = fields.get(i);
             String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
             bs.setString(i + 1, fieldValue);
@@ -187,7 +204,8 @@ public class IndexMaintainerHelper {
     }
 
     //just a concept right now -- issue #4
-    public static void populateNewIndexWithExistingData(Session session, Table t, Index index) {
+    public static void populateNewIndexWithExistingData(Session session, Table t, Index index)
+    {
         throw new UnsupportedOperationException("Not done yet");
     }
 
@@ -201,7 +219,8 @@ public class IndexMaintainerHelper {
      * @return A list of Index objects where the document is or should be stored
      * in.
      */
-    public static List<Index> getIndexForDocument(Session session, Document entity) {
+    public static List<Index> getIndexForDocument(Session session, Document entity)
+    {
         IndexRepository indexRepo = new IndexRepository(session);
         return indexRepo.readAll(entity.databaseName(), entity.tableName());
     }
@@ -216,12 +235,15 @@ public class IndexMaintainerHelper {
      * @return True if an indexed field has changed. False if there is no change
      * of indexed fields.
      */
-    public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity) {
+    public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity)
+    {
         DocumentRepository docRepo = new DocumentRepository(session);//TODO: if we do any sycronization on doc repo, this could be a problem
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
         BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
-        for (String field : index.fields()) {
-            if (!newObject.get(field).equals(oldObject.get(field))) {
+        for (String field : index.fields())
+        {
+            if (!newObject.get(field).equals(oldObject.get(field)))
+            {
                 return true;//fail early
             }
         }
@@ -235,7 +257,8 @@ public class IndexMaintainerHelper {
      * @param index Index to generate the statement for.
      * @return CQL statement.
      */
-    public static String generateCQLStatementForInsert(Index index) {
+    public static String generateCQLStatementForInsert(Index index)
+    {
         //determine which iTables need to be written to
         String iTableToUpdate = Utils.calculateITableName(index);
         //determine which fields need to write as PKs
@@ -243,8 +266,10 @@ public class IndexMaintainerHelper {
         String fieldNamesInsertSyntax = StringUtils.join(",", fields);
         //calculate the number of '?'s we need to append on the values clause
         StringBuilder fieldValueInsertSyntax = new StringBuilder();
-        for (int i = 0; i < fields.size(); i++) {
-            if (i != 0) {
+        for (int i = 0; i < fields.size(); i++)
+        {
+            if (i != 0)
+            {
                 fieldValueInsertSyntax.append(", ");
             }
             fieldValueInsertSyntax.append("?");
@@ -261,7 +286,8 @@ public class IndexMaintainerHelper {
      * @param index Index to generate the statement for.
      * @return CQL statement.
      */
-    public static String generateCQLStatementForWhereClauses(String CQL, Index index) {
+    public static String generateCQLStatementForWhereClauses(String CQL, Index index)
+    {
         //determine which iTables need to be updated
         String iTableToUpdate = Utils.calculateITableName(index);
         //determine which fields need to write as PKs
@@ -269,9 +295,11 @@ public class IndexMaintainerHelper {
         //determine the where clause
         String whereClause;
         StringBuilder setValues = new StringBuilder();
-        for (int i = 0; i < fields.size(); i++) {
+        for (int i = 0; i < fields.size(); i++)
+        {
             String field = fields.get(i);
-            if (i != 0) {
+            if (i != 0)
+            {
                 setValues.append(" AND ");
             }
             setValues.append(field).append(" = ?");

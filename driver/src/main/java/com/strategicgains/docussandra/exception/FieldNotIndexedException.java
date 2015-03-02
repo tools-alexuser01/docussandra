@@ -22,7 +22,8 @@ import java.util.List;
  *
  * @author udeyoje
  */
-public class FieldNotIndexedException extends RuntimeException {
+public class FieldNotIndexedException extends RuntimeException
+{
 
     /**
      * Field that an index does not exist for.
@@ -31,20 +32,27 @@ public class FieldNotIndexedException extends RuntimeException {
 
     /**
      * Constructor.
-     * @param fields List of fields of which at least one does not exist in a known index.
+     *
+     * @param fields List of fields of which at least one does not exist in a
+     * known index.
      */
-    public FieldNotIndexedException(List<String> fields) {
+    public FieldNotIndexedException(List<String> fields)
+    {
         super("One of the following fields: [" + listToString(fields) + "] does not exist in any known indices. Try adding an index (if you understand the ramifications of this).");
         this.fields = fields;
     }
-    
-    private static String listToString(List<String> list){
+
+    private static String listToString(List<String> list)
+    {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (String s : list){
-            if(!first){
-                sb.append(", " );
-            } else {
+        for (String s : list)
+        {
+            if (!first)
+            {
+                sb.append(", ");
+            } else
+            {
                 first = false;
             }
             sb.append(s);
@@ -57,7 +65,8 @@ public class FieldNotIndexedException extends RuntimeException {
      *
      * @return
      */
-    public List<String> getFields() {
+    public List<String> getFields()
+    {
         return fields;
     }
 }
