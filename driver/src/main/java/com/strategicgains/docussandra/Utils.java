@@ -46,6 +46,11 @@ public class Utils {
     public static String calculateITableName(Index index) {
         return calculateITableName(index.databaseName(), index.tableName(), index.name());
     }
+    
+//    public static List<String> parseWhereClause(String whereClause){ 
+    //will have to parse more than the fields, but the field values as well!
+//    
+//    }
 
     /**
      * Converts a string to a fuzzy UUID. Fuzzy, as in it isn't going to be
