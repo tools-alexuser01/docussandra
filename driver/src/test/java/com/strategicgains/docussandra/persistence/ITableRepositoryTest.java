@@ -17,30 +17,37 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class ITableRepositoryTest {
+public class ITableRepositoryTest
+{
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private Fixtures f;
-    public ITableRepositoryTest() {
+
+    public ITableRepositoryTest()
+    {
         f = Fixtures.getInstance();
     }
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass()
+    {
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass()
+    {
     }
 
     @Before
-    public void setUp() {            
+    public void setUp()
+    {
         f.clearTestTables();
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+    {
         f.clearTestTables();
     }
 
@@ -48,7 +55,8 @@ public class ITableRepositoryTest {
      * Test of iTableExists method, of class ITableDao.
      */
     @Test
-    public void testITableExists() {
+    public void testITableExists()
+    {
         System.out.println("iTableExists");
         Index index = Fixtures.createTestIndexOneField();
         ITableRepository cleanUpInstance = new ITableRepository(f.getSession());
@@ -61,7 +69,8 @@ public class ITableRepositoryTest {
      * Test of createITable method, of class ITableDao.
      */
     @Test
-    public void testCreateITable() {
+    public void testCreateITable()
+    {
         System.out.println("createITable");
         Index index = Fixtures.createTestIndexOneField();
         ITableRepository instance = new ITableRepository(f.getSession());
@@ -85,7 +94,8 @@ public class ITableRepositoryTest {
      * Test of generateTableCreationSyntax method, of class ITableDao.
      */
     @Test
-    public void testGenerateTableCreationSyntax() {
+    public void testGenerateTableCreationSyntax()
+    {
         System.out.println("generateTableCreationSyntax");
         ITableRepository instance = new ITableRepository(f.getSession());
         String response = instance.generateTableCreationSyntax(Fixtures.createTestIndexOneField());
@@ -100,7 +110,8 @@ public class ITableRepositoryTest {
      * Test of deleteITable method, of class ITableDao.
      */
     @Test
-    public void testDeleteITable() {
+    public void testDeleteITable()
+    {
         System.out.println("deleteITable");
         ITableRepository instance = new ITableRepository(f.getSession());
         Index index = Fixtures.createTestIndexOneField();
@@ -118,7 +129,8 @@ public class ITableRepositoryTest {
      * Test of deleteITable method, of class ITableDao.
      */
     @Test
-    public void testDeleteITable_String() {
+    public void testDeleteITable_String()
+    {
         System.out.println("deleteITable");
         ITableRepository instance = new ITableRepository(f.getSession());
         Index index = Fixtures.createTestIndexOneField();

@@ -31,11 +31,13 @@ import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 
 public class DocumentRepository
-        extends AbstractObservableRepository<Document> {
+        extends AbstractObservableRepository<Document>
+{
 
     private Session session;
 
-    private class Columns {
+    private class Columns
+    {
 
         static final String ID = "id";
         static final String OBJECT = "object";
@@ -57,7 +59,8 @@ public class DocumentRepository
 
     private final IndexBucketLocator bucketLocator;
 
-    public DocumentRepository(Session session) {
+    public DocumentRepository(Session session)
+    {
         super();
         this.session = session;
         this.bucketLocator = new SimpleIndexBucketLocatorImpl(200);//TODO: maybe we do actually want to let users set this
@@ -66,13 +69,16 @@ public class DocumentRepository
         addObserver(new StateChangeEventingObserver<Document>(new DocumentEventFactory()));
     }
 
-    protected Session session() {
+    protected Session session()
+    {
         return session;
     }
 
     @Override
-    public Document doCreate(Document entity) {
-        if (exists(entity.getId())) {
+    public Document doCreate(Document entity)
+    {
+        if (exists(entity.getId()))
+        {
             throw new DuplicateItemException(entity.getClass().getSimpleName()
                     + " ID already exists: " + entity.getId().toString());
         }
@@ -80,7 +86,8 @@ public class DocumentRepository
         Table table = entity.table();
         PreparedStatement createStmt = createStmts.get(table);
 
-        if (createStmt == null) {
+        if (createStmt == null)
+        {
             createStmt = session().prepare(String.format(CREATE_CQL, table.toDbTable(), Columns.ID));
             createStmts.put(table, createStmt);//TODO: udeyoje: This seems dangrous (memory overrun); should we use a caching lib instead?
         }
@@ -89,19 +96,22 @@ public class DocumentRepository
         bindCreate(bs, entity);
         session().execute(bs);
         List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity, bucketLocator);
-        for (BoundStatement boundIndexStatement : indexStatements) {
+        for (BoundStatement boundIndexStatement : indexStatements)
+        {
             session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
         }
         return entity;
     }
 
     @Override
-    public Document doRead(Identifier identifier) {
+    public Document doRead(Identifier identifier)
+    {
         Table table = extractTable(identifier);
         Identifier id = extractId(identifier);
         PreparedStatement readStmt = readStmts.get(table);
 
-        if (readStmt == null) {
+        if (readStmt == null)
+        {
             readStmt = session().prepare(String.format(READ_CQL, table.toDbTable(), Columns.ID));
             readStmts.put(table, readStmt);
         }
@@ -110,7 +120,8 @@ public class DocumentRepository
         bindIdentifier(bs, id);
         Document item = marshalRow(session().execute(bs).one());
 
-        if (item == null) {
+        if (item == null)
+        {
             throw new ItemNotFoundException("ID not found: " + identifier.toString());
         }
         item.setId(identifier);
@@ -119,8 +130,10 @@ public class DocumentRepository
     }
 
     @Override
-    public Document doUpdate(Document entity) {
-        if (!exists(entity.getId())) {
+    public Document doUpdate(Document entity)
+    {
+        if (!exists(entity.getId()))
+        {
             throw new ItemNotFoundException(entity.getClass().getSimpleName()
                     + " ID not found: " + entity.getId().toString());
         }
@@ -128,7 +141,8 @@ public class DocumentRepository
         Table table = entity.table();
         PreparedStatement updateStmt = updateStmts.get(table);
 
-        if (updateStmt == null) {
+        if (updateStmt == null)
+        {
             updateStmt = session().prepare(String.format(UPDATE_CQL, table.toDbTable(), Columns.ID));
             updateStmts.put(table, updateStmt);
         }
@@ -137,20 +151,24 @@ public class DocumentRepository
         bindUpdate(bs, entity);
         session().execute(bs);
         List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
-        for (BoundStatement boundIndexStatement : indexStatements) {
+        for (BoundStatement boundIndexStatement : indexStatements)
+        {
             session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
         }
         return entity;
     }
 
     @Override
-    public void doDelete(Document entity) {
-        try {
+    public void doDelete(Document entity)
+    {
+        try
+        {
             Table table = entity.table();
             Identifier id = extractId(entity.getId());
             PreparedStatement deleteStmt = deleteStmts.get(table);
 
-            if (deleteStmt == null) {
+            if (deleteStmt == null)
+            {
                 deleteStmt = session().prepare(String.format(DELETE_CQL, table.toDbTable(), Columns.ID));
                 deleteStmts.put(table, deleteStmt);
             }
@@ -159,17 +177,21 @@ public class DocumentRepository
             bindIdentifier(bs, id);
             session().execute(bs);
             List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
-            for (BoundStatement boundIndexStatement : indexStatements) {
+            for (BoundStatement boundIndexStatement : indexStatements)
+            {
                 session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
             }
-        } catch (InvalidObjectIdException e) {
+        } catch (InvalidObjectIdException e)
+        {
             throw new ItemNotFoundException("ID not found: " + entity.getId().toString());
         }
     }
 
     @Override
-    public boolean exists(Identifier identifier) {
-        if (identifier == null || identifier.isEmpty()) {
+    public boolean exists(Identifier identifier)
+    {
+        if (identifier == null || identifier.isEmpty())
+        {
             return false;
         }
 
@@ -177,7 +199,8 @@ public class DocumentRepository
         Identifier id = extractId(identifier);
         PreparedStatement existStmt = existsStmts.get(table);
 
-        if (existStmt == null) {
+        if (existStmt == null)
+        {
             existStmt = session().prepare(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID));
             existsStmts.put(table, existStmt);
         }
@@ -187,12 +210,14 @@ public class DocumentRepository
         return (session().execute(bs).one().getLong(0) > 0);
     }
 
-    private void bindIdentifier(BoundStatement bs, Identifier identifier) {
+    private void bindIdentifier(BoundStatement bs, Identifier identifier)
+    {
         bs.bind(identifier.primaryKey());
 //		bs.bind(identifier.components().toArray());
     }
 
-    private void bindCreate(BoundStatement bs, Document entity) {
+    private void bindCreate(BoundStatement bs, Document entity)
+    {
         BSONObject bson = (BSONObject) JSON.parse(entity.object());
         bs.bind(entity.getUuid(),
                 ByteBuffer.wrap(BSON.encode(bson)),
@@ -200,7 +225,8 @@ public class DocumentRepository
                 entity.getUpdatedAt());
     }
 
-    private void bindUpdate(BoundStatement bs, Document entity) {
+    private void bindUpdate(BoundStatement bs, Document entity)
+    {
         BSONObject bson = (BSONObject) JSON.parse(entity.object());
 
         bs.bind(ByteBuffer.wrap(BSON.encode(bson)),
@@ -208,7 +234,8 @@ public class DocumentRepository
                 entity.getUuid());
     }
 
-    private Identifier extractId(Identifier identifier) {
+    private Identifier extractId(Identifier identifier)
+    {
 		// This includes the date/version on the end...
 //		List<Object> l = identifier.components().subList(2, 4);
 
@@ -217,7 +244,8 @@ public class DocumentRepository
         return new Identifier(l.toArray());
     }
 
-    private Table extractTable(Identifier identifier) {
+    private Table extractTable(Identifier identifier)
+    {
         Table t = new Table();
         List<Object> l = identifier.components().subList(0, 2);//NOTE/TODO: frequent IndexOutOfBounds here
         t.database((String) l.get(0));
@@ -225,8 +253,10 @@ public class DocumentRepository
         return t;
     }
 
-    public static Document marshalRow(Row row) {
-        if (row == null) {
+    public static Document marshalRow(Row row)
+    {
+        if (row == null)
+        {
             return null;
         }
 
@@ -234,7 +264,8 @@ public class DocumentRepository
         d.setUuid(row.getUUID(Columns.ID));
         ByteBuffer b = row.getBytes(Columns.OBJECT);
 
-        if (b != null && b.hasArray()) {
+        if (b != null && b.hasArray())
+        {
             byte[] result = new byte[b.remaining()];
             b.get(result);
             BSONObject o = BSON.decode(result);
@@ -247,20 +278,24 @@ public class DocumentRepository
     }
 
     private class DocumentEventFactory
-            implements EventFactory<Document> {
+            implements EventFactory<Document>
+    {
 
         @Override
-        public Object newCreatedEvent(Document object) {
+        public Object newCreatedEvent(Document object)
+        {
             return new DocumentCreatedEvent(object);
         }
 
         @Override
-        public Object newUpdatedEvent(Document object) {
+        public Object newUpdatedEvent(Document object)
+        {
             return new DocumentUpdatedEvent(object);
         }
 
         @Override
-        public Object newDeletedEvent(Document object) {
+        public Object newDeletedEvent(Document object)
+        {
             return new DocumentDeletedEvent(object);
         }
     }

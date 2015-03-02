@@ -30,34 +30,40 @@ import org.junit.Ignore;
  *
  * @author udeyoje
  */
-public class DatabaseRepositoryTest {
-    
-    public DatabaseRepositoryTest() {
-    }
-    
-    @BeforeClass
-    public static void setUpClass() {
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
+public class DatabaseRepositoryTest
+{
+
+    public DatabaseRepositoryTest()
+    {
     }
 
-   
+    @BeforeClass
+    public static void setUpClass()
+    {
+    }
+
+    @AfterClass
+    public static void tearDownClass()
+    {
+    }
+
+    @Before
+    public void setUp()
+    {
+    }
+
+    @After
+    public void tearDown()
+    {
+    }
+
     /**
      * Test of createEntity method, of class DatabaseRepository.
      */
     @Test
     @Ignore
-    public void testCreateEntity() {
+    public void testCreateEntity()
+    {
         System.out.println("createEntity");
         Database entity = null;
         DatabaseRepository instance = null;
@@ -67,14 +73,14 @@ public class DatabaseRepositoryTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-    
 
     /**
      * Test of updateEntity method, of class DatabaseRepository.
      */
     @Test
-    @Ignore    
-    public void testUpdateEntity() {
+    @Ignore
+    public void testUpdateEntity()
+    {
         System.out.println("updateEntity");
         Database entity = null;
         DatabaseRepository instance = null;
@@ -90,7 +96,8 @@ public class DatabaseRepositoryTest {
      */
     @Test
     @Ignore
-    public void testDeleteEntity() {
+    public void testDeleteEntity()
+    {
         System.out.println("deleteEntity");
         Database entity = null;
         DatabaseRepository instance = null;
@@ -104,7 +111,8 @@ public class DatabaseRepositoryTest {
      */
     @Test
     @Ignore
-    public void testReadAll() {
+    public void testReadAll()
+    {
         System.out.println("readAll");
         DatabaseRepository instance = null;
         List<Database> expResult = null;
@@ -114,5 +122,4 @@ public class DatabaseRepositoryTest {
         fail("The test case is a prototype.");
     }
 
-    
 }

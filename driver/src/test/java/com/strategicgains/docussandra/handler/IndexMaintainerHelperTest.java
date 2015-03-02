@@ -16,8 +16,6 @@
 package com.strategicgains.docussandra.handler;
 
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
@@ -28,9 +26,7 @@ import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -45,7 +41,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class IndexMaintainerHelperTest {
+public class IndexMaintainerHelperTest
+{
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private IndexRepository indexRepo;
@@ -58,20 +55,24 @@ public class IndexMaintainerHelperTest {
 
     private Fixtures f;
 
-    public IndexMaintainerHelperTest() {
+    public IndexMaintainerHelperTest()
+    {
         f = Fixtures.getInstance();
     }
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass()
+    {
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass()
+    {
     }
 
     @Before
-    public void setUp() {
+    public void setUp()
+    {
         IndexChangeObserver ico = new IndexChangeObserver(f.getSession());
         indexRepo = new IndexRepository(f.getSession());
         docRepo = new DocumentRepository(f.getSession());
@@ -91,7 +92,8 @@ public class IndexMaintainerHelperTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+    {
         f.clearTestTables();// clear anything that might be there already
     }
 
@@ -100,21 +102,24 @@ public class IndexMaintainerHelperTest {
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentCreateIndexEntriesStatements() {
+    public void testGenerateDocumentCreateIndexEntriesStatements()
+    {
         System.out.println("generateDocumentCreateIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument2();
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++)
+        {
             assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
         }
         assertEquals("docussandra", one.getKeyspace());
         assertEquals("INSERT INTO docussandra.mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
         BoundStatement two = result.get(1);
         assertNotNull(two);
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++)
+        {
             assertTrue(two.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 4 and 5 are the indexed fields for index2
         }
         assertEquals("docussandra", two.getKeyspace());
@@ -126,7 +131,8 @@ public class IndexMaintainerHelperTest {
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentCreateIndexEntriesStatementsNoIndexField() {
+    public void testGenerateDocumentCreateIndexEntriesStatementsNoIndexField()
+    {
         System.out.println("testGenerateDocumentCreateIndexEntriesStatementsNoIndexField");
         Document entity = Fixtures.createTestDocument2();
         entity.object("{}");//good luck indexing that!
@@ -139,7 +145,8 @@ public class IndexMaintainerHelperTest {
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentUpdateIndexEntriesStatements() {
+    public void testGenerateDocumentUpdateIndexEntriesStatements()
+    {
         System.out.println("generateDocumentUpdateIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument2();
         tableRepo.create(table);//create the table so we have a place to store the test data
@@ -148,14 +155,16 @@ public class IndexMaintainerHelperTest {
         assertTrue(result.size() == 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++)
+        {
             assertTrue(one.isSet(i));// 0 is the blob, 1 is the date, 2 is the UUID
         }
         assertEquals("docussandra", one.getKeyspace());
         assertEquals("UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield = ?;", one.preparedStatement().getQueryString());
         BoundStatement two = result.get(1);
         assertNotNull(two);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++)
+        {
             assertTrue(two.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
         }
         assertEquals("docussandra", two.getKeyspace());
@@ -168,7 +177,8 @@ public class IndexMaintainerHelperTest {
      * indexed field has changed.
      */
     @Test
-    public void testGenerateDocumentUpdateIndexEntriesStatementsIndexChanged() {
+    public void testGenerateDocumentUpdateIndexEntriesStatementsIndexChanged()
+    {
         System.out.println("generateDocumentUpdateIndexEntriesStatementsIndexChanged");
         Document entity = Fixtures.createTestDocument2();
         tableRepo.create(table);//create the table so we have a place to store the test data
@@ -180,7 +190,8 @@ public class IndexMaintainerHelperTest {
         //create
         BoundStatement one = result.get(0);
         assertNotNull(one);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++)
+        {
             assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
         }
         assertEquals("docussandra", one.getKeyspace());
@@ -195,7 +206,8 @@ public class IndexMaintainerHelperTest {
         //the index update should proceed like a normal update
         BoundStatement three = result.get(2);
         assertNotNull(three);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++)
+        {
             assertTrue(three.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
         }
         assertEquals("docussandra", three.getKeyspace());
@@ -207,7 +219,8 @@ public class IndexMaintainerHelperTest {
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentDeleteIndexEntriesStatements() {
+    public void testGenerateDocumentDeleteIndexEntriesStatements()
+    {
         System.out.println("generateDocumentDeleteIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument2();
         entity.object("{'greeting':'hello', 'myindexedfield': 'this is my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");
@@ -220,7 +233,8 @@ public class IndexMaintainerHelperTest {
         assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithonefield WHERE bucket = ? AND myindexedfield = ?;", one.preparedStatement().getQueryString());
         BoundStatement two = result.get(1);
         assertNotNull(two);
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 1; i++)
+        {
             assertTrue(two.isSet(i));// 0 and 1 are indexed fields 
         }
         assertEquals("docussandra", two.getKeyspace());
@@ -233,7 +247,8 @@ public class IndexMaintainerHelperTest {
      */
     @Ignore
     @Test
-    public void testPopulateNewIndexWithExistingData() {
+    public void testPopulateNewIndexWithExistingData()
+    {
         System.out.println("reindex");
         Table t = null;
         Index index = null;
@@ -246,7 +261,8 @@ public class IndexMaintainerHelperTest {
      * Test of getIndexForDocument method, of class IndexMaintainerHelper.
      */
     @Test
-    public void testGetIndexForDocument() {
+    public void testGetIndexForDocument()
+    {
         System.out.println("getIndexForDocument");
         Document entity = Fixtures.createTestDocument2();
         ArrayList<Index> exp = new ArrayList<>(2);
@@ -264,7 +280,8 @@ public class IndexMaintainerHelperTest {
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateCQLStatementForInsert() {
+    public void testGenerateCQLStatementForInsert()
+    {
         System.out.println("generateCQLStatementForInsert");
         String expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);";
         String result = IndexMaintainerHelper.generateCQLStatementForInsert(index1);
@@ -279,7 +296,8 @@ public class IndexMaintainerHelperTest {
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateCQLStatementForUpdate() {
+    public void testGenerateCQLStatementForUpdate()
+    {
         System.out.println("generateCQLStatementForUpdate");
         String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield = ?;";
         String result = IndexMaintainerHelper.generateCQLStatementForWhereClauses(IndexMaintainerHelper.ITABLE_UPDATE_CQL, index1);
@@ -293,7 +311,8 @@ public class IndexMaintainerHelperTest {
      * Test of hasIndexedFieldChanged method, of class IndexMaintainerHelper.
      */
     @Test
-    public void testHasIndexedFieldChanged() {
+    public void testHasIndexedFieldChanged()
+    {
         System.out.println("hasIndexedFieldChanged");
         tableRepo.create(table);//create the table so we have a place to store the test data
         Document entity = Fixtures.createTestDocument2();
@@ -311,7 +330,8 @@ public class IndexMaintainerHelperTest {
      *
      * @return
      */
-    private static Index createTestIndexOneField() {
+    private static Index createTestIndexOneField()
+    {
         Index index = new Index("myIndexWithOneField");
         index.table("mydb", "mytable");
         ArrayList<String> fields = new ArrayList<>();
@@ -326,7 +346,8 @@ public class IndexMaintainerHelperTest {
      *
      * @return
      */
-    private static Index createTestIndexTwoField() {
+    private static Index createTestIndexTwoField()
+    {
         Index index = new Index("myIndexWithTwoFields");
         index.table("mydb", "mytable");
         ArrayList<String> fields = new ArrayList<>();

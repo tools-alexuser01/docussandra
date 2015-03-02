@@ -11,7 +11,8 @@ import java.util.UUID;
  * @author udeyoje
  * @since Feb 12, 2015
  */
-public class Utils {
+public class Utils
+{
 
     /**
      * Calculates the name of an iTable based on the dataBaseName, the
@@ -25,7 +26,8 @@ public class Utils {
      *
      * @return The name of the iTable for that index.
      */
-    public static String calculateITableName(String databaseName, String tableName, String indexName) {
+    public static String calculateITableName(String databaseName, String tableName, String indexName)
+    {
         StringBuilder sb = new StringBuilder();
         sb.append(databaseName);
         sb.append('_');
@@ -43,15 +45,15 @@ public class Utils {
      * @param index Index whose iTable name you would like.
      * @return The name of the iTable for that index.
      */
-    public static String calculateITableName(Index index) {
+    public static String calculateITableName(Index index)
+    {
         return calculateITableName(index.databaseName(), index.tableName(), index.name());
     }
-    
+
 //    public static List<String> parseWhereClause(String whereClause){ 
     //will have to parse more than the fields, but the field values as well!
 //    
 //    }
-
     /**
      * Converts a string to a fuzzy UUID. Fuzzy, as in it isn't going to be
      * unique and is only for the first 8 bytes. Should only be used for
@@ -60,18 +62,24 @@ public class Utils {
      * @param s String to convert.
      * @return a Fuzzy UUID to use for bucket placement.
      */
-    public static UUID convertStringToFuzzyUUID(String s) {
-        if(s == null){
+    public static UUID convertStringToFuzzyUUID(String s)
+    {
+        if (s == null)
+        {
             return null;
         }
         s = s.toLowerCase();
         byte[] string = s.getBytes();
-        if (string.length < 8) {//need to pad!
+        if (string.length < 8)
+        {//need to pad!
             byte[] newString = new byte[8];
-            for (int i = 0; i < newString.length; i++) {
-                if (i < string.length) {
+            for (int i = 0; i < newString.length; i++)
+            {
+                if (i < string.length)
+                {
                     newString[i] = string[i];
-                } else {
+                } else
+                {
                     newString[i] = Character.MIN_VALUE;//
                 }
             }

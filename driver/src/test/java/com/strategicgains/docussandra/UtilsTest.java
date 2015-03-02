@@ -15,34 +15,41 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class UtilsTest {
+public class UtilsTest
+{
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public UtilsTest() {
+    public UtilsTest()
+    {
     }
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass()
+    {
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass()
+    {
     }
 
     @Before
-    public void setUp() {
+    public void setUp()
+    {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+    {
     }
 
     /**
      * Test of calculateITableName method, of class Utils.
      */
     @Test
-    public void testCalculateITableName_3args() {
+    public void testCalculateITableName_3args()
+    {
         System.out.println("calculateITableName");
         String databaseName = "myDb";
         String tableName = "myTable";
@@ -56,7 +63,8 @@ public class UtilsTest {
      * Test of calculateITableName method, of class Utils.
      */
     @Test
-    public void testCalculateITableName_Index() {
+    public void testCalculateITableName_Index()
+    {
         System.out.println("calculateITableName");
         String databaseName = "myDb";
         String tableName = "myTable";
@@ -72,7 +80,8 @@ public class UtilsTest {
      * Test of convertStringToUUID method, of class Utils.
      */
     @Test
-    public void testConvertStringToUUID() {
+    public void testConvertStringToUUID()
+    {
         System.out.println("convertStringToUUID");
         String s = "this is a test string";
         UUID result = Utils.convertStringToFuzzyUUID(s);
@@ -92,7 +101,8 @@ public class UtilsTest {
      * This test isn't so much of a unit test as a proof of concept.
      */
     @Test
-    public void testConvertStringToUUIDOrdering() {
+    public void testConvertStringToUUIDOrdering()
+    {
         System.out.println("convertStringToUUIDOrdering");
         String a = "a";
         String b = "b";
@@ -117,7 +127,8 @@ public class UtilsTest {
      * This test isn't so much of a unit test as a proof of concept.
      */
     @Test
-    public void testConvertStringToUUIDOrdering2() {
+    public void testConvertStringToUUIDOrdering2()
+    {
         System.out.println("convertStringToUUIDOrdering2");
         String a = "apple";
         String b = "baseball";
@@ -142,7 +153,8 @@ public class UtilsTest {
      * This test isn't so much of a unit test as a proof of concept.
      */
     @Test
-    public void testConvertStringToUUIDOrdering3() {
+    public void testConvertStringToUUIDOrdering3()
+    {
         System.out.println("convertStringToUUIDOrdering3");
         String a = "adam";
         String b = "alexandria";
@@ -166,7 +178,8 @@ public class UtilsTest {
      * Test of convertStringToUUID method, of class Utils. Tests special chars.
      */
     @Test
-    public void testConvertStringToUUIDSpecialChars() {
+    public void testConvertStringToUUIDSpecialChars()
+    {
         System.out.println("convertStringToUUIDSpecialChars");
         String s = "~!#$%^&*()_+";
         UUID result = Utils.convertStringToFuzzyUUID(s);

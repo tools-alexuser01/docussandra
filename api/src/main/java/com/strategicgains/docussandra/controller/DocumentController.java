@@ -18,52 +18,56 @@ import com.strategicgains.repoexpress.util.UuidConverter;
 
 public class DocumentController
 {
-	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
 
-	private DocumentService documents;
-	
-	public DocumentController(DocumentService documentsService)
-	{
-		super();
-		this.documents = documentsService;
-	}
+    private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
 
-	public Document create(Request request, Response response)
-	{
-		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
-		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
-		String data = request.getBody().toString(ContentType.CHARSET);
+    private DocumentService documents;
 
-		if (data == null || data.isEmpty()) throw new BadRequestException("No document data provided");
+    public DocumentController(DocumentService documentsService)
+    {
+        super();
+        this.documents = documentsService;
+    }
 
-		Document saved = documents.create(database, table, data);
+    public Document create(Request request, Response response)
+    {
+        String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+        String table = request.getHeader(Constants.Url.TABLE, "No table provided");
+        String data = request.getBody().toString(ContentType.CHARSET);
 
-		// Construct the response for create...
-		response.setResponseCreated();
+        if (data == null || data.isEmpty())
+        {
+            throw new BadRequestException("No document data provided");
+        }
 
-		// enrich the resource with links, etc. here...
-		TokenResolver resolver = HyperExpress.bind(Constants.Url.DOCUMENT_ID, saved.getUuid().toString());
+        Document saved = documents.create(database, table, data);
 
-		// Include the Location header...
-		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.DOCUMENT);
-		response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
+        // Construct the response for create...
+        response.setResponseCreated();
 
-		// Return the newly-created resource...
-		return saved;
-	}
+        // enrich the resource with links, etc. here...
+        TokenResolver resolver = HyperExpress.bind(Constants.Url.DOCUMENT_ID, saved.getUuid().toString());
 
-	public Document read(Request request, Response response)
-	{
-		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
-		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
-		String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
-		Document document = documents.read(database, table, new Identifier(database, table, UuidConverter.parse(id)));
+        // Include the Location header...
+        String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.DOCUMENT);
+        response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
-		// enrich the entity with links, etc. here...
-		HyperExpress.bind(Constants.Url.DOCUMENT_ID, document.getUuid().toString());
+        // Return the newly-created resource...
+        return saved;
+    }
 
-		return document;
-	}
+    public Document read(Request request, Response response)
+    {
+        String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+        String table = request.getHeader(Constants.Url.TABLE, "No table provided");
+        String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
+        Document document = documents.read(database, table, new Identifier(database, table, UuidConverter.parse(id)));
+
+        // enrich the entity with links, etc. here...
+        HyperExpress.bind(Constants.Url.DOCUMENT_ID, document.getUuid().toString());
+
+        return document;
+    }
 
 //	public List<Document> readAll(Request request, Response response)
 //	{
@@ -81,30 +85,32 @@ public class DocumentController
 //
 //		return service.readAll(namespace, collection);
 //	}
+    public void update(Request request, Response response)
+    {
+        String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+        String table = request.getHeader(Constants.Url.TABLE, "No table provided");
+        String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
+        String data = request.getBody().toString(ContentType.CHARSET);
 
-	public void update(Request request, Response response)
-	{
-		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
-		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
-		String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
-		String data = request.getBody().toString(ContentType.CHARSET);
+        if (data == null || data.isEmpty())
+        {
+            throw new BadRequestException("No document data provided");
+        }
 
-		if (data == null || data.isEmpty()) throw new BadRequestException("No document data provided");
+        Document document = new Document();
+        document.setUuid(UuidConverter.parse(id));
+        document.table(database, table);
+        document.object(data);
+        documents.update(document);
+        response.setResponseNoContent();
+    }
 
-		Document document = new Document();
-		document.setUuid(UuidConverter.parse(id));
-		document.table(database, table);
-		document.object(data);
-		documents.update(document);
-		response.setResponseNoContent();
-	}
-
-	public void delete(Request request, Response response)
-	{
-		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
-		String table = request.getHeader(Constants.Url.TABLE, "No table provided");
-		String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
-		documents.delete(database, table, new Identifier(database, table, UuidConverter.parse(id)));
-		response.setResponseNoContent();
-	}
+    public void delete(Request request, Response response)
+    {
+        String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+        String table = request.getHeader(Constants.Url.TABLE, "No table provided");
+        String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
+        documents.delete(database, table, new Identifier(database, table, UuidConverter.parse(id)));
+        response.setResponseNoContent();
+    }
 }

@@ -14,7 +14,8 @@ import com.strategicgains.repoexpress.event.AbstractRepositoryObserver;
  * @since Feb 12, 2015
  */
 public class IndexChangeObserver<T extends Identifiable>
-        extends AbstractRepositoryObserver<T> {
+        extends AbstractRepositoryObserver<T>
+{
 
     /**
      * Session for interacting with the Cassandra database.
@@ -31,7 +32,8 @@ public class IndexChangeObserver<T extends Identifiable>
      *
      * @param session Session for interacting with the Cassandra database.
      */
-    public IndexChangeObserver(Session session) {
+    public IndexChangeObserver(Session session)
+    {
         super();
         this.session = session;
         //TODO: check thread safety here
@@ -40,10 +42,12 @@ public class IndexChangeObserver<T extends Identifiable>
     }
 
     @Override
-    public void afterCreate(T object) {
+    public void afterCreate(T object)
+    {
         //create the iTable
         Index index = (Index) object;
-        if (!dao.iTableExists(index)) {
+        if (!dao.iTableExists(index))
+        {
             dao.createITable(index);
         }
         //TODO: what if it already exists?
@@ -56,10 +60,12 @@ public class IndexChangeObserver<T extends Identifiable>
     }
 
     @Override
-    public void afterDelete(T object) {
+    public void afterDelete(T object)
+    {
         //drop the iTable
         Index index = (Index) object;
-        if (dao.iTableExists(index)) {
+        if (dao.iTableExists(index))
+        {
             dao.deleteITable(index);
         }
         //TODO: what if it doesn't exist?

@@ -33,30 +33,37 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class QueryRepositoryTest {
+public class QueryRepositoryTest
+{
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Fixtures f;
-    public QueryRepositoryTest() {
+
+    public QueryRepositoryTest()
+    {
         f = Fixtures.getInstance();
     }
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass()
+    {
     }
 
     @AfterClass
-    public static void tearDownClass() {
+    public static void tearDownClass()
+    {
     }
 
     @Before
-    public void setUp() {
+    public void setUp()
+    {
         f.clearTestTables();
         f.createTestTables();
     }
 
     @After
-    public void tearDown() {
+    public void tearDown()
+    {
         f.clearTestTables();
     }
 
@@ -64,7 +71,8 @@ public class QueryRepositoryTest {
      * Test of doQuery method, of class QueryDao.
      */
     @Test
-    public void testDoQueryNoResults() {
+    public void testDoQueryNoResults()
+    {
         System.out.println("testDoQueryNoResults");
         QueryRepository instance = new QueryRepository(f.getSession());
         List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
@@ -76,7 +84,8 @@ public class QueryRepositoryTest {
      * Test of doQuery method, of class QueryDao.
      */
     @Test
-    public void testDoQueryWithResults() {
+    public void testDoQueryWithResults()
+    {
         System.out.println("testDoQueryWithResults");
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
@@ -103,7 +112,8 @@ public class QueryRepositoryTest {
      * Test of doQuery method, of class QueryDao.
      */
     @Test
-    public void testDoQueryWithDataButNoResults() {
+    public void testDoQueryWithDataButNoResults()
+    {
         System.out.println("testDoQueryWithDataButNoResults");
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
