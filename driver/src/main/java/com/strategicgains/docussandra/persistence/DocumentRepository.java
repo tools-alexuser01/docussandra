@@ -113,7 +113,8 @@ public class DocumentRepository
         if (item == null) {
             throw new ItemNotFoundException("ID not found: " + identifier.toString());
         }
-
+        item.setId(identifier);
+        item.table(table);
         return item;
     }
 
@@ -218,13 +219,13 @@ public class DocumentRepository
 
     private Table extractTable(Identifier identifier) {
         Table t = new Table();
-        List<Object> l = identifier.components().subList(0, 2);
+        List<Object> l = identifier.components().subList(0, 2);//NOTE/TODO: frequent IndexOutOfBounds here
         t.database((String) l.get(0));
         t.name((String) l.get(1));
         return t;
     }
 
-    private Document marshalRow(Row row) {
+    public static Document marshalRow(Row row) {
         if (row == null) {
             return null;
         }

@@ -45,7 +45,10 @@ public class IndexMaintainerHelper {
         //for each index
         for (Index index : indices) {
             //add row to the iTable(s)
-            statementList.add(generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator));
+            BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
+            if (bs != null) {
+                statementList.add(bs);
+            }
         }
         //return a list of commands to accomplish all of this
         return statementList;
@@ -69,7 +72,13 @@ public class IndexMaintainerHelper {
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         //set the bucket
-        String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
+        String fieldToBucketOn = (String) jsonObject.get(fields.get(0));
+        if (fieldToBucketOn == null) {
+            // we do not have an indexable field in our document -- therefore, it shouldn't be added to an index! (right?) -- is this right Todd?
+            logger.trace("Warning: document: " + entity.toString() + " does not have an indexed field for index: " + index.toString());
+            return null;
+        }
+        String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOn));//note, could have parse problems here with non-string types
         logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         //set the id
@@ -102,7 +111,10 @@ public class IndexMaintainerHelper {
             //1. determine if an indexed field has changed
             if (hasIndexedFieldChanged(session, index, entity)) {
                 //2a. if the field has changed, create a new index entry
-                statementList.add(generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator));
+                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);                
+                if (bs != null) {
+                    statementList.add(bs);
+                }
                 //2b. after creating the new index entry, we must delete the old one
                 statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
             } else {//3. if an indexed field has not changed, do a normal CQL update

@@ -52,9 +52,9 @@ public abstract class Routes
 		//TODO: Support /{database}/{table}/{key1}/{key2}/... style reads for multi-part keys
 //		server.regex("///(*)", config.getDocumentsController())
 
-//		server.uri("/queries.{format}", config.getQueryController())
-//			.action("query", POST)
-//			.name(Constants.Routes.QUERIES);
+		server.uri("/{database}/{table}/queries", config.getQueryController())
+			.action("query", POST)
+			.name(Constants.Routes.QUERY);
 //
 //		server.uri("/queries/{queryId}.{format}", config.getQueryController())
 //			.action("executeSavedQuery", POST)
