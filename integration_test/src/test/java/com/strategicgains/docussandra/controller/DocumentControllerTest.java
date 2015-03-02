@@ -149,7 +149,6 @@ public class DocumentControllerTest {
      * document.
      */
     @Test
-    @Ignore //Test should be correct, application has bug!
     public void putDocumentTest() {
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
@@ -157,15 +156,17 @@ public class DocumentControllerTest {
         //act
         given().body(newObject).expect().statusCode(204)
                 .when().put(testDocument.getUuid().toString());
-
+        
         //check
-        expect().statusCode(200)
+
+        Response response = expect().statusCode(200)
                 .body("id", equalTo(testDocument.getUuid().toString()))
                 .body("object", notNullValue())
-                .body("object", equalTo(newObject))
+                .body("object", equalTo("{ \"newjson\" : \"object\"}"))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get(testDocument.getUuid().toString());
+                .get(testDocument.getUuid().toString()).andReturn();
+                LOGGER.debug("body for put response: " + response.getBody().prettyPrint());
     }
 
     /**
