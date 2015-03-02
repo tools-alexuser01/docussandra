@@ -174,7 +174,6 @@ public class DocumentControllerTest {
      * document.
      */
     @Test
-    @Ignore //Test should be correct, application has bug!
     public void deleteDocumentTest() {
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);

@@ -113,7 +113,8 @@ public class DocumentRepository
         if (item == null) {
             throw new ItemNotFoundException("ID not found: " + identifier.toString());
         }
-
+        item.setId(identifier);
+        item.table(table);
         return item;
     }
 
@@ -145,11 +146,8 @@ public class DocumentRepository
     @Override
     public void doDelete(Document entity) {
         try {
-            Table table = entity.table();//TODO: this doesn't seem like it will ever work
-            if (table == null) {
-                table = extractTable(entity.getId());
-            }
-            Identifier id = extractId(entity.getId());//TODO: bug! this never works
+            Table table = entity.table();
+            Identifier id = extractId(entity.getId());
             PreparedStatement deleteStmt = deleteStmts.get(table);
 
             if (deleteStmt == null) {
