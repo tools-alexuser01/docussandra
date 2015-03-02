@@ -95,6 +95,12 @@ public class DatabaseRepository
         return marshalAll(getSession().execute(bs));
     }
 
+    public List<Database> readAll(int limit, long offset)
+    {
+        BoundStatement bs = new BoundStatement(readAllStmt);
+        return marshalAll(getSession().execute(bs));
+    }
+
     private void bindCreate(BoundStatement bs, Database entity)
     {
         bs.bind(entity.name(),
