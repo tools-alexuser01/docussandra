@@ -48,8 +48,8 @@ extends AbstractCassandraRepository<Table>
 
 	private static final String CREATE_DOC_TABLE_CQL = "create table %s"
 		+ " (id uuid, object blob, created_at timestamp, updated_at timestamp,"
-		+ " primary key ((id), updated_at))"
-		+ " with clustering order by (updated_at DESC);";
+		+ " primary key (id))";//+ " primary key ((id), updated_at))"                
+		//+ " with clustering order by (updated_at DESC);";
 	private static final String DROP_DOC_TABLE_CQL = "drop table if exists %s;";
 
 	private PreparedStatement existStmt;
