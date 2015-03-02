@@ -23,7 +23,7 @@ import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.QueryDao;
+import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class QueryServiceTest {
     public void setUp() {
         f.clearTestTables();
         f.createTestTables();
-        instance = new QueryService(new QueryDao(f.getSession()));
+        instance = new QueryService(new QueryRepository(f.getSession()));
         IndexRepository indexRepo = new IndexRepository(f.getSession());
         indexRepo.create(Fixtures.createTestIndexTwoField());
     }

@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
+public class QueryRepository //extends CassandraTimestampedEntityRepository<Query>
 {
 //	private static final String UPDATE_CQL = "update %s set updatedat = ? where %s = ?";
 //	private static final String CREATE_CQL = "insert into %s (%s, createdat, updatedat) values (?, ?, ?)";
@@ -30,7 +30,7 @@ public class QueryDao //extends CassandraTimestampedEntityRepository<Query>
 
     private Session session;
 
-    public QueryDao(Session session) {
+    public QueryRepository(Session session) {
         //super(session, "queries", "id");
         this.session = session;
         //initializeStatements();

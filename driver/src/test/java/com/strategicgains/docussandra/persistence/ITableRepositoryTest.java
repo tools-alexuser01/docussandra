@@ -17,12 +17,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class ITableDaoTest {
+public class ITableRepositoryTest {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private Fixtures f;
-    public ITableDaoTest() {
+    public ITableRepositoryTest() {
         f = Fixtures.getInstance();
     }
 
@@ -51,7 +51,7 @@ public class ITableDaoTest {
     public void testITableExists() {
         System.out.println("iTableExists");
         Index index = Fixtures.createTestIndexOneField();
-        ITableDao cleanUpInstance = new ITableDao(f.getSession());
+        ITableRepository cleanUpInstance = new ITableRepository(f.getSession());
         boolean expResult = false;//Note: Negative Test Only
         boolean result = cleanUpInstance.iTableExists(index);
         assertEquals(expResult, result);
@@ -64,7 +64,7 @@ public class ITableDaoTest {
     public void testCreateITable() {
         System.out.println("createITable");
         Index index = Fixtures.createTestIndexOneField();
-        ITableDao instance = new ITableDao(f.getSession());
+        ITableRepository instance = new ITableRepository(f.getSession());
         boolean result = instance.iTableExists(index);
         assertEquals(false, result);//make sure it doesn't exist yet
 
@@ -87,7 +87,7 @@ public class ITableDaoTest {
     @Test
     public void testGenerateTableCreationSyntax() {
         System.out.println("generateTableCreationSyntax");
-        ITableDao instance = new ITableDao(f.getSession());
+        ITableRepository instance = new ITableRepository(f.getSession());
         String response = instance.generateTableCreationSyntax(Fixtures.createTestIndexOneField());
         Assert.assertNotNull(response);
         assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield));", response);
@@ -102,7 +102,7 @@ public class ITableDaoTest {
     @Test
     public void testDeleteITable() {
         System.out.println("deleteITable");
-        ITableDao instance = new ITableDao(f.getSession());
+        ITableRepository instance = new ITableRepository(f.getSession());
         Index index = Fixtures.createTestIndexOneField();
         boolean result = instance.iTableExists(index);
         assertEquals(false, result);//not here        
@@ -120,7 +120,7 @@ public class ITableDaoTest {
     @Test
     public void testDeleteITable_String() {
         System.out.println("deleteITable");
-        ITableDao instance = new ITableDao(f.getSession());
+        ITableRepository instance = new ITableRepository(f.getSession());
         Index index = Fixtures.createTestIndexOneField();
         boolean result = instance.iTableExists(index);
         assertEquals(false, result);//not here        

@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class QueryDaoTest {
+public class QueryRepositoryTest {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Fixtures f;
-    public QueryDaoTest() {
+    public QueryRepositoryTest() {
         f = Fixtures.getInstance();
     }
 
@@ -66,7 +66,7 @@ public class QueryDaoTest {
     @Test
     public void testDoQueryNoResults() {
         System.out.println("testDoQueryNoResults");
-        QueryDao instance = new QueryDao(f.getSession());
+        QueryRepository instance = new QueryRepository(f.getSession());
         List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(result.isEmpty());//no data yet, should get an empty set
@@ -82,7 +82,7 @@ public class QueryDaoTest {
         //put a test doc in
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
-        QueryDao instance = new QueryDao(f.getSession());
+        QueryRepository instance = new QueryRepository(f.getSession());
         List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
@@ -109,7 +109,7 @@ public class QueryDaoTest {
         //put a test doc in
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
-        QueryDao instance = new QueryDao(f.getSession());
+        QueryRepository instance = new QueryRepository(f.getSession());
         List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery2());
         assertNotNull(result);
         assertTrue(result.isEmpty());

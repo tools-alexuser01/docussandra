@@ -8,16 +8,16 @@ import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.QueryDao;
+import com.strategicgains.docussandra.persistence.QueryRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class QueryService {
 
-    private QueryDao queries;
+    private QueryRepository queries;
 
-    public QueryService(QueryDao queryRepository) {
+    public QueryService(QueryRepository queryRepository) {
         super();
         this.queries = queryRepository;
     }
