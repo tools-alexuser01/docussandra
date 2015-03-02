@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author udeyoje
  * @since Feb 12, 2015
  */
-public class ITableDao {
+public class ITableRepository {
 
     //TODO: create interface for this class
     /**
@@ -54,7 +54,7 @@ public class ITableDao {
      *
      * @param session Session for interacting with the Cassandra database.
      */
-    public ITableDao(Session session) {;
+    public ITableRepository(Session session) {;
         this.session = session;
     }
 

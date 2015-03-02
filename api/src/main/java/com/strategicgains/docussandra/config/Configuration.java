@@ -20,7 +20,7 @@ import com.strategicgains.docussandra.handler.IndexDeletedHandler;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.QueryDao;
+import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.docussandra.service.DatabaseService;
 import com.strategicgains.docussandra.service.DocumentService;
@@ -72,7 +72,7 @@ extends Environment
 		TableRepository tableRepository = new TableRepository(dbConfig.getSession());
 		DocumentRepository documentRepository = new DocumentRepository(dbConfig.getSession());
 		IndexRepository indexRepository = new IndexRepository(dbConfig.getSession());
-		QueryDao queryRepository = new QueryDao(dbConfig.getSession());
+		QueryRepository queryRepository = new QueryRepository(dbConfig.getSession());
 
 		DatabaseService databaseService = new DatabaseService(databaseRepository);
 		TableService tableService = new TableService(databaseRepository, tableRepository);

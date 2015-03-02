@@ -13,7 +13,7 @@ import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
-import com.strategicgains.docussandra.persistence.ITableDao;
+import com.strategicgains.docussandra.persistence.ITableRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import java.io.File;
@@ -141,7 +141,7 @@ public class Fixtures {
     }
 
     public void clearTestTables() {
-        ITableDao cleanUpInstance = new ITableDao(getSession());
+        ITableRepository cleanUpInstance = new ITableRepository(getSession());
         IndexRepository indexRepo = new IndexRepository(getSession());
         DatabaseRepository databaseRepo = new DatabaseRepository(getSession());
         try {
@@ -186,7 +186,7 @@ public class Fixtures {
 
     public void createTestTables() {
         System.out.println("createTestITables");
-        ITableDao iTableDao = new ITableDao(getSession());
+        ITableRepository iTableDao = new ITableRepository(getSession());
         Index index = Fixtures.createTestIndexOneField();
         Index index2 = Fixtures.createTestIndexTwoField();
         IndexRepository indexRepo = new IndexRepository(getSession());

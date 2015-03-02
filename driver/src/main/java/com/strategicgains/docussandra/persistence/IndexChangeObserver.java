@@ -24,7 +24,7 @@ public class IndexChangeObserver<T extends Identifiable>
     /**
      * Dao for interacting with the iTables.
      */
-    private ITableDao dao;
+    private ITableRepository dao;
 
     /**
      * Constructor. Creates a new IndexChangeObserver.
@@ -35,7 +35,7 @@ public class IndexChangeObserver<T extends Identifiable>
         super();
         this.session = session;
         //TODO: check thread safety here
-        dao = new ITableDao(session);
+        dao = new ITableRepository(session);
 
     }
 
