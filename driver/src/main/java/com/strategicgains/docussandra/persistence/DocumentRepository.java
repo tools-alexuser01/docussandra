@@ -1,5 +1,6 @@
 package com.strategicgains.docussandra.persistence;
 
+import com.datastax.driver.core.BatchStatement;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
@@ -94,12 +95,14 @@ public class DocumentRepository
 
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
-        session().execute(bs);
+        BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
+        batch.add(bs);//the actual create
         List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity, bucketLocator);
         for (BoundStatement boundIndexStatement : indexStatements)
         {
-            session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
+            batch.add(boundIndexStatement);//the index creates
         }
+        session().execute(batch);
         return entity;
     }
 
@@ -149,12 +152,14 @@ public class DocumentRepository
 
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
-        session().execute(bs);
+        BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
+        batch.add(bs);//the actual create
         List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
         for (BoundStatement boundIndexStatement : indexStatements)
         {
-            session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
+            batch.add(boundIndexStatement);//the index updates
         }
+        session().execute(batch);
         return entity;
     }
 
@@ -175,12 +180,14 @@ public class DocumentRepository
 
             BoundStatement bs = new BoundStatement(deleteStmt);
             bindIdentifier(bs, id);
-            session().execute(bs);
+            BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
+            batch.add(bs);//the actual create
             List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
             for (BoundStatement boundIndexStatement : indexStatements)
             {
-                session().execute(boundIndexStatement);//TODO: run in batch -- issue #36
+                batch.add(boundIndexStatement);//the index deletes
             }
+            session().execute(batch);
         } catch (InvalidObjectIdException e)
         {
             throw new ItemNotFoundException("ID not found: " + entity.getId().toString());
