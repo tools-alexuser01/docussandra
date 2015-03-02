@@ -145,8 +145,11 @@ public class DocumentRepository
     @Override
     public void doDelete(Document entity) {
         try {
-            Table table = entity.table();
+            Table table = entity.table();//TODO: this doesn't seem like it will ever work
             Identifier id = extractId(entity.getId());
+            if(table == null){
+                table = extractTable(entity.getId());
+            }
             PreparedStatement deleteStmt = deleteStmts.get(table);
 
             if (deleteStmt == null) {
