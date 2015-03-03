@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Used for testing only! Allows us to quickly establish a database connection
  * and work with test data.
- * 
+ *
  * TODO: clean this up a bit; it was hacked together quick
  *
  * @author udeyoje
@@ -130,11 +130,16 @@ public class Fixtures
 
     public static List<Document> getBulkDocuments() throws IOException, ParseException
     {
+        return getBulkDocuments("./src/test/resources/documents.json");
+    }
+
+    public static List<Document> getBulkDocuments(String path) throws IOException, ParseException
+    {
         if (bulkDocs == null)
         {
             JSONParser parser = new JSONParser();
             logger.info("Data path: " + new File("./src/test/resources/documents.json").getAbsolutePath());
-            JSONObject jsonObject = (JSONObject) parser.parse(new FileReader("./src/test/resources/documents.json"));
+            JSONObject jsonObject = (JSONObject) parser.parse(new FileReader(path));
             JSONArray docs = (JSONArray) jsonObject.get("documents");
             List<Document> toReturn = new ArrayList<>(docs.size());
             for (int i = 0; i < docs.size(); i++)
@@ -142,7 +147,7 @@ public class Fixtures
                 Document doc = new Document();
                 doc.table(createTestTable());
                 doc.setUuid(new UUID(Long.MAX_VALUE - i, 1));//give it a UUID that we will reconize
-                JSONObject object = (JSONObject)docs.get(i);
+                JSONObject object = (JSONObject) docs.get(i);
                 doc.object(object.toJSONString());
                 toReturn.add(doc);
             }
