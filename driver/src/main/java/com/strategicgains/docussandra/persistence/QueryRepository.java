@@ -22,6 +22,7 @@ public class QueryRepository
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String QUERY_CQL = "select * from %s where bucket = ? AND %s";
+    private static final String QUERY_CQL_LIMIT = "select * from %s where bucket = ? AND %s LIMIT %s";//we use the limit as to not put any more stress on cassandra than we need to (even though our algorithm will discard the data anyway)
 
     private IndexBucketLocator ibl = new SimpleIndexBucketLocatorImpl(200);
 
@@ -32,10 +33,17 @@ public class QueryRepository
         this.session = session;
     }
 
-    private BoundStatement generateQueryStatement(ParsedQuery query)
+    private BoundStatement generateQueryStatement(ParsedQuery query, long maxIndex)
     {
+        String finalQuery;
         //format QUERY_CQL
-        String finalQuery = String.format(QUERY_CQL, query.getITable(), query.getWhereClause().getBoundStatementSyntax());
+        if (maxIndex == -1)//no artifical limit
+        {
+            finalQuery = String.format(QUERY_CQL, query.getITable(), query.getWhereClause().getBoundStatementSyntax());
+        } else //with a limit
+        {
+            finalQuery = String.format(QUERY_CQL_LIMIT, query.getITable(), query.getWhereClause().getBoundStatementSyntax(), maxIndex);
+        }
         //run query
         PreparedStatement ps = session.prepare(finalQuery);//TODO: Cache
         BoundStatement bs = new BoundStatement(ps);
@@ -55,7 +63,7 @@ public class QueryRepository
     public List<Document> doQuery(ParsedQuery query)
     {
         //run the query
-        ResultSet results = session.execute(generateQueryStatement(query));
+        ResultSet results = session.execute(generateQueryStatement(query, -1));
         //process result(s)
         ArrayList<Document> toReturn = new ArrayList<>();
         Iterator<Row> ite = results.iterator();
@@ -69,16 +77,17 @@ public class QueryRepository
 
     public List<Document> doQuery(ParsedQuery query, int limit, long offset)
     {
+        long maxIndex = offset + limit;
         //run the query
-        ResultSet results = session.execute(generateQueryStatement(query));
+        ResultSet results = session.execute(generateQueryStatement(query, maxIndex));
         //process result(s)
         ArrayList<Document> toReturn = new ArrayList<>(limit);
         Iterator<Row> ite = results.iterator();
-        int offsetCounter = 0;
+        long offsetCounter = 0;
         while (ite.hasNext())//for each item in the result set
         {
             Row row = ite.next();
-            if (offsetCounter >= offset + limit)//if we are at a counter less than our max amount to return (offset + limit)
+            if (offsetCounter >= maxIndex)//if we are at a counter less than our max amount to return (offset + limit)
             {
                 break;//we are done; don't bother processing anymore, it's not going to be used anyway
             } else if (offsetCounter >= offset)//if we are at a counter greater than or equal to our offset -- we are in the sweet spot of the result set to return
