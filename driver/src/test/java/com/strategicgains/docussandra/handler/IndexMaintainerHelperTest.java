@@ -84,11 +84,8 @@ public class IndexMaintainerHelperTest
         //reinsert with some fresh data
         index1 = Fixtures.createTestIndexOneField();
         index2 = Fixtures.createTestIndexTwoField();
-        indexRepo.doCreate(index1);
-        ico.afterCreate(index1);//not sure why i have to call this explicitly
-        indexRepo.doCreate(index2);
-        ico.afterCreate(index2);
-
+        indexRepo.create(index1);
+        indexRepo.create(index2);
     }
 
     @After

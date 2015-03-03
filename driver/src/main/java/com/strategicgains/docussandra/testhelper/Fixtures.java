@@ -131,7 +131,7 @@ public class Fixtures
         if (bulkDocs == null)
         {
             JSONParser parser = new JSONParser();
-            logger.info("--------------" + new File("./src/test/resources/documents.json").getAbsolutePath());
+            logger.info("Data path: " + new File("./src/test/resources/documents.json").getAbsolutePath());
             JSONObject jsonObject = (JSONObject) parser.parse(new FileReader("./src/test/resources/documents.json"));
             JSONArray docs = (JSONArray) jsonObject.get("documents");
             List<Document> toReturn = new ArrayList<>(docs.size());
@@ -140,7 +140,8 @@ public class Fixtures
                 Document doc = new Document();
                 doc.table(createTestTable());
                 doc.setUuid(new UUID(Long.MAX_VALUE - i, 1));//give it a UUID that we will reconize
-                doc.object(docs.toJSONString());
+                JSONObject object = (JSONObject)docs.get(i);
+                doc.object(object.toJSONString());
                 toReturn.add(doc);
             }
             bulkDocs = toReturn;
@@ -210,6 +211,7 @@ public class Fixtures
         IndexRepository indexRepo = new IndexRepository(getSession());
         DatabaseRepository databaseRepo = new DatabaseRepository(getSession());
         DocumentRepository docRepo = new DocumentRepository(getSession());
+        TableRepository tableRepo = new TableRepository(getSession());
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
@@ -220,6 +222,13 @@ public class Fixtures
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithtwofields");
+        } catch (InvalidQueryException e)
+        {
+            logger.debug("Not dropping iTable, probably doesn't exist.");
+        }
+        try
+        {
+            cleanUpInstance.deleteITable("mydb_mytable_myindexbulkdata");
         } catch (InvalidQueryException e)
         {
             logger.debug("Not dropping iTable, probably doesn't exist.");
@@ -253,7 +262,7 @@ public class Fixtures
 
         try
         {
-            TableRepository tableRepo = new TableRepository(getSession());
+
             tableRepo.delete(Fixtures.createTestTable());
         } catch (InvalidQueryException e)
         {
@@ -275,6 +284,13 @@ public class Fixtures
         }
         try
         {
+            indexRepo.delete(Fixtures.createTestIndexWithBulkDataHit());
+        } catch (InvalidQueryException e)
+        {
+            logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try
+        {
             databaseRepo.delete(Fixtures.createTestDatabase());
         } catch (InvalidQueryException e)
         {
@@ -288,10 +304,12 @@ public class Fixtures
         ITableRepository iTableDao = new ITableRepository(getSession());
         Index index = Fixtures.createTestIndexOneField();
         Index index2 = Fixtures.createTestIndexTwoField();
+        Index index3 = Fixtures.createTestIndexWithBulkDataHit();
         IndexRepository indexRepo = new IndexRepository(getSession());
         indexRepo.create(index);
         //indexRepo.create(index2);
         iTableDao.createITable(index2);
+        iTableDao.createITable(index3);
         TableRepository tableRepo = new TableRepository(getSession());
         tableRepo.create(Fixtures.createTestTable());
     }
@@ -392,6 +410,21 @@ public class Fixtures
     {
         Query query = new Query();
         query.setWhere("myindexedfield = 'foo'");
+        query.setTable("mytable");
+        WhereClause whereClause = new WhereClause(query.getWhere());
+        String iTable = "mydb_mytable_myindexwithonefield";
+        return new ParsedQuery(query, whereClause, iTable);
+    }
+
+    /**
+     * Creates a simple parsed query based on a single index for testing.
+     *
+     * @return
+     */
+    public static final ParsedQuery createTestParsedQueryBulkData()
+    {
+        Query query = new Query();
+        query.setWhere("field1 = 'this is my data'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
         String iTable = "mydb_mytable_myindexwithonefield";
