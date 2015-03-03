@@ -14,10 +14,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QueryRepository
 {
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private static final String QUERY_CQL = "select * from %s where bucket = ? AND %s";
 
     private IndexBucketLocator ibl = new SimpleIndexBucketLocatorImpl(200);
@@ -54,7 +57,6 @@ public class QueryRepository
         //run the query
         ResultSet results = session.execute(generateQueryStatement(query));
         //process result(s)
-        //right now we just are going go return a list of documents
         ArrayList<Document> toReturn = new ArrayList<>();
         Iterator<Row> ite = results.iterator();
         while (ite.hasNext())
@@ -65,17 +67,32 @@ public class QueryRepository
         return toReturn;
     }
 
-    public List<Document> doQuery(ParsedQuery query, int limit, int offset)
+    public List<Document> doQuery(ParsedQuery query, int limit, long offset)
     {
         //run the query
         ResultSet results = session.execute(generateQueryStatement(query));
         //process result(s)
-        ArrayList<Document> toReturn = new ArrayList<>();
+        ArrayList<Document> toReturn = new ArrayList<>(limit);
         Iterator<Row> ite = results.iterator();
-        while (ite.hasNext())
+        int offsetCounter = 0;
+        while (ite.hasNext())//for each item in the result set
         {
             Row row = ite.next();
-            toReturn.add(DocumentRepository.marshalRow(row));
+            if (offsetCounter >= offset + limit)//if we are at a counter less than our max amount to return (offset + limit)
+            {
+                break;//we are done; don't bother processing anymore, it's not going to be used anyway
+            } else if (offsetCounter >= offset)//if we are at a counter greater than or equal to our offset -- we are in the sweet spot of the result set to return
+            {
+                toReturn.add(DocumentRepository.marshalRow(row));//we can add it to our return list
+            } else
+            {
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("We are probably wasting processor time by processing a query inefficently");//TODO: obviously, consider improving this (or at least take out the logger if we decide not to)
+                }
+            }
+            offsetCounter++;
+
         }
         return toReturn;
     }
