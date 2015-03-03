@@ -22,18 +22,18 @@ import org.restexpress.query.QueryRanges;
  */
 public class QueryController
 {
-
+    
     private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
     private static final int DEFAULT_LIMIT = 20;
-
+    
     private QueryService service;
-
+    
     public QueryController(QueryService queryService)
     {
         super();
         this.service = queryService;
     }
-
+    
     public List<Document> query(Request request, Response response)
     {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
@@ -42,7 +42,7 @@ public class QueryController
         toQuery.setTable(table);//change of plans, no longer getting it from the query object, but from the URL instead
 
         QueryRange range = QueryRanges.parseFrom(request);
-
+        
         int limit = DEFAULT_LIMIT;//TODO: enforce maximum limit
         long offset = 0;
         if (range != null)
@@ -50,14 +50,20 @@ public class QueryController
             if (range.hasLimit())
             {
                 limit = range.getLimit();
+            } else
+            {
+                range.setLimit(limit);
             }
             if (range.hasOffset())
             {
                 offset = range.getOffset();
+            } else
+            {
+                range.setOffset(offset);
             }
         }
         List<Document> queryResponse = service.query(database, toQuery, limit, offset);
-
+        response.setCollectionResponse(range, queryResponse.size(), queryResponse.size() + offset);//TODO: double check this
         //Document document = documents.read(database, table, new Identifier(database, table, UuidConverter.parse(id)));
         // enrich the entity with links, etc. here...
         //TODO: come back to thisHyperExpress.bind(Constants.Url.DOCUMENT_ID, document.getUuid().toString());
