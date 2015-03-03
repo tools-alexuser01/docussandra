@@ -38,7 +38,7 @@ public class DatabaseRepository
     private static final String CREATE_CQL = "insert into %s (%s, description, created_at, updated_at) values (?, ?, ?, ?)";
     private static final String UPDATE_CQL = "update %s set description = ?, updated_at = ? where %s = ?";
     private static final String READ_ALL_CQL = "select * from %s";
-    private static final String READ_ALL_CQL_WITH_LIMIT = "select * from %s LIMIT %s";
+    //private static final String READ_ALL_CQL_WITH_LIMIT = "select * from %s LIMIT %s";
 
     private PreparedStatement createStmt;
     private PreparedStatement updateStmt;
@@ -96,13 +96,13 @@ public class DatabaseRepository
         return marshalAll(getSession().execute(bs));
     }
 
-    public List<Database> readAll(int limit, int offset)
-    {
-        PreparedStatement readAllStmtWithLimit = getSession().prepare(String.format(READ_ALL_CQL_WITH_LIMIT, getTable(), limit));    
-        //^^TODO: EhCache this!
-        BoundStatement bs = new BoundStatement(readAllStmtWithLimit);
-        return marshalAll(getSession().execute(bs));
-    }
+//    public List<Database> readAll(int limit, int offset)
+//    {
+//        PreparedStatement readAllStmtWithLimit = getSession().prepare(String.format(READ_ALL_CQL_WITH_LIMIT, getTable(), limit));    
+//        //^^TODO: EhCache this!
+//        BoundStatement bs = new BoundStatement(readAllStmtWithLimit);
+//        return marshalAll(getSession().execute(bs));
+//    }
 
     private void bindCreate(BoundStatement bs, Database entity)
     {
