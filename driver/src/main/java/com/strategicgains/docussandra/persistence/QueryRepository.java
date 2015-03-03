@@ -52,7 +52,7 @@ public class QueryRepository
         String bucket = ibl.getBucket(null, fuzzyUUID);
         bs.setString(0, bucket);
         int i = 1;
-        for (String bindValue : query.getWhereClause().getValues())//no great reason for not using the other loop format
+        for (String bindValue : query.getWhereClause().getValues())
         {
             bs.setString(i, bindValue);
             i++;
