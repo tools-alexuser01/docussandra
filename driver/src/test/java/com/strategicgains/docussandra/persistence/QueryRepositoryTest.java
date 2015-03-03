@@ -125,23 +125,23 @@ public class QueryRepositoryTest
         assertTrue(result.isEmpty());
     }
 
-//    /**
-//     * Test of doQuery method, of class QueryDao.
-//     */
-//    @Test
-//    public void testDoQueryWithLotsOfResults() throws Exception
-//    {
-//        System.out.println("testDoQueryWithLotsOfResults");
-//        //put in an index that we can use with bulk data
-//        f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
-//        List<Document> docs = Fixtures.getBulkDocuments();
-//        //put a bunch of test docs in
-//        f.insertDocuments(docs);
-//        QueryRepository instance = new QueryRepository(f.getSession());
-//        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQueryBulkData());
-//        assertNotNull(result);
-//        assertTrue(!result.isEmpty());
-//        assertTrue(result.size() == 34);
-//    }
+    /**
+     * Test of doQuery method, of class QueryDao.
+     */
+    @Test
+    public void testDoQueryWithLotsOfResults() throws Exception
+    {
+        System.out.println("testDoQueryWithLotsOfResults");
+        //put in an index that we can use with bulk data
+        f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
+        List<Document> docs = Fixtures.getBulkDocuments();
+        //put a bunch of test docs in
+        f.insertDocuments(docs);
+        QueryRepository instance = new QueryRepository(f.getSession());
+        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQueryBulkData());
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 34);
+    }
 
 }

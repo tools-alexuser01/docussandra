@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Used for testing only! Allows us to quickly establish a database connection
  * and work with test data.
+ * 
+ * TODO: clean this up a bit; it was hacked together quick
  *
  * @author udeyoje
  */
@@ -427,7 +429,7 @@ public class Fixtures
         query.setWhere("field1 = 'this is my data'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexwithonefield";
+        String iTable = "mydb_mytable_myindexbulkdata";
         return new ParsedQuery(query, whereClause, iTable);
     }
 
