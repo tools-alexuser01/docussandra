@@ -75,7 +75,7 @@ public class QueryRepositoryTest
     {
         System.out.println("testDoQueryNoResults");
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
+        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(result.isEmpty());//no data yet, should get an empty set
     }
@@ -92,7 +92,7 @@ public class QueryRepositoryTest
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
+        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 1);
@@ -120,7 +120,7 @@ public class QueryRepositoryTest
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery2());
+        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery2());
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -138,7 +138,7 @@ public class QueryRepositoryTest
         //put a bunch of test docs in
         f.insertDocuments(docs);
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQueryBulkData());
+        List<Document> result = instance.doQuery(Fixtures.createTestParsedQueryBulkData());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 34);

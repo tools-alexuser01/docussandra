@@ -26,12 +26,10 @@ public class QueryRepository
 
     public QueryRepository(Session session)
     {
-        //super(session, "queries", "id");
         this.session = session;
-        //initializeStatements();
     }
 
-    public List<Document> doQuery(String db, ParsedQuery query)
+    private BoundStatement generateQueryStatement(ParsedQuery query)
     {
         //format QUERY_CQL
         String finalQuery = String.format(QUERY_CQL, query.getITable(), query.getWhereClause().getBoundStatementSyntax());
@@ -48,10 +46,30 @@ public class QueryRepository
             bs.setString(i, bindValue);
             i++;
         }
+        return bs;
+    }
+
+    public List<Document> doQuery(ParsedQuery query)
+    {
         //run the query
-        ResultSet results = session.execute(bs);
+        ResultSet results = session.execute(generateQueryStatement(query));
         //process result(s)
         //right now we just are going go return a list of documents
+        ArrayList<Document> toReturn = new ArrayList<>();
+        Iterator<Row> ite = results.iterator();
+        while (ite.hasNext())
+        {
+            Row row = ite.next();
+            toReturn.add(DocumentRepository.marshalRow(row));
+        }
+        return toReturn;
+    }
+
+    public List<Document> doQuery(ParsedQuery query, int limit, int offset)
+    {
+        //run the query
+        ResultSet results = session.execute(generateQueryStatement(query));
+        //process result(s)
         ArrayList<Document> toReturn = new ArrayList<>();
         Iterator<Row> ite = results.iterator();
         while (ite.hasNext())
