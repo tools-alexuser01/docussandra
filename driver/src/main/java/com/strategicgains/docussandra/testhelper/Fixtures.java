@@ -162,7 +162,7 @@ public class Fixtures
         fields.add("myindexedfield1");
         fields.add("myindexedfield2");
         index.fields(fields);
-        index.isUnique(true);
+        index.isUnique(false);
         return index;
     }
 
