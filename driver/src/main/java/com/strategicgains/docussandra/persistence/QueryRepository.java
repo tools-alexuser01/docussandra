@@ -15,14 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public class QueryRepository //extends CassandraTimestampedEntityRepository<Query>
+public class QueryRepository
 {
-//	private static final String UPDATE_CQL = "update %s set updatedat = ? where %s = ?";
-//	private static final String CREATE_CQL = "insert into %s (%s, createdat, updatedat) values (?, ?, ?)";
-//
-//	private PreparedStatement createStmt;
-//	private PreparedStatement updateStmt;
-//      
 
     private static final String QUERY_CQL = "select * from %s where bucket = ? AND %s";
 
@@ -68,53 +62,6 @@ public class QueryRepository //extends CassandraTimestampedEntityRepository<Quer
         return toReturn;
     }
 
-//	protected void initializeStatements()
-//	{
-//		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), getIdentifierColumn()));
-//		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable(), getIdentifierColumn()));
-//	}
-//	@Override
-//    protected Query createEntity(Query entity)
-//    {
-//		BoundStatement bs = new BoundStatement(createStmt);
-//		bindCreate(bs, entity);
-//		getSession().execute(bs);
-//		return entity;
-//    }
-//
-//	@Override
-//    protected Query updateEntity(Query entity)
-//    {
-//		BoundStatement bs = new BoundStatement(updateStmt);
-//		bindUpdate(bs, entity);
-//		getSession().execute(bs);
-//		return entity;
-//    }
-//
-//	private void bindCreate(BoundStatement bs, Query entity)
-//	{
-//		bs.bind(entity.getUuid(),
-//		    entity.getCreatedAt(),
-//		    entity.getUpdatedAt());
-//	}
-//
-//	private void bindUpdate(BoundStatement bs, Query entity)
-//	{
-//		bs.bind(entity.getUpdatedAt(),
-//		    entity.getUuid());
-//	}
-//
-//	@Override
-//    protected Query marshalRow(Row row)
-//    {
-//		if (row == null) return null;
-//
-//		Query q = new Query();
-//		q.setUuid(row.getUUID(getIdentifierColumn()));
-//		q.setCreatedAt(row.getDate("createdat"));
-//		q.setUpdatedAt(row.getDate("updatedat"));
-//		return q;
-//    }
     /**
      * @return the session
      */
@@ -123,10 +70,4 @@ public class QueryRepository //extends CassandraTimestampedEntityRepository<Quer
         return session;
     }
 
-//    /**
-//     * @param session the session to set
-//     */
-//    public void setSession(Session session) {
-//        this.session = session;
-//    }
 }
