@@ -24,7 +24,7 @@ public class QueryService {
 
     public List<Document> query(String db, Query toQuery) {
         ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
-        return queries.doQuery(db, parsedQuery);
+        return queries.doQuery(parsedQuery);
 
     }
 
