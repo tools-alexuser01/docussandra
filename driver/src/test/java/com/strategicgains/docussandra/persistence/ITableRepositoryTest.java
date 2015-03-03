@@ -100,8 +100,28 @@ public class ITableRepositoryTest
         ITableRepository instance = new ITableRepository(f.getSession());
         String response = instance.generateTableCreationSyntax(Fixtures.createTestIndexOneField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield));", response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield, id));", response);
         response = instance.generateTableCreationSyntax(Fixtures.createTestIndexTwoField());
+        Assert.assertNotNull(response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield1 varchar, myindexedfield2 varchar, PRIMARY KEY ((bucket), myindexedfield1, myindexedfield2, id));", response);
+    }
+
+    /**
+     * Test of generateTableCreationSyntax method, of class ITableDao.
+     */
+    @Test
+    public void testGenerateTableCreationSyntaxUnique()
+    {
+        System.out.println("testGenerateTableCreationSyntaxUnique");
+        ITableRepository instance = new ITableRepository(f.getSession());
+        Index one = Fixtures.createTestIndexOneField();
+        one.isUnique(true);
+        String response = instance.generateTableCreationSyntax(one);
+        Assert.assertNotNull(response);
+        assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield));", response);
+        Index two = Fixtures.createTestIndexTwoField();
+        two.isUnique(true);
+        response = instance.generateTableCreationSyntax(two);
         Assert.assertNotNull(response);
         assertEquals("CREATE TABLE docussandra.mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield1 varchar, myindexedfield2 varchar, PRIMARY KEY ((bucket), myindexedfield1, myindexedfield2));", response);
     }
