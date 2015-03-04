@@ -19,8 +19,11 @@ import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Just used to load test data.
@@ -29,6 +32,8 @@ import java.util.List;
  */
 public class LoadTestData
 {
+
+    private static Logger logger = LoggerFactory.getLogger(LoadTestData.class);
 
     private Fixtures f;
 
@@ -48,52 +53,75 @@ public class LoadTestData
         try
         {
             f.insertDatabase(testDb);
-        } catch (Exception e)
+        } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create DB");
+            //logger.info("Probile creating DB", e);
         }
         try
         {
             f.insertTable(testTable);
-        } catch (Exception e)
+        } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create Table");
+            //logger.info("Probile creating table", e);
         }
         Index player = new Index("player");
         player.isUnique(false);
         List<String> fields = new ArrayList<>(1);
         fields.add("NAMEFULL");
         player.fields(fields);
+        player.table(testTable);
         try
         {
             f.insertIndex(player);
-        } catch (Exception e)
+        } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create Index");
+            //logger.info("Probile creating index", e);
         }
         Index lastname = new Index("lastname");
         lastname.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add("NAMELAST");
         lastname.fields(fields);
+        lastname.table(testTable);
         try
         {
             f.insertIndex(lastname);
-        } catch (Exception e)
+        } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create Index");
+            //logger.info("Probile creating index", e);
+        }
+        Index lastAndFirst = new Index("lastandfirst");
+        lastAndFirst.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("NAMELAST");
+        fields.add("NAMEFIRST");
+        lastAndFirst.fields(fields);
+        lastAndFirst.table(testTable);
+        try
+        {
+            f.insertIndex(lastAndFirst);
+        } catch (DuplicateItemException e)
+        {
+            System.out.println("Didn't re-create Index");
+            //logger.info("Probile creating index", e);
         }
         Index team = new Index("team");
         team.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add("TEAM");
         team.fields(fields);
+        team.table(testTable);
         try
         {
             f.insertIndex(team);
-        } catch (Exception e)
+        } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create Index");
+            //logger.info("Probile creating index", e);
         }
 
         Index position = new Index("postion");
@@ -101,12 +129,14 @@ public class LoadTestData
         fields = new ArrayList<>(1);
         fields.add("POSITION");
         position.fields(fields);
+        position.table(testTable);
         try
         {
             f.insertIndex(position);
-        } catch (Exception e)
+        } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create Index");
+            //logger.info("Probile creating index", e);
         }
 
         Index rookie = new Index("rookieyear");
@@ -114,17 +144,20 @@ public class LoadTestData
         fields = new ArrayList<>(1);
         fields.add("ROOKIEYEAR");
         rookie.fields(fields);
+        rookie.table(testTable);
         try
         {
             f.insertIndex(rookie);
-        } catch (Exception e)
+        } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create Index");
+            //logger.info("Probile creating index", e);
         }
 
         List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players.json", testTable);
         f.insertDocuments(docs);
-
+        System.out.println("Done!");
+        System.exit(0);
     }
 
     public static void main(String[] args) throws Exception
