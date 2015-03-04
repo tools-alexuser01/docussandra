@@ -77,13 +77,14 @@ public class IndexMaintainerHelper
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         //set the bucket
-        String fieldToBucketOn = (String) jsonObject.get(fields.get(0));
-        if (fieldToBucketOn == null)
+        Object fieldToBucketOnObject = jsonObject.get(fields.get(0));
+        if (fieldToBucketOnObject == null)
         {
             // we do not have an indexable field in our document -- therefore, it shouldn't be added to an index! (right?) -- is this right Todd?
             logger.trace("Warning: document: " + entity.toString() + " does not have an indexed field for index: " + index.toString());
             return null;
         }
+        String fieldToBucketOn = fieldToBucketOnObject.toString();//use the java toString to convert the object to a string.
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOn));//note, could have parse problems here with non-string types
         logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
@@ -98,7 +99,8 @@ public class IndexMaintainerHelper
         for (int i = 0; i < fields.size(); i++)
         {
             String field = fields.get(i);
-            String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+            Object jObject = jsonObject.get(field);
+            String fieldValue = jObject.toString();//note, could have parse problems here with non-string types
             bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
         }
         return bs;
