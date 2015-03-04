@@ -134,7 +134,7 @@ public class QueryControllerTest
         q.setWhere("field1 = 'this is my data'");
         q.setTable("mytable");
         //act
-        given().header("limit", "1").header("offset", "0").body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(200)
+        given().header("limit", "1").header("offset", "0").body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(206)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
                 .body("", notNullValue())
                 .body("id", notNullValue())
