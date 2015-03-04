@@ -55,6 +55,12 @@ public class Fixtures
 
     private static Logger logger = LoggerFactory.getLogger(Fixtures.class);
 
+    private static IndexRepository indexRepo;
+    private static ITableRepository cleanUpInstance;
+    private static DatabaseRepository databaseRepo;
+    private static DocumentRepository docRepo;
+    private static TableRepository tableRepo;
+
     /**
      * Private constructor as this is a singleton object
      */
@@ -73,6 +79,11 @@ public class Fixtures
         final Metadata metadata = cluster.getMetadata();
         session = cluster.connect(this.getCassandraKeyspace());
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
+        indexRepo = new IndexRepository(session);
+        cleanUpInstance = new ITableRepository(getSession());
+        databaseRepo = new DatabaseRepository(getSession());
+        docRepo = new DocumentRepository(getSession());
+        tableRepo = new TableRepository(getSession());
     }
 
     /**
@@ -208,37 +219,31 @@ public class Fixtures
 
     public void insertIndex(Index index)
     {
-        IndexRepository indexRepo = new IndexRepository(session);
         indexRepo.create(index);
     }
 
     public void clearTestTables()
     {
-        ITableRepository cleanUpInstance = new ITableRepository(getSession());
-        IndexRepository indexRepo = new IndexRepository(getSession());
-        DatabaseRepository databaseRepo = new DatabaseRepository(getSession());
-        DocumentRepository docRepo = new DocumentRepository(getSession());
-        TableRepository tableRepo = new TableRepository(getSession());
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not dropping iTable, probably doesn't exist.");
+            //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithtwofields");
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not dropping iTable, probably doesn't exist.");
+            //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexbulkdata");
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not dropping iTable, probably doesn't exist.");
+            //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
         try
         {
@@ -246,7 +251,7 @@ public class Fixtures
             docRepo.delete(Fixtures.createTestDocument2());
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not dropping document, probably doesn't exist.");
+            //logger.debug("Not dropping document, probably doesn't exist.");
         }
         try
         {
@@ -258,7 +263,7 @@ public class Fixtures
                     docRepo.delete(d);
                 } catch (InvalidQueryException e)
                 {
-                    logger.debug("Not dropping bulk document, probably doesn't exist.");
+                    //logger.debug("Not dropping bulk document, probably doesn't exist.");
                 }
             }
         } catch (Exception e)
@@ -272,35 +277,35 @@ public class Fixtures
             tableRepo.delete(Fixtures.createTestTable());
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not dropping table, probably doesn't exist.");
+            //logger.debug("Not dropping table, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexOneField());
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not dropping table, probably doesn't exist.");
+            //logger.debug("Not dropping table, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexTwoField());
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not deleting index, probably doesn't exist.");
+            //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexWithBulkDataHit());
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not deleting index, probably doesn't exist.");
+            //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
             databaseRepo.delete(Fixtures.createTestDatabase());
         } catch (InvalidQueryException e)
         {
-            logger.debug("Not deleting database, probably doesn't exist.");
+            //logger.debug("Not deleting database, probably doesn't exist.");
         }
     }
 
@@ -311,12 +316,10 @@ public class Fixtures
         Index index = Fixtures.createTestIndexOneField();
         Index index2 = Fixtures.createTestIndexTwoField();
         Index index3 = Fixtures.createTestIndexWithBulkDataHit();
-        IndexRepository indexRepo = new IndexRepository(getSession());
         indexRepo.create(index);
         //indexRepo.create(index2);
         iTableDao.createITable(index2);
         iTableDao.createITable(index3);
-        TableRepository tableRepo = new TableRepository(getSession());
         tableRepo.create(Fixtures.createTestTable());
     }
 
@@ -453,7 +456,6 @@ public class Fixtures
 
     public void insertTable(Table table)
     {
-        TableRepository tableRepo = new TableRepository(getSession());
         tableRepo.create(table);
     }
 
@@ -466,7 +468,6 @@ public class Fixtures
 
     public void insertDatabase(Database database)
     {
-        DatabaseRepository databaseRepo = new DatabaseRepository(getSession());
         databaseRepo.create(database);
     }
 
