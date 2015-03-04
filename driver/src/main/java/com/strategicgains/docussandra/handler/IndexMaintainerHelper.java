@@ -12,6 +12,7 @@ import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +72,7 @@ public class IndexMaintainerHelper
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
         String finalCQL = generateCQLStatementForInsert(index);
-        PreparedStatement ps = session.prepare(finalCQL);
+        PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
         //pull the index fields out of the document for binding
         String documentJSON = entity.object();
@@ -133,7 +134,7 @@ public class IndexMaintainerHelper
             } else
             {//3. if an indexed field has not changed, do a normal CQL update
                 String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
-                PreparedStatement ps = session.prepare(finalCQL);
+                PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
                 BoundStatement bs = new BoundStatement(ps);
 
                 //set the blob
@@ -170,7 +171,11 @@ public class IndexMaintainerHelper
         //for each index
         for (Index index : indices)
         {
-            statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
+            BoundStatement bs = generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator);
+            if (bs != null)
+            {
+                statementList.add(bs);
+            }
         }
         return statementList;
     }
@@ -187,13 +192,20 @@ public class IndexMaintainerHelper
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
         String finalCQL = generateCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
-        PreparedStatement ps = session.prepare(finalCQL);
+        PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
         //pull the index fields out of the document for binding
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+        Object fieldToBucketOnObject = jsonObject.get(fields.get(0));
+        if (fieldToBucketOnObject == null)
+        {
+            // we do not have an indexable field in our document -- therefore, it shouldn't need to be removed an index! (right?) -- is this right Todd?
+            logger.trace("Warning: document: " + entity.toString() + " does not have an indexed field for index: " + index.toString());
+            return null;
+        }
         //set the bucket
-        String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
+        String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOnObject.toString()));//note, could have parse problems here with non-string types
         logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)

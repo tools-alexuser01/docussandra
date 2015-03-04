@@ -17,12 +17,15 @@ package com.strategicgains.docussandra.persistence.helper;
 
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
+import java.io.File;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Factory for creating and reusing prepared statements.
+ * Factory for creating and reusing PreparedStatements.
  *
  * @author udeyoje
  */
@@ -32,15 +35,19 @@ public class PreparedStatementFactory
     private static CacheManager manager = null;
     private static Cache preparedStatementCache = null;
     private static boolean established = false;
+    private static final Logger logger = LoggerFactory.getLogger(PreparedStatementFactory.class);
 
     /**
      * Establishes the cache if it doesn't exist.
      */
     private synchronized static void establishCache()
-    {
+    {        
+        String cacheLocation = "./src/main/resources/ehcache.xml";
+        File config = new File(".", cacheLocation);
+        logger.debug("Establishing prepared statement cache with config file: " + config);
         if (manager == null)
         {
-            manager = CacheManager.newInstance("./src/main/resources/ehcache.xml");
+            manager = CacheManager.newInstance(config.getAbsolutePath());
         }
         if (preparedStatementCache == null)
         {
@@ -75,12 +82,14 @@ public class PreparedStatementFactory
         Element e = preparedStatementCache.get(query);
         if (e == null)
         {
+            logger.debug("Creating new Prepared Statement for: " + query);
             e = new Element(query, session.prepare(query));
             preparedStatementCache.put(e);
         }
         return (PreparedStatement) e.getObjectValue();
     }
 
+    //TODO: create shutdown hook to call this
     /**
      * Shuts down the cache; only call upon application shutdown.
      */

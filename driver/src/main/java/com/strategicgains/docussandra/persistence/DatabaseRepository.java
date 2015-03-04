@@ -14,6 +14,7 @@ import com.strategicgains.docussandra.event.DatabaseCreatedEvent;
 import com.strategicgains.docussandra.event.DatabaseDeletedEvent;
 import com.strategicgains.docussandra.event.DatabaseUpdatedEvent;
 import com.strategicgains.docussandra.event.EventFactory;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.CassandraTimestampedEntityRepository;
 
 public class DatabaseRepository
@@ -59,9 +60,9 @@ public class DatabaseRepository
 
     protected void initializeStatements()
     {
-        createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), getIdentifierColumn()));
-        updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable(), getIdentifierColumn()));
-        readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, getTable()));
+        createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), getIdentifierColumn()), getSession());
+        updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable(), getIdentifierColumn()), getSession());
+        readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
     }
 
     @Override

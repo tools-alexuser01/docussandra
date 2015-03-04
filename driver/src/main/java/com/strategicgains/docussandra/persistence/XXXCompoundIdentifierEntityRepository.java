@@ -10,147 +10,158 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.XXXCompoundIdentifierEntity;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
 
 public class XXXCompoundIdentifierEntityRepository
-extends AbstractCassandraRepository<XXXCompoundIdentifierEntity>
+        extends AbstractCassandraRepository<XXXCompoundIdentifierEntity>
 {
-	private static final String IDENTITY_CQL = " where key1 = ? and key2 = ? and key3 = ?";
-	private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-	private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
-	private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
-	private static final String UPDATE_CQL = "update %s set updatedat = ?" + IDENTITY_CQL;
-	private static final String CREATE_CQL = "insert into %s (key1, key2, key3, createdat, updatedat) values (?, ?, ?, ?, ?)";
-	private static final String READ_ALL_CQL = "select * from %s where key1 = ? and key2 = ?";
-	private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where key1 = ? and key2 = ?";
 
-	private PreparedStatement existStmt;
-	private PreparedStatement readStmt;
-	private PreparedStatement createStmt;
-	private PreparedStatement deleteStmt;
-	private PreparedStatement updateStmt;
-	private PreparedStatement readAllStmt;
-	private PreparedStatement readAllCountStmt;
+    private static final String IDENTITY_CQL = " where key1 = ? and key2 = ? and key3 = ?";
+    private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
+    private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
+    private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
+    private static final String UPDATE_CQL = "update %s set updatedat = ?" + IDENTITY_CQL;
+    private static final String CREATE_CQL = "insert into %s (key1, key2, key3, createdat, updatedat) values (?, ?, ?, ?, ?)";
+    private static final String READ_ALL_CQL = "select * from %s where key1 = ? and key2 = ?";
+    private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where key1 = ? and key2 = ?";
 
-	public XXXCompoundIdentifierEntityRepository(Session session)
-	{
-		super(session, "samplecompoundidentities");
-		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<XXXCompoundIdentifierEntity>());
-		initialize();
-	}
+    private PreparedStatement existStmt;
+    private PreparedStatement readStmt;
+    private PreparedStatement createStmt;
+    private PreparedStatement deleteStmt;
+    private PreparedStatement updateStmt;
+    private PreparedStatement readAllStmt;
+    private PreparedStatement readAllCountStmt;
 
-	protected void initialize()
-	{
-		existStmt = getSession().prepare(String.format(EXISTENCE_CQL, getTable()));
-		readStmt = getSession().prepare(String.format(READ_CQL, getTable()));
-		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable()));
-		deleteStmt = getSession().prepare(String.format(DELETE_CQL, getTable()));
-		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable()));
-		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, getTable()));
-		readAllCountStmt = getSession().prepare(String.format(READ_ALL_COUNT_CQL, getTable()));
-	}
+    public XXXCompoundIdentifierEntityRepository(Session session)
+    {
+        super(session, "samplecompoundidentities");
+        addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<XXXCompoundIdentifierEntity>());
+        initialize();
+    }
 
-	@Override
-	public boolean exists(Identifier identifier)
-	{
-		if (identifier == null || identifier.isEmpty()) return false;
+    protected void initialize()
+    {
+        existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, getTable()), getSession());
+        readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, getTable()), getSession());
+        createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable()), getSession());
+        deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, getTable()), getSession());
+        updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable()), getSession());
+        readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
+        readAllCountStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_COUNT_CQL, getTable()), getSession());
+    }
 
-		BoundStatement bs = new BoundStatement(existStmt);
-		bindIdentifier(bs, identifier);
-		return (getSession().execute(bs).one().getLong(0) > 0);
-	}
+    @Override
+    public boolean exists(Identifier identifier)
+    {
+        if (identifier == null || identifier.isEmpty())
+        {
+            return false;
+        }
 
-	protected XXXCompoundIdentifierEntity readEntityById(Identifier identifier)
-	{
-		if (identifier == null || identifier.isEmpty()) return null;
+        BoundStatement bs = new BoundStatement(existStmt);
+        bindIdentifier(bs, identifier);
+        return (getSession().execute(bs).one().getLong(0) > 0);
+    }
 
-		BoundStatement bs = new BoundStatement(readStmt);
-		bindIdentifier(bs, identifier);
-		return marshalRow(getSession().execute(bs).one());
-	}
+    protected XXXCompoundIdentifierEntity readEntityById(Identifier identifier)
+    {
+        if (identifier == null || identifier.isEmpty())
+        {
+            return null;
+        }
 
-	@Override
-	protected XXXCompoundIdentifierEntity createEntity(XXXCompoundIdentifierEntity entity)
-	{
-		BoundStatement bs = new BoundStatement(createStmt);
-		bindCreate(bs, entity);
-		getSession().execute(bs);
-		return entity;
-	}
+        BoundStatement bs = new BoundStatement(readStmt);
+        bindIdentifier(bs, identifier);
+        return marshalRow(getSession().execute(bs).one());
+    }
 
-	@Override
-	protected XXXCompoundIdentifierEntity updateEntity(XXXCompoundIdentifierEntity entity)
-	{
-		BoundStatement bs = new BoundStatement(updateStmt);
-		bindUpdate(bs, entity);
-		getSession().execute(bs);
-		return entity;
-	}
+    @Override
+    protected XXXCompoundIdentifierEntity createEntity(XXXCompoundIdentifierEntity entity)
+    {
+        BoundStatement bs = new BoundStatement(createStmt);
+        bindCreate(bs, entity);
+        getSession().execute(bs);
+        return entity;
+    }
 
-	@Override
-	protected void deleteEntity(XXXCompoundIdentifierEntity entity)
-	{
-		BoundStatement bs = new BoundStatement(deleteStmt);
-		bindIdentifier(bs, entity.getId());
-		getSession().execute(bs);
-	}
+    @Override
+    protected XXXCompoundIdentifierEntity updateEntity(XXXCompoundIdentifierEntity entity)
+    {
+        BoundStatement bs = new BoundStatement(updateStmt);
+        bindUpdate(bs, entity);
+        getSession().execute(bs);
+        return entity;
+    }
 
-	public List<XXXCompoundIdentifierEntity> readAll(String context, String nodeType)
-	{
-		BoundStatement bs = new BoundStatement(readAllStmt);
-		bs.bind(context, nodeType);
-		return (marshalAll(getSession().execute(bs)));
-	}
+    @Override
+    protected void deleteEntity(XXXCompoundIdentifierEntity entity)
+    {
+        BoundStatement bs = new BoundStatement(deleteStmt);
+        bindIdentifier(bs, entity.getId());
+        getSession().execute(bs);
+    }
 
-	public long count(String context, String nodeType)
-	{
-		BoundStatement bs = new BoundStatement(readAllCountStmt);
-		bs.bind(context, nodeType);
-		return (getSession().execute(bs).one().getLong(0));
-	}
+    public List<XXXCompoundIdentifierEntity> readAll(String context, String nodeType)
+    {
+        BoundStatement bs = new BoundStatement(readAllStmt);
+        bs.bind(context, nodeType);
+        return (marshalAll(getSession().execute(bs)));
+    }
 
-	protected List<XXXCompoundIdentifierEntity> marshalAll(ResultSet rs)
-	{
-		List<XXXCompoundIdentifierEntity> results = new ArrayList<XXXCompoundIdentifierEntity>();
-		Iterator<Row> i = rs.iterator();
+    public long count(String context, String nodeType)
+    {
+        BoundStatement bs = new BoundStatement(readAllCountStmt);
+        bs.bind(context, nodeType);
+        return (getSession().execute(bs).one().getLong(0));
+    }
 
-		while (i.hasNext())
-		{
-			results.add(marshalRow(i.next()));
-		}
+    protected List<XXXCompoundIdentifierEntity> marshalAll(ResultSet rs)
+    {
+        List<XXXCompoundIdentifierEntity> results = new ArrayList<XXXCompoundIdentifierEntity>();
+        Iterator<Row> i = rs.iterator();
 
-		return results;
-	}
+        while (i.hasNext())
+        {
+            results.add(marshalRow(i.next()));
+        }
 
-	protected XXXCompoundIdentifierEntity marshalRow(Row row)
-	{
-		if (row == null) return null;
+        return results;
+    }
 
-		XXXCompoundIdentifierEntity s = new XXXCompoundIdentifierEntity();
-		s.setKey1(row.getString("key1"));
-		s.setKey2(row.getString("key2"));
-		s.setKey3(row.getString("key3"));
-		s.setCreatedAt(row.getDate("createdat"));
-		s.setUpdatedAt(row.getDate("updatedat"));
-		return s;
-	}
+    protected XXXCompoundIdentifierEntity marshalRow(Row row)
+    {
+        if (row == null)
+        {
+            return null;
+        }
 
-	private void bindCreate(BoundStatement bs, XXXCompoundIdentifierEntity entity)
-	{
-		bs.bind(entity.getKey1(),
-			entity.getKey2(),
-		    entity.getKey3(),
-		    entity.getCreatedAt(),
-		    entity.getUpdatedAt());
-	}
+        XXXCompoundIdentifierEntity s = new XXXCompoundIdentifierEntity();
+        s.setKey1(row.getString("key1"));
+        s.setKey2(row.getString("key2"));
+        s.setKey3(row.getString("key3"));
+        s.setCreatedAt(row.getDate("createdat"));
+        s.setUpdatedAt(row.getDate("updatedat"));
+        return s;
+    }
 
-	private void bindUpdate(BoundStatement bs, XXXCompoundIdentifierEntity entity)
-	{
-		bs.bind(entity.getUpdatedAt(),
-		    entity.getKey1(),
-		    entity.getKey2(),
-		    entity.getKey3());
-	}
+    private void bindCreate(BoundStatement bs, XXXCompoundIdentifierEntity entity)
+    {
+        bs.bind(entity.getKey1(),
+                entity.getKey2(),
+                entity.getKey3(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt());
+    }
+
+    private void bindUpdate(BoundStatement bs, XXXCompoundIdentifierEntity entity)
+    {
+        bs.bind(entity.getUpdatedAt(),
+                entity.getKey1(),
+                entity.getKey2(),
+                entity.getKey3());
+    }
 }

@@ -242,7 +242,6 @@ public class Fixtures
         }
         try
         {
-
             docRepo.delete(Fixtures.createTestDocument());
             docRepo.delete(Fixtures.createTestDocument2());
         } catch (InvalidQueryException e)

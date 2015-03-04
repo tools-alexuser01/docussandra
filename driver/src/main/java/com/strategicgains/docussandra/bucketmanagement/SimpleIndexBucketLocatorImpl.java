@@ -34,6 +34,7 @@ import java.util.UUID;
  *
  * @author tnine
  */
+//TODO: clean this up a lot; may variables unused
 public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
 
     public static final Long MINIMUM = 0l;
@@ -110,6 +111,9 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
      */
     @Override
     public String getBucket( UUID applicationId, UUID entityId, String... components ) {
+        if(entityId == null){
+            throw new IllegalArgumentException("Entity ID must be not null");
+        }
         return getClosestToken( entityId );
     }
 
