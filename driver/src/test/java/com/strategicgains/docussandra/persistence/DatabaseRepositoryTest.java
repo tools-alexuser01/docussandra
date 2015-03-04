@@ -15,7 +15,6 @@
  */
 package com.strategicgains.docussandra.persistence;
 
-import com.datastax.driver.core.Row;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 
 /**
  *
