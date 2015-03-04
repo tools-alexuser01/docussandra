@@ -23,6 +23,7 @@ import com.strategicgains.docussandra.event.DocumentDeletedEvent;
 import com.strategicgains.docussandra.event.DocumentUpdatedEvent;
 import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.docussandra.handler.IndexMaintainerHelper;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.AbstractObservableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
@@ -52,11 +53,11 @@ public class DocumentRepository
     private static final String UPDATE_CQL = "update %s set object = ?, updated_at = ? where %s = ?";
     private static final String CREATE_CQL = "insert into %s (%s, object, created_at, updated_at) values (?, ?, ?, ?)";
 
-    private Map<Table, PreparedStatement> createStmts = new HashMap<>();
-    private Map<Table, PreparedStatement> readStmts = new HashMap<>();
-    private Map<Table, PreparedStatement> existsStmts = new HashMap<>();
-    private Map<Table, PreparedStatement> updateStmts = new HashMap<>();
-    private Map<Table, PreparedStatement> deleteStmts = new HashMap<>();
+//    private Map<Table, PreparedStatement> createStmts = new HashMap<>();
+//    private Map<Table, PreparedStatement> readStmts = new HashMap<>();
+//    private Map<Table, PreparedStatement> existsStmts = new HashMap<>();
+//    private Map<Table, PreparedStatement> updateStmts = new HashMap<>();
+//    private Map<Table, PreparedStatement> deleteStmts = new HashMap<>();
 
     private final IndexBucketLocator bucketLocator;
 
@@ -85,13 +86,13 @@ public class DocumentRepository
         }
 
         Table table = entity.table();
-        PreparedStatement createStmt = createStmts.get(table);
-
-        if (createStmt == null)
-        {
-            createStmt = session().prepare(String.format(CREATE_CQL, table.toDbTable(), Columns.ID));
-            createStmts.put(table, createStmt);//TODO: udeyoje: This seems dangrous (memory overrun); should we use a caching lib instead?
-        }
+        PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), session());
+//
+//        if (createStmt == null)
+//        {
+//            createStmt = session().prepare(String.format(CREATE_CQL, table.toDbTable(), Columns.ID));
+//            createStmts.put(table, createStmt);//TODO: udeyoje: This seems dangrous (memory overrun); should we use a caching lib instead?
+//        }
 
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
@@ -111,13 +112,13 @@ public class DocumentRepository
     {
         Table table = extractTable(identifier);
         Identifier id = extractId(identifier);
-        PreparedStatement readStmt = readStmts.get(table);
+        PreparedStatement readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, table.toDbTable(), Columns.ID), session());
 
-        if (readStmt == null)
-        {
-            readStmt = session().prepare(String.format(READ_CQL, table.toDbTable(), Columns.ID));
-            readStmts.put(table, readStmt);
-        }
+//        if (readStmt == null)
+//        {
+//            readStmt = session().prepare(String.format(READ_CQL, table.toDbTable(), Columns.ID));
+//            readStmts.put(table, readStmt);
+//        }
 
         BoundStatement bs = new BoundStatement(readStmt);
         bindIdentifier(bs, id);
@@ -142,13 +143,13 @@ public class DocumentRepository
         }
 
         Table table = entity.table();
-        PreparedStatement updateStmt = updateStmts.get(table);
+        PreparedStatement updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, table.toDbTable(), Columns.ID), session());
 
-        if (updateStmt == null)
-        {
-            updateStmt = session().prepare(String.format(UPDATE_CQL, table.toDbTable(), Columns.ID));
-            updateStmts.put(table, updateStmt);
-        }
+//        if (updateStmt == null)
+//        {
+//            updateStmt = session().prepare(String.format(UPDATE_CQL, table.toDbTable(), Columns.ID));
+//            updateStmts.put(table, updateStmt);
+//        }
 
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
@@ -170,13 +171,13 @@ public class DocumentRepository
         {
             Table table = entity.table();
             Identifier id = extractId(entity.getId());
-            PreparedStatement deleteStmt = deleteStmts.get(table);
+            PreparedStatement deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, table.toDbTable(), Columns.ID), session());
 
-            if (deleteStmt == null)
-            {
-                deleteStmt = session().prepare(String.format(DELETE_CQL, table.toDbTable(), Columns.ID));
-                deleteStmts.put(table, deleteStmt);
-            }
+//            if (deleteStmt == null)
+//            {
+//                deleteStmt = session().prepare(String.format(DELETE_CQL, table.toDbTable(), Columns.ID));
+//                deleteStmts.put(table, deleteStmt);
+//            }
 
             BoundStatement bs = new BoundStatement(deleteStmt);
             bindIdentifier(bs, id);
@@ -204,13 +205,13 @@ public class DocumentRepository
 
         Table table = extractTable(identifier);
         Identifier id = extractId(identifier);
-        PreparedStatement existStmt = existsStmts.get(table);
+        PreparedStatement existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID), session());
 
-        if (existStmt == null)
-        {
-            existStmt = session().prepare(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID));
-            existsStmts.put(table, existStmt);
-        }
+//        if (existStmt == null)
+//        {
+//            existStmt = session().prepare(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID));
+//            existsStmts.put(table, existStmt);
+//        }
 
         BoundStatement bs = new BoundStatement(existStmt);
         bindIdentifier(bs, id);
