@@ -264,6 +264,7 @@ public class IndexMaintainerHelper
         return false;
     }
 
+    //TODO: consider caching some of these static string generators to save processor time
     /**
      * Helper for generating insert CQL statements for iTables. This would be
      * private but keeping public for ease of testing.
