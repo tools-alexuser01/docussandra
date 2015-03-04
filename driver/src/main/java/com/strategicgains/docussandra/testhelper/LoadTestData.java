@@ -122,7 +122,7 @@ public class LoadTestData
             System.out.println("Didn't re-create Index");
         }
 
-        List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players.json");
+        List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players.json", testTable);
         f.insertDocuments(docs);
 
     }
