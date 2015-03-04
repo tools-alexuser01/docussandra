@@ -2,9 +2,7 @@ package com.strategicgains.docussandra.persistence;
 
 import com.datastax.driver.core.BatchStatement;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.bson.BSON;
 import org.bson.BSONObject;
