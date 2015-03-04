@@ -130,10 +130,10 @@ public class Fixtures
 
     public static List<Document> getBulkDocuments() throws IOException, ParseException
     {
-        return getBulkDocuments("./src/test/resources/documents.json");
+        return getBulkDocuments("./src/test/resources/documents.json", createTestTable());
     }
 
-    public static List<Document> getBulkDocuments(String path) throws IOException, ParseException
+    public static List<Document> getBulkDocuments(String path, Table t) throws IOException, ParseException
     {
         if (bulkDocs == null)
         {
@@ -145,7 +145,7 @@ public class Fixtures
             for (int i = 0; i < docs.size(); i++)
             {
                 Document doc = new Document();
-                doc.table(createTestTable());
+                doc.table(t);
                 doc.setUuid(new UUID(Long.MAX_VALUE - i, 1));//give it a UUID that we will reconize
                 JSONObject object = (JSONObject) docs.get(i);
                 doc.object(object.toJSONString());
