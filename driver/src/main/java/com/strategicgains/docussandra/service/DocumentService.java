@@ -6,6 +6,10 @@ import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
+import com.strategicgains.syntaxe.ValidationException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class DocumentService
 {
@@ -26,6 +30,17 @@ public class DocumentService
         Document doc = new Document();
         doc.table(database, table);
         doc.object(json);
+        
+        JSONParser parser = new JSONParser();
+        try
+        {
+            JSONObject object = (JSONObject) parser.parse(json);
+            //doc.setUuid(null);
+        } catch (ParseException e)
+        {
+            throw new ValidationException("JSON object is not valid JSON.");
+        }
+
         ValidationEngine.validateAndThrow(doc);
         return docs.create(doc);
     }
