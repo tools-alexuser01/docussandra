@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.persistence;
 
 import com.datastax.driver.core.Row;
 import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -33,8 +34,11 @@ import org.junit.Ignore;
 public class DatabaseRepositoryTest
 {
 
+    private Fixtures f;
+
     public DatabaseRepositoryTest()
     {
+        f = Fixtures.getInstance();
     }
 
     @BeforeClass
@@ -55,71 +59,74 @@ public class DatabaseRepositoryTest
     @After
     public void tearDown()
     {
+        f.clearTestTables();// clear anything that might be there already
     }
 
     /**
      * Test of createEntity method, of class DatabaseRepository.
      */
     @Test
-    @Ignore
     public void testCreateEntity()
     {
         System.out.println("createEntity");
-        Database entity = null;
-        DatabaseRepository instance = null;
-        Database expResult = null;
+        Database entity = Fixtures.createTestDatabase();
+        DatabaseRepository instance = new DatabaseRepository(f.getSession());
         Database result = instance.createEntity(entity);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(entity, result);
     }
 
     /**
      * Test of updateEntity method, of class DatabaseRepository.
      */
     @Test
-    @Ignore
     public void testUpdateEntity()
     {
         System.out.println("updateEntity");
-        Database entity = null;
-        DatabaseRepository instance = null;
-        Database expResult = null;
+        //setup
+        Database entity = Fixtures.createTestDatabase();
+        f.insertDatabase(entity);
+        //act
+        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        entity.description("This is a new description!");
         Database result = instance.updateEntity(entity);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        //assert
+        assertEquals(entity, result);
     }
 
     /**
      * Test of deleteEntity method, of class DatabaseRepository.
      */
     @Test
-    @Ignore
     public void testDeleteEntity()
     {
         System.out.println("deleteEntity");
-        Database entity = null;
-        DatabaseRepository instance = null;
+        //setup
+        Database entity = Fixtures.createTestDatabase();
+        f.insertDatabase(entity);
+        //act
+        DatabaseRepository instance = new DatabaseRepository(f.getSession());
         instance.deleteEntity(entity);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        //check
+        List<Database> allRows = instance.readAll();
+        assertFalse(allRows.contains(entity));
     }
 
     /**
      * Test of readAll method, of class DatabaseRepository.
      */
     @Test
-    @Ignore
     public void testReadAll()
     {
         System.out.println("readAll");
-        DatabaseRepository instance = null;
-        List<Database> expResult = null;
+        //setup
+        Database entity = Fixtures.createTestDatabase();
+        f.insertDatabase(entity);
+        //act
+        DatabaseRepository instance = new DatabaseRepository(f.getSession());
         List<Database> result = instance.readAll();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        //check
+        assertFalse(result.isEmpty());
+        assertTrue(result.contains(entity));
     }
 
 }

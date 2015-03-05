@@ -126,6 +126,9 @@ public class ITableRepository
             fieldCreateStatement.append(field).append(" varchar");
             primaryKeyCreateStatement.append(field);
         }
+        if(!index.isUnique()){
+            primaryKeyCreateStatement.append(", ").append("id");
+        }
         String finalStatement = String.format(TABLE_CREATE_CQL, newTableName, fieldCreateStatement, primaryKeyCreateStatement);
         logger.debug("For index: " + index.toString() + ", the table create SQL is: " + finalStatement);
         return finalStatement;
