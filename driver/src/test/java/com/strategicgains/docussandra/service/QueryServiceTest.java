@@ -27,13 +27,11 @@ import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.lucene.index.IndexReader;
 import org.bson.BSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

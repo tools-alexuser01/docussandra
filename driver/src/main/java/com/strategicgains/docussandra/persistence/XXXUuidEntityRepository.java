@@ -5,6 +5,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.XXXUuidEntity;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.CassandraTimestampedEntityRepository;
 
 public class XXXUuidEntityRepository
@@ -24,8 +25,8 @@ extends CassandraTimestampedEntityRepository<XXXUuidEntity>
 
 	protected void initializeStatements()
 	{
-		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), getIdentifierColumn()));
-		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable(), getIdentifierColumn()));
+		createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), getIdentifierColumn()), getSession());
+		updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable(), getIdentifierColumn()), getSession());
 	}
 
 	@Override

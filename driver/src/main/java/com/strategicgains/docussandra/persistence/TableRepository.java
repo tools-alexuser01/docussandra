@@ -16,6 +16,7 @@ import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.docussandra.event.TableCreatedEvent;
 import com.strategicgains.docussandra.event.TableDeletedEvent;
 import com.strategicgains.docussandra.event.TableUpdatedEvent;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
@@ -70,13 +71,13 @@ extends AbstractCassandraRepository<Table>
 
 	protected void initialize()
 	{
-		existStmt = getSession().prepare(String.format(EXISTENCE_CQL, getTable()));
-		readStmt = getSession().prepare(String.format(READ_CQL, getTable()));
-		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), Columns.NAME));
-		deleteStmt = getSession().prepare(String.format(DELETE_CQL, getTable()));
-		updateStmt = getSession().prepare(String.format(UPDATE_CQL, getTable()));
-		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, getTable()));
-		readAllCountStmt = getSession().prepare(String.format(READ_ALL_COUNT_CQL, getTable()));
+		existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, getTable()), getSession());
+		readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, getTable()), getSession());
+		createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), Columns.NAME), getSession());
+		deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, getTable()), getSession());
+		updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable()), getSession());
+		readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
+		readAllCountStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_COUNT_CQL, getTable()), getSession());
 	}
 
 	@Override

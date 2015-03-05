@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.persistence;
 
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
 import org.bson.BSONObject;
@@ -75,7 +76,7 @@ public class QueryRepositoryTest
     {
         System.out.println("testDoQueryNoResults");
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
+        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(result.isEmpty());//no data yet, should get an empty set
     }
@@ -92,7 +93,7 @@ public class QueryRepositoryTest
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery());
+        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 1);
@@ -120,9 +121,101 @@ public class QueryRepositoryTest
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.DB, Fixtures.createTestParsedQuery2());
+        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery2());
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
+    /**
+     * Test of doQuery method, of class QueryDao.
+     */
+    @Test
+    public void testDoQueryWithLotsOfResults() throws Exception
+    {
+        System.out.println("testDoQueryWithLotsOfResults");
+        //put in an index that we can use with bulk data
+        f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
+        List<Document> docs = Fixtures.getBulkDocuments();
+        //put a bunch of test docs in
+        f.insertDocuments(docs);
+        QueryRepository instance = new QueryRepository(f.getSession());
+        List<Document> result = instance.doQuery(Fixtures.createTestParsedQueryBulkData());
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 34);
+    }
+
+    /**
+     * Test of doQuery method, of class QueryDao.
+     */
+    @Test
+    public void testDoQueryWithPaging() throws Exception
+    {
+        System.out.println("testDoQueryWithPaging");
+        //put in an index that we can use with bulk data
+        f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
+        List<Document> docs = Fixtures.getBulkDocuments();
+        //put a bunch of test docs in
+        f.insertDocuments(docs);
+        //setup
+        QueryRepository instance = new QueryRepository(f.getSession());
+        ParsedQuery query = Fixtures.createTestParsedQueryBulkData();
+        //let's get the first 5
+        List<Document> result = instance.doQuery(query, 5, 0);
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 5);
+        assertTrue(result.get(0).object().contains("\"field2\" : \"this is some more random data32\""));
+        assertTrue(result.get(1).object().contains("\"field2\" : \"this is some more random data31\""));
+        assertTrue(result.get(2).object().contains("\"field2\" : \"this is some more random data30\""));
+        assertTrue(result.get(3).object().contains("\"field2\" : \"this is some more random data29\""));
+        assertTrue(result.get(4).object().contains("\"field2\" : \"this is some more random data28\""));
+
+        //now lets get the second 5
+        result = instance.doQuery(query, 5, 5);
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 5);
+        assertTrue(result.get(0).object().contains("\"field2\" : \"this is some more random data27\""));
+        assertTrue(result.get(1).object().contains("\"field2\" : \"this is some more random data26\""));
+        assertTrue(result.get(2).object().contains("\"field2\" : \"this is some more random data25\""));
+        assertTrue(result.get(3).object().contains("\"field2\" : \"this is some more random data24\""));
+        assertTrue(result.get(4).object().contains("\"field2\" : \"this is some more random data23\""));
+
+        //now lets get the third 5
+        result = instance.doQuery(query, 5, 10);
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 5);
+        assertTrue(result.get(0).object().contains("\"field2\" : \"this is some more random data22\""));
+        assertTrue(result.get(1).object().contains("\"field2\" : \"this is some more random data21\""));
+        assertTrue(result.get(2).object().contains("\"field2\" : \"this is some more random data20\""));
+        assertTrue(result.get(3).object().contains("\"field2\" : \"this is some more random data19\""));
+        assertTrue(result.get(4).object().contains("\"field2\" : \"this is some more random data18\""));
+
+        //now lets get the last 4
+        result = instance.doQuery(query, 5, 30);
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 4);
+        assertTrue(result.get(0).object().contains("\"field2\" : \"this is some more random data2\""));
+        assertTrue(result.get(1).object().contains("\"field2\" : \"this is some more random data1\""));
+        assertTrue(result.get(2).object().contains("\"field2\" : \"this is some more random data\""));
+        assertTrue(result.get(3).object().contains("\"field2\" : \"this is some random data\""));
+
+    }
+
+//    private void assertDocumentListContainsObjectWithSubString(List<Document> toCheck, String subString)
+//    {
+//        boolean stringFound = false;
+//        for (Document d : toCheck)
+//        {
+//            if (d.object().contains(subString))
+//            {
+//                stringFound = true;
+//                break;
+//            }
+//        }
+//        assertTrue("String " + subString + " was not found in document list.", stringFound);
+//    }
 }
