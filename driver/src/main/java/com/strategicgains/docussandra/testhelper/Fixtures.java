@@ -200,7 +200,7 @@ public class Fixtures {
     public static final Document createTestDocument() {
         Document entity = new Document();
         entity.table("mydb", "mytable");
-        entity.object("{'greeting':'hello', 'myindexedfield': 'thisismyfield', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");
+        entity.object("{\"greeting\":\"hello\", \"myindexedfield\": \"thisismyfield\", \"myindexedfield1\":\"my second field\", \"myindexedfield2\":\"my third field\"}");
         entity.setUuid(new UUID(0L, 1L));
         entity.setCreatedAt(new Date());
         entity.setUpdatedAt(new Date());
@@ -215,7 +215,7 @@ public class Fixtures {
     public static final Document createTestDocument2() {
         Document entity = new Document();
         entity.table("mydb", "mytable");
-        entity.object("{'greeting':'hello', 'myindexedfield': 'this is my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");
+        entity.object("{\"greeting\":\"hello\", \"myindexedfield\": \"this is my field\", \"myindexedfield1\":\"my second field\", \"myindexedfield2\":\"my third field\"}");
         entity.setUuid(new UUID(0L, 2L));
         entity.setCreatedAt(new Date());
         entity.setUpdatedAt(new Date());
