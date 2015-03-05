@@ -25,6 +25,7 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import java.util.UUID;
 import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -36,14 +37,16 @@ import testhelper.RestExpressManager;
  *
  * @author udeyoje
  */
-public class QueryControllerTest {
+public class QueryControllerTest
+{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public QueryControllerTest() {
+    public QueryControllerTest()
+    {
         f = Fixtures.getInstance();
     }
 
@@ -54,7 +57,8 @@ public class QueryControllerTest {
      * @throws Exception
      */
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() throws Exception
+    {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
         //RestAssured.basePath = "/courses/" + COURSE_ID + "/categories";
@@ -66,7 +70,8 @@ public class QueryControllerTest {
     }
 
     @Before
-    public void beforeTest() {
+    public void beforeTest() throws Exception
+    {
         f.clearTestTables();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
@@ -74,8 +79,10 @@ public class QueryControllerTest {
         f.insertTable(testTable);
         f.insertIndex(Fixtures.createTestIndexOneField());
         f.insertIndex(Fixtures.createTestIndexTwoField());
+        f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
         f.insertDocument(Fixtures.createTestDocument());
         f.insertDocument(Fixtures.createTestDocument2());
+        f.insertDocuments(Fixtures.getBulkDocuments());
         RestAssured.basePath = "/" + testDb.name() + "/" + testTable.name() + "/queries";
     }
 
@@ -84,14 +91,16 @@ public class QueryControllerTest {
      * executed.
      */
     @AfterClass
-    public static void afterClass() {
+    public static void afterClass()
+    {
     }
 
     /**
      * Cleanup that is performed after each test is executed.
      */
     @After
-    public void afterTest() {
+    public void afterTest()
+    {
         f.clearTestTables();
     }
 
@@ -100,7 +109,8 @@ public class QueryControllerTest {
      * query.
      */
     @Test
-    public void postTableTest() {
+    public void postTableTest()
+    {
         Query q = Fixtures.createTestQuery();
         //act
         given().body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(200)
@@ -110,6 +120,72 @@ public class QueryControllerTest {
                 .body("id[0]", equalTo("00000000-0000-0000-0000-000000000001"))
                 .body("object[0]", notNullValue())
                 .body("object[0]", containsString("hello"))
+                .when().post("");
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * query with limits.
+     */
+    @Test
+    public void postTableTestWithLimit()
+    {
+        Query q = new Query();
+        q.setWhere("field1 = 'this is my data'");
+        q.setTable("mytable");
+        //act
+        given().header("limit", "1").header("offset", "0").body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(206)
+                //.header("Location", startsWith(RestAssured.basePath + "/"))
+                .body("", notNullValue())
+                .body("id", notNullValue())
+                .body("id[0]", equalTo(new UUID(Long.MAX_VALUE - 33, 1l).toString()))
+                .body("object[0]", notNullValue())
+                .body("object[0]", containsString("this is some more random data32"))
+                .when().post("");
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * query with limits.
+     */
+    @Test
+    public void postTableTestWithLimitAndOffset()
+    {
+        Query q = new Query();
+        q.setWhere("field1 = 'this is my data'");
+        q.setTable("mytable");
+        //act
+        given().header("limit", "1").header("offset", "1").body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(206)
+                //.header("Location", startsWith(RestAssured.basePath + "/"))
+                .body("", notNullValue())
+                .body("id", notNullValue())
+                .body("id[0]", equalTo(new UUID(Long.MAX_VALUE - 32, 1l).toString()))
+                .body("object[0]", notNullValue())
+                .body("object[0]", containsString("this is some more random data31"))
+                .when().post("");
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * query with limits.
+     */
+    @Test
+    public void postTableTestWithLimitAndOffset2()
+    {
+        Query q = new Query();
+        q.setWhere("field1 = 'this is my data'");
+        q.setTable("mytable");
+        //act
+        given().header("limit", "2").header("offset", "2").body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(206)
+                //.header("Location", startsWith(RestAssured.basePath + "/"))
+                .body("", notNullValue())
+                .body("id", notNullValue())
+                .body("id[0]", equalTo(new UUID(Long.MAX_VALUE - 31, 1l).toString()))
+                .body("object[0]", notNullValue())
+                .body("object[0]", containsString("this is some more random data30"))
+                .body("id[1]", equalTo(new UUID(Long.MAX_VALUE - 30, 1l).toString()))
+                .body("object[1]", notNullValue())
+                .body("object[1]", containsString("this is some more random data29"))
                 .when().post("");
     }
 

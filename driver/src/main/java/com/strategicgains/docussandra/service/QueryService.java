@@ -13,19 +13,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class QueryService {
+public class QueryService
+{
 
     private QueryRepository queries;
 
-    public QueryService(QueryRepository queryRepository) {
+    public QueryService(QueryRepository queryRepository)
+    {
         super();
         this.queries = queryRepository;
     }
 
-    public List<Document> query(String db, Query toQuery) {
+    public List<Document> query(String db, Query toQuery)
+    {
         ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
-        return queries.doQuery(db, parsedQuery);
+        return queries.doQuery(parsedQuery);
+    }
 
+    public List<Document> query(String db, Query toQuery, int limit, long offset)
+    {
+        ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
+        return queries.doQuery(parsedQuery, limit, offset);
     }
 
     /**
@@ -38,7 +46,8 @@ public class QueryService {
      * @throws FieldNotIndexedException
      */
     //TODO: consider caching the results of this method; could be expensive and frequent
-    public ParsedQuery parseQuery(String db, Query toParse) throws FieldNotIndexedException {
+    public ParsedQuery parseQuery(String db, Query toParse) throws FieldNotIndexedException
+    {
         //let's parse the where clause so we know what we are actually searching for
         WhereClause where = new WhereClause(toParse.getWhere());
         //determine if the query is valid; in other words is it searching on valid fields that we have indexed
@@ -46,28 +55,34 @@ public class QueryService {
         IndexRepository indexRepo = new IndexRepository(queries.getSession());
         List<Index> indices = indexRepo.readAll(db, toParse.getTable());
         Index indexToUse = null;
-        for (Index index : indices) {
-            if (equalLists(index.fields(), fieldsToQueryOn)) {
+        for (Index index : indices)
+        {
+            if (equalLists(index.fields(), fieldsToQueryOn))
+            {
                 indexToUse = index;//we have a perfect match; the index matches the query exactly
                 break;
             }
         }
-        if (indexToUse == null) {//whoops, no perfect match, let try for a partial match (ie, the index has more fields than the query)
+        if (indexToUse == null)
+        {//whoops, no perfect match, let try for a partial match (ie, the index has more fields than the query)
             //TODO: querying on non-primary fields will lead to us being unable to determine which bucket to search -- give the user an override option, but for now just throw an exception
-            for (Index index : indices) {
+            for (Index index : indices)
+            {
                 //make a copy of the fieldsToQueryOn so we don't mutate the orginal
                 ArrayList<String> fieldsToQueryOnCopy = new ArrayList<>(fieldsToQueryOn);
                 ArrayList<String> indexFields = new ArrayList<>(index.fields());//make a copy here too
                 fieldsToQueryOnCopy.removeAll(indexFields);//we remove all the fields we have, from the fields we want
                 //if there are not any fields left in fields we want
-                if (fieldsToQueryOnCopy.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0))) {//second clause in this statement is what ensure we have a primary index; see TODO above.
+                if (fieldsToQueryOnCopy.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0)))
+                {//second clause in this statement is what ensure we have a primary index; see TODO above.
                     //we have an index that will work (even though we have extra fields in it)
                     indexToUse = index;
                     break;
                 }
             }
         }
-        if (indexToUse == null) {
+        if (indexToUse == null)
+        {
             throw new FieldNotIndexedException(fieldsToQueryOn);
         }
         ParsedQuery toReturn = new ParsedQuery(toParse, where, Utils.calculateITableName(indexToUse));
@@ -75,14 +90,17 @@ public class QueryService {
     }
 
     //TODO: move this to PearsonLibrary
-    public boolean equalLists(List<String> one, List<String> two) {
-        if (one == null && two == null) {
+    public boolean equalLists(List<String> one, List<String> two)
+    {
+        if (one == null && two == null)
+        {
             return true;
         }
 
         if ((one == null && two != null)
                 || one != null && two == null
-                || one.size() != two.size()) {
+                || one.size() != two.size())
+        {
             return false;
         }
 
