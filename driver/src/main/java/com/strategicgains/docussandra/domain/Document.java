@@ -29,22 +29,27 @@ public class Document
     public Document() {
     }
 
+    @Override
     public Identifier getId() {
         return new Identifier(databaseName(), tableName(), id, getUpdatedAt());
     }
 
+    @Override
     public void setId(Identifier id) {
-        // Do nothing. Throw?
+        // Do nothing. Throw.
+        throw new UnsupportedOperationException("This is not a valid call for this object.");
     }
 
+    @Override
     public UUID getUuid() {
         return id;
     }
 
+    @Override
     public void setUuid(UUID id) {
         this.id = id;
     }
-
+    
     public boolean hasTable() {
         return (table != null);
     }
