@@ -10,6 +10,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Metadata;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.CassandraTimestampedEntityRepository;
 
 public class MetadataRepository
@@ -51,8 +52,8 @@ extends CassandraTimestampedEntityRepository<Metadata>
 
 	protected void initializeStatements()
 	{
-		createStmt = getSession().prepare(String.format(CREATE_CQL, getTable(), getIdentifierColumn()));
-		readAllStmt = getSession().prepare(String.format(READ_ALL_CQL, getTable()));
+		createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), getIdentifierColumn()), getSession());
+		readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
 	}
 
 	@Override

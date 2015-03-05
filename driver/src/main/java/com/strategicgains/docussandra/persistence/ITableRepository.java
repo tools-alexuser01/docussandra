@@ -6,6 +6,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,7 @@ public class ITableRepository
     public boolean iTableExists(Index index)
     {
         logger.info("Checking for existance of iTable for index: " + index.toString());
-        PreparedStatement createStmt = session.prepare(TABLE_EXISTENCE_CQL);
+        PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(TABLE_EXISTENCE_CQL, session);
         BoundStatement bs = new BoundStatement(createStmt);
         bs.bind(Utils.calculateITableName(index));
         ResultSet rs = session.execute(bs);
@@ -90,7 +91,7 @@ public class ITableRepository
     public void createITable(Index index)
     {
         logger.info("Creating iTable for index: " + index.toString());
-        PreparedStatement createStmt = session.prepare(generateTableCreationSyntax(index));
+        PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(generateTableCreationSyntax(index), session);
         BoundStatement bs = new BoundStatement(createStmt);
         session.execute(bs);
     }
@@ -154,7 +155,7 @@ public class ITableRepository
     {
         logger.info("Deleting iTable: " + tableName);
         String stmt = String.format(TABLE_DELETE_CQL, tableName);
-        PreparedStatement createStmt = session.prepare(stmt);
+        PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(stmt, session);
         BoundStatement bs = new BoundStatement(createStmt);
         session.execute(bs);
     }
