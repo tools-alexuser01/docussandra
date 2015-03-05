@@ -1,7 +1,6 @@
 package com.strategicgains.docussandra.persistence;
 
 import com.datastax.driver.core.Session;
-import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.repoexpress.domain.Identifiable;
 import com.strategicgains.repoexpress.event.AbstractRepositoryObserver;

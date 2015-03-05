@@ -10,6 +10,7 @@ import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
+import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -45,7 +46,7 @@ public class QueryRepository
             finalQuery = String.format(QUERY_CQL_LIMIT, query.getITable(), query.getWhereClause().getBoundStatementSyntax(), maxIndex);
         }
         //run query
-        PreparedStatement ps = session.prepare(finalQuery);//TODO: Cache
+        PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalQuery, getSession());
         BoundStatement bs = new BoundStatement(ps);
         //set the bucket
         UUID fuzzyUUID = Utils.convertStringToFuzzyUUID(query.getWhereClause().getValues().get(0));//fuzzy UUID is based on first field value
