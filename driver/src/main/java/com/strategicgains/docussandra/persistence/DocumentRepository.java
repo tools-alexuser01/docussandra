@@ -127,7 +127,7 @@ public class DocumentRepository
         {
             throw new ItemNotFoundException("ID not found: " + identifier.toString());
         }
-        item.setId(identifier);
+        //item.setId(identifier);
         item.table(table);
         return item;
     }
