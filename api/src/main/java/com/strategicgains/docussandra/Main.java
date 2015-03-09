@@ -40,6 +40,7 @@ public class Main
 	public static void main(String[] args) throws Exception
 	{
 		RestExpress server = initializeServer(args);
+                LOG.info("Server started up!");
 		server.awaitShutdown();
 	}
 

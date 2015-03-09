@@ -1,0 +1,26 @@
+#!/bin/bash
+echo "postinst"
+
+# Create the logging directory
+LOG_DIRECTORY=/var/log/
+LOG_FILE1=$LOG_DIRECTORY/docussandra.log
+LOG_FILE2=$LOG_DIRECTORY/docussandra.json
+mkdir -p $LOG_DIRECTORY
+touch $LOG_FILE1
+touch $LOG_FILE2
+chown appuser:appuser $LOG_FILE1
+chown appuser:appuser $LOG_FILE2
+
+# Set the directory permissions
+chown appuser:appuser /home/appuser/*
+cd /home/appuser/docussandra-api
+jar -xf /home/appuser/docussandra-api/docussandra-api-jar-with-dependencies.jar
+
+# Stop the service if its running
+if [ -f /var/run/docussandra.pid ];
+then
+   stop docussandra-api
+fi
+
+# Start the service
+start docussandra-api
