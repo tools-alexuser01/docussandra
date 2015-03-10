@@ -56,7 +56,7 @@ public class Configuration
     private QueryController queryController;
 
     @Override
-    protected void fillValues(Properties p)
+    public void fillValues(Properties p)
     {
         this.port = Integer.parseInt(p.getProperty(PORT_PROPERTY, String.valueOf(RestExpress.DEFAULT_PORT)));
         this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
@@ -67,7 +67,7 @@ public class Configuration
         loadManifest();
     }
 
-    private void initialize(CassandraConfig dbConfig)
+    public void initialize(CassandraConfig dbConfig)
     {
         DatabaseRepository databaseRepository = new DatabaseRepository(dbConfig.getSession());
         TableRepository tableRepository = new TableRepository(dbConfig.getSession());
