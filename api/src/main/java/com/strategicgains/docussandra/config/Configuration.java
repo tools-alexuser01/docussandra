@@ -34,170 +34,169 @@ import com.strategicgains.repoexpress.cassandra.CassandraConfig;
 import com.strategicgains.restexpress.plugin.metrics.MetricsConfig;
 
 public class Configuration
-extends Environment
+        extends Environment
 {
-	private static final String DEFAULT_EXECUTOR_THREAD_POOL_SIZE = "20";
 
-	private static final String PORT_PROPERTY = "port";
-	private static final String BASE_URL_PROPERTY = "base.url";
-	private static final String EXECUTOR_THREAD_POOL_SIZE = "executor.threadPool.size";
+    private static final String DEFAULT_EXECUTOR_THREAD_POOL_SIZE = "20";
 
-	private int port;
-	private String baseUrl;
-	private int executorThreadPoolSize;
-	private MetricsConfig metricsSettings;
-	private Manifest manifest;
+    private static final String PORT_PROPERTY = "port";
+    private static final String BASE_URL_PROPERTY = "base.url";
+    private static final String EXECUTOR_THREAD_POOL_SIZE = "executor.threadPool.size";
 
-	private DatabaseController databaseController;
-	private TableController tableController;
-	private DocumentController documentController;
-	private IndexController indexController;
-	private QueryController queryController;
+    private int port;
+    private String baseUrl;
+    private int executorThreadPoolSize;
+    private MetricsConfig metricsSettings;
+    private Manifest manifest;
 
-	@Override
-	protected void fillValues(Properties p)
-	{
-		this.port = Integer.parseInt(p.getProperty(PORT_PROPERTY, String.valueOf(RestExpress.DEFAULT_PORT)));
-		this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
-		this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_SIZE, DEFAULT_EXECUTOR_THREAD_POOL_SIZE));
-		this.metricsSettings = new MetricsConfig(p);
-		CassandraConfig dbConfig = new CassandraConfig(p);
-		initialize(dbConfig);
-		loadManifest();
-	}
+    private DatabaseController databaseController;
+    private TableController tableController;
+    private DocumentController documentController;
+    private IndexController indexController;
+    private QueryController queryController;
 
-	private void initialize(CassandraConfig dbConfig)
-	{
-		DatabaseRepository databaseRepository = new DatabaseRepository(dbConfig.getSession());
-		TableRepository tableRepository = new TableRepository(dbConfig.getSession());
-		DocumentRepository documentRepository = new DocumentRepository(dbConfig.getSession());
-		IndexRepository indexRepository = new IndexRepository(dbConfig.getSession());
-		QueryRepository queryRepository = new QueryRepository(dbConfig.getSession());
+    @Override
+    protected void fillValues(Properties p)
+    {
+        this.port = Integer.parseInt(p.getProperty(PORT_PROPERTY, String.valueOf(RestExpress.DEFAULT_PORT)));
+        this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
+        this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_SIZE, DEFAULT_EXECUTOR_THREAD_POOL_SIZE));
+        this.metricsSettings = new MetricsConfig(p);
+        CassandraConfig dbConfig = new CassandraConfig(p);
+        initialize(dbConfig);
+        loadManifest();
+    }
 
-		DatabaseService databaseService = new DatabaseService(databaseRepository);
-		TableService tableService = new TableService(databaseRepository, tableRepository);
-		DocumentService documentService = new DocumentService(tableRepository, documentRepository);
-		IndexService indexService = new IndexService(tableRepository, indexRepository);
-		QueryService queryService = new QueryService(queryRepository);
+    private void initialize(CassandraConfig dbConfig)
+    {
+        DatabaseRepository databaseRepository = new DatabaseRepository(dbConfig.getSession());
+        TableRepository tableRepository = new TableRepository(dbConfig.getSession());
+        DocumentRepository documentRepository = new DocumentRepository(dbConfig.getSession());
+        IndexRepository indexRepository = new IndexRepository(dbConfig.getSession());
+        QueryRepository queryRepository = new QueryRepository(dbConfig.getSession());
 
-		databaseController = new DatabaseController(databaseService);
-		tableController = new TableController(tableService);
-		documentController = new DocumentController(documentService);
-		indexController = new IndexController(indexService);
-		queryController = new QueryController(queryService);
+        DatabaseService databaseService = new DatabaseService(databaseRepository);
+        TableService tableService = new TableService(databaseRepository, tableRepository);
+        DocumentService documentService = new DocumentService(tableRepository, documentRepository);
+        IndexService indexService = new IndexService(tableRepository, indexRepository);
+        QueryService queryService = new QueryService(queryRepository);
+
+        databaseController = new DatabaseController(databaseService);
+        tableController = new TableController(tableService);
+        documentController = new DocumentController(documentService);
+        indexController = new IndexController(indexService);
+        queryController = new QueryController(queryService);
 
 		// TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
+        EventBus bus = new LocalEventBusBuilder()
+                .subscribe(new IndexCreatedHandler())
+                .subscribe(new IndexDeletedHandler())
+                .subscribe(new DatabaseDeletedHandler())
+                .build();
+        DomainEvents.addBus("local", bus);
 
-		EventBus bus = new LocalEventBusBuilder()
-			.subscribe(new IndexCreatedHandler())
-			.subscribe(new IndexDeletedHandler())
-			.subscribe(new DatabaseDeletedHandler())
-			.build();
-		DomainEvents.addBus("local", bus);
-
-	}
-
-	public int getPort()
-	{
-		return port;
-	}
-	
-	public String getBaseUrl()
-	{
-		return baseUrl;
-	}
-	
-	public int getExecutorThreadPoolSize()
-	{
-		return executorThreadPoolSize;
-	}
-
-	public MetricsConfig getMetricsConfig()
-    {
-	    return metricsSettings;
     }
 
-	public DatabaseController getDatabaseController()
+    public int getPort()
     {
-		return databaseController;
+        return port;
     }
 
-	public TableController getTableController()
+    public String getBaseUrl()
     {
-		return tableController;
+        return baseUrl;
     }
 
-	public DocumentController getDocumentController()
+    public int getExecutorThreadPoolSize()
     {
-		return documentController;
+        return executorThreadPoolSize;
     }
 
-	public IndexController getIndexController()
+    public MetricsConfig getMetricsConfig()
     {
-		return indexController;
+        return metricsSettings;
     }
 
-	public QueryController getQueryController()
+    public DatabaseController getDatabaseController()
     {
-		return queryController;
+        return databaseController;
     }
 
-	public String getProjectName(String defaultName)
+    public TableController getTableController()
     {
-		if (hasManifest())
-		{
-    		String name = manifest.getMainAttributes().getValue("Project-Name");
-
-    		if (name != null)
-    		{
-    			return name;
-    		}
-		}
-
-		return defaultName;
+        return tableController;
     }
 
-	public String getProjectVersion()
+    public DocumentController getDocumentController()
     {
-		if (hasManifest())
-		{
-    		String version = manifest.getMainAttributes().getValue("Project-Version");
-
-    		if (version != null)
-    		{
-    			return version;
-    		}
-
-    		return "0.0.0 (Project version not found in manifest)";
-		}
-
-	    return "0.0.0 (Development version)";
+        return documentController;
     }
 
-	private void loadManifest()
-	{
-		Class<?> type = this.getClass();
-		String name = type.getSimpleName() + ".class";
-		URL classUrl = type.getResource(name);
+    public IndexController getIndexController()
+    {
+        return indexController;
+    }
 
-		if (classUrl != null && classUrl.getProtocol().startsWith("jar"))
-		{
-			String path = classUrl.toString();
-			String manifestPath = path.substring(0, path.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
-			try
-			{
-				manifest = new Manifest(new URL(manifestPath).openStream());
-			}
-			catch (IOException e)
-			{
-				throw new ConfigurationException(e);
-			}
-		}
-	}
+    public QueryController getQueryController()
+    {
+        return queryController;
+    }
 
-	private boolean hasManifest()
-	{
-		return (manifest != null);
-	}
+    public String getProjectName(String defaultName)
+    {
+        if (hasManifest())
+        {
+            String name = manifest.getMainAttributes().getValue("Project-Name");
+
+            if (name != null)
+            {
+                return name;
+            }
+        }
+
+        return defaultName;
+    }
+
+    public String getProjectVersion()
+    {
+        if (hasManifest())
+        {
+            String version = manifest.getMainAttributes().getValue("Project-Version");
+
+            if (version != null)
+            {
+                return version;
+            }
+
+            return "0.0.0 (Project version not found in manifest)";
+        }
+
+        return "0.0.0 (Development version)";
+    }
+
+    private void loadManifest()
+    {
+        Class<?> type = this.getClass();
+        String name = type.getSimpleName() + ".class";
+        URL classUrl = type.getResource(name);
+
+        if (classUrl != null && classUrl.getProtocol().startsWith("jar"))
+        {
+            String path = classUrl.toString();
+            String manifestPath = path.substring(0, path.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+            try
+            {
+                manifest = new Manifest(new URL(manifestPath).openStream());
+            } catch (IOException e)
+            {
+                throw new ConfigurationException(e);
+            }
+        }
+    }
+
+    private boolean hasManifest()
+    {
+        return (manifest != null);
+    }
 }
