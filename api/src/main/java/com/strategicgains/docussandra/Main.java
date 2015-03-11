@@ -129,8 +129,10 @@ public class Main
     private static Configuration loadEnvironment(String[] args)
             throws FileNotFoundException, IOException
     {
+        LOG.info("Loading environment with " + args.length + " arguments.");
         if (args.length > 0)
         {
+            LOG.info("-args[0]: " + args[0]);
             if (args[0].startsWith("http") || args[0].startsWith("HTTP"))//if we are fetching props by URL
             {
                 Configuration config = new Configuration();
