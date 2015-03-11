@@ -18,6 +18,7 @@ package com.strategicgains.docussandra.persistence.helper;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import java.io.File;
+import java.net.URL;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
@@ -42,12 +43,13 @@ public class PreparedStatementFactory
      */
     private synchronized static void establishCache()
     {        
-        String cacheLocation = "./src/main/resources/ehcache.xml";
-        File config = new File(".", cacheLocation);
-        logger.debug("Establishing prepared statement cache with config file: " + config);
+        //String cacheLocation = "./src/main/resources/ehcache.xml";
+        URL url = PreparedStatementFactory.class.getResource("/ehcache.xml");
+        //File config = new File(url.getFile());
+        logger.debug("Establishing prepared statement cache with config file: " + url.getPath());
         if (manager == null)
         {
-            manager = CacheManager.newInstance(config.getAbsolutePath());
+            manager = CacheManager.newInstance(url);
         }
         if (preparedStatementCache == null)
         {

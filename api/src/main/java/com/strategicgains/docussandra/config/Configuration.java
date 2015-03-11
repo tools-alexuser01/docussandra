@@ -11,6 +11,7 @@ import org.restexpress.util.Environment;
 
 import com.strategicgains.docussandra.controller.DatabaseController;
 import com.strategicgains.docussandra.controller.DocumentController;
+import com.strategicgains.docussandra.controller.HealthCheckController;
 import com.strategicgains.docussandra.controller.IndexController;
 import com.strategicgains.docussandra.controller.QueryController;
 import com.strategicgains.docussandra.controller.TableController;
@@ -54,6 +55,7 @@ public class Configuration
     private DocumentController documentController;
     private IndexController indexController;
     private QueryController queryController;
+    private HealthCheckController healthController;
 
     @Override
     public void fillValues(Properties p)
@@ -86,6 +88,7 @@ public class Configuration
         documentController = new DocumentController(documentService);
         indexController = new IndexController(indexService);
         queryController = new QueryController(queryService);
+        healthController = new HealthCheckController();
 
 		// TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
@@ -198,5 +201,13 @@ public class Configuration
     private boolean hasManifest()
     {
         return (manifest != null);
+    }
+
+    /**
+     * @return the healthController
+     */
+    public HealthCheckController getHealthController()
+    {
+        return healthController;
     }
 }
