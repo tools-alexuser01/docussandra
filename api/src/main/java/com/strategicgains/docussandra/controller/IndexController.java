@@ -16,6 +16,7 @@ import com.strategicgains.hyperexpress.builder.TokenBinder;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import com.strategicgains.repoexpress.domain.Identifier;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,9 @@ public class IndexController
         t.name(table);
         entity.table(t);
         entity.name(name);
+        if(entity.includeOnly() == null){
+            entity.includeOnly(new ArrayList<String>(0));
+        }
         Index saved;
         try
         {
