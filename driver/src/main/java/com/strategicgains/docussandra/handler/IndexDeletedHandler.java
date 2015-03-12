@@ -5,6 +5,8 @@ import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.event.IndexDeletedEvent;
 import com.strategicgains.docussandra.persistence.ITableRepository;
 import com.strategicgains.eventing.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -16,6 +18,7 @@ public class IndexDeletedHandler
 {
 
     private Session dbSession;
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexDeletedHandler.class);
 
     public IndexDeletedHandler(Session dbSession)
     {
@@ -30,6 +33,7 @@ public class IndexDeletedHandler
 
     public void handle(IndexDeletedEvent event)
     {
+        LOGGER.info("Cleaning up ITables for index: " + event.data.databaseName() + "/" + event.data.tableName() + "/" + event.data.name());
         ITableRepository itr = new ITableRepository(dbSession);
         Index toDelete = event.data;
         if(itr.iTableExists(toDelete)){
