@@ -6,6 +6,8 @@ import com.strategicgains.docussandra.event.TableDeletedEvent;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.eventing.EventHandler;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -17,6 +19,7 @@ public class TableDeleteHandler
 {
 
     private Session dbSession;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableDeleteHandler.class);
 
     public TableDeleteHandler(Session dbSession)
     {
@@ -32,6 +35,7 @@ public class TableDeleteHandler
 
     public void handle(TableDeletedEvent event)
     {
+        LOGGER.info("Cleaning up Indexes for table: " + event.data.databaseName() + "/" + event.data.name());
         //remove all the collections and all the documents in that table.
         //TODO: version instead of delete
         //Delete all indexes
