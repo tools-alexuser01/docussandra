@@ -7,6 +7,8 @@ import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.eventing.EventHandler;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -18,12 +20,12 @@ public class DatabaseDeletedHandler
 {
 
     private Session dbSession;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseDeletedHandler.class);
 
     public DatabaseDeletedHandler(Session dbSession)
     {
         this.dbSession = dbSession;
-    }   
-    
+    }
 
     @Override
     public void handle(Object event) throws Exception
@@ -36,9 +38,11 @@ public class DatabaseDeletedHandler
         //remove all the collections and all the documents in that database.
         //TODO: version instead of delete
         //tables
+        LOGGER.info("Cleaning up tables for database: " + event.data.name());
         TableRepository tr = new TableRepository(dbSession);
         List<Table> tables = tr.readAll(event.data.name());//get all tables
-        for(Table t : tables){
+        for (Table t : tables)
+        {
             tr.doDelete(t);// then delete them
         }
     }
