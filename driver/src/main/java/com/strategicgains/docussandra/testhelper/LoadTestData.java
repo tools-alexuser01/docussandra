@@ -96,7 +96,7 @@ public class LoadTestData
         }
         Index lastAndFirst = new Index("lastandfirst");
         lastAndFirst.isUnique(false);
-        fields = new ArrayList<>(1);
+        fields = new ArrayList<>(2);
         fields.add("NAMELAST");
         fields.add("NAMEFIRST");
         lastAndFirst.fields(fields);
