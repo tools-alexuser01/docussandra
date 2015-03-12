@@ -18,6 +18,7 @@ import com.strategicgains.docussandra.controller.TableController;
 import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.IndexDeletedHandler;
+import com.strategicgains.docussandra.handler.TableDeleteHandler;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
@@ -94,8 +95,9 @@ public class Configuration
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
         EventBus bus = new LocalEventBusBuilder()
                 .subscribe(new IndexCreatedHandler())
-                .subscribe(new IndexDeletedHandler())
-                .subscribe(new DatabaseDeletedHandler())
+                .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
+                .subscribe(new TableDeleteHandler(dbConfig.getSession()))
+                .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
                 .build();
         DomainEvents.addBus("local", bus);
 
