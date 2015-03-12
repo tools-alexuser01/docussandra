@@ -68,7 +68,7 @@ public class Fixtures
     {
         //try {
         //Properties properties = loadTestProperties(); //TODO: put this call back in
-        String cassandraSeedsProperty = "10.199.20.182";//"127.0.0.1";//properties.getProperty(
+        String cassandraSeedsProperty = "127.0.0.1";//properties.getProperty(
         //CASSANDRA_SEEDS, "localhost");
         cassandraKeyspace = "docussandra";//properties.getProperty(CASSANDRA_KEYSPACE);
         cassandraSeeds = cassandraSeedsProperty.split(",");
