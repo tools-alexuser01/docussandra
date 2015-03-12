@@ -15,19 +15,13 @@
  */
 package com.strategicgains.docussandra.controller.perf;
 
-import com.strategicgains.docussandra.controller.*;
 import com.jayway.restassured.RestAssured;
-import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
-import com.strategicgains.docussandra.domain.Database;
-import com.strategicgains.docussandra.domain.Query;
-import com.strategicgains.docussandra.domain.Table;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.Date;
-import java.util.UUID;
 import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
