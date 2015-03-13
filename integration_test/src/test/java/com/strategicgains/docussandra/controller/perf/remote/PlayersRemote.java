@@ -55,7 +55,7 @@ public class PlayersRemote
     private static Table playersTable;
     private static List<Index> indexes = new ArrayList<>();
 
-    private static final int NUM_WORKERS = 500; //NOTE: one more worker will be added to pick up any remainder
+    private static final int NUM_WORKERS = 50; //NOTE: one more worker will be added to pick up any remainder
 
     private static int errorCount = 0;
 
