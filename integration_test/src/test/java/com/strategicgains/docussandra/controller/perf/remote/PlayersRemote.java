@@ -18,7 +18,6 @@ package com.strategicgains.docussandra.controller.perf.remote;
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
-import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
@@ -28,7 +27,6 @@ import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
@@ -49,22 +47,24 @@ public class PlayersRemote
 {
 
     private final static Logger logger = LoggerFactory.getLogger(PlayersRemote.class);
-    private static final String BASE_URI = "http://localhost";//"https://docussandra.stg-prsn.com";
-    private static final int PORT = 19080;
+    private static final String BASE_URI = "https://docussandra.stg-prsn.com";//"http://localhost";//
+    //private static final int PORT = 19080;
 
     private static Database playersDb;
     private static Table playersTable;
     private static List<Index> indexes = new ArrayList<>();
+
+    private static final int NUM_WORKERS = 10; //NOTE: one more worker will be added to pick up any remainder
     
-    private static final int NUM_WORKERS = 20;
+    private static int errorCount = 0;
 
     public PlayersRemote() throws IOException
     {
         RestExpressManager.getManager().ensureRestExpressRunning();
         RestAssured.baseURI = BASE_URI;
-        RestAssured.port = PORT;
+        //RestAssured.port = PORT;
         RestAssured.basePath = "/";
-        //RestAssured.useRelaxedHTTPSValidation();
+        RestAssured.useRelaxedHTTPSValidation();
 
         playersDb = new Database("players");
         playersDb.description("A database about players.");
@@ -126,14 +126,61 @@ public class PlayersRemote
     }
 
     @Test
-    public void loadData() throws IOException, ParseException
+    public void loadData() throws IOException, ParseException, InterruptedException
     {
         List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players.json", playersTable);
-        //TODO: multi thread
-        for (Document d : docs)
+        int numDocs = docs.size();
+        int docsPerWorker = numDocs / NUM_WORKERS;
+        int numDocsAssigned = 0;
+        ArrayList<List<Document>> documentQueues = new ArrayList<>(NUM_WORKERS + 1);
+        while ((numDocsAssigned + 1) < numDocs)
         {
-            postDocument(d);
+            int start = numDocsAssigned;
+            int end = numDocsAssigned + docsPerWorker;
+            if (end > numDocs)
+            {
+                end = numDocs - 1;
+            }
+            documentQueues.add(new ArrayList(docs.subList(start, end)));
+            numDocsAssigned = end;
         }
+
+        ArrayList<Thread> workers = new ArrayList<>(NUM_WORKERS + 1);
+        for (final List<Document> queue : documentQueues)
+        {
+            workers.add(new Thread()
+            {
+                @Override
+                public void run()
+                {
+                    for (Document d : queue)
+                    {
+                        postDocument(d);
+                    }
+                }
+            });
+        }
+        
+        //start your threads!
+        for(Thread t : workers){
+            t.start();
+        }
+        logger.info("All threads started, waiting for completion.");
+        boolean allDone = false;
+        boolean first = true;
+        while(!allDone || first){
+            first = false;
+            for(Thread t : workers){
+                if(t.isAlive()){
+                    allDone = false;
+                }
+            }
+            logger.info("We still have workers running...");
+            Thread.sleep(10000);
+        }
+        
+        
+        logger.info("Done loading data!");
     }
 
     @Before
@@ -264,15 +311,15 @@ public class PlayersRemote
                 .get(playersDb.name() + "/" + playersTable.name() + "/indexes/" + index.name());
     }
 
-    private void postDocument(Document d)
+    private static void postDocument(Document d)
     {
         //act
-        given().body(d.object()).expect().statusCode(201)
-                .body("id", notNullValue())
-                .body("object", notNullValue())
-                .body("createdAt", notNullValue())
-                .body("updatedAt", notNullValue())
-                .when().post(playersDb.name() + "/" + playersTable.name() + "/");
+        Response response = given().body(d.object()).expect().when().post(playersDb.name() + "/" + playersTable.name() + "/").andReturn();
+        int code = response.getStatusCode();
+        if(code != 201){
+            logger.info("Error publishing document: " + response.getBody().prettyPrint());
+            logger.info("This is the: " + (++errorCount) + " error.");
+        }
     }
 
 }
