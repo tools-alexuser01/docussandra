@@ -26,6 +26,7 @@ import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -54,9 +55,12 @@ public class PlayersRemote
     private static Table playersTable;
     private static List<Index> indexes = new ArrayList<>();
 
-    private static final int NUM_WORKERS = 10; //NOTE: one more worker will be added to pick up any remainder
-    
+    private static final int NUM_WORKERS = 500; //NOTE: one more worker will be added to pick up any remainder
+
     private static int errorCount = 0;
+
+    private static long tft = 0;
+    private static int t = 0;
 
     public PlayersRemote() throws IOException
     {
@@ -157,30 +161,51 @@ public class PlayersRemote
                     {
                         postDocument(d);
                     }
+                    logger.info("Thread " + Thread.currentThread().getName() + " is done.");
                 }
             });
         }
-        
+        long start = new Date().getTime();
         //start your threads!
-        for(Thread t : workers){
+        for (Thread t : workers)
+        {
             t.start();
         }
         logger.info("All threads started, waiting for completion.");
         boolean allDone = false;
         boolean first = true;
-        while(!allDone || first){
+        while (!allDone || first)
+        {
             first = false;
-            for(Thread t : workers){
-                if(t.isAlive()){
-                    allDone = false;
+            boolean done = true;
+            for (Thread t : workers)
+            {
+                if (t.isAlive())
+                {
+                    done = false;
+                    logger.info("Thread " + t.getName() + " is still running.");
+                    break;
                 }
             }
-            logger.info("We still have workers running...");
-            Thread.sleep(10000);
+            if (done)
+            {
+                allDone = true;
+            } else
+            {
+                logger.info("We still have workers running...");
+                Thread.sleep(10000);
+            }
         }
+        long end = new Date().getTime();
+        long miliseconds = (end - start);
+        long seconds = miliseconds / 1000;
+        logger.info("Done loading data! Took: " + seconds + " seconds");
+        double tpms = ((double)numDocs / (double)miliseconds);
+        double tps = tpms * 1000;
+        double transactionTime = ((double)tft / (double)numDocs);
+        logger.info("Average Transactions Per Second: " + tps);
+        logger.info("Average Transactions Time (in miliseconds): " + transactionTime);
         
-        
-        logger.info("Done loading data!");
     }
 
     @Before
@@ -314,9 +339,15 @@ public class PlayersRemote
     private static void postDocument(Document d)
     {
         //act
+        long start = new Date().getTime();
         Response response = given().body(d.object()).expect().when().post(playersDb.name() + "/" + playersTable.name() + "/").andReturn();
+        long end = new Date().getTime();
+        long tftt = end - start;
+        tft += tftt;
+        t++;
         int code = response.getStatusCode();
-        if(code != 201){
+        if (code != 201)
+        {
             logger.info("Error publishing document: " + response.getBody().prettyPrint());
             logger.info("This is the: " + (++errorCount) + " error.");
         }
