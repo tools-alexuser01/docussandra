@@ -118,7 +118,7 @@ public class IndexControllerTest {
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .when().post("/" + testIndex.name()).andReturn();
+                .when().post("/" + testIndex.name());
 
         //check
         expect().statusCode(200)
