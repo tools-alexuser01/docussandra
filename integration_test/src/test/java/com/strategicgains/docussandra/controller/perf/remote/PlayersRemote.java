@@ -55,6 +55,8 @@ public class PlayersRemote
     private static Database playersDb;
     private static Table playersTable;
     private static List<Index> indexes = new ArrayList<>();
+    
+    private static final int NUM_WORKERS = 20;
 
     public PlayersRemote() throws IOException
     {
