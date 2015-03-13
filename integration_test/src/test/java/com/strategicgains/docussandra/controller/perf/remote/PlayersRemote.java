@@ -18,6 +18,7 @@ package com.strategicgains.docussandra.controller.perf.remote;
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
+import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
@@ -32,27 +33,28 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import testhelper.RestExpressManager;
 
 /**
+ * Treat this as a singleton, even though it is not.
  *
  * @author udeyoje
  */
 public class PlayersRemote
 {
 
-    private final Logger logger = LoggerFactory.getLogger(PlayersRemote.class);
+    private final static Logger logger = LoggerFactory.getLogger(PlayersRemote.class);
     private static final String BASE_URI = "http://localhost";//"https://docussandra.stg-prsn.com";
     private static final int PORT = 19080;
 
-    private Database playersDb;
-    private Table playersTable;
-    private List<Index> indexes = new ArrayList<>();
+    private static Database playersDb;
+    private static Table playersTable;
+    private static List<Index> indexes = new ArrayList<>();
 
     public PlayersRemote() throws IOException
     {
@@ -60,7 +62,7 @@ public class PlayersRemote
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
         RestAssured.basePath = "/";
-        RestAssured.useRelaxedHTTPSValidation();
+        //RestAssured.useRelaxedHTTPSValidation();
 
         playersDb = new Database("players");
         playersDb.description("A database about players.");
@@ -122,7 +124,6 @@ public class PlayersRemote
     }
 
     @Test
-    @Ignore
     public void loadData() throws IOException, ParseException
     {
         List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players.json", playersTable);
@@ -136,7 +137,7 @@ public class PlayersRemote
     @Before
     public void beforeTest() throws Exception
     {
-        deleteDb();//should delete everything related to this table
+        deleteData();//should delete everything related to this table
         postDB();
         postTable();
         for (Index i : indexes)
@@ -148,8 +149,14 @@ public class PlayersRemote
     @After
     public void afterTest() throws InterruptedException
     {
-        deleteDb();
-        
+        deleteData();
+    }
+
+    @AfterClass
+    public static void afterClass() throws InterruptedException
+    {
+        deleteData();
+        Thread.sleep(10000);//have to let the deletes finish before shutting down
     }
 
     private void postDB()
@@ -175,12 +182,16 @@ public class PlayersRemote
                 .get("/" + playersDb.getId());
     }
 
-    private void deleteDb() throws InterruptedException
+    private static void deleteData()
     {
         logger.debug("Deleteing test DB");
         //act
         given().when().delete(playersDb.name());
-        Thread.sleep(10000);
+        given().when().delete(playersDb.name() + "/" + playersTable.name());
+        for (Index i : indexes)
+        {
+            given().when().delete(playersDb.name() + "/" + playersTable.name() + "/indexes/" + i.name());
+        }
     }
 
     private void postTable()
@@ -216,6 +227,7 @@ public class PlayersRemote
 //    }
     private void postIndex(Index index)
     {
+        logger.info("POSTing index: " + index.toString());
         boolean first = true;
         StringBuilder tableStr = new StringBuilder("{" + "\"fields\" : [");
         for (String field : index.fields())
@@ -234,7 +246,7 @@ public class PlayersRemote
         tableStr.append("],").append("\"name\" : \"").append(index.name()).append("\"}");
 
         //act
-        given().body(tableStr).expect().statusCode(201)
+        given().body(tableStr.toString()).expect().statusCode(201)
                 .body("name", equalTo(index.name()))
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
@@ -253,13 +265,12 @@ public class PlayersRemote
     private void postDocument(Document d)
     {
         //act
-        Response r = given().body(d.object()).expect().statusCode(201)
+        given().body(d.object()).expect().statusCode(201)
                 .body("id", notNullValue())
                 .body("object", notNullValue())
-                .body("object", containsString("greeting"))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .when().post("/").andReturn();
+                .when().post(playersDb.name() + "/" + playersTable.name() + "/");
     }
 
 }
