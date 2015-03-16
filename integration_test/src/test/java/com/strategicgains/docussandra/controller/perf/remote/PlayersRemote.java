@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
@@ -48,8 +50,8 @@ public class PlayersRemote
 {
 
     private final static Logger logger = LoggerFactory.getLogger(PlayersRemote.class);
-    private static final String BASE_URI = "https://docussandra.stg-prsn.com";//"http://localhost";//
-    //private static final int PORT = 19080;
+    private static final String BASE_URI = "http://localhost";//"https://docussandra.stg-prsn.com";
+    private static final int PORT = 19080;
 
     private static Database playersDb;
     private static Table playersTable;
@@ -57,16 +59,16 @@ public class PlayersRemote
 
     private static final int NUM_WORKERS = 50; //NOTE: one more worker will be added to pick up any remainder
 
-    private static int errorCount = 0;
+    private static AtomicInteger errorCount = new AtomicInteger(0);
 
-    private static long tft = 0;
+    private static AtomicLong tft = new AtomicLong(0);
     private static int t = 0;
 
     public PlayersRemote() throws IOException
     {
         RestExpressManager.getManager().ensureRestExpressRunning();
         RestAssured.baseURI = BASE_URI;
-        //RestAssured.port = PORT;
+        RestAssured.port = PORT;
         RestAssured.basePath = "/";
         RestAssured.useRelaxedHTTPSValidation();
 
@@ -202,7 +204,7 @@ public class PlayersRemote
         logger.info("Done loading data! Took: " + seconds + " seconds");
         double tpms = ((double)numDocs / (double)miliseconds);
         double tps = tpms * 1000;
-        double transactionTime = ((double)tft / (double)numDocs);
+        double transactionTime = ((double)tft.get() / (double)numDocs);
         logger.info("Average Transactions Per Second: " + tps);
         logger.info("Average Transactions Time (in miliseconds): " + transactionTime);
         
@@ -343,13 +345,14 @@ public class PlayersRemote
         Response response = given().body(d.object()).expect().when().post(playersDb.name() + "/" + playersTable.name() + "/").andReturn();
         long end = new Date().getTime();
         long tftt = end - start;
-        tft += tftt;
+        tft.addAndGet(tftt);
         t++;
         int code = response.getStatusCode();
         if (code != 201)
         {
+            errorCount.addAndGet(1);
             logger.info("Error publishing document: " + response.getBody().prettyPrint());
-            logger.info("This is the: " + (++errorCount) + " error.");
+            logger.info("This is the: " + errorCount.toString() + " error.");
         }
     }
 
