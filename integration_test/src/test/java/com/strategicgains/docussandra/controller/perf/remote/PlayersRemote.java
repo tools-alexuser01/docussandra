@@ -50,19 +50,15 @@ public class PlayersRemote
 {
 
     private final static Logger logger = LoggerFactory.getLogger(PlayersRemote.class);
+    private final static Logger output = LoggerFactory.getLogger("output");
     private static final String BASE_URI = "http://localhost";//"https://docussandra.stg-prsn.com";
     private static final int PORT = 19080;
-
-    private static Database playersDb;
-    private static Table playersTable;
-    private static List<Index> indexes = new ArrayList<>();
 
     private static final int NUM_WORKERS = 50; //NOTE: one more worker will be added to pick up any remainder
 
     private static AtomicInteger errorCount = new AtomicInteger(0);
 
     private static AtomicLong tft = new AtomicLong(0);
-    private static int t = 0;
 
     public PlayersRemote() throws IOException
     {
@@ -72,69 +68,12 @@ public class PlayersRemote
         RestAssured.basePath = "/";
         RestAssured.useRelaxedHTTPSValidation();
 
-        playersDb = new Database("players");
-        playersDb.description("A database about players.");
-
-        playersTable = new Table();
-        playersTable.name("players_table");
-        playersTable.description("A table about players.");
-
-        Index player = new Index("player");
-        player.isUnique(false);
-        List<String> fields = new ArrayList<>(1);
-        fields.add("NAMEFULL");
-        player.fields(fields);
-        player.table(playersTable);
-
-        Index lastname = new Index("lastname");
-        lastname.isUnique(false);
-        fields = new ArrayList<>(1);
-        fields.add("NAMELAST");
-        lastname.fields(fields);
-        lastname.table(playersTable);
-
-        Index lastAndFirst = new Index("lastandfirst");
-        lastAndFirst.isUnique(false);
-        fields = new ArrayList<>(2);
-        fields.add("NAMELAST");
-        fields.add("NAMEFIRST");
-        lastAndFirst.fields(fields);
-        lastAndFirst.table(playersTable);
-
-        Index team = new Index("team");
-        team.isUnique(false);
-        fields = new ArrayList<>(1);
-        fields.add("TEAM");
-        team.fields(fields);
-        team.table(playersTable);
-
-        Index position = new Index("postion");
-        position.isUnique(false);
-        fields = new ArrayList<>(1);
-        fields.add("POSITION");
-        position.fields(fields);
-        position.table(playersTable);
-
-        Index rookie = new Index("rookieyear");
-        rookie.isUnique(false);
-        fields = new ArrayList<>(1);
-        fields.add("ROOKIEYEAR");
-        rookie.fields(fields);
-        rookie.table(playersTable);
-
-        indexes.add(team);
-        indexes.add(position);
-        indexes.add(player);
-        indexes.add(rookie);
-        indexes.add(lastAndFirst);
-        indexes.add(lastname);
-
     }
 
     @Test
     public void loadData() throws IOException, ParseException, InterruptedException
     {
-        List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players.json", playersTable);
+        List<Document> docs = getDocumentsFromFS();
         int numDocs = docs.size();
         int docsPerWorker = numDocs / NUM_WORKERS;
         int numDocsAssigned = 0;
@@ -161,7 +100,7 @@ public class PlayersRemote
                 {
                     for (Document d : queue)
                     {
-                        postDocument(d);
+                        postDocument(getDb(), getTb(), d);
                     }
                     logger.info("Thread " + Thread.currentThread().getName() + " is done.");
                 }
@@ -200,108 +139,111 @@ public class PlayersRemote
         }
         long end = new Date().getTime();
         long miliseconds = (end - start);
-        long seconds = miliseconds / 1000;
-        logger.info("Done loading data! Took: " + seconds + " seconds");
-        double tpms = ((double)numDocs / (double)miliseconds);
+        double seconds = (double) miliseconds / 1000d;
+        output.info("Done loading data using: " + NUM_WORKERS + " and URL: " + BASE_URI + ". Took: " + seconds + " seconds");
+        double tpms = ((double) numDocs / (double) miliseconds);
         double tps = tpms * 1000;
-        double transactionTime = ((double)tft.get() / (double)numDocs);
-        logger.info("Average Transactions Per Second: " + tps);
-        logger.info("Average Transactions Time (in miliseconds): " + transactionTime);
-        
+        double transactionTime = ((double) tft.get() / (double) numDocs);
+        output.info("Average Transactions Per Second: " + tps);
+        output.info("Average Transactions Time (in miliseconds): " + transactionTime);
+
     }
 
     @Before
     public void beforeTest() throws Exception
     {
-        deleteData();//should delete everything related to this table
-        postDB();
-        postTable();
-        for (Index i : indexes)
+        deleteData(getDb(), getTb(), getIndexes());//should delete everything related to this table
+        postDB(getDb());
+        postTable(getDb(), getTb());
+        for (Index i : getIndexes())
         {
-            postIndex(i);
+            postIndex(getDb(), getTb(), i);
         }
     }
 
     @After
     public void afterTest() throws InterruptedException
     {
-        deleteData();
+        deleteData(getDb(), getTb(), getIndexes());//should delete everything related to this table
     }
 
     @AfterClass
     public static void afterClass() throws InterruptedException
     {
-        deleteData();
         Thread.sleep(10000);//have to let the deletes finish before shutting down
     }
+    
+    private List<Document> getDocumentsFromFS() throws IOException, ParseException{
+        return Fixtures.getBulkDocuments("./src/test/resources/players.json", getTb());
+    }
 
-    private void postDB()
+    private static void postDB(Database database)
     {
         logger.debug("Creating test DB");
-        String dbStr = "{" + "\"description\" : \"" + playersDb.description()
-                + "\"," + "\"name\" : \"" + playersDb.name() + "\"}";
+        String dbStr = "{" + "\"description\" : \"" + database.description()
+                + "\"," + "\"name\" : \"" + database.name() + "\"}";
         //act
         given().body(dbStr).expect().statusCode(201)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
-                .body("name", equalTo(playersDb.name()))
-                .body("description", equalTo(playersDb.description()))
+                .body("name", equalTo(database.name()))
+                .body("description", equalTo(database.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .when().post(playersDb.name());
+                .when().post(database.name());
         //check
         expect().statusCode(200)
-                .body("name", equalTo(playersDb.name()))
-                .body("description", equalTo(playersDb.description()))
+                .body("name", equalTo(database.name()))
+                .body("description", equalTo(database.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
                 .when()
-                .get("/" + playersDb.getId());
+                .get("/" + database.getId());
     }
 
-    private static void deleteData()
+    private static void deleteData(Database database, Table table, List<Index> index)
     {
         logger.debug("Deleteing test DB");
         //act
-        given().when().delete(playersDb.name());
-        given().when().delete(playersDb.name() + "/" + playersTable.name());
-        for (Index i : indexes)
+        given().when().delete(database.name());
+        given().when().delete(database.name() + "/" + table.name());
+        for (Index i : index)
         {
-            given().when().delete(playersDb.name() + "/" + playersTable.name() + "/indexes/" + i.name());
+            given().when().delete(database.name() + "/" + table.name() + "/indexes/" + i.name());
         }
     }
 
-    private void postTable()
+    private void postTable(Database database, Table table)
     {
         logger.debug("Creating test table");
-        String tableStr = "{" + "\"description\" : \"" + playersTable.description()
-                + "\"," + "\"name\" : \"" + playersTable.name() + "\"}";
+        String tableStr = "{" + "\"description\" : \"" + table.description()
+                + "\"," + "\"name\" : \"" + table.name() + "\"}";
         //act
         given().body(tableStr).expect().statusCode(201)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
-                .body("name", equalTo(playersTable.name()))
-                .body("description", equalTo(playersTable.description()))
+                .body("name", equalTo(table.name()))
+                .body("description", equalTo(table.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .when().post(playersDb.name() + "/" + playersTable.name());
+                .when().post(database.name() + "/" + table.name());
         //check
         expect().statusCode(200)
-                .body("name", equalTo(playersTable.name()))
-                .body("description", equalTo(playersTable.description()))
+                .body("name", equalTo(table.name()))
+                .body("description", equalTo(table.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get(playersDb.name() + "/" + playersTable.name());
+                .get(database.name() + "/" + table.name());
     }
 
 //    private void deleteTable()
 //    {
 //        logger.debug("Deleteing test table");
 //        given().expect().statusCode(204)
-//                .when().delete(playersTable.name());
+//                .when().delete(tb.name());
 //        //check
 //        expect().statusCode(404).when()
-//                .get(playersTable.name());
+//                .get(tb.name());
 //    }
-    private void postIndex(Index index)
+    private void postIndex(Database database, Table table, Index index)
     {
         logger.info("POSTing index: " + index.toString());
         boolean first = true;
@@ -327,7 +269,7 @@ public class PlayersRemote
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .when().post(playersDb.name() + "/" + playersTable.name() + "/indexes/" + index.name());
+                .when().post(database.name() + "/" + table.name() + "/indexes/" + index.name());
 
         //check
         expect().statusCode(200)
@@ -335,18 +277,17 @@ public class PlayersRemote
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .get(playersDb.name() + "/" + playersTable.name() + "/indexes/" + index.name());
+                .get(database.name() + "/" + table.name() + "/indexes/" + index.name());
     }
 
-    private static void postDocument(Document d)
+    private static void postDocument(Database database, Table table, Document d)
     {
         //act
         long start = new Date().getTime();
-        Response response = given().body(d.object()).expect().when().post(playersDb.name() + "/" + playersTable.name() + "/").andReturn();
+        Response response = given().body(d.object()).expect().when().post(database.name() + "/" + table.name() + "/").andReturn();
         long end = new Date().getTime();
         long tftt = end - start;
         tft.addAndGet(tftt);
-        t++;
         int code = response.getStatusCode();
         if (code != 201)
         {
@@ -354,6 +295,85 @@ public class PlayersRemote
             logger.info("Error publishing document: " + response.getBody().prettyPrint());
             logger.info("This is the: " + errorCount.toString() + " error.");
         }
+    }
+
+    /**
+     * @return the db
+     */
+    public Database getDb()
+    {
+        Database db = new Database("players");
+        db.description("A database about players.");
+        return db;
+    }
+
+    /**
+     * @return the tb
+     */
+    public Table getTb()
+    {
+        Table tb = new Table();
+        tb.name("players_table");
+        tb.description("A table about players.");
+        return tb;
+    }
+
+    /**
+     * @return the indexes
+     */
+    public List<Index> getIndexes()
+    {
+        ArrayList<Index> indexes = new ArrayList<>(6);
+        Index player = new Index("player");
+        player.isUnique(false);
+        List<String> fields = new ArrayList<>(1);
+        fields.add("NAMEFULL");
+        player.fields(fields);
+        player.table(getTb());
+
+        Index lastname = new Index("lastname");
+        lastname.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("NAMELAST");
+        lastname.fields(fields);
+        lastname.table(getTb());
+
+        Index lastAndFirst = new Index("lastandfirst");
+        lastAndFirst.isUnique(false);
+        fields = new ArrayList<>(2);
+        fields.add("NAMELAST");
+        fields.add("NAMEFIRST");
+        lastAndFirst.fields(fields);
+        lastAndFirst.table(getTb());
+
+        Index team = new Index("team");
+        team.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("TEAM");
+        team.fields(fields);
+        team.table(getTb());
+
+        Index position = new Index("postion");
+        position.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("POSITION");
+        position.fields(fields);
+        position.table(getTb());
+
+        Index rookie = new Index("rookieyear");
+        rookie.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("ROOKIEYEAR");
+        rookie.fields(fields);
+        rookie.table(getTb());
+
+        indexes.add(team);
+        indexes.add(position);
+        indexes.add(player);
+        indexes.add(rookie);
+        indexes.add(lastAndFirst);
+        indexes.add(lastname);
+        return indexes;
     }
 
 }
