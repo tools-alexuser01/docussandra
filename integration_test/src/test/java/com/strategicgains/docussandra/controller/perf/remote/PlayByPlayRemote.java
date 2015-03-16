@@ -1,0 +1,212 @@
+/*
+ * Copyright 2015 udeyoje.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.strategicgains.docussandra.controller.perf.remote;
+
+import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestParent;
+import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.Table;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.json.simple.parser.ParseException;
+
+/**
+ * Does a perf test using the play by play data. PBB.json must be in your home
+ * directory.
+ *
+ * @author udeyoje
+ */
+public class PlayByPlayRemote extends PerfTestParent
+{
+
+    private static AtomicInteger position = new AtomicInteger(0);
+
+    public static final String path = "PBP.json";
+
+    @Override
+    protected List<Document> getDocumentsFromFS() throws IOException, ParseException
+    {
+        throw new UnsupportedOperationException("Intentionally Unsupported.");
+    }
+
+    @Override
+    protected List<Document> getDocumentsFromFS(int numToRead) throws IOException, ParseException
+    {
+        synchronized (this)
+        {
+            List<Document> toReturn = new ArrayList<>(numToRead);
+            numToRead = numToRead + position.intValue();
+
+            File file = new File(System.getProperty("user.home"), path);
+            logger.info("Data path: " + file.getAbsolutePath());
+            int counter = 0;
+            try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
+            {
+                String line = null;
+                while ((line = reader.readLine()) != null)
+                {
+                    if (counter < position.intValue())
+                    {
+                        //read up to where we need to go. there has to be a better way to do this, however, not worth it right now
+                        counter++;
+                    } else if (counter >= position.intValue() && counter < numToRead)
+                    {
+                        //we have a section we care about
+                        //so we add the document
+                        Document doc = new Document();
+                        doc.table(getTb());
+                        doc.setUuid(new UUID(Long.MAX_VALUE - position.intValue(), 1));//give it a UUID that we will reconize
+                        doc.object(line);
+                        toReturn.add(doc);
+                        position.addAndGet(1);//jump the postition
+                        counter++;//and the counter
+                    } else
+                    {
+                        logger.info("Exausted all documents in the PBP.json file for this chunk: " + position.get());
+                        break;//we are done
+                    }
+
+                }
+            }
+            return toReturn;
+        }
+    }
+
+    @Override
+    protected int getNumDocuments() throws IOException
+    {
+        File file = new File(System.getProperty("user.home"), path);
+        logger.info("Data path: " + file.getAbsolutePath());
+        InputStream is = new BufferedInputStream(new FileInputStream(file));
+        int count = 0;
+        try
+        {
+            byte[] c = new byte[1024];
+
+            int readChars = 0;
+            boolean empty = true;
+            while ((readChars = is.read(c)) != -1)
+            {
+                empty = false;
+                for (int i = 0; i < readChars; ++i)
+                {
+                    if (c[i] == '\n')
+                    {
+                        ++count;
+                    }
+                }
+            }
+            return (count == 0 && !empty) ? 1 : count;
+        } finally
+        {
+            is.close();
+        }
+    }
+
+    /**
+     * @return the db
+     */
+    @Override
+    public Database getDb()
+    {
+        Database db = new Database("playbyplay");
+        db.description("A database about play by play statistics.");
+        return db;
+    }
+
+    /**
+     * @return the tb
+     */
+    @Override
+    public Table getTb()
+    {
+        Table tb = new Table();
+        tb.name("players_table");
+        tb.description("A table about play by play statistics.");
+        return tb;
+    }
+
+    /**
+     * @return the indexes
+     */
+    @Override
+    public List<Index> getIndexes()
+    {
+        ArrayList<Index> indexes = new ArrayList<>(6);
+        Index player = new Index("player");
+        player.isUnique(false);
+        List<String> fields = new ArrayList<>(1);
+        fields.add("NAMEFULL");
+        player.fields(fields);
+        player.table(getTb());
+
+        Index lastname = new Index("lastname");
+        lastname.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("NAMELAST");
+        lastname.fields(fields);
+        lastname.table(getTb());
+
+        Index lastAndFirst = new Index("lastandfirst");
+        lastAndFirst.isUnique(false);
+        fields = new ArrayList<>(2);
+        fields.add("NAMELAST");
+        fields.add("NAMEFIRST");
+        lastAndFirst.fields(fields);
+        lastAndFirst.table(getTb());
+
+        Index team = new Index("team");
+        team.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("TEAM");
+        team.fields(fields);
+        team.table(getTb());
+
+        Index position = new Index("postion");
+        position.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("POSITION");
+        position.fields(fields);
+        position.table(getTb());
+
+        Index rookie = new Index("rookieyear");
+        rookie.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("ROOKIEYEAR");
+        rookie.fields(fields);
+        rookie.table(getTb());
+
+        indexes.add(team);
+        indexes.add(position);
+        indexes.add(player);
+        indexes.add(rookie);
+        indexes.add(lastAndFirst);
+        indexes.add(lastname);
+        return indexes;
+    }
+
+}
