@@ -56,14 +56,13 @@ public class PlayByPlayRemote extends PerfTestParent
     @Override
     protected List<Document> getDocumentsFromFS(int numToRead) throws IOException, ParseException
     {
+        File file = new File(System.getProperty("user.home"), path);
+        logger.info("Data path: " + file.getAbsolutePath());
+        List<Document> toReturn = new ArrayList<>(numToRead);
+        int counter = 0;
         synchronized (this)
         {
-            List<Document> toReturn = new ArrayList<>(numToRead);
             numToRead = numToRead + position.intValue();
-
-            File file = new File(System.getProperty("user.home"), path);
-            logger.info("Data path: " + file.getAbsolutePath());
-            int counter = 0;
             try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
             {
                 String line = null;
@@ -92,8 +91,8 @@ public class PlayByPlayRemote extends PerfTestParent
 
                 }
             }
-            return toReturn;
         }
+        return toReturn;
     }
 
     @Override
@@ -157,55 +156,74 @@ public class PlayByPlayRemote extends PerfTestParent
     public List<Index> getIndexes()
     {
         ArrayList<Index> indexes = new ArrayList<>(6);
-        Index player = new Index("player");
-        player.isUnique(false);
+        Index qtr = new Index("qtr");
+        qtr.isUnique(false);
         List<String> fields = new ArrayList<>(1);
-        fields.add("NAMEFULL");
-        player.fields(fields);
-        player.table(getTb());
+        fields.add("qtr");
+        qtr.fields(fields);
+        qtr.table(getTb());
+        qtr.isUnique(false);
 
-        Index lastname = new Index("lastname");
-        lastname.isUnique(false);
+        Index off = new Index("off");
+        off.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("NAMELAST");
-        lastname.fields(fields);
-        lastname.table(getTb());
+        fields.add("off");
+        off.fields(fields);
+        off.fields(fields);
+        off.table(getTb());
 
-        Index lastAndFirst = new Index("lastandfirst");
-        lastAndFirst.isUnique(false);
+        Index def = new Index("def");
+        def.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("def");
+        def.fields(fields);
+        def.fields(fields);
+        def.table(getTb());
+
+        Index dwn = new Index("dwn");
+        dwn.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("dwn");
+        dwn.fields(fields);
+        dwn.fields(fields);
+        dwn.table(getTb());
+
+        Index dwnAndYtg = new Index("dwnandytg");
+        dwnAndYtg.isUnique(false);
+        fields = new ArrayList<>(1);
+        fields.add("dwn");
+        fields.add("ytg");
+        dwnAndYtg.fields(fields);
+        dwnAndYtg.fields(fields);
+        dwnAndYtg.table(getTb());
+
+        Index dwnAndYtgAndPts = new Index("dwnandytgandpts");
+        dwnAndYtgAndPts.isUnique(false);
+        fields = new ArrayList<>(3);
+        fields.add("dwn");
+        fields.add("ytg");
+        fields.add("pts");
+        dwnAndYtgAndPts.fields(fields);
+        dwnAndYtgAndPts.fields(fields);
+        dwnAndYtgAndPts.table(getTb());
+
+        Index offAndPts = new Index("offandpts");
+        offAndPts.isUnique(false);
         fields = new ArrayList<>(2);
-        fields.add("NAMELAST");
-        fields.add("NAMEFIRST");
-        lastAndFirst.fields(fields);
-        lastAndFirst.table(getTb());
+        fields.add("off");
+        fields.add("pts");
+        offAndPts.fields(fields);
+        offAndPts.fields(fields);
+        offAndPts.table(getTb());
 
-        Index team = new Index("team");
-        team.isUnique(false);
-        fields = new ArrayList<>(1);
-        fields.add("TEAM");
-        team.fields(fields);
-        team.table(getTb());
+        indexes.add(qtr);
+        indexes.add(off);
+        indexes.add(def);
+        indexes.add(dwn);
+        indexes.add(dwnAndYtg);
+        indexes.add(dwnAndYtgAndPts);
+        indexes.add(offAndPts);
 
-        Index position = new Index("postion");
-        position.isUnique(false);
-        fields = new ArrayList<>(1);
-        fields.add("POSITION");
-        position.fields(fields);
-        position.table(getTb());
-
-        Index rookie = new Index("rookieyear");
-        rookie.isUnique(false);
-        fields = new ArrayList<>(1);
-        fields.add("ROOKIEYEAR");
-        rookie.fields(fields);
-        rookie.table(getTb());
-
-        indexes.add(team);
-        indexes.add(position);
-        indexes.add(player);
-        indexes.add(rookie);
-        indexes.add(lastAndFirst);
-        indexes.add(lastname);
         return indexes;
     }
 
