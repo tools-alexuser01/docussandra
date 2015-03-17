@@ -101,8 +101,16 @@ public class IndexMaintainerHelper
         {
             String field = fields.get(i);
             Object jObject = jsonObject.get(field);
-            String fieldValue = jObject.toString();//note, could have parse problems here with non-string types
-            bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
+            
+            if (jObject == null)
+            {
+                bs.setString(i + 5, "");//offset from the first five non-dynamic fields
+            } else
+            {
+                String fieldValue = jObject.toString();//note, could have parse problems here with non-string types: TODO: use proper types; need to set the tables correctly first
+                bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
+            }
+            
         }
         return bs;
     }
