@@ -54,8 +54,8 @@ public abstract class PerfTestParent
 
     protected static final Logger logger = LoggerFactory.getLogger(PlayersRemote.class);
     protected static final Logger output = LoggerFactory.getLogger("output");
-    protected static final String BASE_URI = "http://localhost"; //"https://docussandra.stg-prsn.com";
-    protected static final int PORT = 19080;
+    protected static final String BASE_URI = "https://docussandra.stg-prsn.com";//"http://localhost"; 
+    //protected static final int PORT = 19080;
     protected static final int NUM_WORKERS = 50; //NOTE: one more worker may be added to pick up any remainder
     protected static AtomicInteger errorCount = new AtomicInteger(0);
     protected static AtomicLong tft = new AtomicLong(0);
@@ -63,9 +63,9 @@ public abstract class PerfTestParent
     @BeforeClass
     public static void beforeClass() throws IOException
     {
-        RestExpressManager.getManager().ensureRestExpressRunning();
+        //RestExpressManager.getManager().ensureRestExpressRunning();
         RestAssured.baseURI = BASE_URI;
-        RestAssured.port = PORT;
+        //RestAssured.port = PORT;
         RestAssured.basePath = "/";
         RestAssured.useRelaxedHTTPSValidation();
     }
