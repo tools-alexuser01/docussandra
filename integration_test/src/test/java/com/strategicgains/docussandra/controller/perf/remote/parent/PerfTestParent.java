@@ -159,7 +159,7 @@ public abstract class PerfTestParent
             {
                 workers.add(new Thread()
                 {
-                    private final int chunk = (int) (Math.random() * 100) + 50;//pick a random chunk so we are not going back to the FS all at the same time
+                    private final int chunk = (int) (Math.random() * 100) + 150;//pick a random chunk so we are not going back to the FS all at the same time and potentially causing a bottle neck
 
                     @Override
                     public void run()
