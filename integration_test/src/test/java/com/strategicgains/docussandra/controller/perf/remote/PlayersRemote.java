@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.controller.perf.remote;
 
+import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestParent;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
@@ -23,8 +24,11 @@ import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
+import org.junit.Test;
 
 /**
  * Does a perf test using the players data.
@@ -34,6 +38,26 @@ import org.json.simple.parser.ParseException;
 public class PlayersRemote extends PerfTestParent
 {
 
+    public PlayersRemote() throws IOException, InterruptedException, ParseException
+    {
+        beforeClass();
+        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+        postDB(getDb());
+        postTable(getDb(), getTb());
+        for (Index i : getIndexes())
+        {
+            postIndex(getDb(), getTb(), i);
+        }
+        loadData();//actual test here, however it is better to call it here for ordering sake
+    }
+
+
+//    @AfterClass
+//    public static void afterTest() throws InterruptedException
+//    {
+//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+//        Thread.sleep(10000); //have to let the deletes finish before shutting down
+//    }
     @Override
     protected List<Document> getDocumentsFromFS() throws IOException, ParseException
     {
@@ -132,6 +156,61 @@ public class PlayersRemote extends PerfTestParent
         indexes.add(lastAndFirst);
         indexes.add(lastname);
         return indexes;
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * query with a set time.
+     */
+    @Test
+    public void postTableTest()
+    {
+        int numQueries = 1000;
+        Date start = new Date();
+        for (int i = 0; i < numQueries; i++)
+        {
+            logger.debug("Query: " + i);
+            given().header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning'\"}").expect().statusCode(200)
+                    //.header("Location", startsWith(RestAssured.basePath + "/"))
+                    .body("", notNullValue())
+                    .body("id", notNullValue())
+                    .when().post("");
+        }
+        Date end = new Date();
+        long executionTime = end.getTime() - start.getTime();
+        double inSeconds = (double) executionTime / 1000d;
+        double tpms = (double) numQueries / (double) executionTime;
+        double tps = tpms / 1000d;
+        output.info("Players: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("Players: Averge TPS for single field is:" + tps);
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * two field query with a set time.
+     */
+    @Test
+    public void postTableTestTwoField()
+    {
+        int numQueries = 1000;
+        Date start = new Date();
+        for (int i = 0; i < numQueries; i++)
+        {
+            logger.debug("Query: " + i);
+            given().header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning'AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
+                    //.header("Location", startsWith(RestAssured.basePath + "/"))
+                    .body("", notNullValue())
+                    .body("id", notNullValue())
+                    .when().post("");
+        }
+        Date end = new Date();
+
+        long executionTime = end.getTime() - start.getTime();
+        double inSeconds = (double) executionTime / 1000d;
+        double tpms = (double) numQueries / (double) executionTime;
+        double tps = tpms / 1000d;
+        output.info("Players: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("Players: Averge TPS for two fields is:" + tps);
     }
 
 }

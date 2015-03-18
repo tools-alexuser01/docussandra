@@ -33,11 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import testhelper.RestExpressManager;
@@ -54,8 +51,8 @@ public abstract class PerfTestParent
 
     protected static final Logger logger = LoggerFactory.getLogger(PlayersRemote.class);
     protected static final Logger output = LoggerFactory.getLogger("output");
-    protected static final String BASE_URI = "https://docussandra.stg-prsn.com";//"http://localhost"; 
-    //protected static final int PORT = 19080;
+    protected static final String BASE_URI = "http://localhost";//"https://docussandra.stg-prsn.com";//; 
+    protected static final int PORT = 19080;
     protected static final int NUM_WORKERS = 50; //NOTE: one more worker may be added to pick up any remainder
     protected static AtomicInteger errorCount = new AtomicInteger(0);
     protected static AtomicLong tft = new AtomicLong(0);
@@ -63,9 +60,9 @@ public abstract class PerfTestParent
     @BeforeClass
     public static void beforeClass() throws IOException
     {
-        //RestExpressManager.getManager().ensureRestExpressRunning();
+        RestExpressManager.getManager().ensureRestExpressRunning();
         RestAssured.baseURI = BASE_URI;
-        //RestAssured.port = PORT;
+        RestAssured.port = PORT;
         RestAssured.basePath = "/";
         RestAssured.useRelaxedHTTPSValidation();
     }
@@ -73,8 +70,26 @@ public abstract class PerfTestParent
     @AfterClass
     public static void afterClass() throws InterruptedException
     {
-        Thread.sleep(10000); //have to let the deletes finish before shutting down
+        
     }
+
+//    @Before
+//    public void beforeTest() throws Exception
+//    {
+//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+//        postDB(getDb());
+//        postTable(getDb(), getTb());
+//        for (Index i : getIndexes())
+//        {
+//            postIndex(getDb(), getTb(), i);
+//        }
+//    }
+//
+//    @After
+//    public void afterTest() throws InterruptedException
+//    {
+//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+//    }
 
     protected static void postDB(Database database)
     {
@@ -115,7 +130,7 @@ public abstract class PerfTestParent
         }
     }
 
-    @Test
+    //@Test
     public void loadData() throws IOException, ParseException, InterruptedException
     {
         ArrayList<Thread> workers = new ArrayList<>(NUM_WORKERS + 1);
@@ -229,25 +244,7 @@ public abstract class PerfTestParent
         output.info("Average Transactions Time (in miliseconds): " + transactionTime);
     }
 
-    @Before
-    public void beforeTest() throws Exception
-    {
-        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
-        postDB(getDb());
-        postTable(getDb(), getTb());
-        for (Index i : getIndexes())
-        {
-            postIndex(getDb(), getTb(), i);
-        }
-    }
-
-    @After
-    public void afterTest() throws InterruptedException
-    {
-        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
-    }
-
-    protected void postTable(Database database, Table table)
+    protected static void postTable(Database database, Table table)
     {
         logger.debug("Creating test table");
         String tableStr = "{" + "\"description\" : \"" + table.description() + "\"," + "\"name\" : \"" + table.name() + "\"}";
@@ -257,7 +254,7 @@ public abstract class PerfTestParent
         expect().statusCode(200).body("name", equalTo(table.name())).body("description", equalTo(table.description())).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).when().get(database.name() + "/" + table.name());
     }
 
-    protected void postIndex(Database database, Table table, Index index)
+    protected static void postIndex(Database database, Table table, Index index)
     {
         logger.info("POSTing index: " + index.toString());
         boolean first = true;

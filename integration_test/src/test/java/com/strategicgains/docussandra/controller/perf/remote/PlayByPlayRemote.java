@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.controller.perf.remote;
 
+import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestParent;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
@@ -29,10 +30,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
+import org.junit.Test;
 
 /**
  * Does a perf test using the play by play data. PBB.json must be in your home
@@ -47,6 +51,25 @@ public class PlayByPlayRemote extends PerfTestParent
 
     public static final String path = "PBP.json";
 
+    public PlayByPlayRemote() throws IOException, InterruptedException, ParseException
+    {
+        beforeClass();
+        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to thi
+        postDB(getDb());
+        postTable(getDb(), getTb());
+        for (Index i : getIndexes())
+        {
+            postIndex(getDb(), getTb(), i);
+        }
+        loadData();//actual test here, however it is better to call it here for ordering sake
+    }
+
+//    @AfterClass
+//    public void afterTest() throws InterruptedException
+//    {
+//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+//        Thread.sleep(10000); //have to let the deletes finish before shutting down
+//    }
     @Override
     protected List<Document> getDocumentsFromFS() throws IOException, ParseException
     {
@@ -126,6 +149,7 @@ public class PlayByPlayRemote extends PerfTestParent
         }
     }
 
+
     /**
      * @return the db
      */
@@ -144,7 +168,7 @@ public class PlayByPlayRemote extends PerfTestParent
     public Table getTb()
     {
         Table tb = new Table();
-        tb.name("players_table");
+        tb.name("play_table");
         tb.description("A table about play by play statistics.");
         return tb;
     }
@@ -225,6 +249,61 @@ public class PlayByPlayRemote extends PerfTestParent
         indexes.add(offAndPts);
 
         return indexes;
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * query with a set time.
+     */
+    @Test
+    public void postTableTest()
+    {
+        int numQueries = 1000;
+        Date start = new Date();
+        for (int i = 0; i < numQueries; i++)
+        {
+            logger.debug("Query: " + i);
+            given().header("limit", "10000").body("{\"where\":\"dwn = '4'\"}").expect().statusCode(200)
+                    //.header("Location", startsWith(RestAssured.basePath + "/"))
+                    .body("", notNullValue())
+                    .body("id", notNullValue())
+                    .when().post("");
+        }
+        Date end = new Date();
+        long executionTime = end.getTime() - start.getTime();
+        double inSeconds = (double) executionTime / 1000d;
+        double tpms = (double) numQueries / (double) executionTime;
+        double tps = tpms / 1000d;
+        output.info("PBP: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("PBP: Averge TPS for single field is:" + tps);
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * two field query with a set time.
+     */
+    @Test
+    public void postTableTestTwoField()
+    {
+        int numQueries = 1000;
+        Date start = new Date();
+        for (int i = 0; i < numQueries; i++)
+        {
+            logger.debug("Query: " + i);
+            given().header("limit", "10000").body("{\"where\":\"dwn = '4' AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
+                    //.header("Location", startsWith(RestAssured.basePath + "/"))
+                    .body("", notNullValue())
+                    .body("id", notNullValue())
+                    .when().post("");
+        }
+        Date end = new Date();
+
+        long executionTime = end.getTime() - start.getTime();
+        double inSeconds = (double) executionTime / 1000d;
+        double tpms = (double) numQueries / (double) executionTime;
+        double tps = tpms / 1000d;
+        output.info("PBP: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("PBP: Averge TPS for two fields is:" + tps);
     }
 
 }
