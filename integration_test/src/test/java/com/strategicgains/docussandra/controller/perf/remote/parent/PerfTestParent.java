@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.controller.perf.remote.parent;
 
+
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
@@ -30,14 +31,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import org.json.simple.parser.ParseException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import testhelper.RestExpressManager;
 
 /**
  * Performs a perf test using the overridden data. 1. Creates a DB. 2. Creates a
@@ -70,26 +70,8 @@ public abstract class PerfTestParent
     @AfterClass
     public static void afterClass() throws InterruptedException
     {
-        
+        Thread.sleep(10000); //have to let the deletes finish before shutting down
     }
-
-//    @Before
-//    public void beforeTest() throws Exception
-//    {
-//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
-//        postDB(getDb());
-//        postTable(getDb(), getTb());
-//        for (Index i : getIndexes())
-//        {
-//            postIndex(getDb(), getTb(), i);
-//        }
-//    }
-//
-//    @After
-//    public void afterTest() throws InterruptedException
-//    {
-//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
-//    }
 
     protected static void postDB(Database database)
     {

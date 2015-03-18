@@ -51,7 +51,6 @@ public class PlayersRemote extends PerfTestParent
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
-
 //    @AfterClass
 //    public static void afterTest() throws InterruptedException
 //    {
@@ -212,5 +211,4 @@ public class PlayersRemote extends PerfTestParent
         output.info("Players: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
         output.info("Players: Averge TPS for two fields is:" + tps);
     }
-
 }

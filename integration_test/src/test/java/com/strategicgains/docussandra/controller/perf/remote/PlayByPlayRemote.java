@@ -34,7 +34,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import static org.hamcrest.Matchers.notNullValue;
+import static javax.swing.text.html.HTML.Tag.HEAD;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
@@ -64,12 +65,6 @@ public class PlayByPlayRemote extends PerfTestParent
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
-//    @AfterClass
-//    public void afterTest() throws InterruptedException
-//    {
-//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
-//        Thread.sleep(10000); //have to let the deletes finish before shutting down
-//    }
     @Override
     protected List<Document> getDocumentsFromFS() throws IOException, ParseException
     {
