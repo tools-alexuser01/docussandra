@@ -149,7 +149,6 @@ public class PlayByPlayRemote extends PerfTestParent
         }
     }
 
-
     /**
      * @return the db
      */
@@ -290,7 +289,7 @@ public class PlayByPlayRemote extends PerfTestParent
         for (int i = 0; i < numQueries; i++)
         {
             logger.debug("Query: " + i);
-            given().header("limit", "10000").body("{\"where\":\"dwn = '4' AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
+            given().header("limit", "10000").body("{\"where\":\"dwn = '4' AND ytg = '1'\"}").expect().statusCode(200)
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
@@ -304,6 +303,34 @@ public class PlayByPlayRemote extends PerfTestParent
         double tps = tpms / 1000d;
         output.info("PBP: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
         output.info("PBP: Averge TPS for two fields is:" + tps);
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * two field query with a set time.
+     */
+    @Test
+    public void postTableTestThreeField()
+    {
+        int numQueries = 1000;
+        Date start = new Date();
+        for (int i = 0; i < numQueries; i++)
+        {
+            logger.debug("Query: " + i);
+            given().header("limit", "10000").body("{\"where\":\"dwn = '4' AND ytg = '1' AND pts = '6'\"}").expect().statusCode(200)
+                    //.header("Location", startsWith(RestAssured.basePath + "/"))
+                    .body("", notNullValue())
+                    .body("id", notNullValue())
+                    .when().post("");
+        }
+        Date end = new Date();
+
+        long executionTime = end.getTime() - start.getTime();
+        double inSeconds = (double) executionTime / 1000d;
+        double tpms = (double) numQueries / (double) executionTime;
+        double tps = tpms / 1000d;
+        output.info("PBP: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("PBP: Averge TPS for three fields is:" + tps);
     }
 
 }
