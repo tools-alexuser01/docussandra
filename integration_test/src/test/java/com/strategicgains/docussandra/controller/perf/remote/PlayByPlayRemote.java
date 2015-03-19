@@ -103,7 +103,7 @@ public class PlayByPlayRemote extends PerfTestParent
                         counter++;//and the counter
                     } else
                     {
-                        logger.info("Exausted all documents in the PBP.json file for this chunk: " + position.get());
+                        logger.info("Exausted all documents in the PBP.json file for this chunk position: " + position.get());
                         break;//we are done
                     }
 
