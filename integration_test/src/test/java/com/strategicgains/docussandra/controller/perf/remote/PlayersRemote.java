@@ -40,8 +40,13 @@ public class PlayersRemote extends PerfTestParent
 
     public PlayersRemote() throws IOException, InterruptedException, ParseException
     {
+        setup();
+    }
+
+    protected void setup() throws IOException, InterruptedException, ParseException
+    {
         beforeClass();
-        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+        //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
         postDB(getDb());
         postTable(getDb(), getTb());
         for (Index i : getIndexes())
@@ -162,9 +167,9 @@ public class PlayersRemote extends PerfTestParent
      * query with a set time.
      */
     @Test
-    public void postTableTest()
+    public void postQueryTest()
     {
-        int numQueries = 1000;
+        int numQueries = 50;
         Date start = new Date();
         for (int i = 0; i < numQueries; i++)
         {
@@ -189,9 +194,9 @@ public class PlayersRemote extends PerfTestParent
      * two field query with a set time.
      */
     @Test
-    public void postTableTestTwoField()
+    public void postQueryTestTwoField()
     {
-        int numQueries = 1000;
+        int numQueries = 50;
         Date start = new Date();
         for (int i = 0; i < numQueries; i++)
         {

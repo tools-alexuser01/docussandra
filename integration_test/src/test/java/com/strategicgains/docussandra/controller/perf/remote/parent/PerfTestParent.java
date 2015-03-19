@@ -15,7 +15,6 @@
  */
 package com.strategicgains.docussandra.controller.perf.remote.parent;
 
-
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
@@ -256,7 +255,7 @@ public abstract class PerfTestParent
         }
         tableStr.append("],").append("\"name\" : \"").append(index.name()).append("\"}");
         //act
-        given().body(tableStr.toString()).expect().statusCode(201).body("name", equalTo(index.name())).body("fields", notNullValue()).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).when().post(database.name() + "/" + table.name() + "/indexes/" + index.name());
+        given().body(tableStr.toString()).when().post(database.name() + "/" + table.name() + "/indexes/" + index.name());
         //check
         expect().statusCode(200).body("name", equalTo(index.name())).body("fields", notNullValue()).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).get(database.name() + "/" + table.name() + "/indexes/" + index.name());
     }

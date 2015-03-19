@@ -54,8 +54,13 @@ public class PlayByPlayRemote extends PerfTestParent
 
     public PlayByPlayRemote() throws IOException, InterruptedException, ParseException
     {
+        setup();
+    }
+
+    protected void setup() throws IOException, InterruptedException, ParseException
+    {
         beforeClass();
-        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to thi
+        //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this
         postDB(getDb());
         postTable(getDb(), getTb());
         for (Index i : getIndexes())
@@ -250,14 +255,14 @@ public class PlayByPlayRemote extends PerfTestParent
      * query with a set time.
      */
     @Test
-    public void postTableTest()
+    public void postQueryTest()
     {
-        int numQueries = 1000;
+        int numQueries = 20;
         Date start = new Date();
         for (int i = 0; i < numQueries; i++)
         {
             logger.debug("Query: " + i);
-            given().header("limit", "10000").body("{\"where\":\"dwn = '4'\"}").expect().statusCode(200)
+            given().header("limit", "10000").body("{\"where\":\"dwn = '4'\"}").expect()
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
@@ -277,9 +282,9 @@ public class PlayByPlayRemote extends PerfTestParent
      * two field query with a set time.
      */
     @Test
-    public void postTableTestTwoField()
+    public void postQueryTestTwoField()
     {
-        int numQueries = 1000;
+        int numQueries = 20;
         Date start = new Date();
         for (int i = 0; i < numQueries; i++)
         {
@@ -305,9 +310,9 @@ public class PlayByPlayRemote extends PerfTestParent
      * two field query with a set time.
      */
     @Test
-    public void postTableTestThreeField()
+    public void postQueryTestThreeField()
     {
-        int numQueries = 1000;
+        int numQueries = 20;
         Date start = new Date();
         for (int i = 0; i < numQueries; i++)
         {
