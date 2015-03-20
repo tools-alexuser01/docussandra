@@ -23,6 +23,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import java.io.IOException;
@@ -43,16 +44,18 @@ import org.junit.Test;
  */
 public class PlayersRemotePerfMongo extends PlayersRemote
 {
+    private MongoClientURI uri;
 
     public PlayersRemotePerfMongo() throws IOException, InterruptedException, ParseException
     {
-        super();
+        super();   
     }
 
     @Override
     protected void setup() throws IOException, InterruptedException, ParseException
     {
         beforeClass();
+        uri = new MongoClientURI("mongodb://10.199.6.222:27017/?j=true");
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
@@ -63,9 +66,8 @@ public class PlayersRemotePerfMongo extends PlayersRemote
         {
             try
             {
-                MongoClientURI uri = new MongoClientURI("mongodb://localhost/?uri.journal=true");
                 MongoClient mongoClient = new MongoClient(uri);
-                //mongoClient.setWriteConcern(WriteConcern.MAJORITY);
+                mongoClient.setWriteConcern(WriteConcern.MAJORITY);
                 DB db = mongoClient.getDB(this.getDb().name());
                 final DBCollection coll = db.getCollection(this.getDb().name());
                 ArrayList<Thread> workers = new ArrayList<>(NUM_WORKERS + 1);
@@ -208,9 +210,8 @@ public class PlayersRemotePerfMongo extends PlayersRemote
         {
             int numQueries = 50;
             Date start = new Date();
-            MongoClientURI uri = new MongoClientURI("mongodb://localhost/?uri.journal=true");
             MongoClient mongoClient = new MongoClient(uri);
-            //mongoClient.setWriteConcern(WriteConcern.MAJORITY);
+            mongoClient.setWriteConcern(WriteConcern.MAJORITY);
             DB db = mongoClient.getDB(this.getDb().name());
             final DBCollection coll = db.getCollection(this.getDb().name());
 
@@ -254,10 +255,9 @@ public class PlayersRemotePerfMongo extends PlayersRemote
         int numQueries = 50;
         Date start = new Date();
         try
-        {
-            MongoClientURI uri = new MongoClientURI("mongodb://localhost/?uri.journal=true");
+        {           
             MongoClient mongoClient = new MongoClient(uri);
-            //mongoClient.setWriteConcern(WriteConcern.MAJORITY);
+            mongoClient.setWriteConcern(WriteConcern.MAJORITY);
             DB db = mongoClient.getDB(this.getDb().name());
             final DBCollection coll = db.getCollection(this.getDb().name());
             for (int i = 0; i < numQueries; i++)

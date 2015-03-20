@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import static javax.swing.text.html.HTML.Tag.HEAD;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;

@@ -17,8 +17,10 @@ package com.strategicgains.docussandra.controller.perf.remote.mongo;
 
 import com.strategicgains.docussandra.controller.perf.remote.*;
 import static com.jayway.restassured.RestAssured.given;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -32,6 +34,9 @@ import java.util.Date;
 import java.util.List;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import org.json.simple.parser.ParseException;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -43,16 +48,18 @@ import org.junit.Test;
  */
 public class PlayByPlayPerfMongo extends PlayByPlayRemote
 {
-
+    private MongoClientURI uri;
+    
     public PlayByPlayPerfMongo() throws IOException, InterruptedException, ParseException
     {
-        super();
+        super();        
     }
 
     @Override
     protected void setup() throws IOException, InterruptedException, ParseException
     {
         beforeClass();
+        uri = new MongoClientURI("mongodb://localhost/?j=true");
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
@@ -62,8 +69,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
         try
         {
             try
-            {
-                MongoClientURI uri = new MongoClientURI("mongodb://localhost/?uri.journal=true");
+            {                
                 MongoClient mongoClient = new MongoClient(uri);
                 mongoClient.setWriteConcern(WriteConcern.MAJORITY);
                 DB db = mongoClient.getDB(this.getDb().name());
@@ -193,80 +199,142 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
         {
             logger.error("Couldn't read data.", e);
         }
+
     }
 
     @Test
     @Override
     public void postQueryTest()
     {
-        int numQueries = 1000;
-        Date start = new Date();
-        for (int i = 0; i < numQueries; i++)
+        try
         {
-            logger.debug("Query: " + i);
-//            given().header("limit", "10000").body("{\"where\":\"dwn = '4'\"}").expect().statusCode(200)
-//                    //.header("Location", startsWith(RestAssured.basePath + "/"))
-//                    .body("", notNullValue())
-//                    .body("id", notNullValue())
-//                    .when().post("");
+            int numQueries = 50;
+            Date start = new Date();
+            MongoClient mongoClient = new MongoClient(uri);
+            //mongoClient.setWriteConcern(WriteConcern.MAJORITY);
+            DB db = mongoClient.getDB(this.getDb().name());
+            final DBCollection coll = db.getCollection(this.getDb().name());
+            for (int i = 0; i < numQueries; i++)
+            {
+                logger.debug("Query: " + i);
+                ArrayList<String> res = new ArrayList<>();
+                DBCursor curser = coll.find(new BasicDBObject("dwn", "4"));
+                int count = 0;
+                while (curser.hasNext() && count++ < 10000)
+                {
+                    DBObject o = curser.next();
+                    assertNotNull(o);
+                    assertTrue(o.toString().contains("4"));
+                    res.add(o.toString());
+                }
+                assertFalse(res.isEmpty());
+            }
+            Date end = new Date();
+            long executionTime = end.getTime() - start.getTime();
+            double inSeconds = (double) executionTime / 1000d;
+            double tpms = (double) numQueries / (double) executionTime;
+            double tps = tpms / 1000d;
+            output.info("PBP: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
+            output.info("PBP: Averge TPS for single field is:" + tps);
+        } catch (UnknownHostException e)
+        {
+            logger.error("Couldn't run test.", e);
+            throw new RuntimeException(e);
         }
-        Date end = new Date();
-        long executionTime = end.getTime() - start.getTime();
-        double inSeconds = (double) executionTime / 1000d;
-        double tpms = (double) numQueries / (double) executionTime;
-        double tps = tpms / 1000d;
-        output.info("PBP: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP: Averge TPS for single field is:" + tps);
     }
 
     @Test
     @Override
     public void postQueryTestTwoField()
     {
-        int numQueries = 1000;
-        Date start = new Date();
-        for (int i = 0; i < numQueries; i++)
+        try
         {
-            logger.debug("Query: " + i);
-//            given().header("limit", "10000").body("{\"where\":\"dwn = '4' AND ytg = '1'\"}").expect().statusCode(200)
-//                    //.header("Location", startsWith(RestAssured.basePath + "/"))
-//                    .body("", notNullValue())
-//                    .body("id", notNullValue())
-//                    .when().post("");
-        }
-        Date end = new Date();
+            int numQueries = 50;
+            Date start = new Date();
+            MongoClient mongoClient = new MongoClient(uri);
+            //mongoClient.setWriteConcern(WriteConcern.MAJORITY);
+            DB db = mongoClient.getDB(this.getDb().name());
+            final DBCollection coll = db.getCollection(this.getDb().name());
+            for (int i = 0; i < numQueries; i++)
+            {
+                logger.debug("Query: " + i);
+                ArrayList<String> res = new ArrayList<>();
+                BasicDBObject query = new BasicDBObject();
+                query.append("dwn", "4");
+                query.append("ytg", "1");
+                DBCursor curser = coll.find(query);
+                int count = 0;
+                while (curser.hasNext() && count++ < 10000)
+                {
+                    DBObject o = curser.next();
+                    assertNotNull(o);
+                    assertTrue(o.toString().contains("4"));
+                    assertTrue(o.toString().contains("1"));
+                    res.add(o.toString());
+                }
+                assertFalse(res.isEmpty());
+            }
+            Date end = new Date();
 
-        long executionTime = end.getTime() - start.getTime();
-        double inSeconds = (double) executionTime / 1000d;
-        double tpms = (double) numQueries / (double) executionTime;
-        double tps = tpms / 1000d;
-        output.info("PBP: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP: Averge TPS for two fields is:" + tps);
+            long executionTime = end.getTime() - start.getTime();
+            double inSeconds = (double) executionTime / 1000d;
+            double tpms = (double) numQueries / (double) executionTime;
+            double tps = tpms / 1000d;
+            output.info("PBP: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
+            output.info("PBP: Averge TPS for two fields is:" + tps);
+        } catch (UnknownHostException e)
+        {
+            logger.error("Couldn't run test.", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     @Override
     public void postQueryTestThreeField()
     {
-        int numQueries = 1000;
-        Date start = new Date();
-        for (int i = 0; i < numQueries; i++)
+        try
         {
-            logger.debug("Query: " + i);
-//            given().header("limit", "10000").body("{\"where\":\"dwn = '4' AND ytg = '1' AND pts = '6'\"}").expect().statusCode(200)
-//                    //.header("Location", startsWith(RestAssured.basePath + "/"))
-//                    .body("", notNullValue())
-//                    .body("id", notNullValue())
-//                    .when().post("");
-        }
-        Date end = new Date();
+            int numQueries = 50;
+            Date start = new Date();
+            MongoClient mongoClient = new MongoClient(uri);
+            //mongoClient.setWriteConcern(WriteConcern.MAJORITY);
+            DB db = mongoClient.getDB(this.getDb().name());
+            final DBCollection coll = db.getCollection(this.getDb().name());
+            for (int i = 0; i < numQueries; i++)
+            {
+                logger.debug("Query: " + i);
+                ArrayList<String> res = new ArrayList<>();
+                BasicDBObject query = new BasicDBObject();
+                query.append("dwn", "4");
+                query.append("ytg", "1");
+                query.append("pts", "6");
+                DBCursor curser = coll.find(query);
+                int count = 0;
+                while (curser.hasNext() && count++ < 10000)
+                {
+                    DBObject o = curser.next();
+                    assertNotNull(o);
+                    assertTrue(o.toString().contains("4"));
+                    assertTrue(o.toString().contains("1"));
+                    assertTrue(o.toString().contains("6"));
+                    res.add(o.toString());
+                }
+                assertFalse(res.isEmpty());
+            }
+            Date end = new Date();
 
-        long executionTime = end.getTime() - start.getTime();
-        double inSeconds = (double) executionTime / 1000d;
-        double tpms = (double) numQueries / (double) executionTime;
-        double tps = tpms / 1000d;
-        output.info("PBP: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP: Averge TPS for three fields is:" + tps);
+            long executionTime = end.getTime() - start.getTime();
+            double inSeconds = (double) executionTime / 1000d;
+            double tpms = (double) numQueries / (double) executionTime;
+            double tps = tpms / 1000d;
+            output.info("PBP: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
+            output.info("PBP: Averge TPS for three fields is:" + tps);
+        } catch (UnknownHostException e)
+        {
+            logger.error("Couldn't run test.", e);
+            throw new RuntimeException(e);
+        }
     }
 
 }
