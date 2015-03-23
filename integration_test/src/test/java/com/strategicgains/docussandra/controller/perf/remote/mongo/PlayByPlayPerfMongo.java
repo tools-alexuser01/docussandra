@@ -16,7 +16,6 @@
 package com.strategicgains.docussandra.controller.perf.remote.mongo;
 
 import com.strategicgains.docussandra.controller.perf.remote.*;
-import static com.jayway.restassured.RestAssured.given;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -32,12 +31,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import org.json.simple.parser.ParseException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -59,7 +56,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
     protected void setup() throws IOException, InterruptedException, ParseException
     {
         beforeClass();
-        uri = new MongoClientURI("mongodb://localhost/?j=true");
+        uri = new MongoClientURI("mongodb://10.199.0.86:27017/?j=true");
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
@@ -208,7 +205,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
     {
         try
         {
-            int numQueries = 50;
+            int numQueries = 20;
             Date start = new Date();
             MongoClient mongoClient = new MongoClient(uri);
             //mongoClient.setWriteConcern(WriteConcern.MAJORITY);
@@ -249,7 +246,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
     {
         try
         {
-            int numQueries = 50;
+            int numQueries = 20;
             Date start = new Date();
             MongoClient mongoClient = new MongoClient(uri);
             //mongoClient.setWriteConcern(WriteConcern.MAJORITY);

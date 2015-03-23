@@ -78,7 +78,7 @@ public abstract class PerfTestParent
         logger.debug("Creating test DB");
         String dbStr = "{" + "\"description\" : \"" + database.description() + "\"," + "\"name\" : \"" + database.name() + "\"}";
         //act
-        given().body(dbStr).expect().statusCode(201).body("name", equalTo(database.name())).body("description", equalTo(database.description())).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).when().post(database.name());
+        given().body(dbStr).expect().when().post(database.name());
         //check
         expect().statusCode(200).body("name", equalTo(database.name())).body("description", equalTo(database.description())).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).when().get("/" + database.getId());
     }
@@ -231,7 +231,7 @@ public abstract class PerfTestParent
         logger.debug("Creating test table");
         String tableStr = "{" + "\"description\" : \"" + table.description() + "\"," + "\"name\" : \"" + table.name() + "\"}";
         //act
-        given().body(tableStr).expect().statusCode(201).body("name", equalTo(table.name())).body("description", equalTo(table.description())).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).when().post(database.name() + "/" + table.name());
+        given().body(tableStr).expect().when().post(database.name() + "/" + table.name());
         //check
         expect().statusCode(200).body("name", equalTo(table.name())).body("description", equalTo(table.description())).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).when().get(database.name() + "/" + table.name());
     }

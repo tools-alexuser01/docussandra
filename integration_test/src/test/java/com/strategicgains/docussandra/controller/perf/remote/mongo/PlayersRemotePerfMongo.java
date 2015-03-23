@@ -55,7 +55,7 @@ public class PlayersRemotePerfMongo extends PlayersRemote
     protected void setup() throws IOException, InterruptedException, ParseException
     {
         beforeClass();
-        uri = new MongoClientURI("mongodb://10.199.6.222:27017/?j=true");
+        uri = new MongoClientURI("mongodb://10.199.0.86:27017/?j=true");
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
