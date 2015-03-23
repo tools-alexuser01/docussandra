@@ -292,7 +292,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
     {
         try
         {
-            int numQueries = 50;
+            int numQueries = 20;
             Date start = new Date();
             MongoClient mongoClient = new MongoClient(uri);
             //mongoClient.setWriteConcern(WriteConcern.MAJORITY);
