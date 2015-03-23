@@ -215,7 +215,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
             {
                 logger.debug("Query: " + i);
                 ArrayList<String> res = new ArrayList<>();
-                DBCursor curser = coll.find(new BasicDBObject("dwn", "4"));
+                DBCursor curser = coll.find(new BasicDBObject("dwn", 4));
                 int count = 0;
                 while (curser.hasNext() && count++ < 10000)
                 {
@@ -257,8 +257,8 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
                 logger.debug("Query: " + i);
                 ArrayList<String> res = new ArrayList<>();
                 BasicDBObject query = new BasicDBObject();
-                query.append("dwn", "4");
-                query.append("ytg", "1");
+                query.append("dwn", 4);
+                query.append("ytg", 1);
                 DBCursor curser = coll.find(query);
                 int count = 0;
                 while (curser.hasNext() && count++ < 10000)
@@ -303,9 +303,9 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
                 logger.debug("Query: " + i);
                 ArrayList<String> res = new ArrayList<>();
                 BasicDBObject query = new BasicDBObject();
-                query.append("dwn", "4");
-                query.append("ytg", "1");
-                query.append("pts", "6");
+                query.append("dwn", 4);
+                query.append("ytg", 1);
+                query.append("pts", 6);
                 DBCursor curser = coll.find(query);
                 int count = 0;
                 while (curser.hasNext() && count++ < 10000)
