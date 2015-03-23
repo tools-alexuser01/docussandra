@@ -44,11 +44,12 @@ import org.junit.Test;
  */
 public class PlayersRemotePerfMongo extends PlayersRemote
 {
+
     private MongoClientURI uri;
 
     public PlayersRemotePerfMongo() throws IOException, InterruptedException, ParseException
     {
-        super();   
+        super();
     }
 
     @Override
@@ -233,10 +234,9 @@ public class PlayersRemotePerfMongo extends PlayersRemote
             Date end = new Date();
             long executionTime = end.getTime() - start.getTime();
             double inSeconds = (double) executionTime / 1000d;
-            double tpms = (double) numQueries / (double) executionTime;
-            double tps = tpms / 1000d;
+            double average = (double) inSeconds / (double) numQueries;
             output.info("Players: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("Players: Averge TPS for single field is:" + tps);
+            output.info("Players: Averge time for single field is:" + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);
@@ -255,7 +255,7 @@ public class PlayersRemotePerfMongo extends PlayersRemote
         int numQueries = 50;
         Date start = new Date();
         try
-        {           
+        {
             MongoClient mongoClient = new MongoClient(uri);
             mongoClient.setWriteConcern(WriteConcern.MAJORITY);
             DB db = mongoClient.getDB(this.getDb().name());
@@ -283,10 +283,9 @@ public class PlayersRemotePerfMongo extends PlayersRemote
 
             long executionTime = end.getTime() - start.getTime();
             double inSeconds = (double) executionTime / 1000d;
-            double tpms = (double) numQueries / (double) executionTime;
-            double tps = tpms / 1000d;
+            double average = (double) inSeconds / (double) numQueries;
             output.info("Players: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("Players: Averge TPS for two fields is:" + tps);
+            output.info("Players: Averge time for two fields is:" + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);

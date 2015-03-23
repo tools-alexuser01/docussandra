@@ -183,10 +183,9 @@ public class PlayersRemote extends PerfTestParent
         Date end = new Date();
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
-        double tpms = (double) numQueries / (double) executionTime;
-        double tps = tpms / 1000d;
+        double average = (double) inSeconds / (double) numQueries;
         output.info("Players: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("Players: Averge TPS for single field is:" + tps);
+        output.info("Players: Averge time for single field is:" + average);
     }
 
     /**
@@ -211,9 +210,8 @@ public class PlayersRemote extends PerfTestParent
 
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
-        double tpms = (double) numQueries / (double) executionTime;
-        double tps = tpms / 1000d;
+        double average = (double) inSeconds / (double) numQueries;
         output.info("Players: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("Players: Averge TPS for two fields is:" + tps);
+        output.info("Players: Averge time for two fields is:" + average);
     }
 }

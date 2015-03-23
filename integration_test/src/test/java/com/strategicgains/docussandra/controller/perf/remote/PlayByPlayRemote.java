@@ -270,10 +270,9 @@ public class PlayByPlayRemote extends PerfTestParent
         Date end = new Date();
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
-        double tpms = (double) numQueries / (double) executionTime;
-        double tps = tpms / 1000d;
-        output.info("PBP: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP: Averge TPS for single field is:" + tps);
+        double average = (double) inSeconds / (double) numQueries;
+        output.info("PBP-doc: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("PBP-doc: Averge time for single field is:" + average);
     }
 
     /**
@@ -298,10 +297,9 @@ public class PlayByPlayRemote extends PerfTestParent
 
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
-        double tpms = (double) numQueries / (double) executionTime;
-        double tps = tpms / 1000d;
-        output.info("PBP: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP: Averge TPS for two fields is:" + tps);
+        double average = (double) inSeconds / (double) numQueries;
+        output.info("PBP-doc: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("PBP-doc: Averge time for two fields is:" + average);
     }
 
     /**
@@ -326,10 +324,9 @@ public class PlayByPlayRemote extends PerfTestParent
 
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
-        double tpms = (double) numQueries / (double) executionTime;
-        double tps = tpms / 1000d;
-        output.info("PBP: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP: Averge TPS for three fields is:" + tps);
+        double average = (double) inSeconds / (double) numQueries;
+        output.info("PBP-doc: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("PBP-doc: Averge time for three fields is:" + average);
     }
 
 }

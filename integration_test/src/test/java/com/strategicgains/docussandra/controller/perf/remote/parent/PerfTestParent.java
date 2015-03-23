@@ -218,12 +218,12 @@ public abstract class PerfTestParent
         long end = new Date().getTime();
         long miliseconds = end - start;
         double seconds = (double) miliseconds / 1000d;
-        output.info("Done loading data using: " + NUM_WORKERS + " and URL: " + BASE_URI + ". Took: " + seconds + " seconds");
+        output.info("Doc: Done loading data using: " + NUM_WORKERS + " and URL: " + BASE_URI + ". Took: " + seconds + " seconds");
         double tpms = (double) numDocs / (double) miliseconds;
         double tps = tpms * 1000;
         double transactionTime = (double) tft.get() / (double) numDocs;
-        output.info("Average Transactions Per Second: " + tps);
-        output.info("Average Transactions Time (in miliseconds): " + transactionTime);
+        output.info("Doc: Average Transactions Per Second: " + tps);
+        output.info("Doc: Average Transactions Time (in miliseconds): " + transactionTime);
     }
 
     protected static void postTable(Database database, Table table)

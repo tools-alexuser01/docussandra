@@ -45,11 +45,12 @@ import org.junit.Test;
  */
 public class PlayByPlayPerfMongo extends PlayByPlayRemote
 {
+
     private MongoClientURI uri;
-    
+
     public PlayByPlayPerfMongo() throws IOException, InterruptedException, ParseException
     {
-        super();        
+        super();
     }
 
     @Override
@@ -66,7 +67,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
         try
         {
             try
-            {                
+            {
                 MongoClient mongoClient = new MongoClient(uri);
                 mongoClient.setWriteConcern(WriteConcern.MAJORITY);
                 DB db = mongoClient.getDB(this.getDb().name());
@@ -185,8 +186,8 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
                 double tpms = (double) numDocs / (double) miliseconds;
                 double tps = tpms * 1000;
                 double transactionTime = (double) tft.get() / (double) numDocs;
-                output.info("Average Transactions Per Second: " + tps);
-                output.info("Average Transactions Time (in miliseconds): " + transactionTime);
+                output.info("PBP-Mongo Average Transactions Per Second: " + tps);
+                output.info("PBP-Mongo Average Transactions Time (in miliseconds): " + transactionTime);
 
             } catch (UnknownHostException e)
             {
@@ -229,10 +230,9 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
             Date end = new Date();
             long executionTime = end.getTime() - start.getTime();
             double inSeconds = (double) executionTime / 1000d;
-            double tpms = (double) numQueries / (double) executionTime;
-            double tps = tpms / 1000d;
-            output.info("PBP: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("PBP: Averge TPS for single field is:" + tps);
+            double average = (double) inSeconds / (double) numQueries;
+            output.info("PBP-Mongo: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
+            output.info("PBP-Mongo: Averge time for single field is:" + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);
@@ -275,10 +275,9 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
 
             long executionTime = end.getTime() - start.getTime();
             double inSeconds = (double) executionTime / 1000d;
-            double tpms = (double) numQueries / (double) executionTime;
-            double tps = tpms / 1000d;
-            output.info("PBP: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("PBP: Averge TPS for two fields is:" + tps);
+            double average = (double) inSeconds / (double) numQueries;
+            output.info("PBP-Mongo: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
+            output.info("PBP-Mongo: Averge time for two fields is:" + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);
@@ -323,10 +322,9 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
 
             long executionTime = end.getTime() - start.getTime();
             double inSeconds = (double) executionTime / 1000d;
-            double tpms = (double) numQueries / (double) executionTime;
-            double tps = tpms / 1000d;
-            output.info("PBP: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("PBP: Averge TPS for three fields is:" + tps);
+            double average = (double) inSeconds / (double) numQueries;
+            output.info("PBP-Mongo: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
+            output.info("PBP-Mongo: Averge time for three fields is:" + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);
