@@ -256,7 +256,7 @@ public class PlayByPlayRemote extends PerfTestParent
     @Test
     public void postQueryTest()
     {
-        int numQueries = 20;
+        int numQueries = 50;
         Date start = new Date();
         for (int i = 0; i < numQueries; i++)
         {
@@ -282,7 +282,7 @@ public class PlayByPlayRemote extends PerfTestParent
     @Test
     public void postQueryTestTwoField()
     {
-        int numQueries = 20;
+        int numQueries = 50;
         Date start = new Date();
         for (int i = 0; i < numQueries; i++)
         {
@@ -309,7 +309,7 @@ public class PlayByPlayRemote extends PerfTestParent
     @Test
     public void postQueryTestThreeField()
     {
-        int numQueries = 20;
+        int numQueries = 50;
         Date start = new Date();
         for (int i = 0; i < numQueries; i++)
         {
