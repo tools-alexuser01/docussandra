@@ -103,6 +103,7 @@ public class MongoLoader
                             public void run()
                             {
                                 ThreadLocal<Integer> counter = new ThreadLocal<>();
+                                counter.set(new Integer(0));
                                 try
                                 {
                                     List<Document> docs = clazz.getDocumentsFromFS(chunk);//grab a handful of documents
