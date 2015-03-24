@@ -117,7 +117,7 @@ public class MongoLoader
                                         }
                                         docs = clazz.getDocumentsFromFS(chunk);//grab another handful of documents
                                     }
-                                    logger.info("Thread " + Thread.currentThread().getName() + " is done. It processed " + counter + " documents.");
+                                    logger.info("Thread " + Thread.currentThread().getName() + " is done. It processed " + counter.get() + " documents.");
                                 } catch (IOException | ParseException e)
                                 {
                                     logger.error("Couldn't read from document", e);
