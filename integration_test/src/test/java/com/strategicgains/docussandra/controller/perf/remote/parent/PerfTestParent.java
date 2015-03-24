@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public abstract class PerfTestParent
 {
 
-    protected static final Logger logger = LoggerFactory.getLogger(PlayersRemote.class);
+    protected static final Logger logger = LoggerFactory.getLogger(PerfTestParent.class);
     protected static final Logger output = LoggerFactory.getLogger("output");
     protected static final String BASE_URI = "https://docussandra.stg-prsn.com";//; "http://localhost";//
     //protected static final String BASE_URI = "http://localhost";
