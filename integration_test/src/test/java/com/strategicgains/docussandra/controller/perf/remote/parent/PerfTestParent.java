@@ -161,6 +161,7 @@ public abstract class PerfTestParent
                     public void run()
                     {
                         ThreadLocal<Integer> counter = new ThreadLocal<>();
+                        counter.set(new Integer(0));
                         try
                         {
                             List<Document> docs = getDocumentsFromFS(chunk);//grab a handful of documents
@@ -173,7 +174,7 @@ public abstract class PerfTestParent
                                 }
                                 docs = getDocumentsFromFS(chunk);//grab another handful of documents
                             }
-                            logger.info("Thread " + Thread.currentThread().getName() + " is done. It processed " + counter + " documents.");
+                            logger.info("Thread " + Thread.currentThread().getName() + " is done. It processed " + counter.get() + " documents.");
                         } catch (IOException | ParseException e)
                         {
                             logger.error("Couldn't read from document", e);
