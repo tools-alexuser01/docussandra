@@ -272,7 +272,7 @@ public class PlayByPlayRemote extends PerfTestParent
         double inSeconds = (double) executionTime / 1000d;
         double average = (double) inSeconds / (double) numQueries;
         output.info("PBP-doc: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP-doc: Averge time for single field is:" + average);
+        output.info("PBP-doc: Averge time for single field is: " + average);
     }
 
     /**
@@ -299,7 +299,7 @@ public class PlayByPlayRemote extends PerfTestParent
         double inSeconds = (double) executionTime / 1000d;
         double average = (double) inSeconds / (double) numQueries;
         output.info("PBP-doc: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP-doc: Averge time for two fields is:" + average);
+        output.info("PBP-doc: Averge time for two fields is: " + average);
     }
 
     /**
@@ -326,7 +326,7 @@ public class PlayByPlayRemote extends PerfTestParent
         double inSeconds = (double) executionTime / 1000d;
         double average = (double) inSeconds / (double) numQueries;
         output.info("PBP-doc: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP-doc: Averge time for three fields is:" + average);
+        output.info("PBP-doc: Averge time for three fields is: " + average);
     }
 
 }

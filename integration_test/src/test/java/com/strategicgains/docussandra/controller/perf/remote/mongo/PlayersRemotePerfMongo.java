@@ -236,7 +236,7 @@ public class PlayersRemotePerfMongo extends PlayersRemote
             double inSeconds = (double) executionTime / 1000d;
             double average = (double) inSeconds / (double) numQueries;
             output.info("Players: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("Players: Averge time for single field is:" + average);
+            output.info("Players: Averge time for single field is: " + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);
@@ -285,7 +285,7 @@ public class PlayersRemotePerfMongo extends PlayersRemote
             double inSeconds = (double) executionTime / 1000d;
             double average = (double) inSeconds / (double) numQueries;
             output.info("Players: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("Players: Averge time for two fields is:" + average);
+            output.info("Players: Averge time for two fields is: " + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);

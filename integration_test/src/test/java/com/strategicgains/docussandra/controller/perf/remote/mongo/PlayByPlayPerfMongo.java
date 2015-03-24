@@ -232,7 +232,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
             double inSeconds = (double) executionTime / 1000d;
             double average = (double) inSeconds / (double) numQueries;
             output.info("PBP-Mongo: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("PBP-Mongo: Averge time for single field is:" + average);
+            output.info("PBP-Mongo: Averge time for single field is: " + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);
@@ -277,7 +277,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
             double inSeconds = (double) executionTime / 1000d;
             double average = (double) inSeconds / (double) numQueries;
             output.info("PBP-Mongo: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("PBP-Mongo: Averge time for two fields is:" + average);
+            output.info("PBP-Mongo: Averge time for two fields is: " + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);
@@ -324,7 +324,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
             double inSeconds = (double) executionTime / 1000d;
             double average = (double) inSeconds / (double) numQueries;
             output.info("PBP-Mongo: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
-            output.info("PBP-Mongo: Averge time for three fields is:" + average);
+            output.info("PBP-Mongo: Averge time for three fields is: " + average);
         } catch (UnknownHostException e)
         {
             logger.error("Couldn't run test.", e);
