@@ -37,14 +37,19 @@ import org.junit.Test;
  */
 public class PlayersRemote extends PerfTestParent
 {
+    private static boolean setupRun = false;
 
     public PlayersRemote() throws IOException, InterruptedException, ParseException
     {
-        setup();
+        if(!setupRun){
+            setupRun = true;
+            setup();            
+        }
     }
 
     protected void setup() throws IOException, InterruptedException, ParseException
     {
+        logger.info("Setup called!");
         beforeClass();
         //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
         postDB(getDb());
@@ -63,19 +68,19 @@ public class PlayersRemote extends PerfTestParent
 //        Thread.sleep(10000); //have to let the deletes finish before shutting down
 //    }
     @Override
-    protected List<Document> getDocumentsFromFS() throws IOException, ParseException
+    public List<Document> getDocumentsFromFS() throws IOException, ParseException
     {
         return Fixtures.getBulkDocuments("./src/test/resources/players.json", getTb());
     }
 
     @Override
-    protected List<Document> getDocumentsFromFS(int numToRead) throws IOException, ParseException
+    public List<Document> getDocumentsFromFS(int numToRead) throws IOException, ParseException
     {
         throw new UnsupportedOperationException("Intentionally Unsupported.");
     }
 
     @Override
-    protected int getNumDocuments() throws IOException, ParseException
+    public int getNumDocuments() throws IOException, ParseException
     {
         return getDocumentsFromFS().size();
     }
@@ -184,8 +189,8 @@ public class PlayersRemote extends PerfTestParent
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
         double average = (double) inSeconds / (double) numQueries;
-        output.info("Players: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("Players: Averge time for single field is: " + average);
+        output.info("Players-Doc: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("Players-Doc: Averge time for single field is: " + average);
     }
 
     /**
@@ -211,7 +216,7 @@ public class PlayersRemote extends PerfTestParent
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
         double average = (double) inSeconds / (double) numQueries;
-        output.info("Players: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("Players: Averge time for two fields is: " + average);
+        output.info("Players-Doc: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("Players-Doc: Averge time for two fields is: " + average);
     }
 }

@@ -55,7 +55,7 @@ public abstract class PerfTestParent
     //protected static final int PORT = 19080;
     protected static final int NUM_WORKERS = 50; //NOTE: one more worker may be added to pick up any remainder
     protected static AtomicInteger errorCount = new AtomicInteger(0);
-    protected static AtomicLong tft = new AtomicLong(0);
+    //protected static AtomicLong tft = new AtomicLong(0);
 
     @BeforeClass
     public static void beforeClass() throws IOException
@@ -98,11 +98,11 @@ public abstract class PerfTestParent
     protected static void postDocument(Database database, Table table, Document d)
     {
         //act
-        long start = new Date().getTime();
+        //long start = new Date().getTime();
         Response response = given().body(d.object()).expect().when().post(database.name() + "/" + table.name() + "/").andReturn();
-        long end = new Date().getTime();
-        long tftt = end - start;
-        tft.addAndGet(tftt);
+        //long end = new Date().getTime();
+        //long tftt = end - start;
+        //tft.addAndGet(tftt);
         int code = response.getStatusCode();
         if (code != 201)
         {
@@ -115,6 +115,7 @@ public abstract class PerfTestParent
     //@Test
     public void loadData() throws IOException, ParseException, InterruptedException
     {
+        logger.info("------------Loading Data into: " + this.getDb().name() + " with Docussandra!------------");
         ArrayList<Thread> workers = new ArrayList<>(NUM_WORKERS + 1);
         int numDocs = getNumDocuments();
         int docsPerWorker = numDocs / NUM_WORKERS;
@@ -161,7 +162,7 @@ public abstract class PerfTestParent
                     @Override
                     public void run()
                     {
-                        int counter = 0;
+                        ThreadLocal<Integer> counter = new ThreadLocal<>();
                         try
                         {
                             List<Document> docs = getDocumentsFromFS(chunk);//grab a handful of documents
@@ -170,7 +171,7 @@ public abstract class PerfTestParent
                                 for (Document d : docs)//process the documents we grabbed
                                 {
                                     postDocument(getDb(), getTb(), d);//post them up
-                                    counter++;
+                                    counter.set(counter.get() + 1);
                                 }
                                 docs = getDocumentsFromFS(chunk);//grab another handful of documents
                             }
@@ -221,9 +222,9 @@ public abstract class PerfTestParent
         output.info("Doc: Done loading data using: " + NUM_WORKERS + " and URL: " + BASE_URI + ". Took: " + seconds + " seconds");
         double tpms = (double) numDocs / (double) miliseconds;
         double tps = tpms * 1000;
-        double transactionTime = (double) tft.get() / (double) numDocs;
-        output.info("Doc: Average Transactions Per Second: " + tps);
-        output.info("Doc: Average Transactions Time (in miliseconds): " + transactionTime);
+        double transactionTime = (double) miliseconds / (double) numDocs;
+        output.info(this.getDb().name() + " Doc: Average Transactions Per Second: " + tps);
+        output.info(this.getDb().name() + " Doc: Average Transactions Time (in miliseconds): " + transactionTime);
     }
 
     protected static void postTable(Database database, Table table)
@@ -293,7 +294,7 @@ public abstract class PerfTestParent
      * @throws IOException
      * @throws ParseException
      */
-    protected abstract List<Document> getDocumentsFromFS() throws IOException, ParseException;
+    public abstract List<Document> getDocumentsFromFS() throws IOException, ParseException;
 
     /**
      * Gets the documents to use for this test.
@@ -307,7 +308,7 @@ public abstract class PerfTestParent
      * @throws IOException
      * @throws ParseException
      */
-    protected abstract List<Document> getDocumentsFromFS(int numToRead) throws IOException, ParseException;
+    public abstract List<Document> getDocumentsFromFS(int numToRead) throws IOException, ParseException;
 
     /**
      * Gets the number of documents available for reading.
@@ -315,5 +316,5 @@ public abstract class PerfTestParent
      * @return
      * @throws IOException
      */
-    protected abstract int getNumDocuments() throws IOException, ParseException;
+    public abstract int getNumDocuments() throws IOException, ParseException;
 }

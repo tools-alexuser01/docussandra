@@ -51,13 +51,20 @@ public class PlayByPlayRemote extends PerfTestParent
 
     public static final String path = "PBP.json";
 
+    private static boolean setupRun = false;
+
     public PlayByPlayRemote() throws IOException, InterruptedException, ParseException
     {
-        setup();
+        if (!setupRun)
+        {
+            setupRun = true;
+            setup();
+        }
     }
 
     protected void setup() throws IOException, InterruptedException, ParseException
     {
+        logger.info("Setup called!");
         beforeClass();
         //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this
         postDB(getDb());
@@ -70,13 +77,13 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     @Override
-    protected List<Document> getDocumentsFromFS() throws IOException, ParseException
+    public List<Document> getDocumentsFromFS() throws IOException, ParseException
     {
         throw new UnsupportedOperationException("Intentionally Unsupported.");
     }
 
     @Override
-    protected List<Document> getDocumentsFromFS(int numToRead) throws IOException, ParseException
+    public List<Document> getDocumentsFromFS(int numToRead) throws IOException, ParseException
     {
         File file = new File(System.getProperty("user.home"), path);
         logger.info("Data path: " + file.getAbsolutePath());
@@ -118,7 +125,7 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     @Override
-    protected int getNumDocuments() throws IOException
+    public int getNumDocuments() throws IOException
     {
         File file = new File(System.getProperty("user.home"), path);
         logger.info("Data path: " + file.getAbsolutePath());
@@ -298,8 +305,8 @@ public class PlayByPlayRemote extends PerfTestParent
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
         double average = (double) inSeconds / (double) numQueries;
-        output.info("PBP-doc: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP-doc: Averge time for two fields is: " + average);
+        output.info("PBP-Doc: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("PBP-Doc: Averge time for two fields is: " + average);
     }
 
     /**
@@ -325,8 +332,8 @@ public class PlayByPlayRemote extends PerfTestParent
         long executionTime = end.getTime() - start.getTime();
         double inSeconds = (double) executionTime / 1000d;
         double average = (double) inSeconds / (double) numQueries;
-        output.info("PBP-doc: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
-        output.info("PBP-doc: Averge time for three fields is: " + average);
+        output.info("PBP-Doc: Time to execute (three fields) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("PBP-Doc: Averge time for three fields is: " + average);
     }
 
 }
