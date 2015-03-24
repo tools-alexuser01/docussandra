@@ -14,6 +14,11 @@ public abstract class Routes
 {
 	public static void define(Configuration config, RestExpress server)
 	{
+                //health check        
+                server.uri("/health.{format}", config.getHealthController())
+                    .action("getHealth", GET)
+                    .name(Constants.Routes.HEALTH).noSerialization();
+                    
 		server.uri("/", config.getDatabaseController())
 			.action("readAll", GET)
 			.method(OPTIONS)
