@@ -45,7 +45,7 @@ public class QueryService
      * @return A ParsedQuery object for the query.
      * @throws FieldNotIndexedException
      */
-    //TODO: consider caching the results of this method; could be expensive and frequent
+    //TODO: cache the results of this method; will be expensive and very frequent
     public ParsedQuery parseQuery(String db, Query toParse) throws FieldNotIndexedException
     {
         //let's parse the where clause so we know what we are actually searching for
