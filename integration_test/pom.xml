@@ -65,6 +65,40 @@
             </build>
         </profile>
         <profile>
+            <id>mongo-perf</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.15</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*Perf.java</include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>mongo-perf</id>
+                                <goals>
+                                    <goal>mongo-perf</goal>
+                                </goals>
+                                <phase>mongo-perf</phase>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>none</exclude>
+                                    </excludes>
+                                    <includes>
+                                        <include>**/*PerfMongo.java</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>                    
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>integration</id>
             <build>
                 <plugins>
@@ -98,7 +132,40 @@
                 </plugins>
             </build>
         </profile>
-
+        <profile>
+            <id>perf-remote</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.15</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*Remote.java</include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>perf-remote</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>perf-remote</phase>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>none</exclude>
+                                    </excludes>
+                                    <includes>
+                                        <include>**/*Remote.java</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>                    
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>test</id>
             <build>
@@ -156,7 +223,7 @@
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>1.8.1</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -178,6 +245,12 @@
             <groupId>com.strategicgains.docussandra</groupId>
             <artifactId>docussandra-driver</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>2.13.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

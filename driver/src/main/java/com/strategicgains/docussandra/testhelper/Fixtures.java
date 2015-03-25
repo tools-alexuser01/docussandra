@@ -149,7 +149,7 @@ public class Fixtures
         if (bulkDocs == null)
         {
             JSONParser parser = new JSONParser();
-            logger.info("Data path: " + new File("./src/test/resources/documents.json").getAbsolutePath());
+            logger.info("Data path: " + new File(path).getAbsolutePath());
             JSONObject jsonObject = (JSONObject) parser.parse(new FileReader(path));
             JSONArray docs = (JSONArray) jsonObject.get("documents");
             List<Document> toReturn = new ArrayList<>(docs.size());
