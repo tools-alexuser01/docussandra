@@ -64,18 +64,18 @@ public class Fixtures
     /**
      * Private constructor as this is a singleton object
      */
-    private Fixtures()
+    private Fixtures(String seeds)
     {
         //try {
         //Properties properties = loadTestProperties(); //TODO: put this call back in
-        String cassandraSeedsProperty = "127.0.0.1";//properties.getProperty(
+        String cassandraSeedsProperty = seeds;//properties.getProperty(
         //CASSANDRA_SEEDS, "localhost");
         cassandraKeyspace = "docussandra";//properties.getProperty(CASSANDRA_KEYSPACE);
         cassandraSeeds = cassandraSeedsProperty.split(",");
 //        } catch (IOException ioe) { // Because Checked Exceptions are the bane
 //            throw new RuntimeException(ioe);
 //        }
-        Cluster cluster = Cluster.builder().addContactPoints(this.getCassandraSeeds()).build();
+        Cluster cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
         final Metadata metadata = cluster.getMetadata();
         session = cluster.connect(this.getCassandraKeyspace());
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
@@ -91,18 +91,32 @@ public class Fixtures
      *
      * @return the singleton instance
      */
-    public static Fixtures getInstance()
+    public static Fixtures getInstance(String seeds)
     {
         if (INSTANCE == null)
         {
-            INSTANCE = new Fixtures();
+            INSTANCE = new Fixtures(seeds);
         }
         return INSTANCE;
     }
 
-    public String[] getCassandraSeeds()
+    /**
+     * Get this singleton instance. THIS CLASS IS FOR TESTING ONLY.
+     *
+     * @return the singleton instance
+     */
+    public static Fixtures getInstance()
     {
-        return cassandraSeeds;
+        if (INSTANCE == null)
+        {
+            INSTANCE = new Fixtures("127.0.0.1");
+        }
+        return INSTANCE;
+    }
+
+    public String getCassandraSeedString()
+    {
+        return "127.0.0.1";
     }
 
     public String getCassandraKeyspace()

@@ -20,7 +20,10 @@ import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestPare
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.persistence.QueryRepository;
+import com.strategicgains.docussandra.service.QueryService;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +31,8 @@ import java.util.Date;
 import java.util.List;
 import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -37,13 +42,15 @@ import org.junit.Test;
  */
 public class PlayersRemote extends PerfTestParent
 {
+
     private static boolean setupRun = false;
 
     public PlayersRemote() throws IOException, InterruptedException, ParseException
     {
-        if(!setupRun){
+        if (!setupRun)
+        {
             setupRun = true;
-            setup();            
+            setup();
         }
     }
 
@@ -58,7 +65,7 @@ public class PlayersRemote extends PerfTestParent
         {
             postIndex(getDb(), getTb(), i);
         }
-        loadData();//actual test here, however it is better to call it here for ordering sake
+        //loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
 //    @AfterClass
@@ -218,5 +225,39 @@ public class PlayersRemote extends PerfTestParent
         double average = (double) inSeconds / (double) numQueries;
         output.info("Players-Doc: Time to execute (two fields) for " + numQueries + " is: " + inSeconds + " seconds");
         output.info("Players-Doc: Averge time for two fields is: " + average);
+    }
+
+    /**
+     * Tests that the querying directly with the driver endpoint properly runs a
+     * query with a set time (test should always pass; check output for stats.)
+     */
+    @Test
+    public void directQueryTest()
+    {
+        int numQueries = 50;
+        Fixtures f = Fixtures.getInstance("10.199.0.23,10.199.8.47,10.199.4.248,10.199.24.172,10.199.28.84,10.199.23.113");
+        QueryService qs = new QueryService(new QueryRepository(f.getSession()));
+        Query q = new Query();
+        q.setWhere("NAMELAST = 'Manning'");
+        q.setTable(this.getTb().name());
+
+        Date start = new Date();
+        for (int i = 0; i < numQueries; i++)
+        {
+            logger.debug("Query: " + i);
+            List<Document> response = qs.query(this.getDb().name(), q, 10000, 0);
+            for (Document d : response)
+            {
+                assertNotNull(d);
+                String json = d.object();
+                assertTrue(json.indexOf("Manning") > -1);
+            }
+        }
+        Date end = new Date();
+        long executionTime = end.getTime() - start.getTime();
+        double inSeconds = (double) executionTime / 1000d;
+        double average = (double) inSeconds / (double) numQueries;
+        output.info("Players-Doc-Direct: Time to execute (single field) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("Players-Doc-Direct: Averge time for single field is: " + average);
     }
 }
