@@ -6,6 +6,7 @@ import org.restexpress.Response;
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
+import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.service.QueryService;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import java.util.List;
@@ -65,18 +66,28 @@ public class QueryController
                 range.setOffset(offset);
             }
         }
-        List<Document> queryResponse = service.query(database, toQuery, limit, offset);
+        QueryResponseWrapper queryResponse = service.query(database, toQuery, limit, offset);
         //TODO: Headers are not entirely correct here: https://github.com/tfredrich/docussandra/issues/50
-        if(queryResponse.isEmpty()){
-            // ?? response.setCollectionResponse(range, queryResponse.size(), queryResponse.size());//https://github.com/tfredrich/docussandra/issues/50
-        } 
-        else if (queryResponse.size() >= limit)
+        if (queryResponse.isEmpty())
         {
-            response.setCollectionResponse(range, queryResponse.size(), queryResponse.size() + 1);//https://github.com/tfredrich/docussandra/issues/50
-        } else
+            response.setCollectionResponse(range, 0, 0);//https://github.com/tfredrich/docussandra/issues/50
+        } else if (queryResponse.getNumAdditionalResults() == null)
+        {//we have more results, but an unknown number more
+            response.setCollectionResponse(range, queryResponse.size(), queryResponse.size() + 1);
+        } else if (queryResponse.getNumAdditionalResults() == 0l)
+        {//we have no more results, the amount returned is the number that exists
+            response.setCollectionResponse(range, queryResponse.size(), queryResponse.size());
+        } else// not likely to actually happen given our implementation, but coding in case our backend changes
         {
-            response.setCollectionResponse(range, queryResponse.size(), queryResponse.size() + offset);//https://github.com/tfredrich/docussandra/issues/50
+            response.setCollectionResponse(range, queryResponse.size(), queryResponse.size() + queryResponse.getNumAdditionalResults());
         }
+//        else if (queryResponse.size() >= limit)
+//        {
+//            response.setCollectionResponse(range, queryResponse.size(), queryResponse.size());//https://github.com/tfredrich/docussandra/issues/50
+//        } else
+//        {
+//            response.setCollectionResponse(range, queryResponse.size(), limit);//https://github.com/tfredrich/docussandra/issues/50
+//        }
         logger.debug("Query: " + toQuery.toString() + " returned " + queryResponse.size() + " documents.");
         //Document document = documents.read(database, table, new Identifier(database, table, UuidConverter.parse(id)));
         // enrich the entity with links, etc. here...
