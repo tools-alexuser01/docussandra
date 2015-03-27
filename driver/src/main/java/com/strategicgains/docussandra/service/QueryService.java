@@ -1,7 +1,6 @@
 package com.strategicgains.docussandra.service;
 
 import com.strategicgains.docussandra.Utils;
-import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
@@ -40,14 +39,22 @@ public class QueryService
      * Does a query with no limit or offset.
      * @param db Database to query.
      * @param toQuery Query perform.
-     * @return 
+     * @return A query response object containing a list of documents and some metadata about the query.
      */
-    public List<Document> query(String db, Query toQuery)
+    public QueryResponseWrapper query(String db, Query toQuery)
     {
         ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
         return queries.doQuery(parsedQuery);
     }
 
+    /**
+     * Does a query with limit and offset.
+     * @param db Database to query.
+     * @param toQuery Query perform.
+     * @param limit max number of results to return
+     * @param offset offset of the query results
+     * @return A query response object containing a list of documents and some metadata about the query.
+     */
     public QueryResponseWrapper query(String db, Query toQuery, int limit, long offset)
     {
         ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
