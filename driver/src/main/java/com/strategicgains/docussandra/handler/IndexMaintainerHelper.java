@@ -244,7 +244,7 @@ public class IndexMaintainerHelper
     public static List<Index> getIndexForDocument(Session session, Document entity)
     {
         IndexRepository indexRepo = new IndexRepository(session);
-        return indexRepo.readAll(entity.databaseName(), entity.tableName());
+        return indexRepo.readAllCached(entity.databaseName(), entity.tableName());
     }
 
     /**

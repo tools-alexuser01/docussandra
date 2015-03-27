@@ -767,6 +767,12 @@ Here is an example of CacheManager level resource tuning, which will use up to 4
            timeToLiveSeconds="86400"
            memoryStoreEvictionPolicy="FIFO">        
     </cache>
+    
+    <cache name="index" 
+           maxBytesLocalHeap = "100000000"
+           timeToLiveSeconds="120"
+           memoryStoreEvictionPolicy="LFU">        
+    </cache>
 
     <!--
     Sample Terracotta clustered cache named sampleTerracottaCache.

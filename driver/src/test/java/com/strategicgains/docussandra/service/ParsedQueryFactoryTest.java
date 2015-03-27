@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.service;
 
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.WhereClause;
@@ -169,9 +170,13 @@ public class ParsedQueryFactoryTest
     {
         System.out.println("testGetParsedQuery");
         String db = Fixtures.DB;
+        CacheFactory.shutdownCacheManger();//kill the cache and make it re-create for the purposes of this test.
         Query toParse = Fixtures.createTestQuery();
         ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithonefield");
         ParsedQuery result = ParsedQueryFactory.getParsedQuery(db, toParse, f.getSession());
+        assertEquals(expResult, result);
+        //try again to ensure the cache isn't botched
+        result = ParsedQueryFactory.getParsedQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
     }
 

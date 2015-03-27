@@ -46,7 +46,7 @@ public class IndexService
 
 	public List<Index> readAll(String namespace, String collection)
     {
-	    return indexes.readAll(namespace, collection);
+	    return indexes.readAllCached(namespace, collection);
     }
 
 	public long count(String namespace, String collection)

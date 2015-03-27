@@ -31,7 +31,8 @@ import org.slf4j.LoggerFactory;
 public class PreparedStatementFactory
 {
     //private static Cache preparedStatementCache = null;
-   // private static boolean established = false;
+    // private static boolean established = false;
+
     private static final Logger logger = LoggerFactory.getLogger(PreparedStatementFactory.class);
 
 //    /**
@@ -46,7 +47,6 @@ public class PreparedStatementFactory
 //        }
 //        established = true;
 //    }
-
     /**
      * Gets a prepared statement. Could be new, or from the cache.
      *
@@ -71,11 +71,18 @@ public class PreparedStatementFactory
         query = query.trim();
         Cache c = CacheFactory.getCache("preparedStatements");
         Element e = c.get(query);
-        if (e == null)
+        if (e == null || e.getObjectValue() == null)
         {
             logger.debug("Creating new Prepared Statement for: " + query);
             e = new Element(query, session.prepare(query));
             c.put(e);
+        } else
+        {
+            if (logger.isDebugEnabled())
+            {
+                PreparedStatement ps = (PreparedStatement) e.getObjectValue();
+                logger.debug("Pulling PreparedStatement from Cache: " + ps.getQueryString());
+            }
         }
         return (PreparedStatement) e.getObjectValue();
     }

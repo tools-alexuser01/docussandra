@@ -16,6 +16,7 @@
 package com.strategicgains.docussandra.persistence;
 
 import com.mongodb.util.JSON;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
@@ -155,6 +156,7 @@ public class QueryRepositoryTest
     public void testDoQueryWithPaging() throws Exception
     {
         System.out.println("testDoQueryWithPaging");
+        CacheFactory.shutdownCacheManger();//kill the cache and make it re-create for the purposes of this test.
         //put in an index that we can use with bulk data
         f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
         List<Document> docs = Fixtures.getBulkDocuments();

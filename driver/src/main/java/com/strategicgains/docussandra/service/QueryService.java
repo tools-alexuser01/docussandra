@@ -39,7 +39,7 @@ public class QueryService
      */
     public QueryResponseWrapper query(String db, Query toQuery)
     {
-        ParsedQuery parsedQuery = ParsedQueryFactory.parseQuery(db, toQuery, queries.getSession());//note: throws a runtime exception
+        ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());//note: throws a runtime exception
         return queries.doQuery(parsedQuery);
     }
 
@@ -55,7 +55,7 @@ public class QueryService
      */
     public QueryResponseWrapper query(String db, Query toQuery, int limit, long offset)
     {
-        ParsedQuery parsedQuery = ParsedQueryFactory.parseQuery(db, toQuery, queries.getSession());//note: throws a runtime exception
+        ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());//note: throws a runtime exception
         return queries.doQuery(parsedQuery, limit, offset);
     }
 

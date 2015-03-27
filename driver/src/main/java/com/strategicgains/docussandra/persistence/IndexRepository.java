@@ -9,6 +9,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.event.EventFactory;
@@ -19,10 +20,16 @@ import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactor
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IndexRepository
         extends AbstractCassandraRepository<Index>
 {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private class Tables
     {
@@ -139,6 +146,30 @@ public class IndexRepository
         BoundStatement bs = new BoundStatement(readAllStmt);
         bs.bind(namespace, collection);
         return (marshalAll(getSession().execute(bs)));
+    }
+
+    /**
+     * Same as readAll, but will read from the cache if availible.
+     *
+     * @param namespace
+     * @param collection
+     * @return
+     */
+    public List<Index> readAllCached(String namespace, String collection)
+    {        
+        String key = namespace + ":" + collection;
+        logger.info("Reading all indexes from cache for " + key);
+        Cache c = CacheFactory.getCache("index");
+        Element e = c.get(key);
+        if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+        {
+            e = new Element(key, readAll(namespace, collection));
+            c.put(e);
+        } else
+        {
+            logger.debug("Pulling Index from Cache: " + e.getObjectValue().toString());
+        }
+        return (List<Index>) e.getObjectValue();
     }
 
     public long countAll(String namespace, String collection)

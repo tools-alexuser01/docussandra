@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.controller;
 
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.given;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
@@ -72,6 +73,7 @@ public class QueryControllerTest
     @Before
     public void beforeTest() throws Exception
     {
+        CacheFactory.shutdownCacheManger();//kill the cache and make it re-create for the purposes of this test.
         f.clearTestTables();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);

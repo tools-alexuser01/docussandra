@@ -73,7 +73,7 @@ public class PlayByPlayRemote extends PerfTestParent
         {
             postIndex(getDb(), getTb(), i);
         }
-        loadData();//actual test here, however it is better to call it here for ordering sake
+        //loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
     @Override
