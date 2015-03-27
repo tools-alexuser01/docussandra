@@ -21,6 +21,7 @@ import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Query;
+import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.service.QueryService;
@@ -245,7 +246,7 @@ public class PlayersRemote extends PerfTestParent
         for (int i = 0; i < numQueries; i++)
         {
             logger.debug("Query: " + i);
-            List<Document> response = qs.query(this.getDb().name(), q, 10000, 0);
+            QueryResponseWrapper response = qs.query(this.getDb().name(), q, 10000, 0);
             for (Document d : response)
             {
                 assertNotNull(d);

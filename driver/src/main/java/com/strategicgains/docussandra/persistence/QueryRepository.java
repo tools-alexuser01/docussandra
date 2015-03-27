@@ -10,10 +10,10 @@ import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
+import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,7 @@ public class QueryRepository
         return bs;
     }
 
-    public List<Document> doQuery(ParsedQuery query)
+    public QueryResponseWrapper doQuery(ParsedQuery query)
     {
         //run the query
         ResultSet results = session.execute(generateQueryStatement(query, -1));
@@ -73,23 +73,25 @@ public class QueryRepository
             Row row = ite.next();
             toReturn.add(DocumentRepository.marshalRow(row));
         }
-        return toReturn;
+        return new QueryResponseWrapper(toReturn, 0l);
     }
 
-    public List<Document> doQuery(ParsedQuery query, int limit, long offset)
+    public QueryResponseWrapper doQuery(ParsedQuery query, int limit, long offset)
     {
         long maxIndex = offset + limit;
         //run the query
-        ResultSet results = session.execute(generateQueryStatement(query, maxIndex));
+        ResultSet results = session.execute(generateQueryStatement(query, maxIndex + 1));//we do one plus here so we know if there are additional results
         //process result(s)
         ArrayList<Document> toReturn = new ArrayList<>(limit);
         Iterator<Row> ite = results.iterator();
         long offsetCounter = 0;
+        Long additionalResults = 0l;//default to 0, will be set to null if there are additional results (or in a later implementation, the actual number)
         while (ite.hasNext())//for each item in the result set
         {
             Row row = ite.next();
             if (offsetCounter >= maxIndex)//if we are at a counter less than our max amount to return (offset + limit)
             {
+                additionalResults = null;//we have additional results for sure (see comment about +1 limit)
                 break;//we are done; don't bother processing anymore, it's not going to be used anyway
             } else if (offsetCounter >= offset)//if we are at a counter greater than or equal to our offset -- we are in the sweet spot of the result set to return
             {
@@ -104,7 +106,7 @@ public class QueryRepository
             offsetCounter++;
 
         }
-        return toReturn;
+        return new QueryResponseWrapper(toReturn, additionalResults);
     }
 
     /**

@@ -5,6 +5,7 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
+import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.persistence.IndexRepository;
@@ -47,7 +48,7 @@ public class QueryService
         return queries.doQuery(parsedQuery);
     }
 
-    public List<Document> query(String db, Query toQuery, int limit, long offset)
+    public QueryResponseWrapper query(String db, Query toQuery, int limit, long offset)
     {
         ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
         return queries.doQuery(parsedQuery, limit, offset);

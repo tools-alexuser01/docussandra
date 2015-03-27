@@ -16,9 +16,9 @@
 package com.strategicgains.docussandra.controller;
 
 import com.jayway.restassured.RestAssured;
-import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
 import org.junit.BeforeClass;
@@ -81,7 +81,13 @@ public class QueryControllerTest
         f.insertIndex(Fixtures.createTestIndexTwoField());
         f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
         f.insertDocument(Fixtures.createTestDocument());
+        Document onePrime = Fixtures.createTestDocument();
+        onePrime.setUuid(new UUID(onePrime.getUuid().getMostSignificantBits() + 2, 1L));
+        f.insertDocument(onePrime);
         f.insertDocument(Fixtures.createTestDocument2());
+        Document twoPrime = Fixtures.createTestDocument2();
+        twoPrime.setUuid(new UUID(twoPrime.getUuid().getMostSignificantBits() + 3, 2L));
+        f.insertDocument(twoPrime);
         f.insertDocuments(Fixtures.getBulkDocuments());
         RestAssured.basePath = "/" + testDb.name() + "/" + testTable.name() + "/queries";
     }
@@ -135,6 +141,48 @@ public class QueryControllerTest
         q.setTable("mytable");
         //act
         given().header("limit", "1").header("offset", "0").body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(206)
+                //.header("Location", startsWith(RestAssured.basePath + "/"))
+                .body("", notNullValue())
+                .body("id", notNullValue())
+                .body("id[0]", equalTo(new UUID(Long.MAX_VALUE - 33, 1l).toString()))
+                .body("object[0]", notNullValue())
+                .body("object[0]", containsString("this is some more random data32"))
+                .when().post("");
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * query with limits.
+     */
+    @Test
+    public void postTableTestWithLimitSameAsResponse()
+    {
+        Query q = new Query();
+        q.setWhere("field1 = 'this is my data'");
+        q.setTable("mytable");
+        //act
+        given().header("limit", "34").header("offset", "0").body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(200)
+                //.header("Location", startsWith(RestAssured.basePath + "/"))
+                .body("", notNullValue())
+                .body("id", notNullValue())
+                .body("id[0]", equalTo(new UUID(Long.MAX_VALUE - 33, 1l).toString()))
+                .body("object[0]", notNullValue())
+                .body("object[0]", containsString("this is some more random data32"))
+                .when().post("");
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * query with limits.
+     */
+    @Test
+    public void postTableTestWithLimitMoreThanResponse()
+    {
+        Query q = new Query();
+        q.setWhere("field1 = 'this is my data'");
+        q.setTable("mytable");
+        //act
+        given().header("limit", "10000").header("offset", "0").body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(200)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
                 .body("", notNullValue())
                 .body("id", notNullValue())
