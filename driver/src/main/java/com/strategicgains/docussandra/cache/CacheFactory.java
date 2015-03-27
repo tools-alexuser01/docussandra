@@ -98,6 +98,9 @@ public class CacheFactory
         {
             logger.info("Shutting down cache manager.");
             manager.shutdown();
+            cacheMap = new ConcurrentHashMap<>();
+            cacheManagerEstablished = false;
+            manager = null;
         }
     }
 }
