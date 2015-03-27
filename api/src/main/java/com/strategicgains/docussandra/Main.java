@@ -21,6 +21,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.config.Configuration;
 import com.strategicgains.docussandra.serialization.SerializationProvider;
 import com.strategicgains.repoexpress.adapter.Identifiers;
@@ -54,6 +55,12 @@ public class Main
         RestExpress server = initializeServer(args);
         LOG.info("Server started up!");
         server.awaitShutdown();
+         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                LOG.info("Shutting down Docussandra...");
+                CacheFactory.shutdownCacheManger();
+            }
+        }, "Shutdown-thread"));
     }
 
     public static RestExpress initializeServer(String[] args) throws IOException

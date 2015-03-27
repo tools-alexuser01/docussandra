@@ -17,10 +17,8 @@ package com.strategicgains.docussandra.persistence.helper;
 
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
-import java.io.File;
-import java.net.URL;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,32 +30,22 @@ import org.slf4j.LoggerFactory;
  */
 public class PreparedStatementFactory
 {
-
-    private static CacheManager manager = null;
-    private static Cache preparedStatementCache = null;
-    private static boolean established = false;
+    //private static Cache preparedStatementCache = null;
+   // private static boolean established = false;
     private static final Logger logger = LoggerFactory.getLogger(PreparedStatementFactory.class);
 
-    /**
-     * Establishes the cache if it doesn't exist.
-     */
-    private synchronized static void establishCache()
-    {        
-        //String cacheLocation = "./src/main/resources/ehcache.xml";
-        URL url = PreparedStatementFactory.class.getResource("/ehcache.xml");
-        //File config = new File(url.getFile());
-        logger.debug("Establishing prepared statement cache with config file: " + url.getPath());
-        if (manager == null)
-        {
-            manager = CacheManager.newInstance(url);
-        }
-        if (preparedStatementCache == null)
-        {
-            preparedStatementCache = manager.getCache("preparedStatements");
-        }
-        established = true;
-
-    }
+//    /**
+//     * Establishes the cache if it doesn't exist.
+//     */
+//    private synchronized static void establishCache()
+//    {     
+//        logger.debug("Establishing prepared statement cache...");
+//        if (preparedStatementCache == null)
+//        {
+//            preparedStatementCache = CacheFactory.getCache("preparedStatements");
+//        }
+//        established = true;
+//    }
 
     /**
      * Gets a prepared statement. Could be new, or from the cache.
@@ -68,10 +56,10 @@ public class PreparedStatementFactory
      */
     public static PreparedStatement getPreparedStatement(String query, Session session)
     {
-        if (!established)
-        {
-            establishCache();
-        }
+//        if (!established)
+//        {
+//            establishCache();
+//        }
         if (query == null || query.trim().equals(""))
         {
             throw new IllegalArgumentException("Query must be populated.");
@@ -81,26 +69,15 @@ public class PreparedStatementFactory
             throw new IllegalArgumentException("Session cannot be null.");
         }
         query = query.trim();
-        Element e = preparedStatementCache.get(query);
+        Cache c = CacheFactory.getCache("preparedStatements");
+        Element e = c.get(query);
         if (e == null)
         {
             logger.debug("Creating new Prepared Statement for: " + query);
             e = new Element(query, session.prepare(query));
-            preparedStatementCache.put(e);
+            c.put(e);
         }
         return (PreparedStatement) e.getObjectValue();
-    }
-
-    //TODO: create shutdown hook to call this
-    /**
-     * Shuts down the cache; only call upon application shutdown.
-     */
-    public static void shutdownCache()
-    {
-        if (manager != null)
-        {
-            manager.shutdown();
-        }
     }
 
 }
