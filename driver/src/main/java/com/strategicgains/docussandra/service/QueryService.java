@@ -13,17 +13,34 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Service for performing a query.
+ * @author udeyoje
+ */
 public class QueryService
 {
 
+    /**
+     * Query Repository for accessing the database.
+     */
     private QueryRepository queries;
 
+    /**
+     * Constructor. 
+     * @param queryRepository QueryRepository to use to perform the query.
+     */
     public QueryService(QueryRepository queryRepository)
     {
         super();
         this.queries = queryRepository;
     }
 
+    /**
+     * Does a query with no limit or offset.
+     * @param db Database to query.
+     * @param toQuery Query perform.
+     * @return 
+     */
     public List<Document> query(String db, Query toQuery)
     {
         ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
@@ -35,6 +52,11 @@ public class QueryService
         ParsedQuery parsedQuery = parseQuery(db, toQuery);//note: throws a runtime exception
         return queries.doQuery(parsedQuery, limit, offset);
     }
+    
+    private ParsedQuery getParsedQuery(String db, Query toParse){
+        return parseQuery(db, toParse);
+    }
+    
 
     /**
      * Parses a query to determine if it is valid and determine the information
