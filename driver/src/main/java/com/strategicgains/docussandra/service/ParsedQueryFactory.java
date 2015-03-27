@@ -58,7 +58,6 @@ public class ParsedQueryFactory
 //        }
 //        established = true;
 //    }
-
     /**
      * Gets a parsed query for the passed in parameters. If the ParsedQuery
      * requested has already been created on this app node, it will retrieve it
@@ -89,9 +88,12 @@ public class ParsedQueryFactory
         Element e = c.get(key);
         if (e == null)
         {
-            logger.debug("Creating new Parsed Query for: " + key);
+            logger.debug("Creating new ParsedQuery for: " + key);
             e = new Element(key, parseQuery(db, toParse, session));
             c.put(e);
+        } else
+        {
+            logger.debug("Pulling ParsedQuery from Cache: " + e.getObjectValue().toString());
         }
         return (ParsedQuery) e.getObjectValue();
     }
@@ -113,7 +115,7 @@ public class ParsedQueryFactory
         //determine if the query is valid; in other words is it searching on valid fields that we have indexed
         List<String> fieldsToQueryOn = where.getFields();
         IndexRepository indexRepo = new IndexRepository(session);
-        List<Index> indices = indexRepo.readAll(db, toParse.getTable());
+        List<Index> indices = indexRepo.readAllCached(db, toParse.getTable());
         Index indexToUse = null;
         for (Index index : indices)
         {
