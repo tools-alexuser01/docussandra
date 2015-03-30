@@ -159,7 +159,7 @@ public class IndexMaintainerHelper
                 DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
                 //set the bucket
                 String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
-                //logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+                logger.trace("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
                 bs.setString(2, bucketId);
                 for (int i = 0; i < fields.size(); i++)
                 {
