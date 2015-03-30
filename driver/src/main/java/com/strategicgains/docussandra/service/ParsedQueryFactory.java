@@ -19,6 +19,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
+import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
@@ -85,17 +86,20 @@ public class ParsedQueryFactory
         }
         final String key = db + ":" + toParse.getTable() + ":" + toParse.getWhere();
         Cache c = CacheFactory.getCache("parsedQuery");
-        Element e = c.get(key);
-        if (e == null)
+        synchronized (CacheSynchronizer.getLockingObject(key, ParsedQuery.class))
         {
-            logger.debug("Creating new ParsedQuery for: " + key);
-            e = new Element(key, parseQuery(db, toParse, session));
-            c.put(e);
-        } else
-        {
-            logger.debug("Pulling ParsedQuery from Cache: " + e.getObjectValue().toString());
+            Element e = c.get(key);
+            if (e == null)
+            {
+                logger.debug("Creating new ParsedQuery for: " + key);
+                e = new Element(key, parseQuery(db, toParse, session));
+                c.put(e);
+            } else
+            {
+                logger.trace("Pulling ParsedQuery from Cache: " + e.getObjectValue().toString());
+            }
+            return (ParsedQuery) e.getObjectValue();
         }
-        return (ParsedQuery) e.getObjectValue();
     }
 
     /**

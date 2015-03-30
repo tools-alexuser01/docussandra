@@ -10,6 +10,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
+import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.event.EventFactory;
@@ -120,6 +121,21 @@ public class IndexRepository
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
         getSession().execute(bs);
+        //maintain cache -- TODO: break into seperate method; probably a new thread        
+        try//we do this in a try/catch because we don't want to cause an app error if this fails
+        {
+            Cache c = CacheFactory.getCache("index");
+            String key = entity.databaseName() + ":" + entity.tableName();
+            synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
+            {
+                List<Index> currentIndex = this.readAll(entity.databaseName(), entity.tableName());
+                Element e = new Element(key, currentIndex);
+                c.put(e);
+            }
+        } catch (Exception e)
+        {
+            logger.error("Could not update index cache upon index create.", e);
+        }
         return entity;
     }
 
@@ -139,6 +155,27 @@ public class IndexRepository
         BoundStatement bs = new BoundStatement(deleteStmt);
         bindIdentifier(bs, entity.getId());
         getSession().execute(bs);
+        //maintain cache
+        try//we do this in a try/catch because we don't want to cause an app error if this fails
+        {
+            Cache c = CacheFactory.getCache("index");
+            String key = entity.databaseName() + ":" + entity.tableName();
+            synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
+            {
+                List<Index> currentIndex = this.readAll(entity.databaseName(), entity.tableName());
+                if (!currentIndex.isEmpty())
+                {
+                    Element e = new Element(key, currentIndex);
+                    c.put(e);
+                } else
+                {
+                    c.put(null);
+                }
+            }
+        } catch (Exception e)
+        {
+            logger.error("Could not update index cache upon index delete.", e);
+        }
     }
 
     public List<Index> readAll(String namespace, String collection)
@@ -156,20 +193,23 @@ public class IndexRepository
      * @return
      */
     public List<Index> readAllCached(String namespace, String collection)
-    {        
+    {
         String key = namespace + ":" + collection;
-        logger.info("Reading all indexes from cache for " + key);
+        //logger.info("Reading all indexes from cache for " + key);
         Cache c = CacheFactory.getCache("index");
-        Element e = c.get(key);
-        if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+        synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
         {
-            e = new Element(key, readAll(namespace, collection));
-            c.put(e);
-        } else
-        {
-            logger.debug("Pulling Index from Cache: " + e.getObjectValue().toString());
+            Element e = c.get(key);
+            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+            {
+                e = new Element(key, readAll(namespace, collection));
+                c.put(e);
+            } else
+            {
+                logger.debug("Pulling Index from Cache: " + e.getObjectValue().toString());
+            }
+            return (List<Index>) e.getObjectValue();
         }
-        return (List<Index>) e.getObjectValue();
     }
 
     public long countAll(String namespace, String collection)

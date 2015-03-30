@@ -7,6 +7,8 @@ import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
+import com.strategicgains.docussandra.cache.CacheFactory;
+import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
@@ -16,6 +18,8 @@ import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactor
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 import org.bson.BSON;
 import org.bson.BSONObject;
 import org.restexpress.common.util.StringUtils;
@@ -87,7 +91,7 @@ public class IndexMaintainerHelper
         }
         String fieldToBucketOn = fieldToBucketOnObject.toString();//use the java toString to convert the object to a string.
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOn));//note, could have parse problems here with non-string types
-        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        //logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         //set the id
         bs.setUUID(1, entity.getUuid());
@@ -101,7 +105,7 @@ public class IndexMaintainerHelper
         {
             String field = fields.get(i);
             Object jObject = jsonObject.get(field);
-            
+
             if (jObject == null)
             {
                 bs.setString(i + 5, "");//offset from the first five non-dynamic fields
@@ -110,7 +114,7 @@ public class IndexMaintainerHelper
                 String fieldValue = jObject.toString();//note, could have parse problems here with non-string types: TODO: use proper types; need to set the tables correctly first
                 bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
             }
-            
+
         }
         return bs;
     }
@@ -155,7 +159,7 @@ public class IndexMaintainerHelper
                 DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
                 //set the bucket
                 String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
-                logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+                //logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
                 bs.setString(2, bucketId);
                 for (int i = 0; i < fields.size(); i++)
                 {
@@ -214,7 +218,7 @@ public class IndexMaintainerHelper
         }
         //set the bucket
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOnObject.toString()));//note, could have parse problems here with non-string types
-        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        //logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)
         {
@@ -272,7 +276,6 @@ public class IndexMaintainerHelper
         return false;
     }
 
-    //TODO: consider caching some of these static string generators to save processor time
     /**
      * Helper for generating insert CQL statements for iTables. This would be
      * private but keeping public for ease of testing.
@@ -282,23 +285,40 @@ public class IndexMaintainerHelper
      */
     public static String generateCQLStatementForInsert(Index index)
     {
-        //determine which iTables need to be written to
-        String iTableToUpdate = Utils.calculateITableName(index);
-        //determine which fields need to write as PKs
-        List<String> fields = index.fields();
-        String fieldNamesInsertSyntax = StringUtils.join(",", fields);
-        //calculate the number of '?'s we need to append on the values clause
-        StringBuilder fieldValueInsertSyntax = new StringBuilder();
-        for (int i = 0; i < fields.size(); i++)
+        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
+        Cache iTableCQLCache = CacheFactory.getCache("iTableInsertCQL");
+        synchronized (CacheSynchronizer.getLockingObject(key, "iTableInsertCQL"))
         {
-            if (i != 0)
+            Element e = iTableCQLCache.get(key);
+            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
             {
-                fieldValueInsertSyntax.append(", ");
+                //not cached; let's create it
+                //determine which iTables need to be written to
+                String iTableToUpdate = Utils.calculateITableName(index);
+                //determine which fields need to write as PKs
+                List<String> fields = index.fields();
+                String fieldNamesInsertSyntax = StringUtils.join(",", fields);
+                //calculate the number of '?'s we need to append on the values clause
+                StringBuilder fieldValueInsertSyntax = new StringBuilder();
+                for (int i = 0; i < fields.size(); i++)
+                {
+                    if (i != 0)
+                    {
+                        fieldValueInsertSyntax.append(", ");
+                    }
+                    fieldValueInsertSyntax.append("?");
+                }
+                //create final CQL statement for adding a row to an iTable(s)
+                String iTableInsertCQL = String.format(ITABLE_INSERT_CQL, iTableToUpdate, fieldNamesInsertSyntax, fieldValueInsertSyntax);
+                //save it back to the cache
+                e = new Element(key, iTableInsertCQL);
+                iTableCQLCache.put(e);
+            } else
+            {
+                logger.debug("Pulling iTableInsertCQL from Cache: " + e.getObjectValue().toString());
             }
-            fieldValueInsertSyntax.append("?");
+            return (String) e.getObjectValue();
         }
-        //create final CQL statement for adding a row to an iTable(s)
-        return String.format(ITABLE_INSERT_CQL, iTableToUpdate, fieldNamesInsertSyntax, fieldValueInsertSyntax);
     }
 
     /**
@@ -311,23 +331,39 @@ public class IndexMaintainerHelper
      */
     public static String generateCQLStatementForWhereClauses(String CQL, Index index)
     {
+        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
+        Cache whereCache = CacheFactory.getCache("iTableWhere");
         //determine which iTables need to be updated
         String iTableToUpdate = Utils.calculateITableName(index);
-        //determine which fields need to write as PKs
-        List<String> fields = index.fields();
-        //determine the where clause
         String whereClause;
-        StringBuilder setValues = new StringBuilder();
-        for (int i = 0; i < fields.size(); i++)
+        synchronized (CacheSynchronizer.getLockingObject(key, "iTableWhere"))
         {
-            String field = fields.get(i);
-            if (i != 0)
+            Element e = whereCache.get(key);
+            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
             {
-                setValues.append(" AND ");
+                //not cached; let's create it
+                //determine which fields need to write as PKs
+                List<String> fields = index.fields();
+                //determine the where clause
+                StringBuilder setValues = new StringBuilder();
+                for (int i = 0; i < fields.size(); i++)
+                {
+                    String field = fields.get(i);
+                    if (i != 0)
+                    {
+                        setValues.append(" AND ");
+                    }
+                    setValues.append(field).append(" = ?");
+                }
+                //save it back to the cache
+                e = new Element(key, setValues.toString());
+                whereCache.put(e);
+            } else
+            {
+                logger.debug("Pulling WHERE statement info from Cache: " + e.getObjectValue().toString());
             }
-            setValues.append(field).append(" = ?");
+            whereClause = (String) e.getObjectValue();
         }
-        whereClause = setValues.toString();
         //create final CQL statement for updating a row in an iTable(s)        
         return String.format(CQL, iTableToUpdate, whereClause);
     }

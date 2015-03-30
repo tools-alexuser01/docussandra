@@ -78,7 +78,7 @@ public class PreparedStatementFactory
             c.put(e);
         } else
         {
-            if (logger.isDebugEnabled())
+            if (logger.isTraceEnabled())
             {
                 PreparedStatement ps = (PreparedStatement) e.getObjectValue();
                 logger.debug("Pulling PreparedStatement from Cache: " + ps.getQueryString());

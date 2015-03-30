@@ -76,17 +76,21 @@ public class CacheFactory
         {
             establishCacheManager();
         }
-        Cache c = cacheMap.get(cacheName);//try to pull the cache from our map
-        if (c == null)//it doesn't exist yet
+        synchronized (CacheSynchronizer.getLockingObject(cacheName, Cache.class))
         {
-            //lets create a new cache
-            c = manager.getCache(cacheName);
-            if(c == null){
-                throw new RuntimeException("Cache is not defined. This is a programming error.");
+            Cache c = cacheMap.get(cacheName);//try to pull the cache from our map
+            if (c == null)//it doesn't exist yet
+            {
+                //lets create a new cache
+                c = manager.getCache(cacheName);
+                if (c == null)
+                {
+                    throw new RuntimeException("Cache is not defined: "+cacheName+". This is a programming error.");
+                }
+                cacheMap.put(cacheName, c);
             }
-            cacheMap.put(cacheName, c);
-        }
-        return c;
+            return c;
+        }        
     }
 
     /**
