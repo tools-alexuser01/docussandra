@@ -66,7 +66,7 @@ public class PlayersRemote extends PerfTestParent
         {
             postIndex(getDb(), getTb(), i);
         }
-        //loadData();//actual test here, however it is better to call it here for ordering sake
+        loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
 //    @AfterClass
@@ -213,7 +213,7 @@ public class PlayersRemote extends PerfTestParent
         for (int i = 0; i < numQueries; i++)
         {
             logger.debug("Query: " + i);
-            given().header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning'AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
+            given().header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning' AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
@@ -236,7 +236,7 @@ public class PlayersRemote extends PerfTestParent
     public void directQueryTest()
     {
         int numQueries = 50;
-        Fixtures f = Fixtures.getInstance("10.199.0.23,10.199.8.47,10.199.4.248,10.199.24.172,10.199.28.84,10.199.23.113");
+        Fixtures f = Fixtures.getInstance("10.199.12.206,10.199.11.178,10.199.4.114,10.199.24.180,10.199.28.24,10.199.23.159");
         QueryService qs = new QueryService(new QueryRepository(f.getSession()));
         Query q = new Query();
         q.setWhere("NAMELAST = 'Manning'");
