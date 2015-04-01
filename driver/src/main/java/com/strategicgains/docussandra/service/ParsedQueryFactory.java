@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
+import org.apache.commons.lang.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,20 +86,28 @@ public class ParsedQueryFactory
             throw new IllegalArgumentException("Query cannot be null.");
         }
         final String key = db + ":" + toParse.getTable() + ":" + toParse.getWhere();
+        StopWatch pull = new StopWatch();
+        pull.start();
         Cache c = CacheFactory.getCache("parsedQuery");
 //        synchronized (CacheSynchronizer.getLockingObject(key, ParsedQuery.class))
 //        {
-            Element e = c.get(key);
-            if (e == null)
-            {
-                logger.debug("Creating new ParsedQuery for: " + key);
-                e = new Element(key, parseQuery(db, toParse, session));
-                c.put(e);
-            } else
-            {
-                logger.trace("Pulling ParsedQuery from Cache: " + e.getObjectValue().toString());
-            }
-            return (ParsedQuery) e.getObjectValue();
+        Element e = c.get(key);
+        pull.stop();
+        logger.debug("Time to pull a parsed query from cache: " + pull.getTime());
+        if (e == null)
+        {
+            logger.debug("Creating new ParsedQuery for: " + key);
+            StopWatch sw = new StopWatch();
+            sw.start();
+            e = new Element(key, parseQuery(db, toParse, session));
+            c.put(e);
+            sw.stop();
+            logger.debug("Time to create a new parsed query: " + sw.getTime());
+        } else
+        {
+            logger.trace("Pulling ParsedQuery from Cache: " + e.getObjectValue().toString());
+        }
+        return (ParsedQuery) e.getObjectValue();
         //}
     }
 
