@@ -194,23 +194,23 @@ public class IndexRepository
      */
     public List<Index> readAllCached(String namespace, String collection)
     {
-//        String key = namespace + ":" + collection;
-//        //logger.info("Reading all indexes from cache for " + key);
-//        Cache c = CacheFactory.getCache("index");
-//        synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
-//        {
-//            Element e = c.get(key);
-//            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
-//            {
-//                e = new Element(key, readAll(namespace, collection));
-//                c.put(e);
-//            } else
-//            {
-//                logger.debug("Pulling Index from Cache: " + e.getObjectValue().toString());
-//            }
-//            return (List<Index>) e.getObjectValue();
-//        }
-        return readAll(namespace, collection);
+        String key = namespace + ":" + collection;
+        //logger.info("Reading all indexes from cache for " + key);
+        Cache c = CacheFactory.getCache("index");
+        synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
+        {
+            Element e = c.get(key);
+            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+            {
+                e = new Element(key, readAll(namespace, collection));
+                c.put(e);
+            } else
+            {
+                logger.trace("Pulling Index from Cache: " + e.getObjectValue().toString());
+            }
+            return (List<Index>) e.getObjectValue();
+        }
+        //return readAll(namespace, collection);
     }
 
     public long countAll(String namespace, String collection)
