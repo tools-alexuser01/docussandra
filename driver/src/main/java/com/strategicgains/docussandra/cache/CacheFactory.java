@@ -76,8 +76,8 @@ public class CacheFactory
         {
             establishCacheManager();
         }
-        synchronized (CacheSynchronizer.getLockingObject(cacheName, Cache.class))
-        {
+        //synchronized (CacheSynchronizer.getLockingObject(cacheName, Cache.class))
+        //{
             Cache c = cacheMap.get(cacheName);//try to pull the cache from our map
             if (c == null)//it doesn't exist yet
             {
@@ -90,7 +90,7 @@ public class CacheFactory
                 cacheMap.put(cacheName, c);
             }
             return c;
-        }        
+       // }        
     }
 
     /**

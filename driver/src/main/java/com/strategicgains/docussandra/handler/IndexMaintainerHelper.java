@@ -159,7 +159,7 @@ public class IndexMaintainerHelper
                 DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
                 //set the bucket
                 String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
-                logger.trace("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+                logger.debug("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
                 bs.setString(2, bucketId);
                 for (int i = 0; i < fields.size(); i++)
                 {
@@ -218,7 +218,7 @@ public class IndexMaintainerHelper
         }
         //set the bucket
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOnObject.toString()));//note, could have parse problems here with non-string types
-        //logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        logger.debug("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)
         {
@@ -278,6 +278,34 @@ public class IndexMaintainerHelper
 
     /**
      * Helper for generating insert CQL statements for iTables. This would be
+     * private but keeping public for ease of testing. Same as
+     * generateCQLStatementForInsert but will retrieve from cache if available.
+     *
+     * @param index Index to generate the statement for.
+     * @return CQL statement.
+     */
+    public static String getCQLStatementForInsert(Index index)
+    {
+        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
+        Cache iTableCQLCache = CacheFactory.getCache("iTableInsertCQL");
+        //synchronized (CacheSynchronizer.getLockingObject(key, "iTableInsertCQL"))
+        //{
+            Element e = iTableCQLCache.get(key);
+            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+            {
+                //not cached; let's create it                               
+                e = new Element(key, generateCQLStatementForInsert(index));//save it back to the cache
+                iTableCQLCache.put(e);
+            } else
+            {
+                logger.debug("Pulling iTableInsertCQL from Cache: " + e.getObjectValue().toString());
+            }
+            return (String) e.getObjectValue();
+        //}
+    }
+
+    /**
+     * Helper for generating insert CQL statements for iTables. This would be
      * private but keeping public for ease of testing.
      *
      * @param index Index to generate the statement for.
@@ -285,41 +313,56 @@ public class IndexMaintainerHelper
      */
     public static String generateCQLStatementForInsert(Index index)
     {
-        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
-        Cache iTableCQLCache = CacheFactory.getCache("iTableInsertCQL");
-        synchronized (CacheSynchronizer.getLockingObject(key, "iTableInsertCQL"))
+        //determine which iTables need to be written to
+        String iTableToUpdate = Utils.calculateITableName(index);
+        //determine which fields need to write as PKs
+        List<String> fields = index.fields();
+        String fieldNamesInsertSyntax = StringUtils.join(",", fields);
+        //calculate the number of '?'s we need to append on the values clause
+        StringBuilder fieldValueInsertSyntax = new StringBuilder();
+        for (int i = 0; i < fields.size(); i++)
         {
-            Element e = iTableCQLCache.get(key);
-            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+            if (i != 0)
             {
-                //not cached; let's create it
-                //determine which iTables need to be written to
-                String iTableToUpdate = Utils.calculateITableName(index);
-                //determine which fields need to write as PKs
-                List<String> fields = index.fields();
-                String fieldNamesInsertSyntax = StringUtils.join(",", fields);
-                //calculate the number of '?'s we need to append on the values clause
-                StringBuilder fieldValueInsertSyntax = new StringBuilder();
-                for (int i = 0; i < fields.size(); i++)
-                {
-                    if (i != 0)
-                    {
-                        fieldValueInsertSyntax.append(", ");
-                    }
-                    fieldValueInsertSyntax.append("?");
-                }
-                //create final CQL statement for adding a row to an iTable(s)
-                String iTableInsertCQL = String.format(ITABLE_INSERT_CQL, iTableToUpdate, fieldNamesInsertSyntax, fieldValueInsertSyntax);
-                //save it back to the cache
-                e = new Element(key, iTableInsertCQL);
-                iTableCQLCache.put(e);
-            } else
-            {
-                logger.debug("Pulling iTableInsertCQL from Cache: " + e.getObjectValue().toString());
+                fieldValueInsertSyntax.append(", ");
             }
-            return (String) e.getObjectValue();
+            fieldValueInsertSyntax.append("?");
         }
+        //create final CQL statement for adding a row to an iTable(s)
+        return String.format(ITABLE_INSERT_CQL, iTableToUpdate, fieldNamesInsertSyntax, fieldValueInsertSyntax);
     }
+
+//    /**
+//     * Helper for generating update CQL statements for iTables. This would be
+//     * private but keeping public for ease of testing. Same as
+//     * generateCQLStatementForWhereClauses but will retrieve from cache when
+//     * availible.
+//     *
+//     * @param CQL statement that is not yet formatted.
+//     * @param index Index to generate the statement for.
+//     * @return CQL statement.
+//     */
+//    public static String getCQLStatementForWhereClauses(String CQL, Index index)
+//    {
+//        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
+//        Cache whereCache = CacheFactory.getCache("iTableWhere");
+//        synchronized (CacheSynchronizer.getLockingObject(key, "iTableWhere"))
+//        {
+//            Element e = whereCache.get(key);
+//            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+//            {
+//                //not cached; let's create it                               
+//                e = new Element(key, setValues.toString());//save it back to the cache
+//                whereCache.put(e);
+//            } else
+//            {
+//                logger.debug("Pulling WHERE statement info from Cache: " + e.getObjectValue().toString());
+//            }
+//            whereClause = (String) e.getObjectValue();
+//        }
+//        //create final CQL statement for updating a row in an iTable(s)        
+//        return String.format(CQL, iTableToUpdate, whereClause);
+//    }
 
     /**
      * Helper for generating update CQL statements for iTables. This would be
@@ -331,39 +374,24 @@ public class IndexMaintainerHelper
      */
     public static String generateCQLStatementForWhereClauses(String CQL, Index index)
     {
-        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
-        Cache whereCache = CacheFactory.getCache("iTableWhere");
+        String whereClause;
         //determine which iTables need to be updated
         String iTableToUpdate = Utils.calculateITableName(index);
-        String whereClause;
-        synchronized (CacheSynchronizer.getLockingObject(key, "iTableWhere"))
+
+        //determine which fields need to write as PKs
+        List<String> fields = index.fields();
+        //determine the where clause
+        StringBuilder setValues = new StringBuilder();
+        for (int i = 0; i < fields.size(); i++)
         {
-            Element e = whereCache.get(key);
-            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+            String field = fields.get(i);
+            if (i != 0)
             {
-                //not cached; let's create it
-                //determine which fields need to write as PKs
-                List<String> fields = index.fields();
-                //determine the where clause
-                StringBuilder setValues = new StringBuilder();
-                for (int i = 0; i < fields.size(); i++)
-                {
-                    String field = fields.get(i);
-                    if (i != 0)
-                    {
-                        setValues.append(" AND ");
-                    }
-                    setValues.append(field).append(" = ?");
-                }
-                //save it back to the cache
-                e = new Element(key, setValues.toString());
-                whereCache.put(e);
-            } else
-            {
-                logger.debug("Pulling WHERE statement info from Cache: " + e.getObjectValue().toString());
+                setValues.append(" AND ");
             }
-            whereClause = (String) e.getObjectValue();
+            setValues.append(field).append(" = ?");
         }
+        whereClause = setValues.toString();
         //create final CQL statement for updating a row in an iTable(s)        
         return String.format(CQL, iTableToUpdate, whereClause);
     }

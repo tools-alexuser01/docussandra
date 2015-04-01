@@ -86,8 +86,8 @@ public class ParsedQueryFactory
         }
         final String key = db + ":" + toParse.getTable() + ":" + toParse.getWhere();
         Cache c = CacheFactory.getCache("parsedQuery");
-        synchronized (CacheSynchronizer.getLockingObject(key, ParsedQuery.class))
-        {
+//        synchronized (CacheSynchronizer.getLockingObject(key, ParsedQuery.class))
+//        {
             Element e = c.get(key);
             if (e == null)
             {
@@ -99,7 +99,7 @@ public class ParsedQueryFactory
                 logger.trace("Pulling ParsedQuery from Cache: " + e.getObjectValue().toString());
             }
             return (ParsedQuery) e.getObjectValue();
-        }
+        //}
     }
 
     /**

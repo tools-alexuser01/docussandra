@@ -20,6 +20,7 @@ import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
+import org.apache.commons.lang.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,8 @@ public class PreparedStatementFactory
 //        {
 //            establishCache();
 //        }
+        StopWatch sw = new StopWatch();
+        sw.start();
         if (query == null || query.trim().equals(""))
         {
             throw new IllegalArgumentException("Query must be populated.");
@@ -84,6 +87,8 @@ public class PreparedStatementFactory
                 logger.debug("Pulling PreparedStatement from Cache: " + ps.getQueryString());
             }
         }
+        sw.stop();
+        logger.debug("Time to fetch prepared statement (" + query + "): " + sw.getTime());
         return (PreparedStatement) e.getObjectValue();
     }
 

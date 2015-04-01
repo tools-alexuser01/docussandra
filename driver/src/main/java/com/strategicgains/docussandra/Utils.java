@@ -32,13 +32,13 @@ public class Utils
      */
     public static String calculateITableName(String databaseName, String tableName, String indexName)
     {
-        String key = databaseName + ":" + tableName + ":" + indexName;
-        Cache c = CacheFactory.getCache("iTableName");
-        synchronized (CacheSynchronizer.getLockingObject(key, "iTableName"))
-        {
-            Element e = c.get(key);
-            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
-            {
+        //String key = databaseName + ":" + tableName + ":" + indexName;
+        //Cache c = CacheFactory.getCache("iTableName");
+//        synchronized (CacheSynchronizer.getLockingObject(key, "iTableName"))
+//        {
+//            Element e = c.get(key);
+//            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+//            {
                 //not cached; let's create it
                 StringBuilder sb = new StringBuilder();
                 sb.append(databaseName);
@@ -46,11 +46,12 @@ public class Utils
                 sb.append(tableName);
                 sb.append('_');
                 sb.append(indexName);
-                e = new Element(key, sb.toString().toLowerCase());
-                c.put(e);
-            }
-            return (String) e.getObjectValue();
-        }
+                return sb.toString().toLowerCase();
+//                e = new Element(key, sb.toString().toLowerCase());
+//                c.put(e);
+//            }
+//            return (String) e.getObjectValue();
+//        }
     }
 
     /**

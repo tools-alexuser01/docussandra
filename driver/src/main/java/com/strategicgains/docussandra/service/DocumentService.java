@@ -16,7 +16,7 @@ public class DocumentService
 
     private TableRepository tables;
     private DocumentRepository docs;
-    private final Cache tableCache = CacheFactory.getCache("tableExist");
+    //private final Cache tableCache = CacheFactory.getCache("tableExist");
 
     public DocumentService(TableRepository databaseRepository, DocumentRepository documentRepository)
     {
@@ -66,20 +66,23 @@ public class DocumentService
 
     private void verifyTable(String database, String table)
     {
-        String key = database + table;
+//        String key = database + table;
         Identifier tableId = new Identifier(database, table);
-        synchronized (CacheSynchronizer.getLockingObject(key, "tableExist"))
-        {
-            Element e = tableCache.get(key);
-            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
-            {
-                //not cached; let's read it                        
-                e = new Element(key, (Boolean) tables.exists(tableId));
-            }
-            if (!(Boolean) e.getObjectValue())
-            {
-                throw new ItemNotFoundException("Table not found: " + tableId.toString());
-            }
+//        synchronized (CacheSynchronizer.getLockingObject(key, "tableExist"))
+//        {
+//            Element e = tableCache.get(key);
+//            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+//            {
+//                //not cached; let's read it                        
+//                e = new Element(key, (Boolean) tables.exists(tableId));
+//            }
+//            if (!(Boolean) e.getObjectValue())
+//            {
+//                throw new ItemNotFoundException("Table not found: " + tableId.toString());
+//            }
+//        }
+        if (!tables.exists(tableId)){
+            throw new ItemNotFoundException("Table not found: " + tableId.toString());
         }
     }
 }
