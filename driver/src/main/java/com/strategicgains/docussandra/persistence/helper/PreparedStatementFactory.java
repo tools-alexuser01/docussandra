@@ -61,8 +61,8 @@ public class PreparedStatementFactory
 //        {
 //            establishCache();
 //        }
-        StopWatch sw = new StopWatch();
-        sw.start();
+        //StopWatch sw = new StopWatch();
+        //sw.start();
         if (query == null || query.trim().equals(""))
         {
             throw new IllegalArgumentException("Query must be populated.");
@@ -84,11 +84,11 @@ public class PreparedStatementFactory
             if (logger.isTraceEnabled())
             {
                 PreparedStatement ps = (PreparedStatement) e.getObjectValue();
-                logger.debug("Pulling PreparedStatement from Cache: " + ps.getQueryString());
+                logger.trace("Pulling PreparedStatement from Cache: " + ps.getQueryString());
             }
         }
-        sw.stop();
-        logger.debug("Time to fetch prepared statement (" + query + "): " + sw.getTime());
+        //sw.stop();
+        //logger.debug("Time to fetch prepared statement (" + query + "): " + sw.getTime());
         return (PreparedStatement) e.getObjectValue();
     }
 
