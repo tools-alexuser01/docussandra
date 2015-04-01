@@ -8,11 +8,15 @@ import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IndexService
 {
 	private TableRepository tables;
 	private IndexRepository indexes;
+        
+        private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public IndexService(TableRepository tableRepository, IndexRepository indexRepository)
 	{
@@ -25,6 +29,7 @@ public class IndexService
 	{
 		verifyTable(index.databaseName(), index.tableName());
 		ValidationEngine.validateAndThrow(index);
+                logger.debug("Creating index: " + index.toString());
 		return indexes.create(index);
 	}
 
@@ -36,11 +41,13 @@ public class IndexService
 	public void update(Index index)
     {
 		ValidationEngine.validateAndThrow(index);
+                logger.debug("Updating index: " + index.toString());
 		indexes.update(index);
     }
 
 	public void delete(Identifier identifier)
     {
+                logger.debug("Deleting index: " + identifier.toString());
 		indexes.delete(identifier);
     }
 
