@@ -91,7 +91,7 @@ public class IndexMaintainerHelper
         }
         String fieldToBucketOn = fieldToBucketOnObject.toString();//use the java toString to convert the object to a string.
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOn));//note, could have parse problems here with non-string types
-        //logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         //set the id
         bs.setUUID(1, entity.getUuid());
