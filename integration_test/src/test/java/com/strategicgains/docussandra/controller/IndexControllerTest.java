@@ -43,7 +43,7 @@ public class IndexControllerTest {
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public IndexControllerTest() {
+    public IndexControllerTest() throws Exception{
         f = Fixtures.getInstance();
     }
 

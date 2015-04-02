@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -42,19 +43,19 @@ import org.slf4j.LoggerFactory;
  */
 public class Fixtures
 {
-
+    
     private static Fixtures INSTANCE = null;
     private static final String CASSANDRA_SEEDS = "cassandra.seeds";
     private static final String CASSANDRA_KEYSPACE = "cassandra.keyspace";
     public static final String DB = "mydb";
     private static List<Document> bulkDocs = null;
-
+    
     private Session session;
     private final String[] cassandraSeeds;
     private final String cassandraKeyspace;
-
+    
     private static Logger logger = LoggerFactory.getLogger(Fixtures.class);
-
+    
     private static IndexRepository indexRepo;
     private static ITableRepository cleanUpInstance;
     private static DatabaseRepository databaseRepo;
@@ -64,7 +65,7 @@ public class Fixtures
     /**
      * Private constructor as this is a singleton object
      */
-    private Fixtures(String seeds)
+    private Fixtures(String seeds) throws Exception
     {
         //try {
         //Properties properties = loadTestProperties(); //TODO: put this call back in
@@ -75,10 +76,23 @@ public class Fixtures
 //        } catch (IOException ioe) { // Because Checked Exceptions are the bane
 //            throw new RuntimeException(ioe);
 //        }
-        Cluster cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
+        boolean embeddedCassandra;
+        Cluster cluster;
+        if (seeds.equals("localhost") || seeds.equals("127.0.0.1"))//using cassandra-unit for testing
+        {
+            EmbeddedCassandraServerHelper.startEmbeddedCassandra();
+            cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
+            embeddedCassandra = true;
+        } else //using a remote server for testing
+        {
+            cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
+            embeddedCassandra = false;
+        }
         final Metadata metadata = cluster.getMetadata();
         session = cluster.connect(this.getCassandraKeyspace());
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
+        
+        
         indexRepo = new IndexRepository(session);
         cleanUpInstance = new ITableRepository(getSession());
         databaseRepo = new DatabaseRepository(getSession());
@@ -91,7 +105,7 @@ public class Fixtures
      *
      * @return the singleton instance
      */
-    public static Fixtures getInstance(String seeds)
+    public static Fixtures getInstance(String seeds) throws Exception
     {
         if (INSTANCE == null)
         {
@@ -105,7 +119,7 @@ public class Fixtures
      *
      * @return the singleton instance
      */
-    public static Fixtures getInstance()
+    public static Fixtures getInstance() throws Exception
     {
         if (INSTANCE == null)
         {
@@ -113,16 +127,21 @@ public class Fixtures
         }
         return INSTANCE;
     }
-
+    
     public String getCassandraSeedString()
     {
         return "127.0.0.1";
     }
-
+    
     public String getCassandraKeyspace()
     {
         return cassandraKeyspace;
     }
+    
+    /**
+     * Creates the database based off of an cql file. Move to RestExpress and pull in from WW eventually.
+     */
+    private void initDatabase(String)
 
     /**
      * Load properties from a property file
@@ -152,12 +171,12 @@ public class Fixtures
             }
         }
     }
-
+    
     public static List<Document> getBulkDocuments() throws IOException, ParseException
     {
         return getBulkDocuments("./src/test/resources/documents.json", createTestTable());
     }
-
+    
     public static List<Document> getBulkDocuments(String path, Table t) throws IOException, ParseException
     {
         if (bulkDocs == null)
@@ -230,12 +249,12 @@ public class Fixtures
         index.isUnique(false);
         return index;
     }
-
+    
     public void insertIndex(Index index)
     {
         indexRepo.create(index);
     }
-
+    
     public void clearTestTables()
     {
         try
@@ -284,10 +303,10 @@ public class Fixtures
         {
             throw new RuntimeException(e);
         }
-
+        
         try
         {
-
+            
             tableRepo.delete(Fixtures.createTestTable());
         } catch (InvalidQueryException e)
         {
@@ -322,7 +341,7 @@ public class Fixtures
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
     }
-
+    
     public void createTestTables()
     {
         System.out.println("createTestITables");
@@ -336,7 +355,7 @@ public class Fixtures
         iTableDao.createITable(index3);
         tableRepo.create(Fixtures.createTestTable());
     }
-
+    
     public static final Document createTestDocument()
     {
         Document entity = new Document();
@@ -363,13 +382,13 @@ public class Fixtures
         entity.setUpdatedAt(new Date());
         return entity;
     }
-
+    
     public void insertDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
         documentRepo.create(document);
     }
-
+    
     public void insertDocuments(List<Document> documents)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
@@ -378,7 +397,7 @@ public class Fixtures
             documentRepo.create(document);
         }
     }
-
+    
     public void deleteDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
@@ -467,19 +486,19 @@ public class Fixtures
         t.description("My Table stores a lot of data.");
         return t;
     }
-
+    
     public void insertTable(Table table)
     {
         tableRepo.create(table);
     }
-
+    
     public static Database createTestDatabase()
     {
         Database database = new Database(DB);
         database.description("This is a test database.");
         return database;
     }
-
+    
     public void insertDatabase(Database database)
     {
         databaseRepo.create(database);

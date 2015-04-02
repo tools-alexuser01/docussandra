@@ -45,7 +45,7 @@ public class QueryControllerTest
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public QueryControllerTest()
+    public QueryControllerTest() throws Exception
     {
         f = Fixtures.getInstance();
     }

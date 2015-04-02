@@ -41,7 +41,7 @@ public class DatabaseControllerTest {
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public DatabaseControllerTest() {
+    public DatabaseControllerTest() throws Exception{
         f = Fixtures.getInstance();
     }
 

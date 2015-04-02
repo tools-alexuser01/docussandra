@@ -55,7 +55,7 @@ public class IndexMaintainerHelperTest
 
     private Fixtures f;
 
-    public IndexMaintainerHelperTest()
+    public IndexMaintainerHelperTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
@@ -72,7 +72,7 @@ public class IndexMaintainerHelperTest
 
     @Before
     public void setUp()
-    {
+    {        
         IndexChangeObserver ico = new IndexChangeObserver(f.getSession());
         indexRepo = new IndexRepository(f.getSession());
         docRepo = new DocumentRepository(f.getSession());

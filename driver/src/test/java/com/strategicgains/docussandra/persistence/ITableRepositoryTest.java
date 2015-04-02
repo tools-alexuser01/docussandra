@@ -24,7 +24,7 @@ public class ITableRepositoryTest
 
     private Fixtures f;
 
-    public ITableRepositoryTest()
+    public ITableRepositoryTest() throws Exception
     {
         f = Fixtures.getInstance();
     }

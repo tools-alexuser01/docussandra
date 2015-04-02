@@ -47,7 +47,7 @@ public class DocumentControllerTest {
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public DocumentControllerTest() {
+    public DocumentControllerTest() throws Exception{
         f = Fixtures.getInstance();
     }
 

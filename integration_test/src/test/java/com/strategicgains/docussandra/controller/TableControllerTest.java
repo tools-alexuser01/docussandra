@@ -42,7 +42,7 @@ public class TableControllerTest {
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public TableControllerTest() {
+    public TableControllerTest() throws Exception {
         f = Fixtures.getInstance();
     }
 
