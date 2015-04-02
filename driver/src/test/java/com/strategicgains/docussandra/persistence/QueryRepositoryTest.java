@@ -18,6 +18,7 @@ package com.strategicgains.docussandra.persistence;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
+import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
 import org.bson.BSONObject;
@@ -76,7 +77,7 @@ public class QueryRepositoryTest
     {
         System.out.println("testDoQueryNoResults");
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery());
+        QueryResponseWrapper result = instance.doQuery(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(result.isEmpty());//no data yet, should get an empty set
     }
@@ -93,7 +94,7 @@ public class QueryRepositoryTest
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery());
+        QueryResponseWrapper result = instance.doQuery(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 1);
@@ -121,9 +122,10 @@ public class QueryRepositoryTest
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.doCreate(doc);
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.createTestParsedQuery2());
+        QueryResponseWrapper result = instance.doQuery(Fixtures.createTestParsedQuery2());
         assertNotNull(result);
         assertTrue(result.isEmpty());
+        assertTrue(result.getNumAdditionalResults() == 0);
     }
 
     /**
@@ -139,10 +141,11 @@ public class QueryRepositoryTest
         //put a bunch of test docs in
         f.insertDocuments(docs);
         QueryRepository instance = new QueryRepository(f.getSession());
-        List<Document> result = instance.doQuery(Fixtures.createTestParsedQueryBulkData());
+        QueryResponseWrapper result = instance.doQuery(Fixtures.createTestParsedQueryBulkData());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 34);
+        assertTrue(result.getNumAdditionalResults() == 0);
     }
 
     /**
@@ -161,7 +164,7 @@ public class QueryRepositoryTest
         QueryRepository instance = new QueryRepository(f.getSession());
         ParsedQuery query = Fixtures.createTestParsedQueryBulkData();
         //let's get the first 5
-        List<Document> result = instance.doQuery(query, 5, 0);
+        QueryResponseWrapper result = instance.doQuery(query, 5, 0);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 5);
@@ -170,6 +173,7 @@ public class QueryRepositoryTest
         assertTrue(result.get(2).object().contains("\"field2\" : \"this is some more random data30\""));
         assertTrue(result.get(3).object().contains("\"field2\" : \"this is some more random data29\""));
         assertTrue(result.get(4).object().contains("\"field2\" : \"this is some more random data28\""));
+        assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the second 5
         result = instance.doQuery(query, 5, 5);
@@ -181,6 +185,7 @@ public class QueryRepositoryTest
         assertTrue(result.get(2).object().contains("\"field2\" : \"this is some more random data25\""));
         assertTrue(result.get(3).object().contains("\"field2\" : \"this is some more random data24\""));
         assertTrue(result.get(4).object().contains("\"field2\" : \"this is some more random data23\""));
+        assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the third 5
         result = instance.doQuery(query, 5, 10);
@@ -192,6 +197,7 @@ public class QueryRepositoryTest
         assertTrue(result.get(2).object().contains("\"field2\" : \"this is some more random data20\""));
         assertTrue(result.get(3).object().contains("\"field2\" : \"this is some more random data19\""));
         assertTrue(result.get(4).object().contains("\"field2\" : \"this is some more random data18\""));
+        assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the last 4
         result = instance.doQuery(query, 5, 30);
@@ -202,6 +208,7 @@ public class QueryRepositoryTest
         assertTrue(result.get(1).object().contains("\"field2\" : \"this is some more random data1\""));
         assertTrue(result.get(2).object().contains("\"field2\" : \"this is some more random data\""));
         assertTrue(result.get(3).object().contains("\"field2\" : \"this is some random data\""));
+        assertTrue(result.getNumAdditionalResults() == 0);
 
     }
 
