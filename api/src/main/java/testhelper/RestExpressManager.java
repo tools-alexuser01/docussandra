@@ -72,7 +72,9 @@ public class RestExpressManager {
     public synchronized void ensureRestExpressRunning() throws IOException {
         if (restExpressRunning == false) {
             LOGGER.info("Starting RestExpress server...");
-            server = Main.initializeServer(new String[0]);
+            String[] params = new String[1];
+            params[0] = "local_test";
+            server = Main.initializeServer(params);
             restExpressRunning = true;            
         }
     }
