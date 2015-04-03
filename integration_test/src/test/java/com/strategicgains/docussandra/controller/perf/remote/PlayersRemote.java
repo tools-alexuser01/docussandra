@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -233,6 +234,7 @@ public class PlayersRemote extends PerfTestParent
      * query with a set time (test should always pass; check output for stats.)
      */
     @Test
+    @Ignore
     public void directQueryTest() throws Exception
     {
         int numQueries = 50;
