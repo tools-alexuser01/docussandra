@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Class for managing testing of RestExpress so we are not tearing down and
  * creating new server instances with every tests.
+ * 
+ * For test use only!
  *
  * The alternate strange reason for creating this is that it seems once our
  * RestExpress server is started up, it won't let go of the HyperExpress plugin
