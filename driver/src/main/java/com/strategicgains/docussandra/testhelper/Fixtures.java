@@ -3,6 +3,7 @@ package com.strategicgains.docussandra.testhelper;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
@@ -286,21 +287,21 @@ public class Fixtures
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithtwofields");
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexbulkdata");
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
@@ -308,7 +309,7 @@ public class Fixtures
         {
             docRepo.delete(Fixtures.createTestDocument());
             docRepo.delete(Fixtures.createTestDocument2());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping document, probably doesn't exist.");
         }
@@ -320,7 +321,7 @@ public class Fixtures
                 try
                 {
                     docRepo.delete(d);
-                } catch (InvalidQueryException e)
+                } catch (DriverException e)
                 {
                     //logger.debug("Not dropping bulk document, probably doesn't exist.");
                 }
@@ -334,35 +335,35 @@ public class Fixtures
         {
 
             tableRepo.delete(Fixtures.createTestTable());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping table, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexOneField());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping table, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexTwoField());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexWithBulkDataHit());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
             databaseRepo.delete(Fixtures.createTestDatabase());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
