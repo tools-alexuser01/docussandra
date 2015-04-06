@@ -91,7 +91,10 @@ public class IndexMaintainerHelper
         }
         String fieldToBucketOn = fieldToBucketOnObject.toString();//use the java toString to convert the object to a string.
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOn));//note, could have parse problems here with non-string types
-        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        if (logger.isTraceEnabled())
+        {
+            logger.trace("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        }
         bs.setString(0, bucketId);
         //set the id
         bs.setUUID(1, entity.getUuid());
@@ -350,22 +353,22 @@ public class IndexMaintainerHelper
         Cache whereCache = CacheFactory.getCache("iTableWhere");
 //        synchronized (CacheSynchronizer.getLockingObject(key, "iTableWhere"))
 //        {
-            Element e = whereCache.get(key);
-            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
-            {
-                //not cached; let's create it                               
-                e = new Element(key, getWhereClauseHelper(index));//save it back to the cache
-                whereCache.put(e);
-            } else
-            {
-                logger.trace("Pulling WHERE statement info from Cache: " + e.getObjectValue().toString());
-            }
-            whereClause = (String) e.getObjectValue();
+        Element e = whereCache.get(key);
+        if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+        {
+            //not cached; let's create it                               
+            e = new Element(key, getWhereClauseHelper(index));//save it back to the cache
+            whereCache.put(e);
+        } else
+        {
+            logger.trace("Pulling WHERE statement info from Cache: " + e.getObjectValue().toString());
+        }
+        whereClause = (String) e.getObjectValue();
 //        }
         //create final CQL statement for updating a row in an iTable(s)        
         return String.format(CQL, iTableToUpdate, whereClause);
     }
-    
+
     /**
      * Helper for generating update CQL statements for iTables. This would be
      * private but keeping public for ease of testing.
