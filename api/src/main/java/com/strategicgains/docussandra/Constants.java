@@ -41,5 +41,6 @@ public class Constants
 		public static final String QUERIES = "query.collection";
 		public static final String QUERY = "query.single";
                 public static final String HEALTH = "health";
+                public static final String BUILD_INFO = "build.info";
 	}
 }
