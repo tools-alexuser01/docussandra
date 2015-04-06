@@ -12,54 +12,58 @@ import com.strategicgains.docussandra.config.Configuration;
 
 public abstract class Routes
 {
-	public static void define(Configuration config, RestExpress server)
-	{
-                //health check        
-                server.uri("/health.{format}", config.getHealthController())
-                    .action("getHealth", GET)
-                    .name(Constants.Routes.HEALTH).noSerialization();
-                    
-		server.uri("/", config.getDatabaseController())
-			.action("readAll", GET)
-			.method(OPTIONS)
-			.name(Constants.Routes.DATABASES);
 
-		server.uri("/{database}", config.getDatabaseController())
-			.method(GET, DELETE, PUT, POST)
-			.method(OPTIONS)
-			.name(Constants.Routes.DATABASE);
+    public static void define(Configuration config, RestExpress server)
+    {
+        //health check        
+        server.uri("/health.{format}", config.getHealthController())
+                .action("getHealth", GET)
+                .name(Constants.Routes.HEALTH).noSerialization();
+        //build info via GET
+        server.uri("/buildInfo.{format}", config.getBuildInfoController())
+                .action("getBuildInfo", GET)
+                .name(Constants.Routes.BUILD_INFO).noSerialization();
 
-		server.uri("/{database}/", config.getTableController())
-			.action("readAll", GET)
-			.name(Constants.Routes.TABLES);
+        server.uri("/", config.getDatabaseController())
+                .action("readAll", GET)
+                .method(OPTIONS)
+                .name(Constants.Routes.DATABASES);
 
-		server.uri("/{database}/{table}", config.getTableController())
-			.method(GET, DELETE, PUT, POST)
-			.name(Constants.Routes.TABLE);
+        server.uri("/{database}", config.getDatabaseController())
+                .method(GET, DELETE, PUT, POST)
+                .method(OPTIONS)
+                .name(Constants.Routes.DATABASE);
 
-		server.uri("/{database}/{table}/", config.getDocumentController())
-//			.action("readAll", GET)
-			.method(POST)
-			.name(Constants.Routes.DOCUMENTS);
+        server.uri("/{database}/", config.getTableController())
+                .action("readAll", GET)
+                .name(Constants.Routes.TABLES);
 
-		server.uri("/{database}/{table}/indexes", config.getIndexController())
-			.action("readAll", GET)
-			.name(Constants.Routes.INDEXES);
+        server.uri("/{database}/{table}", config.getTableController())
+                .method(GET, DELETE, PUT, POST)
+                .name(Constants.Routes.TABLE);
 
-		server.uri("/{database}/{table}/indexes/{index}", config.getIndexController())
-			.method(GET, PUT, DELETE, POST)
-			.name(Constants.Routes.INDEX);
+        server.uri("/{database}/{table}/", config.getDocumentController())
+                //			.action("readAll", GET)
+                .method(POST)
+                .name(Constants.Routes.DOCUMENTS);
 
-		server.uri("/{database}/{table}/{documentId}", config.getDocumentController())
-			.method(GET, PUT, DELETE)
-			.name(Constants.Routes.DOCUMENT);
+        server.uri("/{database}/{table}/indexes", config.getIndexController())
+                .action("readAll", GET)
+                .name(Constants.Routes.INDEXES);
+
+        server.uri("/{database}/{table}/indexes/{index}", config.getIndexController())
+                .method(GET, PUT, DELETE, POST)
+                .name(Constants.Routes.INDEX);
+
+        server.uri("/{database}/{table}/{documentId}", config.getDocumentController())
+                .method(GET, PUT, DELETE)
+                .name(Constants.Routes.DOCUMENT);
 
 		//TODO: Support /{database}/{table}/{key1}/{key2}/... style reads for multi-part keys
 //		server.regex("///(*)", config.getDocumentsController())
-
-		server.uri("/{database}/{table}/queries", config.getQueryController())
-			.action("query", POST)
-			.name(Constants.Routes.QUERY);
+        server.uri("/{database}/{table}/queries", config.getQueryController())
+                .action("query", POST)
+                .name(Constants.Routes.QUERY);
 //
 //		server.uri("/queries/{queryId}.{format}", config.getQueryController())
 //			.action("executeSavedQuery", POST)
@@ -82,5 +86,5 @@ public abstract class Routes
 //		    .action("readAll", GET)
 //		    .method(POST)
 //		    .name(Constants.Routes.SAMPLE_COMPOUND_COLLECTION);
-	}
+    }
 }

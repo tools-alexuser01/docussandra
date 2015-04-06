@@ -1,5 +1,6 @@
 package com.strategicgains.docussandra.config;
 
+import com.strategicgains.docussandra.controller.BuildInfoController;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
@@ -57,6 +58,7 @@ public class Configuration
     private IndexController indexController;
     private QueryController queryController;
     private HealthCheckController healthController;
+    private BuildInfoController buildInfoController;
 
     @Override
     public void fillValues(Properties p)
@@ -90,6 +92,7 @@ public class Configuration
         indexController = new IndexController(indexService);
         queryController = new QueryController(queryService);
         healthController = new HealthCheckController();
+        buildInfoController = new BuildInfoController();
 
 		// TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
@@ -211,5 +214,13 @@ public class Configuration
     public HealthCheckController getHealthController()
     {
         return healthController;
+    }
+
+    /**
+     * @return the buildInfoController
+     */
+    public BuildInfoController getBuildInfoController()
+    {
+        return buildInfoController;
     }
 }
