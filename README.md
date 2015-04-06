@@ -58,4 +58,3 @@ To run the integration tests:
 
 *mvn clean install -P integration
 
-
