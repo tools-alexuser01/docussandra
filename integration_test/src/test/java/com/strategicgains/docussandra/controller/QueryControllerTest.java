@@ -47,7 +47,7 @@ public class QueryControllerTest
 
     public QueryControllerTest() throws Exception
     {
-        f = Fixtures.getInstance();
+        f = Fixtures.getInstance(false);
     }
 
     /**
@@ -66,7 +66,7 @@ public class QueryControllerTest
 //        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
 //        String[] env = {testEnv};
         //Thread.sleep(10000);
-        RestExpressManager.getManager().ensureRestExpressRunning();
+        RestExpressManager.getManager().ensureRestExpressRunning(false);
     }
 
     @Before

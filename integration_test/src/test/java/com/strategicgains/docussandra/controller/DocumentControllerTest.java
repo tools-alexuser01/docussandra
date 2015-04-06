@@ -48,7 +48,7 @@ public class DocumentControllerTest {
     private Fixtures f;
 
     public DocumentControllerTest() throws Exception{
-        f = Fixtures.getInstance();
+        f = Fixtures.getInstance(false);
     }
 
     /**
@@ -61,7 +61,7 @@ public class DocumentControllerTest {
     public static void beforeClass() throws Exception {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
-        RestExpressManager.getManager().ensureRestExpressRunning();
+        RestExpressManager.getManager().ensureRestExpressRunning(false);
     }
 
     @Before

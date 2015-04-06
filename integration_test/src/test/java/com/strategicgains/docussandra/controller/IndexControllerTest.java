@@ -44,7 +44,7 @@ public class IndexControllerTest {
     private Fixtures f;
 
     public IndexControllerTest() throws Exception{
-        f = Fixtures.getInstance();
+        f = Fixtures.getInstance(false);
     }
 
     /**
@@ -57,7 +57,7 @@ public class IndexControllerTest {
     public static void beforeClass() throws Exception {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
-        RestExpressManager.getManager().ensureRestExpressRunning();
+        RestExpressManager.getManager().ensureRestExpressRunning(false);
     }
 
     @Before

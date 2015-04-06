@@ -42,7 +42,7 @@ public class DatabaseControllerTest {
     private Fixtures f;
 
     public DatabaseControllerTest() throws Exception{
-        f = Fixtures.getInstance();
+        f = Fixtures.getInstance(false);
     }
 
     /**
@@ -61,7 +61,7 @@ public class DatabaseControllerTest {
 //        String[] env = {testEnv};
         LOGGER.debug("Loading RestExpress Environment... ");
         //Thread.sleep(10000);
-        RestExpressManager.getManager().ensureRestExpressRunning();
+        RestExpressManager.getManager().ensureRestExpressRunning(false);
     }
 
     @Before

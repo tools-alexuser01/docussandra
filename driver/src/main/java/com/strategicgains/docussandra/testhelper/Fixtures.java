@@ -70,7 +70,7 @@ public class Fixtures
     /**
      * Private constructor as this is a singleton object
      */
-    private Fixtures(String seeds) throws Exception
+    private Fixtures(String seeds, boolean mockCassandra) throws Exception
     {
         //try {
         //Properties properties = loadTestProperties(); //TODO: put this call back in
@@ -83,12 +83,12 @@ public class Fixtures
 //        }
         boolean embeddedCassandra;
         Cluster cluster;
-        if (seeds.equals("localhost") || seeds.equals("127.0.0.1"))//using cassandra-unit for testing
+        if (mockCassandra)//using cassandra-unit for testing
         {
             EmbeddedCassandraServerHelper.startEmbeddedCassandra();
             cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
             embeddedCassandra = true;
-        } else //using a remote server for testing
+        } else //using a remote or local server for testing
         {
             cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
             embeddedCassandra = false;
@@ -117,11 +117,11 @@ public class Fixtures
      *
      * @return the singleton instance
      */
-    public static Fixtures getInstance(String seeds) throws Exception
+    public static Fixtures getInstance(String seeds, boolean mockCassandra) throws Exception
     {
         if (INSTANCE == null)
         {
-            INSTANCE = new Fixtures(seeds);
+            INSTANCE = new Fixtures(seeds, mockCassandra);
         }
         return INSTANCE;
     }
@@ -135,7 +135,21 @@ public class Fixtures
     {
         if (INSTANCE == null)
         {
-            INSTANCE = new Fixtures("127.0.0.1");
+            INSTANCE = new Fixtures("127.0.0.1", true);
+        }
+        return INSTANCE;
+    }
+
+    /**
+     * Get this singleton instance. THIS CLASS IS FOR TESTING ONLY.
+     *
+     * @return the singleton instance
+     */
+    public static Fixtures getInstance(boolean mockCassandra) throws Exception
+    {
+        if (INSTANCE == null)
+        {
+            INSTANCE = new Fixtures("127.0.0.1", mockCassandra);
         }
         return INSTANCE;
     }

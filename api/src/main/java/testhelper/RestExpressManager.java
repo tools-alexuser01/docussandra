@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Class for managing testing of RestExpress so we are not tearing down and
  * creating new server instances with every tests.
- * 
+ *
  * For test use only!
  *
  * The alternate strange reason for creating this is that it seems once our
@@ -32,12 +32,14 @@ import org.slf4j.LoggerFactory;
  * and will disallow another RestExpress instance to startup, even after the
  * first has been shutdown.
  *
- * Generally, the usage is as follows: RestExpressManager.getManager().ensureRestExpressRunning();
- * 
+ * Generally, the usage is as follows:
+ * RestExpressManager.getManager().ensureRestExpressRunning();
+ *
  * @author udeyoje
  */
-public class RestExpressManager {
-    
+public class RestExpressManager
+{
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RestExpressManager.class);
 
     private static RestExpressManager manager = null;
@@ -49,16 +51,20 @@ public class RestExpressManager {
     /**
      * Singleton.
      */
-    private RestExpressManager() {
+    private RestExpressManager()
+    {
         ;
     }
 
     /**
      * Gets an instance of this class.
-     * @return 
+     *
+     * @return
      */
-    public static synchronized RestExpressManager getManager() {
-        if (manager == null) {
+    public static synchronized RestExpressManager getManager()
+    {
+        if (manager == null)
+        {
             manager = new RestExpressManager();
         }
         return manager;
@@ -67,24 +73,49 @@ public class RestExpressManager {
     /**
      * Ensures RestExpress is presently running.
      *
+     * Cassandra will be mocked instead of relying on a external process.
+     *
      * @throws IOException
      */
-    public synchronized void ensureRestExpressRunning() throws IOException {
-        if (restExpressRunning == false) {
+    public synchronized void ensureRestExpressRunning() throws IOException
+    {
+        ensureRestExpressRunning(true);//default to mocking cassandra
+    }
+
+    /**
+     * Ensures RestExpress is presently running.
+     *
+     * @param mockCassandra If true, Cassandra will be mocked instead of relying
+     * on a external process.
+     *
+     * @throws IOException
+     */
+    public synchronized void ensureRestExpressRunning(boolean mockCassandra) throws IOException
+    {
+        if (restExpressRunning == false)
+        {
             LOGGER.info("Starting RestExpress server...");
-            String[] params = new String[1];
-            params[0] = "local_test";
-            server = Main.initializeServer(params);
-            restExpressRunning = true;            
+            if (mockCassandra)
+            {
+                String[] params = new String[1];
+                params[0] = "local_test";
+                server = Main.initializeServer(params);
+            } else
+            {
+                server = Main.initializeServer(new String[0]);
+            }
+            restExpressRunning = true;
         }
     }
 
     /**
      * Shuts down the rest express instance.
-     * @throws Throwable 
+     *
+     * @throws Throwable
      */
     @Override
-    protected void finalize() throws Throwable {
+    protected void finalize() throws Throwable
+    {
         super.finalize();
         server.shutdown();
         restExpressRunning = false;
