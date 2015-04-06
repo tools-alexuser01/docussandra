@@ -59,6 +59,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.3.2</version>
         </dependency>
+        <dependency>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <version>2.1.13</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -91,6 +96,27 @@
                             <Project-ArtifactId>${project.artifactId}</Project-ArtifactId>
                         </manifestEntries>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.1.13</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- ... -->
+
+                    <!-- this is false by default, forces the plugin to generate the git.properties file -->
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+
+                    <!-- The path for the to be generated properties file, it's relative to ${project.basedir} -->
+                    <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
                 </configuration>
             </plugin>
             <plugin>
