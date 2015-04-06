@@ -15,11 +15,9 @@
  */
 package com.strategicgains.docussandra.service;
 
-import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
-import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
@@ -86,14 +84,14 @@ public class ParsedQueryFactory
             throw new IllegalArgumentException("Query cannot be null.");
         }
         final String key = db + ":" + toParse.getTable() + ":" + toParse.getWhere();
-        StopWatch pull = new StopWatch();
-        pull.start();
+        //StopWatch pull = new StopWatch();
+        //pull.start();
         Cache c = CacheFactory.getCache("parsedQuery");
 //        synchronized (CacheSynchronizer.getLockingObject(key, ParsedQuery.class))
 //        {
         Element e = c.get(key);
-        pull.stop();
-        logger.debug("Time to pull a parsed query from cache: " + pull.getTime());
+        //pull.stop();
+        //logger.debug("Time to pull a parsed query from cache: " + pull.getTime());
         if (e == null)
         {
             logger.debug("Creating new ParsedQuery for: " + key);
