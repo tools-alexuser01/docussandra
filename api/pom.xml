@@ -110,11 +110,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!-- ... -->
-
                     <!-- this is false by default, forces the plugin to generate the git.properties file -->
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
-
                     <!-- The path for the to be generated properties file, it's relative to ${project.basedir} -->
                     <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
                 </configuration>
