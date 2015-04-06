@@ -57,3 +57,5 @@ Naming restrictions on the table name are similar to the database: unique *to th
 To run the integration tests:
 
 *mvn clean install -P integration
+
+
