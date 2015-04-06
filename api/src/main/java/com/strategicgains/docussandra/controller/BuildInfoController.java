@@ -22,7 +22,7 @@ public class BuildInfoController
         response.setContentType(ContentType.JSON);
         try
         {
-            return FileUtils.readFileToString(new File(this.getClass().getResource("/git.properties").toURI()));
+            return FileUtils.readFileToString(new File(this.getClass().getResource("./git.properties").toURI()));
         } catch (IOException | URISyntaxException e)
         {
             String message = "Could not read build info file.";
