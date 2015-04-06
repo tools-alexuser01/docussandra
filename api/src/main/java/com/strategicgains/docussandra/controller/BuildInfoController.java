@@ -3,6 +3,7 @@ package com.strategicgains.docussandra.controller;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import org.apache.commons.io.FileUtils;
 import org.restexpress.ContentType;
 import org.restexpress.Request;
@@ -21,8 +22,8 @@ public class BuildInfoController
         response.setContentType(ContentType.JSON);
         try
         {
-            return FileUtils.readFileToString(new File("./src/main/resources/git.properties"));
-        } catch (IOException e)
+            return FileUtils.readFileToString(new File(this.getClass().getResource("/git.properties").toURI()));
+        } catch (IOException | URISyntaxException e)
         {
             String message = "Could not read build info file.";
             LOGGER.error(message, e);
