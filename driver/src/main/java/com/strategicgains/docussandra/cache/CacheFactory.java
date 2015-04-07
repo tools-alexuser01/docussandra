@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.cache;
 
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -104,7 +105,17 @@ public class CacheFactory
             manager.shutdown();
             cacheMap = new ConcurrentHashMap<>();
             cacheManagerEstablished = false;
-            manager = null;
+        }
+    }
+    
+    /**
+     * Clears all caches we currently have. For testing use only.
+     */
+    public static void clearAllCaches(){
+        Enumeration e = cacheMap.elements();
+        while(e.hasMoreElements()){
+            Cache c = (Cache)e.nextElement();
+            c.removeAll();
         }
     }
 }

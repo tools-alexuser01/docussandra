@@ -68,8 +68,9 @@ public class DocumentControllerTest {
     @Before
     public void beforeTest() {
         f.clearTestTables();
-        //re-establish cache 'cause we just deleted everything; if we had something cached, it's not going to work now if we re-create it
-        CacheFactory.shutdownCacheManger();
+        //re-establish cache 'cause we just deleted everything;
+        //if we had something cached, it's not going to work anymore if we re-create the object with the same name
+        CacheFactory.clearAllCaches();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         Table testTable = Fixtures.createTestTable();

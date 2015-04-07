@@ -73,7 +73,7 @@ public class QueryControllerTest
     @Before
     public void beforeTest() throws Exception
     {
-        CacheFactory.shutdownCacheManger();//kill the cache and make it re-create for the purposes of this test.
+        CacheFactory.clearAllCaches();//kill the cache and make it re-create for the purposes of this test.
         f.clearTestTables();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
