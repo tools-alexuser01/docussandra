@@ -45,7 +45,7 @@ public class ParsedQueryFactoryTest
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Fixtures f;
 
-    public ParsedQueryFactoryTest()
+    public ParsedQueryFactoryTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
