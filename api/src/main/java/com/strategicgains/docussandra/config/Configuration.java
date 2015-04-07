@@ -1,5 +1,6 @@
 package com.strategicgains.docussandra.config;
 
+import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.controller.BuildInfoController;
 import java.io.IOException;
@@ -62,7 +63,7 @@ public class Configuration
     private QueryController queryController;
     private HealthCheckController healthController;
     private BuildInfoController buildInfoController;
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 
     @Override
@@ -72,16 +73,16 @@ public class Configuration
         this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
         this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_SIZE, DEFAULT_EXECUTOR_THREAD_POOL_SIZE));
         this.metricsSettings = new MetricsConfig(p);
-        CassandraConfig dbConfig = new CassandraConfig(p);
+        CassandraConfigWithGenericSessionAccess dbConfig = new CassandraConfigWithGenericSessionAccess(p);
         initialize(dbConfig);
         loadManifest();
     }
 
-    public void initialize(CassandraConfig dbConfig)
+    private void initialize(CassandraConfigWithGenericSessionAccess dbConfig)
     {
         try
         {
-            Utils.initDatabase("/docussandra_autoload.cql", dbConfig.getSession());
+            Utils.initDatabase("/docussandra_autoload.cql", dbConfig.getGenericSession());
         } catch (IOException e)
         {
             LOGGER.error("Could not init database; trying to continue startup anyway (in case DB was manually created).", e);
@@ -234,5 +235,30 @@ public class Configuration
     public BuildInfoController getBuildInfoController()
     {
         return buildInfoController;
+    }
+
+    /**
+     * CassandraConfig object that we can get a session seperate from the
+     * keyspace.
+     */
+    private class CassandraConfigWithGenericSessionAccess extends CassandraConfig
+    {
+
+        private Session genericSession;
+
+        public CassandraConfigWithGenericSessionAccess(Properties p)
+        {
+            super(p);
+        }
+
+        public Session getGenericSession()
+        {
+            if (genericSession == null)
+            {
+                genericSession = getCluster().connect();
+            }
+
+            return genericSession;
+        }
     }
 }
