@@ -25,7 +25,6 @@ import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
