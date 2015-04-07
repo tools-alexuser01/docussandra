@@ -1,3 +1,5 @@
+package com.strategicgains.docussandra.controller;
+
 /*
  * Copyright 2015 udeyoje.
  *
@@ -13,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.controller;
+
 
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
@@ -39,10 +41,10 @@ public class DatabaseControllerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
-    private Fixtures f;
+    private static Fixtures f;
 
     public DatabaseControllerTest() throws Exception{
-        f = Fixtures.getInstance(false);
+        
     }
 
     /**
@@ -61,7 +63,8 @@ public class DatabaseControllerTest {
 //        String[] env = {testEnv};
         LOGGER.debug("Loading RestExpress Environment... ");
         //Thread.sleep(10000);
-        RestExpressManager.getManager().ensureRestExpressRunning(false);
+        f = Fixtures.getInstance();
+        RestExpressManager.getManager().ensureRestExpressRunning();
     }
 
     @Before

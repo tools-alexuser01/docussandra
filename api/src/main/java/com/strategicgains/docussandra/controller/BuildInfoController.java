@@ -1,10 +1,9 @@
 package com.strategicgains.docussandra.controller;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import org.apache.commons.io.FileUtils;
+import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
 import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
@@ -22,8 +21,11 @@ public class BuildInfoController
         response.setContentType(ContentType.JSON);
         try
         {
-            return FileUtils.readFileToString(new File(this.getClass().getResource("./git.properties").toURI()));
-        } catch (IOException | URISyntaxException e)
+            InputStream propsStream = this.getClass().getResourceAsStream("/git.properties");
+            String buildInfo = IOUtils.toString(propsStream);
+            LOGGER.debug("Get build info called: " + buildInfo);
+            return buildInfo;
+        } catch (IOException e)
         {
             String message = "Could not read build info file.";
             LOGGER.error(message, e);

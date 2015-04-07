@@ -42,8 +42,8 @@ public class TableControllerTest {
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public TableControllerTest() {
-        f = Fixtures.getInstance();
+    public TableControllerTest() throws Exception {
+        f = Fixtures.getInstance(false);
     }
 
     /**
@@ -61,7 +61,7 @@ public class TableControllerTest {
 //        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
 //        String[] env = {testEnv};
         //Thread.sleep(10000);
-        RestExpressManager.getManager().ensureRestExpressRunning();
+        RestExpressManager.getManager().ensureRestExpressRunning(false);
     }
 
     @Before

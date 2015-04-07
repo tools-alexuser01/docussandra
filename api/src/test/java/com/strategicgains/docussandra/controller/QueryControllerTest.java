@@ -1,3 +1,5 @@
+package com.strategicgains.docussandra.controller;
+
 /*
  * Copyright 2015 udeyoje.
  *
@@ -13,11 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.controller;
-
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.given;
-import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
@@ -44,11 +43,11 @@ public class QueryControllerTest
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
-    private Fixtures f;
+    private static Fixtures f;
 
     public QueryControllerTest() throws Exception
     {
-        f = Fixtures.getInstance(false);
+
     }
 
     /**
@@ -67,13 +66,13 @@ public class QueryControllerTest
 //        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
 //        String[] env = {testEnv};
         //Thread.sleep(10000);
-        RestExpressManager.getManager().ensureRestExpressRunning(false);
+        f = Fixtures.getInstance();
+        RestExpressManager.getManager().ensureRestExpressRunning();
     }
 
     @Before
     public void beforeTest() throws Exception
     {
-        CacheFactory.shutdownCacheManger();//kill the cache and make it re-create for the purposes of this test.
         f.clearTestTables();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);

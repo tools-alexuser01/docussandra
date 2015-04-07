@@ -33,7 +33,7 @@ public class PreparedStatementFactoryTest
 {
     private Fixtures f;
     
-    public PreparedStatementFactoryTest()
+    public PreparedStatementFactoryTest() throws Exception
     {
         f = Fixtures.getInstance();
     }

@@ -34,7 +34,7 @@ public class DatabaseRepositoryTest
 
     private Fixtures f;
 
-    public DatabaseRepositoryTest()
+    public DatabaseRepositoryTest() throws Exception
     {
         f = Fixtures.getInstance();
     }

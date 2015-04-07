@@ -42,7 +42,7 @@ public class QueryControllerPerf
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public QueryControllerPerf()
+    public QueryControllerPerf() throws Exception
     {
         f = Fixtures.getInstance();
     }

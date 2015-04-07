@@ -42,7 +42,7 @@ public class QueryRepositoryTest
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private Fixtures f;
 
-    public QueryRepositoryTest()
+    public QueryRepositoryTest() throws Exception
     {
         f = Fixtures.getInstance();
     }

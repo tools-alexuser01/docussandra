@@ -51,11 +51,6 @@ public class DocumentRepository
     private static final String UPDATE_CQL = "update %s set object = ?, updated_at = ? where %s = ?";
     private static final String CREATE_CQL = "insert into %s (%s, object, created_at, updated_at) values (?, ?, ?, ?)";
 
-//    private Map<Table, PreparedStatement> createStmts = new HashMap<>();
-//    private Map<Table, PreparedStatement> readStmts = new HashMap<>();
-//    private Map<Table, PreparedStatement> existsStmts = new HashMap<>();
-//    private Map<Table, PreparedStatement> updateStmts = new HashMap<>();
-//    private Map<Table, PreparedStatement> deleteStmts = new HashMap<>();
 
     private final IndexBucketLocator bucketLocator;
 
