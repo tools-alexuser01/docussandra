@@ -154,7 +154,7 @@ public class Main
             HttpClient client = HttpClientBuilder.create().build();
             JSONParser parser = new JSONParser();
             HttpGet request = new HttpGet(url);
-            RequestConfig rc = rc = RequestConfig.custom().setConnectTimeout(60000).setSocketTimeout(3600000).setConnectionRequestTimeout(60000).build();;
+            RequestConfig rc = RequestConfig.custom().setConnectTimeout(60000).setSocketTimeout(3600000).setConnectionRequestTimeout(60000).build();;
             request.setConfig(rc);
             // add request header
             request.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
