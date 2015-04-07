@@ -66,7 +66,7 @@ public class DocumentControllerTest {
 
     @Before
     public void beforeTest() {
-        f.clearTestTables();
+        f.clearTestTables();        
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         Table testTable = Fixtures.createTestTable();
