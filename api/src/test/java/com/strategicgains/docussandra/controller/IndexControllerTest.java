@@ -1,3 +1,5 @@
+package com.strategicgains.docussandra.controller;
+
 /*
  * Copyright 2015 udeyoje.
  *
@@ -13,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.controller;
+
 
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
@@ -41,10 +43,9 @@ public class IndexControllerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
-    private Fixtures f;
+    private static Fixtures f;
 
     public IndexControllerTest() throws Exception{
-        f = Fixtures.getInstance(false);
     }
 
     /**
@@ -57,7 +58,8 @@ public class IndexControllerTest {
     public static void beforeClass() throws Exception {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
-        RestExpressManager.getManager().ensureRestExpressRunning(false);
+        f = Fixtures.getInstance();
+        RestExpressManager.getManager().ensureRestExpressRunning();
     }
 
     @Before

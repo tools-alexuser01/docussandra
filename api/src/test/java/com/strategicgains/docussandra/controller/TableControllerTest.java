@@ -1,3 +1,5 @@
+package com.strategicgains.docussandra.controller;
+
 /*
  * Copyright 2015 udeyoje.
  *
@@ -13,12 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.controller;
-
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.domain.Table;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +35,17 @@ import testhelper.RestExpressManager;
  *
  * @author udeyoje
  */
-public class DatabaseControllerTest {
+public class TableControllerTest
+{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseControllerTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
-    private Fixtures f;
+    private static Fixtures f;
 
-    public DatabaseControllerTest() throws Exception{
-        f = Fixtures.getInstance(false);
+    public TableControllerTest() throws Exception
+    {
+        f = Fixtures.getInstance();
     }
 
     /**
@@ -52,21 +55,26 @@ public class DatabaseControllerTest {
      * @throws Exception
      */
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() throws Exception
+    {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
-        RestAssured.basePath = "/";
+        //RestAssured.basePath = "/courses/" + COURSE_ID + "/categories";
 
 //        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
 //        String[] env = {testEnv};
-        LOGGER.debug("Loading RestExpress Environment... ");
         //Thread.sleep(10000);
-        RestExpressManager.getManager().ensureRestExpressRunning(false);
+        f = Fixtures.getInstance();
+        RestExpressManager.getManager().ensureRestExpressRunning();
     }
 
     @Before
-    public void beforeTest() {
+    public void beforeTest()
+    {
         f.clearTestTables();
+        Database testDb = Fixtures.createTestDatabase();
+        f.insertDatabase(testDb);
+        RestAssured.basePath = "/" + testDb.name();
     }
 
     /**
@@ -74,105 +82,103 @@ public class DatabaseControllerTest {
      * executed.
      */
     @AfterClass
-    public static void afterClass() {
+    public static void afterClass()
+    {
     }
 
     /**
      * Cleanup that is performed after each test is executed.
      */
     @After
-    public void afterTest() {
+    public void afterTest()
+    {
         f.clearTestTables();
     }
 
-//    /**
-//     * Tests that the GET / properly retrieves all existing database
-//     */
-//    @Test
-//    public void getDatabasesTest() {
-//        Database testDb = Fixtures.createTestDatabase();
-//        f.insertDatabase(testDb);
-//        //not the best test
-//        expect().statusCode(200)
-//                .body("", contains(testDb.name()))
-//                .body("", contains(testDb.description())).when()
-//                .get("/");
-//    }
     /**
-     * Tests that the GET /{databases} properly retrieves an existing database.
+     * Tests that the GET /{databases}/{table} properly retrieves an existing
+     * table.
      */
     @Test
-    public void getDatabaseTest() {
-        Database testDb = Fixtures.createTestDatabase();
-        f.insertDatabase(testDb);
+    public void getTableTest()
+    {
+        Table testTable = Fixtures.createTestTable();
+        f.insertTable(testTable);
         expect().statusCode(200)
-                .body("name", equalTo(testDb.name()))
-                .body("description", equalTo(testDb.description()))
+                .body("name", equalTo(testTable.name()))
+                .body("description", equalTo(testTable.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
+                .get(testTable.name());
     }
 
     /**
-     * Tests that the POST /{databases} endpoint properly creates a database.
+     * Tests that the POST /{databases}/{table} endpoint properly creates a
+     * table.
      */
     @Test
-    public void postDatabaseTest() {
-        Database testDb = Fixtures.createTestDatabase();
-        String dbStr = "{" + "\"description\" : \"" + testDb.description()
-                + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
+    public void postTableTest()
+    {
+        Table testTable = Fixtures.createTestTable();
+        String tableStr = "{" + "\"description\" : \"" + testTable.description()
+                + "\"," + "\"name\" : \"" + testTable.name() + "\"}";
         //act
-        given().body(dbStr).expect().statusCode(201)
+        given().body(tableStr).expect().statusCode(201)
                 //.header("Location", startsWith(RestAssured.basePath + "/"))
-                .body("name", equalTo(testDb.name()))
-                .body("description", equalTo(testDb.description()))
+                .body("name", equalTo(testTable.name()))
+                .body("description", equalTo(testTable.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .when().post(testDb.name());
+                .when().post(testTable.name());
         //check
         expect().statusCode(200)
-                .body("name", equalTo(testDb.name()))
-                .body("description", equalTo(testDb.description()))
+                .body("name", equalTo(testTable.name()))
+                .body("description", equalTo(testTable.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
+                .get(testTable.name());
     }
 
     /**
-     * Tests that the PUT /{databases} endpoint properly updates a database.
+     * Tests that the PUT /{databases}/{table} endpoint properly updates a
+     * table.
      */
     @Test
-    public void putDatabaseTest() {
-        Database testDb = Fixtures.createTestDatabase();
-        f.insertDatabase(testDb);
+    public void putTableTest()
+    {
+        Table testTable = Fixtures.createTestTable();
+        f.insertTable(testTable);
         String newDesciption = "this is a new description";
-        String dbStr = "{" + "\"description\" : \"" + newDesciption
-                + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
+        String tableStr = "{" + "\"description\" : \"" + newDesciption
+                + "\"," + "\"name\" : \"" + testTable.name() + "\"}";
+
         //act
-        given().body(dbStr).expect().statusCode(204)
-                .when().put(testDb.name());
+        given().body(tableStr).expect().statusCode(204)
+                .when().put(testTable.name());
+
         //check
         expect().statusCode(200)
-                .body("name", equalTo(testDb.name()))
+                .body("name", equalTo(testTable.name()))
                 .body("description", equalTo(newDesciption))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
-
+                .get(testTable.name());
     }
 
     /**
-     * Tests that the DELETE /{databases} endpoint properly deletes a database.
+     * Tests that the DELETE /{databases}/{table} endpoint properly deletes a
+     * table.
      */
     @Test
-    public void deleteDatabaseTest() {
-        Database testDb = Fixtures.createTestDatabase();
-        f.insertDatabase(testDb);
+    public void deleteTableTest()
+    {
+        Table testTable = Fixtures.createTestTable();
+        f.insertTable(testTable);
         //act
         given().expect().statusCode(204)
-                .when().delete(testDb.name());
+                .when().delete(testTable.name());
         //check
         expect().statusCode(404).when()
-                .get(testDb.name());
+                .get(testTable.name());
     }
 }

@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -233,10 +234,11 @@ public class PlayersRemote extends PerfTestParent
      * query with a set time (test should always pass; check output for stats.)
      */
     @Test
-    public void directQueryTest()
+    @Ignore
+    public void directQueryTest() throws Exception
     {
         int numQueries = 50;
-        Fixtures f = Fixtures.getInstance("10.199.0.23,10.199.8.47,10.199.4.248,10.199.24.172,10.199.28.84,10.199.23.113");
+        Fixtures f = Fixtures.getInstance("10.199.0.23,10.199.8.47,10.199.4.248,10.199.24.172,10.199.28.84,10.199.23.113", false);
         QueryService qs = new QueryService(new QueryRepository(f.getSession()));
         Query q = new Query();
         q.setWhere("NAMELAST = 'Manning'");

@@ -37,7 +37,7 @@ public class LoadTestData
 
     private Fixtures f;
 
-    public LoadTestData()
+    public LoadTestData() throws Exception
     {
         f = Fixtures.getInstance();
     }

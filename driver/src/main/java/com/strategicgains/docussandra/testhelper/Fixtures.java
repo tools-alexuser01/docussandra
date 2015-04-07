@@ -3,6 +3,7 @@ package com.strategicgains.docussandra.testhelper;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
@@ -18,13 +19,18 @@ import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.UUID;
+import java.util.regex.Pattern;
+import org.apache.commons.io.FileUtils;
+import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -64,7 +70,7 @@ public class Fixtures
     /**
      * Private constructor as this is a singleton object
      */
-    private Fixtures(String seeds)
+    private Fixtures(String seeds, boolean mockCassandra) throws Exception
     {
         //try {
         //Properties properties = loadTestProperties(); //TODO: put this call back in
@@ -75,9 +81,29 @@ public class Fixtures
 //        } catch (IOException ioe) { // Because Checked Exceptions are the bane
 //            throw new RuntimeException(ioe);
 //        }
-        Cluster cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
+        boolean embeddedCassandra;
+        Cluster cluster;
+        if (mockCassandra)//using cassandra-unit for testing
+        {
+            EmbeddedCassandraServerHelper.startEmbeddedCassandra();
+            cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
+            embeddedCassandra = true;
+        } else //using a remote or local server for testing
+        {
+            cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
+            embeddedCassandra = false;
+        }
         final Metadata metadata = cluster.getMetadata();
-        session = cluster.connect(this.getCassandraKeyspace());
+
+        if (embeddedCassandra)
+        {
+            session = cluster.connect();
+            initDatabase(new File("./src/main/resources/docussandra.cql"));
+            session = cluster.connect(this.getCassandraKeyspace());
+        } else
+        {
+            session = cluster.connect(this.getCassandraKeyspace());
+        }
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
         indexRepo = new IndexRepository(session);
         cleanUpInstance = new ITableRepository(getSession());
@@ -91,11 +117,11 @@ public class Fixtures
      *
      * @return the singleton instance
      */
-    public static Fixtures getInstance(String seeds)
+    public static Fixtures getInstance(String seeds, boolean mockCassandra) throws Exception
     {
         if (INSTANCE == null)
         {
-            INSTANCE = new Fixtures(seeds);
+            INSTANCE = new Fixtures(seeds, mockCassandra);
         }
         return INSTANCE;
     }
@@ -105,11 +131,25 @@ public class Fixtures
      *
      * @return the singleton instance
      */
-    public static Fixtures getInstance()
+    public static Fixtures getInstance() throws Exception
     {
         if (INSTANCE == null)
         {
-            INSTANCE = new Fixtures("127.0.0.1");
+            INSTANCE = new Fixtures("127.0.0.1", true);
+        }
+        return INSTANCE;
+    }
+
+    /**
+     * Get this singleton instance. THIS CLASS IS FOR TESTING ONLY.
+     *
+     * @return the singleton instance
+     */
+    public static Fixtures getInstance(boolean mockCassandra) throws Exception
+    {
+        if (INSTANCE == null)
+        {
+            INSTANCE = new Fixtures("127.0.0.1", mockCassandra);
         }
         return INSTANCE;
     }
@@ -122,6 +162,26 @@ public class Fixtures
     public String getCassandraKeyspace()
     {
         return cassandraKeyspace;
+    }
+
+    /**
+     * Creates the database based off of an cql file. Move to RestExpress and
+     * pull in from WW eventually.
+     */
+    private void initDatabase(File cqlFile) throws FileNotFoundException, IOException
+    {
+        logger.warn("Creating new database from scratch!");
+        String cql = FileUtils.readFileToString(cqlFile);
+        String[] statements = cql.split("\\Q;\\E");
+        for (String statement : statements)
+        {
+            statement = statement.trim();
+            statement = statement.replaceAll("\\Q\n\\E", " ");
+            if (!statement.equals("") && !statement.startsWith("//"))
+            {
+                session.execute(statement);
+            }
+        }
     }
 
     /**
@@ -241,21 +301,21 @@ public class Fixtures
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithtwofields");
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexbulkdata");
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
@@ -263,7 +323,7 @@ public class Fixtures
         {
             docRepo.delete(Fixtures.createTestDocument());
             docRepo.delete(Fixtures.createTestDocument2());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping document, probably doesn't exist.");
         }
@@ -275,7 +335,7 @@ public class Fixtures
                 try
                 {
                     docRepo.delete(d);
-                } catch (InvalidQueryException e)
+                } catch (DriverException e)
                 {
                     //logger.debug("Not dropping bulk document, probably doesn't exist.");
                 }
@@ -289,35 +349,35 @@ public class Fixtures
         {
 
             tableRepo.delete(Fixtures.createTestTable());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping table, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexOneField());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not dropping table, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexTwoField());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexWithBulkDataHit());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
             databaseRepo.delete(Fixtures.createTestDatabase());
-        } catch (InvalidQueryException e)
+        } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }

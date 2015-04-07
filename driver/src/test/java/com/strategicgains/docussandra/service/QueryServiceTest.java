@@ -46,7 +46,7 @@ public class QueryServiceTest
     private QueryService instance;
     private Fixtures f;
 
-    public QueryServiceTest()
+    public QueryServiceTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
