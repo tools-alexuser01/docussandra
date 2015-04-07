@@ -1,5 +1,6 @@
 package com.strategicgains.docussandra.config;
 
+import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.controller.BuildInfoController;
 import java.io.IOException;
 import java.net.URL;
@@ -35,6 +36,8 @@ import com.strategicgains.eventing.EventBus;
 import com.strategicgains.eventing.local.LocalEventBusBuilder;
 import com.strategicgains.repoexpress.cassandra.CassandraConfig;
 import com.strategicgains.restexpress.plugin.metrics.MetricsConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Configuration
         extends Environment
@@ -59,6 +62,8 @@ public class Configuration
     private QueryController queryController;
     private HealthCheckController healthController;
     private BuildInfoController buildInfoController;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 
     @Override
     public void fillValues(Properties p)
@@ -74,6 +79,13 @@ public class Configuration
 
     public void initialize(CassandraConfig dbConfig)
     {
+        try
+        {
+            Utils.initDatabase("/docussandra_autoload.cql", dbConfig.getSession());
+        } catch (IOException e)
+        {
+            LOGGER.error("Could not init database; trying to continue startup anyway (in case DB was manually created).", e);
+        }
         DatabaseRepository databaseRepository = new DatabaseRepository(dbConfig.getSession());
         TableRepository tableRepository = new TableRepository(dbConfig.getSession());
         DocumentRepository documentRepository = new DocumentRepository(dbConfig.getSession());
@@ -94,7 +106,7 @@ public class Configuration
         healthController = new HealthCheckController();
         buildInfoController = new BuildInfoController();
 
-		// TODO: create service and repository implementations for these...
+        // TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
         EventBus bus = new LocalEventBusBuilder()
                 .subscribe(new IndexCreatedHandler())

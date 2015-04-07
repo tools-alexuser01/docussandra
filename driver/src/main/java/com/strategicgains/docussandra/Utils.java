@@ -1,8 +1,14 @@
 package com.strategicgains.docussandra;
 
+import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Index;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.UUID;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A collection of public static helper methods for various docussandra related
@@ -13,6 +19,8 @@ import java.util.UUID;
  */
 public class Utils
 {
+
+    private static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     /**
      * Calculates the name of an iTable based on the dataBaseName, the
@@ -50,10 +58,6 @@ public class Utils
         return calculateITableName(index.databaseName(), index.tableName(), index.name());
     }
 
-//    public static List<String> parseWhereClause(String whereClause){ 
-    //will have to parse more than the fields, but the field values as well!
-//    
-//    }
     /**
      * Converts a string to a fuzzy UUID. Fuzzy, as in it isn't going to be
      * unique and is only for the first 8 bytes. Should only be used for
@@ -88,6 +92,34 @@ public class Utils
         //TODO: we might need to scale this UUID by Long.MAX_VALUE to ensure a more even distribution (right now buckets might clump toward ASCII chars)
         ByteBuffer bb = ByteBuffer.wrap(string);//convert to long
         return new UUID(new Long(bb.getLong()), 0L);
+    }
+
+    /**
+     * Creates the database based off of a passed in CQL file. WARNING: Be
+     * careful, this could erase data if you are not cautious. Ignores comment
+     * lines (lines that start with "//").
+     *
+     * @param cqlPath path to the CQl file you wish to use to init the database.
+     * @param session Database session 
+     *
+     * @throws IOException if it can't read from the CQL file for some reason.
+     */
+    public static void initDatabase(String cqlPath, Session session) throws IOException
+    {
+        logger.warn("Initing database from CQL file: " + cqlPath);
+        InputStream cqlStream = Utils.class.getResourceAsStream(cqlPath);
+        String cql = IOUtils.toString(cqlStream);
+        String[] statements = cql.split("\\Q;\\E");
+        for (String statement : statements)
+        {
+            statement = statement.trim();
+            statement = statement.replaceAll("\\Q\n\\E", " ");
+            if (!statement.equals("") && !statement.startsWith("//"))//don't count comments
+            {
+                logger.info("Executing CQL statement: " + statement);
+                session.execute(statement);
+            }
+        }
     }
 
 }
