@@ -20,6 +20,7 @@ import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import com.jayway.restassured.response.Response;
 import com.mongodb.util.JSON;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Table;
@@ -67,6 +68,8 @@ public class DocumentControllerTest {
     @Before
     public void beforeTest() {
         f.clearTestTables();
+        //re-establish cache 'cause we just deleted everything; if we had something cached, it's not going to work now if we re-create it
+        //CacheFactory.shutdownCacheManger();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         Table testTable = Fixtures.createTestTable();
