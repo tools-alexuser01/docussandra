@@ -4,7 +4,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.DriverException;
-import com.datastax.driver.core.exceptions.InvalidQueryException;
+import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
@@ -19,17 +19,13 @@ import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.Scanner;
 import java.util.UUID;
-import java.util.regex.Pattern;
-import org.apache.commons.io.FileUtils;
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -98,7 +94,7 @@ public class Fixtures
         if (embeddedCassandra)
         {
             session = cluster.connect();
-            initDatabase(new File("./src/main/resources/docussandra.cql"));
+            Utils.initDatabase("/docussandra.cql", session);
             session = cluster.connect(this.getCassandraKeyspace());
         } else
         {
@@ -164,25 +160,25 @@ public class Fixtures
         return cassandraKeyspace;
     }
 
-    /**
-     * Creates the database based off of an cql file. Move to RestExpress and
-     * pull in from WW eventually.
-     */
-    private void initDatabase(File cqlFile) throws FileNotFoundException, IOException
-    {
-        logger.warn("Creating new database from scratch!");
-        String cql = FileUtils.readFileToString(cqlFile);
-        String[] statements = cql.split("\\Q;\\E");
-        for (String statement : statements)
-        {
-            statement = statement.trim();
-            statement = statement.replaceAll("\\Q\n\\E", " ");
-            if (!statement.equals("") && !statement.startsWith("//"))
-            {
-                session.execute(statement);
-            }
-        }
-    }
+//    /**
+//     * Creates the database based off of an cql file. Move to RestExpress and
+//     * pull in from WW eventually.
+//     */
+//    private void initDatabase(File cqlFile) throws FileNotFoundException, IOException
+//    {
+//        logger.warn("Creating new database from scratch!");
+//        String cql = FileUtils.readFileToString(cqlFile);
+//        String[] statements = cql.split("\\Q;\\E");
+//        for (String statement : statements)
+//        {
+//            statement = statement.trim();
+//            statement = statement.replaceAll("\\Q\n\\E", " ");
+//            if (!statement.equals("") && !statement.startsWith("//"))
+//            {
+//                session.execute(statement);
+//            }
+//        }
+//    }
 
     /**
      * Load properties from a property file
