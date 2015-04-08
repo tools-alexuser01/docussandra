@@ -95,12 +95,12 @@ public class ParsedQueryFactory
         if (e == null)
         {
             logger.debug("Creating new ParsedQuery for: " + key);
-            StopWatch sw = new StopWatch();
-            sw.start();
+            //StopWatch sw = new StopWatch();
+            //sw.start();
             e = new Element(key, parseQuery(db, toParse, session));
             c.put(e);
-            sw.stop();
-            logger.debug("Time to create a new parsed query: " + sw.getTime());
+            //sw.stop();
+            //logger.debug("Time to create a new parsed query: " + sw.getTime());
         } else
         {
             logger.trace("Pulling ParsedQuery from Cache: " + e.getObjectValue().toString());
