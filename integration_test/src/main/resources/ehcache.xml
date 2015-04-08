@@ -757,43 +757,43 @@ Here is an example of CacheManager level resource tuning, which will use up to 4
     </cache> -->
     <!--TODO: tune this!-->
     <cache name="preparedStatements" 
-           maxBytesLocalHeap = "100000000"
+           maxBytesLocalHeap = "10000000"
            timeToLiveSeconds="3600"
            memoryStoreEvictionPolicy="LFU">        
     </cache>
     
     <cache name="parsedQuery" 
-           maxBytesLocalHeap = "100000000"
+           maxBytesLocalHeap = "10000000"
            timeToLiveSeconds="86400"
            memoryStoreEvictionPolicy="FIFO">        
     </cache>
     
     <cache name="index" 
-           maxBytesLocalHeap = "100000000"
+           maxBytesLocalHeap = "10000000"
            timeToLiveSeconds="3600"
            memoryStoreEvictionPolicy="LFU">        
     </cache>
     
     <cache name="iTableInsertCQL" 
-           maxBytesLocalHeap = "100000000"
+           maxBytesLocalHeap = "10000000"
            timeToLiveSeconds="240"
            memoryStoreEvictionPolicy="LFU">        
     </cache>
     
     <cache name="iTableWhere" 
-           maxBytesLocalHeap = "100000000"
+           maxBytesLocalHeap = "10000000"
            timeToLiveSeconds="240"
            memoryStoreEvictionPolicy="LFU">        
     </cache>
     
     <cache name="iTableName" 
-           maxBytesLocalHeap = "100000000"
+           maxBytesLocalHeap = "10000000"
            timeToLiveSeconds="86400"
            memoryStoreEvictionPolicy="LFU">        
     </cache>
     
     <cache name="tableExist" 
-           maxBytesLocalHeap = "100000000"
+           maxBytesLocalHeap = "10000000"
            timeToLiveSeconds="240"
            memoryStoreEvictionPolicy="LFU">        
     </cache>
