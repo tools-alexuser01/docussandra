@@ -17,8 +17,8 @@ package com.strategicgains.docussandra.cache;
 
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.Enumeration;
+import java.util.concurrent.ConcurrentHashMap;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class CacheFactory
     /**
      * Map containing all of our Caches.
      */
-    private static HashMap<String, Cache> cacheMap = new HashMap<>();
+    private static ConcurrentHashMap<String, Cache> cacheMap = new ConcurrentHashMap<>();
     /**
      * Flag indicating if the CacheManager has been established or not.
      */
@@ -79,19 +79,19 @@ public class CacheFactory
         }
         //synchronized (CacheSynchronizer.getLockingObject(cacheName, Cache.class))
         //{
-        Cache c = cacheMap.get(cacheName);//try to pull the cache from our map
-        if (c == null)//it doesn't exist yet
-        {
-            //lets create a new cache
-            c = manager.getCache(cacheName);
-            if (c == null)
+            Cache c = cacheMap.get(cacheName);//try to pull the cache from our map
+            if (c == null)//it doesn't exist yet
             {
-                throw new RuntimeException("Cache is not defined: " + cacheName + ". This is a programming error.");
+                //lets create a new cache
+                c = manager.getCache(cacheName);
+                if (c == null)
+                {
+                    throw new RuntimeException("Cache is not defined: "+cacheName+". This is a programming error.");
+                }
+                cacheMap.put(cacheName, c);
             }
-            cacheMap.put(cacheName, c);
-        }
-        return c;
-        // }        
+            return c;
+       // }        
     }
 
     /**
@@ -103,19 +103,18 @@ public class CacheFactory
         {
             logger.info("Shutting down cache manager.");
             manager.shutdown();
-            cacheMap = new HashMap<>();
+            cacheMap = new ConcurrentHashMap<>();
             cacheManagerEstablished = false;
         }
     }
-
+    
     /**
      * Clears all caches we currently have. For testing use only.
      */
-    public static void clearAllCaches()
-    {
-        for (String key : cacheMap.keySet())
-        {
-            Cache c = (Cache) cacheMap.get(key);
+    public static void clearAllCaches(){
+        Enumeration e = cacheMap.elements();
+        while(e.hasMoreElements()){
+            Cache c = (Cache)e.nextElement();
             c.removeAll();
         }
     }
