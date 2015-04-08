@@ -32,7 +32,7 @@ public class Utils
      * tableName, and the indexName.
      *
      * Note: No null checks.
-     *
+     * @param databaseName database name for the iTable.
      * @param tableName table name for the iTable.
      * @param indexName index name for the iTable.
      *
