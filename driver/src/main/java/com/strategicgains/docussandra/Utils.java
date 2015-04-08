@@ -33,7 +33,6 @@ public class Utils
      *
      * Note: No null checks.
      *
-     * @param databaseName dbName for the iTable.
      * @param tableName table name for the iTable.
      * @param indexName index name for the iTable.
      *
