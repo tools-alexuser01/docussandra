@@ -214,7 +214,7 @@ public class PlayersRemote extends PerfTestParent
         for (int i = 0; i < numQueries; i++)
         {
             logger.debug("Query: " + i);
-            given().header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning'AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
+            given().header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning' AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
