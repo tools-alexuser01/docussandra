@@ -61,11 +61,6 @@ public class QueryControllerTest
     {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
-        //RestAssured.basePath = "/courses/" + COURSE_ID + "/categories";
-
-//        String testEnv = System.getProperty("TEST_ENV") != null ? System.getProperty("TEST_ENV") : "local";
-//        String[] env = {testEnv};
-        //Thread.sleep(10000);
         f = Fixtures.getInstance();
         RestExpressManager.getManager().ensureRestExpressRunning();
     }
