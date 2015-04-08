@@ -54,7 +54,7 @@ public class PlayByPlayPerfMongo extends PlayByPlayRemote
     {
         logger.info("Setup called!");
         beforeClass();
-        uri = new MongoClientURI("mongodb://10.199.0.86:27017/?j=true");
+        uri = new MongoClientURI("mongodb://10.199.11.97:27017/?j=true");
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
