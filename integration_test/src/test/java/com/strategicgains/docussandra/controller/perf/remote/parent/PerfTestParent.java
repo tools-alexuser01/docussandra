@@ -140,6 +140,7 @@ public abstract class PerfTestParent
                     @Override
                     public void run()
                     {
+                        logger.debug("Processing document: " + queue.get(0).toString());
                         for (Document d : queue)
                         {
                             postDocument(getDb(), getTb(), d);
@@ -167,6 +168,7 @@ public abstract class PerfTestParent
                             List<Document> docs = getDocumentsFromFS(chunk);//grab a handful of documents
                             while (docs.size() > 0)
                             {
+                                logger.debug("Processing document: " + docs.get(0).toString());
                                 for (Document d : docs)//process the documents we grabbed
                                 {
                                     postDocument(getDb(), getTb(), d);//post them up

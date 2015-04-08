@@ -112,4 +112,5 @@ public class Query
         return "Query{" + "table=" + table + ", columns=" + columns + ", where=" + where + ", limit=" + limit + ", offset=" + offset + '}';
     }
 
+    
 }

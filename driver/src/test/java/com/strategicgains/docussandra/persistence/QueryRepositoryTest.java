@@ -16,6 +16,7 @@
 package com.strategicgains.docussandra.persistence;
 
 import com.mongodb.util.JSON;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;

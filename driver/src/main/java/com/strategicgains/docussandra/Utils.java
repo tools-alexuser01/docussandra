@@ -1,14 +1,19 @@
 package com.strategicgains.docussandra;
 
 import com.datastax.driver.core.Session;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Index;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.UUID;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
 
 /**
  * A collection of public static helper methods for various docussandra related
@@ -27,8 +32,7 @@ public class Utils
      * tableName, and the indexName.
      *
      * Note: No null checks.
-     *
-     * @param databaseName dbName for the iTable.
+     * @param databaseName database name for the iTable.
      * @param tableName table name for the iTable.
      * @param indexName index name for the iTable.
      *
@@ -36,13 +40,26 @@ public class Utils
      */
     public static String calculateITableName(String databaseName, String tableName, String indexName)
     {
-        StringBuilder sb = new StringBuilder();
-        sb.append(databaseName);
-        sb.append('_');
-        sb.append(tableName);
-        sb.append('_');
-        sb.append(indexName);
-        return sb.toString().toLowerCase();
+        String key = databaseName + ":" + tableName + ":" + indexName;
+        Cache c = CacheFactory.getCache("iTableName");
+//        synchronized (CacheSynchronizer.getLockingObject(key, "iTableName"))
+//        {
+            Element e = c.get(key);
+            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+            {
+                //not cached; let's create it
+                StringBuilder sb = new StringBuilder();
+                sb.append(databaseName);
+                sb.append('_');
+                sb.append(tableName);
+                sb.append('_');
+                sb.append(indexName);
+                //return sb.toString().toLowerCase();
+                e = new Element(key, sb.toString().toLowerCase());
+                c.put(e);
+            }
+            return (String) e.getObjectValue();
+//        }
     }
 
     /**

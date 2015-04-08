@@ -81,7 +81,6 @@ public class DocumentRepository
         Table table = entity.table();
         PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), session());
 
-
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
         BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);

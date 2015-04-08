@@ -289,6 +289,22 @@ public class IndexMaintainerHelperTest
     }
 
     /**
+     * Test of generateCQLStatementForInsert method, of class
+     * IndexMaintainerHelper.
+     */
+    @Test
+    public void testGenerateCQLStatementForInsert2()
+    {
+        System.out.println("generateCQLStatementForInsert");
+        String expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);";
+        String result = IndexMaintainerHelper.getCQLStatementForInsert(index1);
+        assertEquals(expResult, result);
+        expResult = "INSERT INTO docussandra.mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1,myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);";
+        result = IndexMaintainerHelper.getCQLStatementForInsert(index2);
+        assertEquals(expResult, result);
+    }
+
+    /**
      * Test of generateCQLStatementForWhereClauses method, of class
      * IndexMaintainerHelper.
      */
@@ -301,6 +317,22 @@ public class IndexMaintainerHelperTest
         assertEquals(expResult, result);
         expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;";
         result = IndexMaintainerHelper.generateCQLStatementForWhereClauses(IndexMaintainerHelper.ITABLE_UPDATE_CQL, index2);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of generateCQLStatementForWhereClauses method, of class
+     * IndexMaintainerHelper.
+     */
+    @Test
+    public void testGenerateCQLStatementForUpdate2()
+    {
+        System.out.println("generateCQLStatementForUpdate");
+        String expResult = "UPDATE docussandra.mydb_mytable_myindexwithonefield SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield = ?;";
+        String result = IndexMaintainerHelper.getCQLStatementForWhereClauses(IndexMaintainerHelper.ITABLE_UPDATE_CQL, index1);
+        assertEquals(expResult, result);
+        expResult = "UPDATE docussandra.mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;";
+        result = IndexMaintainerHelper.getCQLStatementForWhereClauses(IndexMaintainerHelper.ITABLE_UPDATE_CQL, index2);
         assertEquals(expResult, result);
     }
 

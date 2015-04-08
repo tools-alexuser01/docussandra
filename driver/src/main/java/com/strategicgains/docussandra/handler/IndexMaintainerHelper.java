@@ -7,6 +7,8 @@ import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
+import com.strategicgains.docussandra.cache.CacheFactory;
+import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
@@ -16,6 +18,8 @@ import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactor
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 import org.bson.BSON;
 import org.bson.BSONObject;
 import org.restexpress.common.util.StringUtils;
@@ -71,7 +75,7 @@ public class IndexMaintainerHelper
     {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
-        String finalCQL = generateCQLStatementForInsert(index);
+        String finalCQL = getCQLStatementForInsert(index);
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
         //pull the index fields out of the document for binding
@@ -87,7 +91,10 @@ public class IndexMaintainerHelper
         }
         String fieldToBucketOn = fieldToBucketOnObject.toString();//use the java toString to convert the object to a string.
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOn));//note, could have parse problems here with non-string types
-        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        if (logger.isTraceEnabled())
+        {
+            logger.trace("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        }
         bs.setString(0, bucketId);
         //set the id
         bs.setUUID(1, entity.getUuid());
@@ -101,7 +108,7 @@ public class IndexMaintainerHelper
         {
             String field = fields.get(i);
             Object jObject = jsonObject.get(field);
-            
+
             if (jObject == null)
             {
                 bs.setString(i + 5, "");//offset from the first five non-dynamic fields
@@ -110,7 +117,7 @@ public class IndexMaintainerHelper
                 String fieldValue = jObject.toString();//note, could have parse problems here with non-string types: TODO: use proper types; need to set the tables correctly first
                 bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
             }
-            
+
         }
         return bs;
     }
@@ -141,7 +148,7 @@ public class IndexMaintainerHelper
                 statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
             } else
             {//3. if an indexed field has not changed, do a normal CQL update
-                String finalCQL = generateCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
+                String finalCQL = getCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
                 PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
                 BoundStatement bs = new BoundStatement(ps);
 
@@ -155,7 +162,7 @@ public class IndexMaintainerHelper
                 DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
                 //set the bucket
                 String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
-                logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+                logger.debug("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
                 bs.setString(2, bucketId);
                 for (int i = 0; i < fields.size(); i++)
                 {
@@ -199,7 +206,7 @@ public class IndexMaintainerHelper
     {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
-        String finalCQL = generateCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
+        String finalCQL = getCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
         //pull the index fields out of the document for binding
@@ -214,7 +221,7 @@ public class IndexMaintainerHelper
         }
         //set the bucket
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOnObject.toString()));//note, could have parse problems here with non-string types
-        logger.debug("Bucket ID for entity: " + entity.toString() + "for index: " + index.toString() + " is: " + bucketId);
+        logger.debug("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)
         {
@@ -244,7 +251,7 @@ public class IndexMaintainerHelper
     public static List<Index> getIndexForDocument(Session session, Document entity)
     {
         IndexRepository indexRepo = new IndexRepository(session);
-        return indexRepo.readAll(entity.databaseName(), entity.tableName());
+        return indexRepo.readAllCached(entity.databaseName(), entity.tableName());
     }
 
     /**
@@ -272,7 +279,34 @@ public class IndexMaintainerHelper
         return false;
     }
 
-    //TODO: consider caching some of these static string generators to save processor time
+    /**
+     * Helper for generating insert CQL statements for iTables. This would be
+     * private but keeping public for ease of testing. Same as
+     * generateCQLStatementForInsert but will retrieve from cache if available.
+     *
+     * @param index Index to generate the statement for.
+     * @return CQL statement.
+     */
+    public static String getCQLStatementForInsert(Index index)
+    {
+        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
+        Cache iTableCQLCache = CacheFactory.getCache("iTableInsertCQL");
+        //synchronized (CacheSynchronizer.getLockingObject(key, "iTableInsertCQL"))
+        //{
+        Element e = iTableCQLCache.get(key);
+        if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+        {
+            //not cached; let's create it                               
+            e = new Element(key, generateCQLStatementForInsert(index));//save it back to the cache
+            iTableCQLCache.put(e);
+        } else
+        {
+            logger.trace("Pulling iTableInsertCQL from Cache: " + e.getObjectValue().toString());
+        }
+        return (String) e.getObjectValue();
+        //}
+    }
+
     /**
      * Helper for generating insert CQL statements for iTables. This would be
      * private but keeping public for ease of testing.
@@ -303,6 +337,40 @@ public class IndexMaintainerHelper
 
     /**
      * Helper for generating update CQL statements for iTables. This would be
+     * private but keeping public for ease of testing. Same as
+     * generateCQLStatementForWhereClauses but will retrieve from cache when
+     * availible.
+     *
+     * @param CQL statement that is not yet formatted.
+     * @param index Index to generate the statement for.
+     * @return CQL statement.
+     */
+    public static String getCQLStatementForWhereClauses(String CQL, Index index)
+    {
+        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
+        String whereClause;
+        String iTableToUpdate = Utils.calculateITableName(index);
+        Cache whereCache = CacheFactory.getCache("iTableWhere");
+//        synchronized (CacheSynchronizer.getLockingObject(key, "iTableWhere"))
+//        {
+        Element e = whereCache.get(key);
+        if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+        {
+            //not cached; let's create it                               
+            e = new Element(key, getWhereClauseHelper(index));//save it back to the cache
+            whereCache.put(e);
+        } else
+        {
+            logger.trace("Pulling WHERE statement info from Cache: " + e.getObjectValue().toString());
+        }
+        whereClause = (String) e.getObjectValue();
+//        }
+        //create final CQL statement for updating a row in an iTable(s)        
+        return String.format(CQL, iTableToUpdate, whereClause);
+    }
+
+    /**
+     * Helper for generating update CQL statements for iTables. This would be
      * private but keeping public for ease of testing.
      *
      * @param CQL statement that is not yet formatted.
@@ -313,10 +381,15 @@ public class IndexMaintainerHelper
     {
         //determine which iTables need to be updated
         String iTableToUpdate = Utils.calculateITableName(index);
+        //create final CQL statement for updating a row in an iTable(s)        
+        return String.format(CQL, iTableToUpdate, getWhereClauseHelper(index));
+    }
+
+    private static String getWhereClauseHelper(Index index)
+    {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
         //determine the where clause
-        String whereClause;
         StringBuilder setValues = new StringBuilder();
         for (int i = 0; i < fields.size(); i++)
         {
@@ -327,9 +400,7 @@ public class IndexMaintainerHelper
             }
             setValues.append(field).append(" = ?");
         }
-        whereClause = setValues.toString();
-        //create final CQL statement for updating a row in an iTable(s)        
-        return String.format(CQL, iTableToUpdate, whereClause);
+        return setValues.toString();
     }
 
 }

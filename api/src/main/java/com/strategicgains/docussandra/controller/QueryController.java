@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
  */
 public class QueryController
 {
-
-    private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
     private static final int DEFAULT_LIMIT = 20;
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
