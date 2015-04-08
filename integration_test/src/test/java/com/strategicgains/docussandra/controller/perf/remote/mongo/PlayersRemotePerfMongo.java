@@ -54,7 +54,7 @@ public class PlayersRemotePerfMongo extends PlayersRemote
     {
         logger.info("Setup called!");
         beforeClass();
-        uri = new MongoClientURI("mongodb://10.199.11.97:27017/?j=true");
+        uri = new MongoClientURI("mongodb://10.199.8.243:27017/?j=true");
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
