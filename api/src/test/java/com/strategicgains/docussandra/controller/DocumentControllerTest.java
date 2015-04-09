@@ -77,7 +77,7 @@ public class DocumentControllerTest
         //clear all caches for the sake of this test, we will be createing and
         //deleting more frequently than a real world operation causing the cache
         //to hit no longer relevent objects
-        CacheFactory.clearAllCaches();        
+        CacheFactory.clearAllCaches();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         Table testTable = Fixtures.createTestTable();
@@ -119,6 +119,8 @@ public class DocumentControllerTest
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
                 .get(testDocument.getUuid().toString());
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
     }
 
     /**
@@ -178,6 +180,8 @@ public class DocumentControllerTest
                 .body("updatedAt", notNullValue()).when()
                 .get(testDocument.getUuid().toString()).andReturn();
         LOGGER.debug("body for put response: " + response.getBody().prettyPrint());
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
     }
 
     /**
