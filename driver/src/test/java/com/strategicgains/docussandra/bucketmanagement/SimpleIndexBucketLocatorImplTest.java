@@ -105,84 +105,84 @@ public class SimpleIndexBucketLocatorImplTest
         assertEquals(bucket4, "085070591730234615865843651857942052863");
     }
 
-    @Test
-    @Ignore
-    public void evenDistribution()
-    {
-
-        UUID appId = UUIDUtils.newTimeUUID();
-        String entityType = "user";
-        String propName = "firstName";
-
-        int bucketSize = 20;
-        float distributionPercentage = .05f;
-
-        // test 100 elements
-        SimpleIndexBucketLocatorImpl locator = new SimpleIndexBucketLocatorImpl(bucketSize);
-
-        List<String> buckets = locator.getBuckets(appId, entityType, propName);
-
-        assertEquals(bucketSize, buckets.size());
-
-        int testSize = 2000000;
-
-        Map<String, Float> counts = new HashMap<String, Float>();
-
-        final Timer hashes
-                = Metrics.newTimer(SimpleIndexBucketLocatorImplTest.class, "responses", TimeUnit.MILLISECONDS,
-                        TimeUnit.SECONDS);
-
-        // ConsoleReporter.enable(1, TimeUnit.SECONDS);
-        /**
-         * Loop through each new UUID and add it's hash to our map
-         */
-        for (int i = 0; i < testSize; i++)
-        {
-            UUID id = UUIDUtils.newTimeUUID();
-
-            final TimerContext context = hashes.time();
-
-            String bucket = locator.getBucket(appId, id, entityType, propName);
-
-            context.stop();
-
-            Float count = counts.get(bucket);
-
-            if (count == null)
-            {
-                count = 0f;
-            }
-
-            counts.put(bucket, ++count);
-        }
-
-        /**
-         * Check each entry is within +- 5% of every subsequent entry
-         */
-        List<String> keys = new ArrayList<String>(counts.keySet());
-        int keySize = keys.size();
-
-        assertEquals(bucketSize, keySize);
-
-        for (int i = 0; i < keySize; i++)
-        {
-
-            float sourceCount = counts.get(keys.get(i));
-
-            for (int j = i + 1; j < keySize; j++)
-            {
-                float destCount = counts.get(keys.get(j));
-
-                // find the maximum allowed value for the assert based on the
-                // largest value in the pair
-                float maxDelta = Math.max(sourceCount, destCount) * distributionPercentage;
-
-                assertEquals(
-                        String.format("Not within %f as percentage for keys '%s' and '%s'", distributionPercentage,
-                                keys.get(i), keys.get(j)), sourceCount, destCount, maxDelta);
-            }
-        }
-    }
+//    @Test
+//    @Ignore
+//    public void evenDistribution()
+//    {
+//
+//        UUID appId = UUIDUtils.newTimeUUID();
+//        String entityType = "user";
+//        String propName = "firstName";
+//
+//        int bucketSize = 20;
+//        float distributionPercentage = .05f;
+//
+//        // test 100 elements
+//        SimpleIndexBucketLocatorImpl locator = new SimpleIndexBucketLocatorImpl(bucketSize);
+//
+//        List<String> buckets = locator.getBuckets(appId, entityType, propName);
+//
+//        assertEquals(bucketSize, buckets.size());
+//
+//        int testSize = 2000000;
+//
+//        Map<String, Float> counts = new HashMap<String, Float>();
+//
+//        final Timer hashes
+//                = Metrics.newTimer(SimpleIndexBucketLocatorImplTest.class, "responses", TimeUnit.MILLISECONDS,
+//                        TimeUnit.SECONDS);
+//
+//        // ConsoleReporter.enable(1, TimeUnit.SECONDS);
+//        /**
+//         * Loop through each new UUID and add it's hash to our map
+//         */
+//        for (int i = 0; i < testSize; i++)
+//        {
+//            UUID id = UUIDUtils.newTimeUUID();
+//
+//            final TimerContext context = hashes.time();
+//
+//            String bucket = locator.getBucket(appId, id, entityType, propName);
+//
+//            context.stop();
+//
+//            Float count = counts.get(bucket);
+//
+//            if (count == null)
+//            {
+//                count = 0f;
+//            }
+//
+//            counts.put(bucket, ++count);
+//        }
+//
+//        /**
+//         * Check each entry is within +- 5% of every subsequent entry
+//         */
+//        List<String> keys = new ArrayList<String>(counts.keySet());
+//        int keySize = keys.size();
+//
+//        assertEquals(bucketSize, keySize);
+//
+//        for (int i = 0; i < keySize; i++)
+//        {
+//
+//            float sourceCount = counts.get(keys.get(i));
+//
+//            for (int j = i + 1; j < keySize; j++)
+//            {
+//                float destCount = counts.get(keys.get(j));
+//
+//                // find the maximum allowed value for the assert based on the
+//                // largest value in the pair
+//                float maxDelta = Math.max(sourceCount, destCount) * distributionPercentage;
+//
+//                assertEquals(
+//                        String.format("Not within %f as percentage for keys '%s' and '%s'", distributionPercentage,
+//                                keys.get(i), keys.get(j)), sourceCount, destCount, maxDelta);
+//            }
+//        }
+//    }
 
     @Test
     public void practicalDistribution()
