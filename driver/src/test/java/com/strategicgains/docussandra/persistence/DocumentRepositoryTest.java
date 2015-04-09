@@ -15,31 +15,41 @@
  */
 package com.strategicgains.docussandra.persistence;
 
-import com.datastax.driver.core.Row;
+import com.strategicgains.docussandra.cache.CacheFactory;
+import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.testhelper.Fixtures;
 import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Test for the document repository.
  *
  * @author udeyoje
  */
 public class DocumentRepositoryTest
 {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentRepositoryTest.class);
+    private static Fixtures f;
+
     public DocumentRepositoryTest()
     {
     }
 
     @BeforeClass
-    public static void setUpClass()
+    public static void setUpClass() throws Exception
     {
+        f = Fixtures.getInstance();
     }
 
     @AfterClass
@@ -50,6 +60,15 @@ public class DocumentRepositoryTest
     @Before
     public void setUp()
     {
+        f.clearTestTables();
+        //clear all caches for the sake of this test, we will be createing and
+        //deleting more frequently than a real world operation causing the cache
+        //to hit no longer relevent objects
+        CacheFactory.clearAllCaches();
+        Database testDb = Fixtures.createTestDatabase();
+        f.insertDatabase(testDb);
+        Table testTable = Fixtures.createTestTable();
+        f.insertTable(testTable);
     }
 
     @After
@@ -61,83 +80,98 @@ public class DocumentRepositoryTest
      * Test of doCreate method, of class DocumentRepository.
      */
     @Test
-    @Ignore
     public void testDoCreate()
     {
         System.out.println("doCreate");
-        Document entity = null;
-        DocumentRepository instance = null;
-        Document expResult = null;
+        Document entity = Fixtures.createTestDocument();
+        DocumentRepository instance = new DocumentRepository(f.getSession());
         Document result = instance.doCreate(entity);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertNotNull(result);
+        assertEquals(entity.databaseName(), result.databaseName());
+        assertEquals(entity.tableName(), result.tableName());
+        assertEquals(entity.object(), result.object());
+        assertNotNull(result.getUuid());
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(result);
     }
 
     /**
      * Test of doRead method, of class DocumentRepository.
      */
     @Test
-    @Ignore
     public void testDoRead()
     {
         System.out.println("doRead");
-        Identifier identifier = null;
-        DocumentRepository instance = null;
-        Document expResult = null;
+        //setup
+        Document testDocument = Fixtures.createTestDocument();
+        f.insertDocument(testDocument);
+
+        Identifier identifier = testDocument.getId();
+        DocumentRepository instance = new DocumentRepository(f.getSession());
+        Document expResult = testDocument;
         Document result = instance.doRead(identifier);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
     }
 
     /**
      * Test of doUpdate method, of class DocumentRepository.
      */
     @Test
-    @Ignore
     public void testDoUpdate()
     {
         System.out.println("doUpdate");
-        Document entity = null;
-        DocumentRepository instance = null;
-        Document expResult = null;
-        Document result = instance.doUpdate(entity);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        Document testDocument = Fixtures.createTestDocument();
+        f.insertDocument(testDocument);
+        DocumentRepository instance = new DocumentRepository(f.getSession());
+        String newObject = "{\"newjson\": \"object\"}";
+        testDocument.object(newObject);
+        Document result = instance.doUpdate(testDocument);
+        assertEquals(testDocument, result);
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
     }
 
     /**
      * Test of doDelete method, of class DocumentRepository.
      */
     @Test
-    @Ignore
     public void testDoDelete()
     {
         System.out.println("doDelete");
-        Document entity = null;
-        DocumentRepository instance = null;
-        instance.doDelete(entity);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        Document testDocument = Fixtures.createTestDocument();
+        f.insertDocument(testDocument);
+        DocumentRepository instance = new DocumentRepository(f.getSession());
+        instance.doDelete(testDocument);
+        boolean exceptionThrown = false;
+        try
+        {
+            instance.doRead(testDocument.getId());
+        } catch (ItemNotFoundException e)
+        {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+
     }
 
     /**
      * Test of exists method, of class DocumentRepository.
      */
     @Test
-    @Ignore
     public void testExists()
     {
         System.out.println("exists");
-        Identifier identifier = null;
-        DocumentRepository instance = null;
-        boolean expResult = false;
+        Document testDocument = Fixtures.createTestDocument();
+        f.insertDocument(testDocument);
+        DocumentRepository instance = new DocumentRepository(f.getSession());
+        Identifier identifier = testDocument.getId();
         boolean result = instance.exists(identifier);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(true, result);
+        f.deleteDocument(testDocument);
+        result = instance.exists(identifier);
+        assertEquals(false, result);
     }
 
 }

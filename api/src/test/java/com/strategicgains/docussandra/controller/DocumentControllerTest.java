@@ -15,13 +15,12 @@ package com.strategicgains.docussandra.controller;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import com.jayway.restassured.response.Response;
 import com.mongodb.util.JSON;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Table;
@@ -43,16 +42,17 @@ import testhelper.RestExpressManager;
  *
  * @author udeyoje
  */
-@Ignore //cassandra-unit does not like us pulling prepared statements from the cache for this test -- TODO: Why?
-public class DocumentControllerTest {
+public class DocumentControllerTest
+{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private static Fixtures f;
 
-    public DocumentControllerTest() throws Exception{
-        
+    public DocumentControllerTest() throws Exception
+    {
+
     }
 
     /**
@@ -62,7 +62,8 @@ public class DocumentControllerTest {
      * @throws Exception
      */
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() throws Exception
+    {
         f = Fixtures.getInstance();
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
@@ -70,8 +71,13 @@ public class DocumentControllerTest {
     }
 
     @Before
-    public void beforeTest() {
+    public void beforeTest()
+    {
         f.clearTestTables();
+        //clear all caches for the sake of this test, we will be createing and
+        //deleting more frequently than a real world operation causing the cache
+        //to hit no longer relevent objects
+        CacheFactory.clearAllCaches();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         Table testTable = Fixtures.createTestTable();
@@ -84,23 +90,26 @@ public class DocumentControllerTest {
      * executed.
      */
     @AfterClass
-    public static void afterClass() {
+    public static void afterClass()
+    {
     }
 
     /**
      * Cleanup that is performed after each test is executed.
      */
     @After
-    public void afterTest() {
+    public void afterTest()
+    {
         f.clearTestTables();
     }
 
     /**
-     * Tests that the GET /{databases}/{table}/{document} properly retrieves an existing
-     * document.
+     * Tests that the GET /{databases}/{table}/{document} properly retrieves an
+     * existing document.
      */
     @Test
-    public void getDocumentTest() {
+    public void getDocumentTest()
+    {
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
         expect().statusCode(200)
@@ -110,6 +119,8 @@ public class DocumentControllerTest {
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
                 .get(testDocument.getUuid().toString());
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
     }
 
     /**
@@ -117,7 +128,8 @@ public class DocumentControllerTest {
      * document.
      */
     @Test
-    public void postDocumentTest() {
+    public void postDocumentTest()
+    {
         Document testDocument = Fixtures.createTestDocument();
         String tableStr = testDocument.object();
 
@@ -146,20 +158,20 @@ public class DocumentControllerTest {
     }
 
     /**
-     * Tests that the PUT /{databases}/{table}/{document} endpoint properly updates a
-     * document.
+     * Tests that the PUT /{databases}/{table}/{document} endpoint properly
+     * updates a document.
      */
     @Test
-    public void putDocumentTest() {
+    public void putDocumentTest()
+    {
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
         String newObject = "{\"newjson\": \"object\"}";
         //act
         given().body(newObject).expect().statusCode(204)
                 .when().put(testDocument.getUuid().toString());
-        
-        //check
 
+        //check
         Response response = expect().statusCode(200)
                 .body("id", equalTo(testDocument.getUuid().toString()))
                 .body("object", notNullValue())
@@ -167,15 +179,18 @@ public class DocumentControllerTest {
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
                 .get(testDocument.getUuid().toString()).andReturn();
-                LOGGER.debug("body for put response: " + response.getBody().prettyPrint());
+        LOGGER.debug("body for put response: " + response.getBody().prettyPrint());
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
     }
 
     /**
-     * Tests that the DELETE /{databases}/{table}/{document} endpoint properly deletes a
-     * document.
+     * Tests that the DELETE /{databases}/{table}/{document} endpoint properly
+     * deletes a document.
      */
     @Test
-    public void deleteDocumentTest() {
+    public void deleteDocumentTest()
+    {
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
         //act
