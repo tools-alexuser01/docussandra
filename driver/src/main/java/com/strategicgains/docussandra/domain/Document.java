@@ -7,6 +7,7 @@ import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.domain.UuidIdentifiable;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.Required;
+import java.util.Objects;
 
 public class Document
         extends AbstractTimestampedIdentifiable
@@ -86,5 +87,44 @@ public class Document
     public String toString() {
         return "Document{" + "id=" + id + ", table=" + table + ", object=" + object + '}';
     }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 29 * hash + Objects.hashCode(this.id);
+        hash = 29 * hash + Objects.hashCode(this.table);
+        hash = 29 * hash + Objects.hashCode(this.object);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        final Document other = (Document) obj;
+        if (!Objects.equals(this.id, other.id))
+        {
+            return false;
+        }
+        if (!Objects.equals(this.table, other.table))
+        {
+            return false;
+        }
+        if (!Objects.equals(this.object, other.object))
+        {
+            return false;
+        }
+        return true;
+    }
+    
+    
 
 }
