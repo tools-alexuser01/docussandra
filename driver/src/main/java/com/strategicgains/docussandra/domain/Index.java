@@ -50,6 +50,11 @@ public class Index
      * subset--those listed in includeOnly.
      */
     private List<String> includeOnly;
+    
+    /**
+     * Field indicating if this index should be presently considered active. TODO: Store this in the DB.
+     */
+    private boolean isActive;
 
     public Index() {
     }
@@ -141,6 +146,24 @@ public class Index
         for (String field : fields) {
             callback.process(new IndexField(field));
         }
+    }
+
+    /**
+     * Field indicating if this index should be presently considered active. TODO: Store this in the DB.
+     * @return the isActive
+     */
+    public boolean isIsActive()
+    {
+        return isActive;
+    }
+
+    /**
+     * Field indicating if this index should be presently considered active. TODO: Store this in the DB.
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(boolean isActive)
+    {
+        this.isActive = isActive;
     }
 
     public class IndexField {
