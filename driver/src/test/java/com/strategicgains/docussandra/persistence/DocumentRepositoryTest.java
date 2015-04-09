@@ -15,7 +15,6 @@
  */
 package com.strategicgains.docussandra.persistence;
 
-import com.datastax.driver.core.Row;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.repoexpress.domain.Identifier;
 import org.junit.After;
