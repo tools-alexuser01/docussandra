@@ -1,5 +1,6 @@
 package com.strategicgains.docussandra.domain;
 
+import com.mongodb.util.JSON;
 import java.util.UUID;
 
 import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
@@ -8,6 +9,7 @@ import com.strategicgains.repoexpress.domain.UuidIdentifiable;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.Required;
 import java.util.Objects;
+import org.bson.BSON;
 
 public class Document
         extends AbstractTimestampedIdentifiable
@@ -118,7 +120,7 @@ public class Document
         {
             return false;
         }
-        if (!Objects.equals(this.object, other.object))
+        if (!Objects.equals(JSON.parse(this.object), JSON.parse(other.object)))
         {
             return false;
         }
