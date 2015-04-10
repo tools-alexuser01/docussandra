@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.domain;
 
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
+import java.util.Objects;
 
 /**
  * @author toddf
@@ -47,4 +48,32 @@ public class DatabaseReference
     {
         return new Database(name);
     }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 83 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        final DatabaseReference other = (DatabaseReference) obj;
+        if (!Objects.equals(this.name, other.name))
+        {
+            return false;
+        }
+        return true;
+    }
+    
 }
