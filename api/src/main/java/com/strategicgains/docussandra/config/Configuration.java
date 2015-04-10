@@ -16,6 +16,7 @@ import com.strategicgains.docussandra.controller.DatabaseController;
 import com.strategicgains.docussandra.controller.DocumentController;
 import com.strategicgains.docussandra.controller.HealthCheckController;
 import com.strategicgains.docussandra.controller.IndexController;
+import com.strategicgains.docussandra.controller.IndexStatusController;
 import com.strategicgains.docussandra.controller.QueryController;
 import com.strategicgains.docussandra.controller.TableController;
 import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
@@ -60,6 +61,7 @@ public class Configuration
     private TableController tableController;
     private DocumentController documentController;
     private IndexController indexController;
+    private IndexStatusController indexStatusController;
     private QueryController queryController;
     private HealthCheckController healthController;
     private BuildInfoController buildInfoController;
@@ -103,6 +105,7 @@ public class Configuration
         tableController = new TableController(tableService);
         documentController = new DocumentController(documentService);
         indexController = new IndexController(indexService);
+        indexStatusController = new IndexStatusController(indexService);
         queryController = new QueryController(queryService);
         healthController = new HealthCheckController();
         buildInfoController = new BuildInfoController();
@@ -157,6 +160,11 @@ public class Configuration
     public IndexController getIndexController()
     {
         return indexController;
+    }
+
+    public IndexStatusController getIndexStatusController()
+    {
+        return indexStatusController;
     }
 
     public QueryController getQueryController()

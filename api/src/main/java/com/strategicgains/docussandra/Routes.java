@@ -54,6 +54,10 @@ public abstract class Routes
         server.uri("/{database}/{table}/indexes/{index}", config.getIndexController())
                 .method(GET, DELETE, POST)
                 .name(Constants.Routes.INDEX);
+        
+        server.uri("/{database}/{table}/index_status/{status_id}", config.getIndexStatusController())
+                .method(GET)
+                .name(Constants.Routes.INDEX_STATUS);
 
         server.uri("/{database}/{table}/{documentId}", config.getDocumentController())
                 .method(GET, PUT, DELETE)

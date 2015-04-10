@@ -15,6 +15,7 @@ public class Constants
 		public static final String DATABASE = "database";
 		public static final String TABLE = "table";
 		public static final String INDEX = "index";
+                public static final String INDEX_STATUIS = "status_id";
 		public static final String DOCUMENT_ID = "documentId";
 		public static final String QUERY_ID = "queryId";
 	}
@@ -38,6 +39,7 @@ public class Constants
 		public static final String DOCUMENT = "document.single";
 		public static final String INDEXES = "index.collection";
 		public static final String INDEX = "index.single";
+                public static final String INDEX_STATUS = "index.status";
 		public static final String QUERIES = "query.collection";
 		public static final String QUERY = "query.single";
                 public static final String HEALTH = "health";
