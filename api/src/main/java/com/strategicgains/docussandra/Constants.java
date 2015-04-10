@@ -15,7 +15,7 @@ public class Constants
 		public static final String DATABASE = "database";
 		public static final String TABLE = "table";
 		public static final String INDEX = "index";
-                public static final String INDEX_STATUIS = "status_id";
+                public static final String INDEX_STATUS = "status_id";
 		public static final String DOCUMENT_ID = "documentId";
 		public static final String QUERY_ID = "queryId";
 	}

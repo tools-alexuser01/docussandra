@@ -40,3 +40,15 @@ create table IF NOT EXISTS sys_idx (
 	updated_at timestamp,
 	primary key ((db_name), tbl_name, name)
 );
+
+create table IF NOT EXISTS sys_idx_status (
+    id text,
+	db_name text,
+	tbl_name text,
+	index_name text,
+	records_completed bigint,
+    is_done boolean,
+	started_at timestamp,
+	updated_at timestamp,
+	primary key ((id))
+);

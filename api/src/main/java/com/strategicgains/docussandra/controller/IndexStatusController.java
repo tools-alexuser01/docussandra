@@ -38,10 +38,11 @@ public class IndexStatusController
         super();
         this.indexes = indexService;
     }
-
    
     
     public IndexCreationStatus read(Request request, Response response){
+        String id = request.getHeader(Constants.Url.INDEX_STATUS, "No index status id provided.");
+        
         throw new UnsupportedOperationException("Not done yet.");
     }
 

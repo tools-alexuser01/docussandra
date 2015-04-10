@@ -90,8 +90,6 @@ public class IndexCreationStatus implements UuidIdentifiable
     }
 
     
-    
-    
     public boolean isDone()
     {
         return getIndex().isActive();
