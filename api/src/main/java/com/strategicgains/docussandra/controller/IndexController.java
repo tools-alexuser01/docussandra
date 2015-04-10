@@ -9,6 +9,7 @@ import org.restexpress.Response;
 
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexCreationStatus;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.service.IndexService;
 import com.strategicgains.hyperexpress.HyperExpress;
@@ -56,10 +57,10 @@ public class IndexController
         if(entity.includeOnly() == null){
             entity.includeOnly(new ArrayList<String>(0));
         }
-        Index saved;
+        Index status;
         try
         {
-            saved = indexes.create(entity);
+            status = indexes.create(entity);
         } catch (Exception e)
         {
             LOGGER.error("Could not save index", e);
@@ -69,16 +70,20 @@ public class IndexController
         response.setResponseCreated();
 
         // enrich the resource with links, etc. here...
-        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, saved.tableName())
-                .bind(Constants.Url.DATABASE, saved.databaseName())
-                .bind(Constants.Url.INDEX, saved.name());
+        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.tableName())
+                .bind(Constants.Url.DATABASE, status.databaseName())
+                .bind(Constants.Url.INDEX, status.name());
 
         // Include the Location header...
         String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);
         response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
         // Return the newly-created resource...
-        return saved;
+        return status;
+    }
+    
+    public IndexCreationStatus status(Request request, Response response){
+        throw new UnsupportedOperationException("Not done yet.");
     }
 
     public Index read(Request request, Response response)

@@ -4,11 +4,14 @@ import java.util.List;
 
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.persistence.ITableRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
+import static it.unimi.dsi.fastutil.BigArrays.index;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +35,16 @@ public class IndexService
         verifyTable(index.databaseName(), index.tableName());
         ValidationEngine.validateAndThrow(index);
         logger.debug("Creating index: " + index.toString());
-        return indexes.create(index);
+        Index created = indexes.create(index);
+        //long dataSize = tables.countAll(null);
+        return created;
+    }
+    
+    public IndexCreationStatus status(UUID id)
+    {
+        logger.debug("Checking index creation status: " + id.toString());
+        //return indexes.create(index);
+        throw new UnsupportedOperationException("Not done yet.");
     }
 
     public Index read(Identifier identifier)
