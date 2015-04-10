@@ -43,16 +43,16 @@ public class TableRepository
 
     private static final String IDENTITY_CQL = " where " + Columns.DATABASE + " = ? and " + Columns.NAME + " = ?";
     private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into %s (%s, "+ Columns.DATABASE+", "+ Columns.DESCRIPTION+", "+ Columns.CREATED_AT+", "+ Columns.UPDATED_AT+") values (?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into %s (%s, " + Columns.DATABASE + ", " + Columns.DESCRIPTION + ", " + Columns.CREATED_AT + ", " + Columns.UPDATED_AT + ") values (?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
     private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
-    private static final String UPDATE_CQL = "update %s set "+Columns.DESCRIPTION+" = ?, "+ Columns.UPDATED_AT+" = ?" + IDENTITY_CQL;
+    private static final String UPDATE_CQL = "update %s set " + Columns.DESCRIPTION + " = ?, " + Columns.UPDATED_AT + " = ?" + IDENTITY_CQL;
     private static final String READ_ALL_CQL = "select * from %s where " + Columns.DATABASE + " = ?";
     private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where " + Columns.DATABASE + " = ?";
     private static final String READ_COUNT_TABLE_SIZE_CQL = "select count(*) from %s where " + Columns.DATABASE + " = ? and " + Columns.NAME + " = ?";
 
     private static final String CREATE_DOC_TABLE_CQL = "create table %s"
-            + " (id uuid, object blob, "+ Columns.CREATED_AT+" timestamp, "+ Columns.UPDATED_AT+" timestamp,"
+            + " (id uuid, object blob, " + Columns.CREATED_AT + " timestamp, " + Columns.UPDATED_AT + " timestamp,"
             + " primary key (id))";//+ " primary key ((id), updated_at))"                
     //+ " with clustering order by (updated_at DESC);";
     private static final String DROP_DOC_TABLE_CQL = "drop table if exists %s;";
@@ -64,6 +64,7 @@ public class TableRepository
     private PreparedStatement updateStmt;
     private PreparedStatement readAllStmt;
     private PreparedStatement readAllCountStmt;
+    private PreparedStatement readCountTableSizeStmt;
 
     public TableRepository(Session session)
     {
@@ -97,6 +98,7 @@ public class TableRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
+    @Override
     protected Table readEntityById(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -160,6 +162,7 @@ public class TableRepository
 
     public long countTableSize(String namespace, String tableName)
     {
+        readCountTableSizeStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_COUNT_TABLE_SIZE_CQL, namespace + "_" + tableName), getSession());
         BoundStatement bs = new BoundStatement(readAllCountStmt);
         bs.bind(namespace);
         return (getSession().execute(bs).one().getLong(0));
@@ -184,7 +187,7 @@ public class TableRepository
 
     private List<Table> marshalAll(ResultSet rs)
     {
-        List<Table> collections = new ArrayList<Table>();
+        List<Table> collections = new ArrayList<>();
         Iterator<Row> i = rs.iterator();
 
         while (i.hasNext())
