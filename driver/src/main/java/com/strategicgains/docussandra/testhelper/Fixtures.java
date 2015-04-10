@@ -8,6 +8,7 @@ import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexCreationStatus;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
@@ -181,7 +182,6 @@ public class Fixtures
 //            }
 //        }
 //    }
-
     /**
      * Load properties from a property file
      */
@@ -270,6 +270,22 @@ public class Fixtures
         index.fields(fields);
         index.isUnique(false);
         return index;
+    }
+
+    /**
+     * Creates at test IndexCreationStatus.
+     *
+     * @return
+     */
+    public static final IndexCreationStatus createTestIndexCreationStatus()
+    {
+        IndexCreationStatus toReturn = new IndexCreationStatus();
+        toReturn.setDateStarted(new Date());
+        toReturn.setIndex(createTestIndexOneField());
+        toReturn.setTotalRecords(1000);
+        toReturn.setUuid(UUID.randomUUID());
+        toReturn.setStatusLastUpdatedAt(new Date());
+        return toReturn;
     }
 
     /**
