@@ -11,6 +11,7 @@ import com.strategicgains.repoexpress.AbstractObservableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
+import com.strategicgains.repoexpress.util.UuidConverter;
 import com.strategicgains.syntaxe.ValidationEngine;
 import java.util.Date;
 import java.util.UUID;
@@ -32,18 +33,19 @@ public class IndexService
         this.tables = tableRepository;
     }
 
-    public Index create(Index index)
+    public IndexCreationStatus create(Index index)
     {
         verifyTable(index.databaseName(), index.tableName());
         ValidationEngine.validateAndThrow(index);
+        index.setActive(false);//we default to not active when being created; we don't allow the user to change this; only the app can change this
         logger.debug("Creating index: " + index.toString());
         Index created = indexes.create(index);
         long dataSize = tables.countTableSize(index.databaseName(), index.tableName());
         Date now = new Date();
-        
-        return created;
+        UUID uuid = UUID.randomUUID();
+        return new IndexCreationStatus(uuid, now, now, created, dataSize, 0l);
     }
-    
+
     public IndexCreationStatus status(UUID id)
     {
         logger.debug("Checking index creation status: " + id.toString());
@@ -55,21 +57,13 @@ public class IndexService
     {
         return indexes.read(identifier);
     }
-    
-    public Index update(Index index)
-    {
-        ValidationEngine.validateAndThrow(index);
-        logger.debug("Updating index: " + index.toString());
-        indexes.update(index);
-        return index;
-    }
 
     public void delete(Identifier identifier)
     {
         logger.debug("Deleting index: " + identifier.toString());
         indexes.delete(identifier);
     }
-    
+
     public void delete(Index index)
     {
         Identifier identifier = index.getId();

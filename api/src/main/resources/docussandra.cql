@@ -41,6 +41,7 @@ create table sys_idx (
 	bucket_sz bigint,
 	fields list<text>,
 	only list<text>,
+    is_active boolean,
 	created_at timestamp,
 	updated_at timestamp,
 	primary key ((db_name), tbl_name, name)

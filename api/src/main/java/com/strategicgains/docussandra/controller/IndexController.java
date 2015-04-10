@@ -43,7 +43,7 @@ public class IndexController
         this.indexes = indexService;
     }
 
-    public Index create(Request request, Response response)
+    public IndexCreationStatus create(Request request, Response response)
     {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
@@ -57,7 +57,7 @@ public class IndexController
         if(entity.includeOnly() == null){
             entity.includeOnly(new ArrayList<String>(0));
         }
-        Index status;
+        IndexCreationStatus status;
         try
         {
             status = indexes.create(entity);
@@ -70,9 +70,9 @@ public class IndexController
         response.setResponseCreated();
 
         // enrich the resource with links, etc. here...
-        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.tableName())
-                .bind(Constants.Url.DATABASE, status.databaseName())
-                .bind(Constants.Url.INDEX, status.name());
+        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
+                .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
+                .bind(Constants.Url.INDEX, status.getIndex().name());
 
         // Include the Location header...
         String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);

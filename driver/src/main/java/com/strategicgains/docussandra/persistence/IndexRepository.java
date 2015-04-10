@@ -50,14 +50,15 @@ public class IndexRepository
         static final String ONLY = "only";
         static final String CREATED_AT = "created_at";
         static final String UPDATED_AT = "updated_at";
+        static final String IS_ACTIVE = "is_active";
     }
 
     private static final String IDENTITY_CQL = " where db_name = ? and tbl_name = ? and name = ?";
     private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, only, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, only, is_active, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
     private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
-    private static final String UPDATE_CQL = "update %s set bucket_sz = ?, updated_at = ?" + IDENTITY_CQL;
+    //private static final String UPDATE_CQL = "update %s set bucket_sz = ?, updated_at = ?" + IDENTITY_CQL;
     private static final String READ_ALL_CQL = "select * from %s where db_name = ? and tbl_name = ?";
     private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where db_name = ? and tbl_name = ?";
 
@@ -65,7 +66,7 @@ public class IndexRepository
     private PreparedStatement readStmt;
     private PreparedStatement createStmt;
     private PreparedStatement deleteStmt;
-    private PreparedStatement updateStmt;
+    //private PreparedStatement updateStmt;
     private PreparedStatement readAllStmt;
     private PreparedStatement readAllCountStmt;
 
@@ -73,7 +74,7 @@ public class IndexRepository
     {
         super(session, Tables.BY_ID);
         addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Index>());
-        addObserver(new StateChangeEventingObserver<Index>(new IndexEventFactory()));
+        addObserver(new StateChangeEventingObserver<>(new IndexEventFactory()));
         addObserver(new IndexChangeObserver(session));
         initialize();
     }
@@ -84,7 +85,7 @@ public class IndexRepository
         readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, getTable()), getSession());
         createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), Columns.NAME), getSession());
         deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, getTable()), getSession());
-        updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable()), getSession());
+        //updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable()), getSession());
         readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
         readAllCountStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_COUNT_CQL, getTable()), getSession());
     }
@@ -143,10 +144,6 @@ public class IndexRepository
     protected Index updateEntity(Index entity)
     {
         throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
-//		BoundStatement bs = new BoundStatement(updateStmt);
-//		bindUpdate(bs, entity);
-//		getSession().execute(bs);
-//		return entity;
     }
 
     @Override
@@ -232,19 +229,19 @@ public class IndexRepository
                 entity.bucketSize(),
                 entity.fields(),
                 entity.includeOnly(),
+                entity.isActive(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }
 
-    private void bindUpdate(BoundStatement bs, Index entity)
-    {
-        bs.bind(entity.bucketSize(),
-                entity.getUpdatedAt(),
-                entity.databaseName(),
-                entity.tableName(),
-                entity.name());
-    }
-
+//    private void bindUpdate(BoundStatement bs, Index entity)
+//    {
+//        bs.bind(entity.bucketSize(),
+//                entity.getUpdatedAt(),
+//                entity.databaseName(),
+//                entity.tableName(),
+//                entity.name());
+//    }
     private List<Index> marshalAll(ResultSet rs)
     {
         List<Index> indexes = new ArrayList<Index>();
@@ -275,6 +272,7 @@ public class IndexRepository
         i.bucketSize(row.getLong(Columns.BUCKET_SIZE));
         i.fields(row.getList(Columns.FIELDS, String.class));
         i.includeOnly(row.getList(Columns.ONLY, String.class));
+        i.setActive(row.getBool(Columns.IS_ACTIVE));
         i.setCreatedAt(row.getDate(Columns.CREATED_AT));
         i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
         return i;

@@ -116,10 +116,16 @@ public class IndexControllerTest {
 
         //act
         given().body(tableStr).expect().statusCode(201)
-                .body("name", equalTo(testIndex.name()))
-                .body("fields", notNullValue())
-                .body("createdAt", notNullValue())
-                .body("updatedAt", notNullValue())
+                .body("index.name", equalTo(testIndex.name()))
+                .body("index.fields", notNullValue())
+                .body("index.createdAt", notNullValue())
+                .body("index.updatedAt", notNullValue())
+                .body("index.active", equalTo(false))
+                .body("id", notNullValue())
+                .body("dateStarted", notNullValue())
+                .body("statusLastUpdatedAt", notNullValue())
+                .body("totalRecords", equalTo(0))
+                .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name());
 
         //check
@@ -128,6 +134,7 @@ public class IndexControllerTest {
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
+                .body("active", equalTo(false))
                 .get("/" + testIndex.name());
     }
 

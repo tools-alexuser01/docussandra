@@ -94,7 +94,7 @@ public class IndexCreationStatus implements UuidIdentifiable
     
     public boolean isDone()
     {
-        return getIndex().isIsActive();
+        return getIndex().isActive();
     }
 
     /**
@@ -107,6 +107,14 @@ public class IndexCreationStatus implements UuidIdentifiable
     public double calculatePercentComplete()
     {
         return (double) ((double) getRecordsCompleted() / (double) getTotalRecords()) * 100d;
+    }
+    
+    /**
+     * Gets a status link that can be used to check on this request.
+     * @return 
+     */
+    public String getStatusLink(){
+        return ""; //TODO: finish
     }
 
     @Override
