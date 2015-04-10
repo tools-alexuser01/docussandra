@@ -381,7 +381,7 @@ public class Fixtures
         }
     }
 
-    public void createTestTables()
+    public void createTestITables()
     {
         System.out.println("createTestITables");
         ITableRepository iTableDao = new ITableRepository(getSession());

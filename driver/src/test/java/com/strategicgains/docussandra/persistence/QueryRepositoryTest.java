@@ -61,7 +61,7 @@ public class QueryRepositoryTest
     public void setUp()
     {
         f.clearTestTables();
-        f.createTestTables();
+        f.createTestITables();
     }
 
     @After

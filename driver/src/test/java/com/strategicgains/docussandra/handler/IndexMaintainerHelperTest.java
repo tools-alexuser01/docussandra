@@ -79,7 +79,7 @@ public class IndexMaintainerHelperTest
         tableRepo = new TableRepository(f.getSession());
         table = Fixtures.createTestTable();// new Table();
         f.clearTestTables();// clear anything that might be there already
-        //f.createTestTables();
+        //f.createTestITables();
         //clearTestData();
         //reinsert with some fresh data
         index1 = Fixtures.createTestIndexOneField();

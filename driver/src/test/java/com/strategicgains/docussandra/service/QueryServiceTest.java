@@ -55,7 +55,7 @@ public class QueryServiceTest
     public void setUp()
     {
         f.clearTestTables();
-        f.createTestTables();
+        f.createTestITables();
         instance = new QueryService(new QueryRepository(f.getSession()));
         IndexRepository indexRepo = new IndexRepository(f.getSession());
         indexRepo.create(Fixtures.createTestIndexTwoField());
