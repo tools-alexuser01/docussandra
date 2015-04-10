@@ -46,7 +46,7 @@ public class IndexStatusRepository
     private static final String EXISTENCE_CQL = "select count(*) from " + Tables.BY_ID + IDENTITY_CQL;
     private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.IS_DONE + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ") values (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from " + Tables.BY_ID + IDENTITY_CQL;
-    private static final String UPDATE_CQL = "update " + Tables.BY_ID + " set " + Columns.RECORDS_COMPLETED + " = ?  " + Columns.IS_DONE + " = ?, updated_at = ?" + IDENTITY_CQL;
+    private static final String UPDATE_CQL = "update " + Tables.BY_ID + " set " + Columns.RECORDS_COMPLETED + " = ?, " + Columns.IS_DONE + " = ?, updated_at = ?" + IDENTITY_CQL;
     private static final String READ_ALL_CQL = "select * from " + Tables.BY_ID;
 
     private PreparedStatement existStmt;
