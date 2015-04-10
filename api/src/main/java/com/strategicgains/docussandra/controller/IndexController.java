@@ -116,20 +116,20 @@ public class IndexController
         return indexes.readAll(database, table);
     }
 
-    public void update(Request request, Response response)
-    {
-        String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
-        String table = request.getHeader(Constants.Url.TABLE, "No table provided");
-        String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
-        Index entity = request.getBodyAs(Index.class, "Resource details not provided");
-        Table t = new Table();
-        t.database(database);
-        t.name(table);
-        entity.table(t);
-        entity.name(name);
-        indexes.update(entity);
-        response.setResponseNoContent();
-    }
+//    public void update(Request request, Response response)
+//    {
+//        String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
+//        String table = request.getHeader(Constants.Url.TABLE, "No table provided");
+//        String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
+//        Index entity = request.getBodyAs(Index.class, "Resource details not provided");
+//        Table t = new Table();
+//        t.database(database);
+//        t.name(table);
+//        entity.table(t);
+//        entity.name(name);
+//        indexes.update(entity);
+//        response.setResponseNoContent();
+//    }
 
     public void delete(Request request, Response response)
     {
