@@ -59,12 +59,14 @@ public class Index
 
     public Index()
     {
+        active = false;
     }
 
     public Index(String name)
     {
         this();
         name(name);
+        active = false;
     }
 
     public boolean hasTable()

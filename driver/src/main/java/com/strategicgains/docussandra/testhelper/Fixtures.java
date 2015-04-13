@@ -1,7 +1,9 @@
 package com.strategicgains.docussandra.testhelper;
 
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.strategicgains.docussandra.Utils;
@@ -17,6 +19,7 @@ import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.ITableRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,6 +66,7 @@ public class Fixtures
     private static DatabaseRepository databaseRepo;
     private static DocumentRepository docRepo;
     private static TableRepository tableRepo;
+    private static IndexStatusRepository indexStatusRepo;
 
     /**
      * Private constructor as this is a singleton object
@@ -109,6 +113,7 @@ public class Fixtures
         databaseRepo = new DatabaseRepository(getSession());
         docRepo = new DocumentRepository(getSession());
         tableRepo = new TableRepository(getSession());
+        indexStatusRepo = new IndexStatusRepository(getSession());
     }
 
     /**
@@ -395,6 +400,7 @@ public class Fixtures
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
+
     }
 
     public void createTestITables()

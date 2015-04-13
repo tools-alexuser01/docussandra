@@ -18,6 +18,7 @@ package com.strategicgains.docussandra.domain;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.domain.UuidIdentifiable;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -247,4 +248,26 @@ public class IndexCreationStatus implements UuidIdentifiable
     {
         this.recordsCompleted = recordsCompleted;
     }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 5;
+        hash = 79 * hash + Objects.hashCode(this.id);
+        hash = 79 * hash + Objects.hashCode(this.dateStarted);
+        hash = 79 * hash + Objects.hashCode(this.statusLastUpdatedAt);
+        hash = 79 * hash + Objects.hashCode(this.index);
+        hash = 79 * hash + (int) (this.totalRecords ^ (this.totalRecords >>> 32));
+        hash = 79 * hash + (int) (this.recordsCompleted ^ (this.recordsCompleted >>> 32));
+        return hash;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "IndexCreationStatus{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + '}';
+    }
+    
+    
 }

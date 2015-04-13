@@ -49,13 +49,17 @@ create table sys_idx (
 
 drop table if exists sys_idx_status;
 create table sys_idx_status (
-    id text,
+    id uuid,
 	db_name text,
 	tbl_name text,
 	index_name text,
 	records_completed bigint,
-    is_done boolean,
 	started_at timestamp,
 	updated_at timestamp,
-	primary key ((id))
+	primary key (id)
+);
+
+drop table if exists sys_idx_not_done;
+create table sys_idx_not_done (
+    id uuid primary key
 );

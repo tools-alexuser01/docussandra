@@ -42,13 +42,16 @@ create table IF NOT EXISTS sys_idx (
 );
 
 create table IF NOT EXISTS sys_idx_status (
-    id text,
+    id uuid,
 	db_name text,
 	tbl_name text,
 	index_name text,
 	records_completed bigint,
-    is_done boolean,
 	started_at timestamp,
 	updated_at timestamp,
-	primary key ((id))
+	primary key (id)
+);
+
+create table IF NOT EXISTS sys_idx_not_done (
+    id uuid primary key
 );

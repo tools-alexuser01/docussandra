@@ -15,7 +15,6 @@
  */
 package com.strategicgains.docussandra.persistence;
 
-import com.datastax.driver.core.Row;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Table;
@@ -70,7 +69,6 @@ public class TableRepositoryTest
     @After
     public void tearDown()
     {
-        f.clearTestTables();
     }
 
     /**
