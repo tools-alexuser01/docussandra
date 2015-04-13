@@ -26,6 +26,7 @@ import com.strategicgains.docussandra.handler.TableDeleteHandler;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.docussandra.service.DatabaseService;
@@ -44,19 +45,19 @@ import org.slf4j.LoggerFactory;
 public class Configuration
         extends Environment
 {
-
+    
     private static final String DEFAULT_EXECUTOR_THREAD_POOL_SIZE = "20";
-
+    
     private static final String PORT_PROPERTY = "port";
     private static final String BASE_URL_PROPERTY = "base.url";
     private static final String EXECUTOR_THREAD_POOL_SIZE = "executor.threadPool.size";
-
+    
     private int port;
     private String baseUrl;
     private int executorThreadPoolSize;
     private MetricsConfig metricsSettings;
     private Manifest manifest;
-
+    
     private DatabaseController databaseController;
     private TableController tableController;
     private DocumentController documentController;
@@ -65,9 +66,9 @@ public class Configuration
     private QueryController queryController;
     private HealthCheckController healthController;
     private BuildInfoController buildInfoController;
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
-
+    
     @Override
     public void fillValues(Properties p)
     {
@@ -79,7 +80,7 @@ public class Configuration
         initialize(dbConfig);
         loadManifest();
     }
-
+    
     private void initialize(CassandraConfigWithGenericSessionAccess dbConfig)
     {
         try
@@ -94,13 +95,14 @@ public class Configuration
         DocumentRepository documentRepository = new DocumentRepository(dbConfig.getSession());
         IndexRepository indexRepository = new IndexRepository(dbConfig.getSession());
         QueryRepository queryRepository = new QueryRepository(dbConfig.getSession());
-
+        IndexStatusRepository indexStatusRepository = new IndexStatusRepository(dbConfig.getSession());
+        
         DatabaseService databaseService = new DatabaseService(databaseRepository);
         TableService tableService = new TableService(databaseRepository, tableRepository);
         DocumentService documentService = new DocumentService(tableRepository, documentRepository);
-        IndexService indexService = new IndexService(tableRepository, indexRepository);
+        IndexService indexService = new IndexService(tableRepository, indexRepository, indexStatusRepository);
         QueryService queryService = new QueryService(queryRepository);
-
+        
         databaseController = new DatabaseController(databaseService);
         tableController = new TableController(tableService);
         documentController = new DocumentController(documentService);
@@ -119,97 +121,97 @@ public class Configuration
                 .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
                 .build();
         DomainEvents.addBus("local", bus);
-
+        
     }
-
+    
     public int getPort()
     {
         return port;
     }
-
+    
     public String getBaseUrl()
     {
         return baseUrl;
     }
-
+    
     public int getExecutorThreadPoolSize()
     {
         return executorThreadPoolSize;
     }
-
+    
     public MetricsConfig getMetricsConfig()
     {
         return metricsSettings;
     }
-
+    
     public DatabaseController getDatabaseController()
     {
         return databaseController;
     }
-
+    
     public TableController getTableController()
     {
         return tableController;
     }
-
+    
     public DocumentController getDocumentController()
     {
         return documentController;
     }
-
+    
     public IndexController getIndexController()
     {
         return indexController;
     }
-
+    
     public IndexStatusController getIndexStatusController()
     {
         return indexStatusController;
     }
-
+    
     public QueryController getQueryController()
     {
         return queryController;
     }
-
+    
     public String getProjectName(String defaultName)
     {
         if (hasManifest())
         {
             String name = manifest.getMainAttributes().getValue("Project-Name");
-
+            
             if (name != null)
             {
                 return name;
             }
         }
-
+        
         return defaultName;
     }
-
+    
     public String getProjectVersion()
     {
         if (hasManifest())
         {
             String version = manifest.getMainAttributes().getValue("Project-Version");
-
+            
             if (version != null)
             {
                 return version;
             }
-
+            
             return "0.0.0 (Project version not found in manifest)";
         }
-
+        
         return "0.0.0 (Development version)";
     }
-
+    
     private void loadManifest()
     {
         Class<?> type = this.getClass();
         String name = type.getSimpleName() + ".class";
         URL classUrl = type.getResource(name);
-
+        
         if (classUrl != null && classUrl.getProtocol().startsWith("jar"))
         {
             String path = classUrl.toString();
@@ -223,7 +225,7 @@ public class Configuration
             }
         }
     }
-
+    
     private boolean hasManifest()
     {
         return (manifest != null);
@@ -251,21 +253,21 @@ public class Configuration
      */
     private class CassandraConfigWithGenericSessionAccess extends CassandraConfig
     {
-
+        
         private Session genericSession;
-
+        
         public CassandraConfigWithGenericSessionAccess(Properties p)
         {
             super(p);
         }
-
+        
         public Session getGenericSession()
         {
             if (genericSession == null)
             {
                 genericSession = getCluster().connect();
             }
-
+            
             return genericSession;
         }
     }

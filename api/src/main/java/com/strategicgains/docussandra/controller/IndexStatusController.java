@@ -14,6 +14,7 @@ import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenBinder;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,32 +41,27 @@ public class IndexStatusController
     }
    
     
+    /**
+     * Gets the status for an index creation request.
+     * @param request
+     * @param response
+     * @return 
+     */
     public IndexCreationStatus read(Request request, Response response){
         String id = request.getHeader(Constants.Url.INDEX_STATUS, "No index status id provided.");
-        
-        throw new UnsupportedOperationException("Not done yet.");
+        return indexes.status(UUID.fromString(id));
     }
 
 
+    /**
+     * Gets all presently active index creation requests.
+     * @param request
+     * @param response
+     * @return 
+     */
     public List<IndexCreationStatus> readAll(Request request, Response response)
     {
-//        String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
-//        String table = request.getHeader(Constants.Url.TABLE, "No table provided");
-//
-//        HyperExpress.tokenBinder(new TokenBinder<Index>()
-//        {
-//            @Override
-//            public void bind(Index object, TokenResolver resolver)
-//            {
-//                resolver.bind(Constants.Url.TABLE, object.tableName())
-//                        .bind(Constants.Url.DATABASE, object.databaseName())
-//                        .bind(Constants.Url.INDEX, object.name());
-//
-//            }
-//        });
-//
-//        return indexes.readAll(database, table);
-        throw new UnsupportedOperationException("Not done yet.");
+        return indexes.getAllActiveStatus();
     }
 
 }

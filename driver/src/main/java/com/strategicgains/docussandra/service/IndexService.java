@@ -1,17 +1,14 @@
 package com.strategicgains.docussandra.service;
 
-import com.strategicgains.docussandra.domain.Document;
 import java.util.List;
 
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexCreationStatus;
 import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
-import com.strategicgains.repoexpress.AbstractObservableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
-import com.strategicgains.repoexpress.util.UuidConverter;
 import com.strategicgains.syntaxe.ValidationEngine;
 import java.util.Date;
 import java.util.UUID;
@@ -23,14 +20,16 @@ public class IndexService
 
     private TableRepository tables;
     private IndexRepository indexes;
+    private IndexStatusRepository status;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public IndexService(TableRepository tableRepository, IndexRepository indexRepository)
+    public IndexService(TableRepository tableRepository, IndexRepository indexRepository, IndexStatusRepository status)
     {
         super();
         this.indexes = indexRepository;
         this.tables = tableRepository;
+        this.status = status;
     }
 
     public IndexCreationStatus create(Index index)
@@ -46,11 +45,25 @@ public class IndexService
         return new IndexCreationStatus(uuid, now, now, created, dataSize, 0l);
     }
 
+    /**
+     * Gets the status of an index creation event.
+     * @param id Id to get the status for.
+     * @return an IndexCreationStatus for this id.
+     */
     public IndexCreationStatus status(UUID id)
     {
         logger.debug("Checking index creation status: " + id.toString());
-        //return indexes.create(index);
-        throw new UnsupportedOperationException("Not done yet.");
+        return status(id);
+    }
+    
+    /**
+     * Gets all statuses for pending index creations.
+     * @return a list of IndexCreationStatus.
+     */
+    public List<IndexCreationStatus> getAllActiveStatus()
+    {
+        logger.debug("Checking index creation status.");
+        return status.readAllActive();
     }
 
     public Index read(Identifier identifier)
