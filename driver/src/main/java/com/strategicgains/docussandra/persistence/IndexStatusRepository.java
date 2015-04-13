@@ -126,7 +126,7 @@ public class IndexStatusRepository
     }
 
     @Override
-    protected IndexCreationStatus createEntity(IndexCreationStatus entity)
+    public IndexCreationStatus createEntity(IndexCreationStatus entity)
     {
         BoundStatement create = new BoundStatement(createStmt);
         bindCreate(create, entity);
@@ -141,7 +141,7 @@ public class IndexStatusRepository
     }
 
     @Override
-    protected IndexCreationStatus updateEntity(IndexCreationStatus entity)
+    public IndexCreationStatus updateEntity(IndexCreationStatus entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
