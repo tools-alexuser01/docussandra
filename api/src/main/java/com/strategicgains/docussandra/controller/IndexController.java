@@ -82,9 +82,6 @@ public class IndexController
         return status;
     }
     
-    public IndexCreationStatus status(Request request, Response response){
-        throw new UnsupportedOperationException("Not done yet.");
-    }
 
     public Index read(Request request, Response response)
     {

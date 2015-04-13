@@ -114,7 +114,7 @@ public class IndexStatusRepository
         throw new UnsupportedOperationException("This is not a valid call for this class.");
     }
 
-    protected IndexCreationStatus readEntityByUUID(UUID uuid)
+    public IndexCreationStatus readEntityByUUID(UUID uuid)
     {
         if (uuid == null)
         {

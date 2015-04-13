@@ -15,11 +15,10 @@ package com.strategicgains.docussandra.controller;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
+import com.jayway.restassured.response.ResponseOptions;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
@@ -38,14 +37,16 @@ import testhelper.RestExpressManager;
  *
  * @author udeyoje
  */
-public class IndexControllerTest {
+public class IndexControllerTest
+{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private static Fixtures f;
 
-    public IndexControllerTest() throws Exception{
+    public IndexControllerTest() throws Exception
+    {
     }
 
     /**
@@ -55,7 +56,8 @@ public class IndexControllerTest {
      * @throws Exception
      */
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() throws Exception
+    {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
         f = Fixtures.getInstance();
@@ -63,7 +65,8 @@ public class IndexControllerTest {
     }
 
     @Before
-    public void beforeTest() {
+    public void beforeTest()
+    {
         f.clearTestTables();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
@@ -77,14 +80,16 @@ public class IndexControllerTest {
      * executed.
      */
     @AfterClass
-    public static void afterClass() {
+    public static void afterClass()
+    {
     }
 
     /**
      * Cleanup that is performed after each test is executed.
      */
     @After
-    public void afterTest() {
+    public void afterTest()
+    {
         f.clearTestTables();
     }
 
@@ -93,7 +98,8 @@ public class IndexControllerTest {
      * retrieves an existing index.
      */
     @Test
-    public void getIndexTest() {
+    public void getIndexTest()
+    {
         Index testIndex = Fixtures.createTestIndexOneField();
         f.insertIndex(testIndex);
         expect().statusCode(200)
@@ -109,7 +115,8 @@ public class IndexControllerTest {
      * creates a index.
      */
     @Test
-    public void postIndexTest() {
+    public void postIndexTest()
+    {
         Index testIndex = Fixtures.createTestIndexOneField();
         String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
                 + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
@@ -138,13 +145,56 @@ public class IndexControllerTest {
                 .get("/" + testIndex.name());
     }
 
+    /**
+     * Tests that the POST /{databases}/{table}/indexes/ endpoint properly
+     * creates a index and that the
+     * GET/{database}/{table}/index_status/{status_id} endpoint is working.
+     */
+    @Test
+    public void postIndexAndCheckStatusTest()
+    {
+        Index testIndex = Fixtures.createTestIndexOneField();
+        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
+                + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
+
+        //act
+        ResponseOptions response = given().body(tableStr).expect().statusCode(201)
+                .body("index.name", equalTo(testIndex.name()))
+                .body("index.fields", notNullValue())
+                .body("index.createdAt", notNullValue())
+                .body("index.updatedAt", notNullValue())
+                .body("index.active", equalTo(false))
+                .body("id", notNullValue())
+                .body("dateStarted", notNullValue())
+                .body("statusLastUpdatedAt", notNullValue())
+                .body("totalRecords", equalTo(0))
+                .body("recordsCompleted", equalTo(0))
+                .when().post("/" + testIndex.name()).andReturn();
+
+        
+        String restAssuredBasePath = RestAssured.basePath;
+        try
+        {            
+            //get the uuid from the response
+            String uuidString = response.getBody().jsonPath().get("id");
+            RestAssured.basePath = "/" + testIndex.databaseName() + "/" + testIndex.tableName() + "/index_status/";
+            expect().statusCode(200)//TODO: left off here
+                    .body("id", equalTo(uuidString))
+                    .when().get(uuidString);
+        } finally
+        {
+            RestAssured.basePath = restAssuredBasePath;
+        }
+
+    }
 
     /**
      * Tests that the DELETE /{databases}/{table}/indexes/{index} endpoint
      * properly deletes a index.
      */
     @Test
-    public void deleteIndexTest() {
+    public void deleteIndexTest()
+    {
         Index testIndex = Fixtures.createTestIndexOneField();
         f.insertIndex(testIndex);
         //act
