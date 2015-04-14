@@ -38,7 +38,7 @@ public class FieldNotIndexedException extends RuntimeException
      */
     public FieldNotIndexedException(List<String> fields)
     {
-        super("One of the following fields: [" + listToString(fields) + "] does not exist in any known indices. Try adding an index (if you understand the ramifications of this).");
+        super("One of the following fields: [" + listToString(fields) + "] does not exist in any known indices (or may not be yet active). Try adding an index (if you understand the ramifications of this).");
         this.fields = fields;
     }
 
