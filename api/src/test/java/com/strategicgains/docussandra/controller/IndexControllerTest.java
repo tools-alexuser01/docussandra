@@ -39,12 +39,12 @@ import testhelper.RestExpressManager;
  */
 public class IndexControllerTest
 {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private static Fixtures f;
-    
+
     public IndexControllerTest() throws Exception
     {
     }
@@ -63,7 +63,7 @@ public class IndexControllerTest
         f = Fixtures.getInstance();
         RestExpressManager.getManager().ensureRestExpressRunning();
     }
-    
+
     @Before
     public void beforeTest()
     {
@@ -167,10 +167,13 @@ public class IndexControllerTest
                 .body("id", notNullValue())
                 .body("dateStarted", notNullValue())
                 .body("statusLastUpdatedAt", notNullValue())
+                .body("eta", notNullValue())
+                .body("precentComplete", notNullValue())
                 .body("totalRecords", equalTo(0))
+                .body("statusLink", notNullValue())
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name()).andReturn();
-        
+
         String restAssuredBasePath = RestAssured.basePath;
         try
         {
@@ -182,21 +185,23 @@ public class IndexControllerTest
                     .body("dateStarted", notNullValue())
                     .body("statusLastUpdatedAt", notNullValue())
                     .body("eta", notNullValue())
+                    .body("precentComplete", notNullValue())
                     .body("index", notNullValue())
                     .body("totalRecords", notNullValue())
+                    .body("statusLink", containsString(uuidString))
                     .body("recordsCompleted", notNullValue())
                     .when().get(uuidString).andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
         } finally
         {
             RestAssured.basePath = restAssuredBasePath;
-        }        
+        }
     }
 
     /**
      * Tests that the POST /{databases}/{table}/indexes/ endpoint properly
-     * creates a index and that the
-     * GET/{database}/{table}/index_status/ endpoint is working.
+     * creates a index and that the GET/{database}/{table}/index_status/
+     * endpoint is working.
      */
     @Test
     public void postIndexAndCheckStatusAllTest()
@@ -218,7 +223,7 @@ public class IndexControllerTest
                 .body("totalRecords", equalTo(0))
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name()).andReturn();
-        
+
         String restAssuredBasePath = RestAssured.basePath;
         try
         {
@@ -236,9 +241,9 @@ public class IndexControllerTest
         } finally
         {
             RestAssured.basePath = restAssuredBasePath;
-        }        
+        }
     }
-    
+
     /**
      * Tests that the DELETE /{databases}/{table}/indexes/{index} endpoint
      * properly deletes a index.

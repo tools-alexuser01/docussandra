@@ -45,9 +45,20 @@ public class IndexCreationStatus implements UuidIdentifiable
     private Date statusLastUpdatedAt;
 
     /**
-     * Estimated time to completion of this index.
+     * Estimated time to completion of this index. In seconds. Expect this to be
+     * rough.
      */
-    private long eta;//likely a pipe dream, but it would be sweet if this worked
+    private long eta;
+
+    /**
+     * Percent complete for this task.
+     */
+    private double precentComplete;
+
+    /**
+     * Status link for this status.
+     */
+    private String statusLink;
 
     /**
      * The requested index that is being created.
@@ -73,12 +84,13 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * Constructor.
+     *
      * @param id
      * @param dateStarted
      * @param statusLastUpdatedAt
      * @param index
      * @param totalRecords
-     * @param recordsCompleted 
+     * @param recordsCompleted
      */
     public IndexCreationStatus(UUID id, Date dateStarted, Date statusLastUpdatedAt, Index index, long totalRecords, long recordsCompleted)
     {
@@ -90,7 +102,16 @@ public class IndexCreationStatus implements UuidIdentifiable
         this.recordsCompleted = recordsCompleted;
     }
 
-    
+    /**
+     * Computes any calculated fields.
+     */
+    public void calculateValues()
+    {
+        calculatePercentComplete();
+        calulateStatusLink();
+        calculateEta();
+    }
+
     public boolean isDone()
     {
         return getIndex().isActive();
@@ -100,20 +121,48 @@ public class IndexCreationStatus implements UuidIdentifiable
      * Calculates out what percent complete this operation is. If more records
      * get added during the operation, the percent complete could decrease
      * instead of climb.
-     *
-     * @return The current percent complete of this index creation operation.
      */
-    public double calculatePercentComplete()
+    private void calculatePercentComplete()
     {
-        return (double) ((double) getRecordsCompleted() / (double) getTotalRecords()) * 100d;
+        if (getTotalRecords() == 0)
+        {
+            precentComplete = 100;
+        } else if (getRecordsCompleted() == 0)
+        {
+            precentComplete = 0;
+        } else
+        {
+            precentComplete = (double) ((double) getRecordsCompleted() / (double) getTotalRecords()) * 100d;
+        }
     }
-    
+
     /**
-     * Gets a status link that can be used to check on this request.
-     * @return 
+     * Calculates a status link that can be used to check on this request.
      */
-    public String getStatusLink(){
-        return ""; //TODO: finish
+    private void calulateStatusLink()
+    {
+        statusLink = "http://localhost:8081/" + index.databaseName() + "/" + index.tableName() + "/index_status/" + getUuid().toString();//TODO: finish
+    }
+
+    private void calculateEta()
+    {
+        long duration = this.getStatusLastUpdatedAt().getTime() - this.getDateStarted().getTime();
+        if (getTotalRecords() == 0)
+        {
+            eta = 0;//we are functionally done
+        } else if (duration == 0)
+        {
+            //nothing to go off of
+            eta = -1;
+        } else
+        {
+            long recordsProcessed = getRecordsCompleted();
+            long recordsRemaining = getTotalRecords() - getRecordsCompleted();
+            //lets get duration in seconds
+            double durationDouble = (double) duration / 1000d;
+            double doubleEta = (durationDouble / recordsProcessed) * recordsRemaining;//might need to be recordsProcessed/durationDouble
+            eta = (long) doubleEta;
+        }
     }
 
     @Override
@@ -143,6 +192,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * The date that this request to make an index was issued.
+     *
      * @return the dateStarted
      */
     public Date getDateStarted()
@@ -152,6 +202,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * The date that this request to make an index was issued.
+     *
      * @param dateStarted the dateStarted to set
      */
     public void setDateStarted(Date dateStarted)
@@ -161,6 +212,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * The last time this status was updated.
+     *
      * @return the statusLastUpdatedAt
      */
     public Date getStatusLastUpdatedAt()
@@ -170,6 +222,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * The last time this status was updated.
+     *
      * @param statusLastUpdatedAt the statusLastUpdatedAt to set
      */
     public void setStatusLastUpdatedAt(Date statusLastUpdatedAt)
@@ -179,6 +232,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * Estimated time to completion of this index.
+     *
      * @return the eta
      */
     public long getEta()
@@ -187,16 +241,8 @@ public class IndexCreationStatus implements UuidIdentifiable
     }
 
     /**
-     * Estimated time to completion of this index.
-     * @param eta the eta to set
-     */
-    public void setEta(long eta)
-    {
-        this.eta = eta;
-    }
-
-    /**
      * The requested index that is being created.
+     *
      * @return the index
      */
     public Index getIndex()
@@ -206,6 +252,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * The requested index that is being created.
+     *
      * @param index the index to set
      */
     public void setIndex(Index index)
@@ -215,6 +262,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * Total number of records that this index will have when complete.
+     *
      * @return the totalRecords
      */
     public long getTotalRecords()
@@ -224,6 +272,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * Total number of records that this index will have when complete.
+     *
      * @param totalRecords the totalRecords to set
      */
     public void setTotalRecords(long totalRecords)
@@ -233,6 +282,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * Number of records that have been indexed.
+     *
      * @return the recordsCompleted
      */
     public long getRecordsCompleted()
@@ -242,6 +292,7 @@ public class IndexCreationStatus implements UuidIdentifiable
 
     /**
      * Number of records that have been indexed.
+     *
      * @param recordsCompleted the recordsCompleted to set
      */
     public void setRecordsCompleted(long recordsCompleted)
@@ -252,22 +303,94 @@ public class IndexCreationStatus implements UuidIdentifiable
     @Override
     public int hashCode()
     {
-        int hash = 5;
-        hash = 79 * hash + Objects.hashCode(this.id);
-        hash = 79 * hash + Objects.hashCode(this.dateStarted);
-        hash = 79 * hash + Objects.hashCode(this.statusLastUpdatedAt);
-        hash = 79 * hash + Objects.hashCode(this.index);
-        hash = 79 * hash + (int) (this.totalRecords ^ (this.totalRecords >>> 32));
-        hash = 79 * hash + (int) (this.recordsCompleted ^ (this.recordsCompleted >>> 32));
+        int hash = 3;
+        hash = 37 * hash + Objects.hashCode(this.id);
+        hash = 37 * hash + Objects.hashCode(this.dateStarted);
+        hash = 37 * hash + Objects.hashCode(this.statusLastUpdatedAt);
+        hash = 37 * hash + (int) (this.eta ^ (this.eta >>> 32));
+        hash = 37 * hash + (int) (Double.doubleToLongBits(this.precentComplete) ^ (Double.doubleToLongBits(this.precentComplete) >>> 32));
+        hash = 37 * hash + Objects.hashCode(this.statusLink);
+        hash = 37 * hash + Objects.hashCode(this.index);
+        hash = 37 * hash + (int) (this.totalRecords ^ (this.totalRecords >>> 32));
+        hash = 37 * hash + (int) (this.recordsCompleted ^ (this.recordsCompleted >>> 32));
         return hash;
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        final IndexCreationStatus other = (IndexCreationStatus) obj;
+        if (!Objects.equals(this.id, other.id))
+        {
+            return false;
+        }
+        if (!Objects.equals(this.dateStarted, other.dateStarted))
+        {
+            return false;
+        }
+        if (!Objects.equals(this.statusLastUpdatedAt, other.statusLastUpdatedAt))
+        {
+            return false;
+        }
+        if (this.eta != other.eta)
+        {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.precentComplete) != Double.doubleToLongBits(other.precentComplete))
+        {
+            return false;
+        }
+        if (!Objects.equals(this.statusLink, other.statusLink))
+        {
+            return false;
+        }
+        if (!Objects.equals(this.index, other.index))
+        {
+            return false;
+        }
+        if (this.totalRecords != other.totalRecords)
+        {
+            return false;
+        }
+        if (this.recordsCompleted != other.recordsCompleted)
+        {
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public String toString()
     {
-        return "IndexCreationStatus{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + '}';
+        return "IndexCreationStatus{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", precentComplete=" + precentComplete + ", statusLink=" + statusLink + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + '}';
     }
-    
-    
+
+    /**
+     * Percent complete for this task.
+     *
+     * @return the precentComplete
+     */
+    public double getPrecentComplete()
+    {
+        return precentComplete;
+    }
+
+    /**
+     * Status link for this status.
+     *
+     * @return the statusLink
+     */
+    public String getStatusLink()
+    {
+        return statusLink;
+    }
+
 }

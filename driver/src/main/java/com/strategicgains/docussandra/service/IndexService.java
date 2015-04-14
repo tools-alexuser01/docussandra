@@ -47,6 +47,7 @@ public class IndexService
         if(!statusRepo.exists(uuid)){
             statusRepo.createEntity(toReturn);
         }
+        toReturn.calculateValues();
         DomainEvents.publish(uuid);
         return toReturn;
     }

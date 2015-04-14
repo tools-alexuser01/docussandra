@@ -77,7 +77,6 @@ public class IndexController
         // Include the Location header...
         String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);
         response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
-
         // Return the newly-created resource...
         return status;
     }

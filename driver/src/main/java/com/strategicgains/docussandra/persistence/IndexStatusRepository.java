@@ -267,6 +267,7 @@ public class IndexStatusRepository
         i.setRecordsCompleted(row.getLong(Columns.RECORDS_COMPLETED));
         i.setDateStarted(row.getDate(Columns.STARTED_AT));
         i.setStatusLastUpdatedAt(row.getDate(Columns.UPDATED_AT));
+        i.calculateValues();
         //TODO: look up index here???
         return i;
     }
