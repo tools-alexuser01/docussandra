@@ -18,6 +18,7 @@ package com.strategicgains.docussandra.controller;
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
+import com.jayway.restassured.response.ResponseOptions;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
@@ -136,6 +137,59 @@ public class IndexControllerTest {
                 .body("updatedAt", notNullValue())
                 .body("active", equalTo(false))
                 .get("/" + testIndex.name());
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/indexes/ endpoint properly
+     * creates a index and that the
+     * GET/{database}/{table}/index_status/{status_id} endpoint is working.
+     */
+    @Test
+    public void postIndexAndCheckStatusTest()
+    {
+        Index testIndex = Fixtures.createTestIndexOneField();
+        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
+                + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
+
+        //act
+        ResponseOptions response = given().body(tableStr).expect().statusCode(201)
+                .body("index.name", equalTo(testIndex.name()))
+                .body("index.fields", notNullValue())
+                .body("index.createdAt", notNullValue())
+                .body("index.updatedAt", notNullValue())
+                .body("index.active", equalTo(false))
+                .body("id", notNullValue())
+                .body("dateStarted", notNullValue())
+                .body("statusLastUpdatedAt", notNullValue())
+                .body("eta", notNullValue())
+                .body("precentComplete", notNullValue())
+                .body("totalRecords", equalTo(0))
+                .body("statusLink", notNullValue())
+                .body("recordsCompleted", equalTo(0))
+                .when().post("/" + testIndex.name()).andReturn();
+
+        String restAssuredBasePath = RestAssured.basePath;
+        try
+        {
+            //get the uuid from the response
+            String uuidString = response.getBody().jsonPath().get("id");
+            RestAssured.basePath = "/" + testIndex.databaseName() + "/" + testIndex.tableName() + "/index_status/";
+            ResponseOptions res = expect().statusCode(200)
+                    .body("id", equalTo(uuidString))
+                    .body("dateStarted", notNullValue())
+                    .body("statusLastUpdatedAt", notNullValue())
+                    .body("eta", notNullValue())
+                    .body("precentComplete", notNullValue())
+                    .body("index", notNullValue())
+                    .body("totalRecords", notNullValue())
+                    .body("statusLink", containsString(uuidString))
+                    .body("recordsCompleted", notNullValue())
+                    .when().get(uuidString).andReturn();
+            LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
+        } finally
+        {
+            RestAssured.basePath = restAssuredBasePath;
+        }
     }
 
 
