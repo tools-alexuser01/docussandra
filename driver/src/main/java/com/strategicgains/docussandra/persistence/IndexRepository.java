@@ -139,6 +139,11 @@ public class IndexRepository
         }
         return entity;
     }
+    
+    public void markActive(Index entity)
+    {
+        throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
+    }
 
     @Override
     protected Index updateEntity(Index entity)

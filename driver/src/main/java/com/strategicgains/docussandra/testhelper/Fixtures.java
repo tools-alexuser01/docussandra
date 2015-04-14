@@ -1,9 +1,7 @@
 package com.strategicgains.docussandra.testhelper;
 
-import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Metadata;
-import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.strategicgains.docussandra.Utils;
@@ -114,6 +112,7 @@ public class Fixtures
         docRepo = new DocumentRepository(getSession());
         tableRepo = new TableRepository(getSession());
         indexStatusRepo = new IndexStatusRepository(getSession());
+        Utils.establishBackgroundTasks(indexRepo, indexStatusRepo, docRepo);
     }
 
     /**
@@ -168,25 +167,6 @@ public class Fixtures
         return cassandraKeyspace;
     }
 
-//    /**
-//     * Creates the database based off of an cql file. Move to RestExpress and
-//     * pull in from WW eventually.
-//     */
-//    private void initDatabase(File cqlFile) throws FileNotFoundException, IOException
-//    {
-//        logger.warn("Creating new database from scratch!");
-//        String cql = FileUtils.readFileToString(cqlFile);
-//        String[] statements = cql.split("\\Q;\\E");
-//        for (String statement : statements)
-//        {
-//            statement = statement.trim();
-//            statement = statement.replaceAll("\\Q\n\\E", " ");
-//            if (!statement.equals("") && !statement.startsWith("//"))
-//            {
-//                session.execute(statement);
-//            }
-//        }
-//    }
     /**
      * Load properties from a property file
      */

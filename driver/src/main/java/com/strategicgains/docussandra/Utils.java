@@ -3,6 +3,13 @@ package com.strategicgains.docussandra;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.handler.BackgroundIndexHandler;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.IndexStatusRepository;
+import com.strategicgains.eventing.DomainEvents;
+import com.strategicgains.eventing.EventBus;
+import com.strategicgains.eventing.local.LocalEventBusBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -12,8 +19,6 @@ import net.sf.ehcache.Element;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 
 /**
  * A collection of public static helper methods for various docussandra related
@@ -32,6 +37,7 @@ public class Utils
      * tableName, and the indexName.
      *
      * Note: No null checks.
+     *
      * @param databaseName database name for the iTable.
      * @param tableName table name for the iTable.
      * @param indexName index name for the iTable.
@@ -44,21 +50,21 @@ public class Utils
         Cache c = CacheFactory.getCache("iTableName");
 //        synchronized (CacheSynchronizer.getLockingObject(key, "iTableName"))
 //        {
-            Element e = c.get(key);
-            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
-            {
-                //not cached; let's create it
-                StringBuilder sb = new StringBuilder();
-                sb.append(databaseName);
-                sb.append('_');
-                sb.append(tableName);
-                sb.append('_');
-                sb.append(indexName);
-                //return sb.toString().toLowerCase();
-                e = new Element(key, sb.toString().toLowerCase());
-                c.put(e);
-            }
-            return (String) e.getObjectValue();
+        Element e = c.get(key);
+        if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+        {
+            //not cached; let's create it
+            StringBuilder sb = new StringBuilder();
+            sb.append(databaseName);
+            sb.append('_');
+            sb.append(tableName);
+            sb.append('_');
+            sb.append(indexName);
+            //return sb.toString().toLowerCase();
+            e = new Element(key, sb.toString().toLowerCase());
+            c.put(e);
+        }
+        return (String) e.getObjectValue();
 //        }
     }
 
@@ -117,7 +123,7 @@ public class Utils
      * lines (lines that start with "//").
      *
      * @param cqlPath path to the CQl file you wish to use to init the database.
-     * @param session Database session 
+     * @param session Database session
      *
      * @throws IOException if it can't read from the CQL file for some reason.
      */
@@ -137,6 +143,18 @@ public class Utils
                 session.execute(statement);
             }
         }
+    }
+
+    /**
+     * Establishes our background tasks. Probably not an ideal location for
+     * this, but it will work for now.
+     */
+    public static void establishBackgroundTasks(IndexRepository indexRepo, IndexStatusRepository indexStatusRepo, DocumentRepository docRepo)
+    {
+        EventBus q = new LocalEventBusBuilder()
+                .subscribe(new BackgroundIndexHandler(indexRepo, indexStatusRepo, docRepo))
+                .build();
+        DomainEvents.addBus("indexs", q);
     }
 
 }

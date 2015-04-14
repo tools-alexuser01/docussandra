@@ -111,6 +111,8 @@ public class Configuration
         queryController = new QueryController(queryService);
         healthController = new HealthCheckController();
         buildInfoController = new BuildInfoController();
+        //TODO: consider using the bus below instead
+        Utils.establishBackgroundTasks(indexRepository, indexStatusRepository, documentRepository);
 
         // TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
