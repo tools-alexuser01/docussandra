@@ -8,7 +8,6 @@ import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.cache.CacheFactory;
-import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
