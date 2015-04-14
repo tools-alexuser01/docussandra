@@ -25,7 +25,7 @@ public class QueryRepository
     private static final String QUERY_CQL = "select * from %s where bucket = ? AND %s";
     private static final String QUERY_CQL_LIMIT = "select * from %s where bucket = ? AND %s LIMIT %s";//we use the limit as to not put any more stress on cassandra than we need to (even though our algorithm will discard the data anyway)
 
-    private IndexBucketLocator ibl = new SimpleIndexBucketLocatorImpl(200);
+    private static IndexBucketLocator ibl = new SimpleIndexBucketLocatorImpl(200);
 
     private Session session;
 
@@ -50,7 +50,7 @@ public class QueryRepository
         BoundStatement bs = new BoundStatement(ps);
         //set the bucket
         UUID fuzzyUUID = Utils.convertStringToFuzzyUUID(query.getWhereClause().getValues().get(0));//fuzzy UUID is based on first field value
-        String bucket = ibl.getBucket(null, fuzzyUUID);
+        String bucket = getIbl().getBucket(null, fuzzyUUID);
         bs.setString(0, bucket);
         int i = 1;
         for (String bindValue : query.getWhereClause().getValues())
@@ -90,6 +90,14 @@ public class QueryRepository
     public Session getSession()
     {
         return session;
+    }
+
+    /**
+     * @return the ibl
+     */
+    public static IndexBucketLocator getIbl()
+    {
+        return ibl;
     }
 
 }

@@ -15,6 +15,8 @@
  */
 package com.strategicgains.docussandra.handler;
 
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.BoundStatement;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexCreationStatus;
@@ -22,7 +24,10 @@ import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
+import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.eventing.EventHandler;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,17 +80,32 @@ public class BackgroundIndexHandler implements EventHandler
         }
         while (hasMore)
         {
-            for(Document toIndex : responseWrapper){
+            for (Document toIndex : responseWrapper)
+            {
                 //actually index here
-                IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(null, toIndex, null);
+                List<BoundStatement> statements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(indexStatusRepo.getSession(), toIndex, QueryRepository.getIbl());
+                BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
+                batch.addAll(statements);
+                indexStatusRepo.getSession().execute(batch);
             }
-            //TODO: save status
             offset = offset + CHUNK;
+            //update status
+            status.setRecordsCompleted(offset);
+            status.setStatusLastUpdatedAt(new Date());
+            indexStatusRepo.doUpdate(status);
+            //get the next chunk
             responseWrapper = docRepo.doReadAll(index.databaseName(), index.name(), CHUNK, offset);
-            if(responseWrapper.isEmpty()){
+            if (responseWrapper.isEmpty())
+            {
                 hasMore = false;
             }
         }
+        //update index as done
+        index.setActive(true);
+        status.setIndex(index);
+        indexRepo.markActive(index);
+        //final update       
+        indexStatusRepo.doUpdate(status);
     }
 
 }

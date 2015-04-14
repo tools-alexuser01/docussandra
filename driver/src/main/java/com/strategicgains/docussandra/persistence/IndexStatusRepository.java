@@ -271,4 +271,11 @@ public class IndexStatusRepository
         //TODO: look up index here???
         return i;
     }
+    
+    @Override
+    public Session getSession()
+    {
+    	return super.getSession();
+    }
+    
 }

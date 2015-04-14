@@ -58,7 +58,7 @@ public class IndexRepository
     private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, only, is_active, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
     private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
-    //private static final String UPDATE_CQL = "update %s set bucket_sz = ?, updated_at = ?" + IDENTITY_CQL;
+    private static final String MARK_ACTIVE_CQL = "update %s set is_active = 'true'" + IDENTITY_CQL;
     private static final String READ_ALL_CQL = "select * from %s where db_name = ? and tbl_name = ?";
     private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where db_name = ? and tbl_name = ?";
 
@@ -66,7 +66,7 @@ public class IndexRepository
     private PreparedStatement readStmt;
     private PreparedStatement createStmt;
     private PreparedStatement deleteStmt;
-    //private PreparedStatement updateStmt;
+    private PreparedStatement markActiveStmt;
     private PreparedStatement readAllStmt;
     private PreparedStatement readAllCountStmt;
 
@@ -85,7 +85,7 @@ public class IndexRepository
         readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, getTable()), getSession());
         createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), Columns.NAME), getSession());
         deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, getTable()), getSession());
-        //updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable()), getSession());
+        markActiveStmt = PreparedStatementFactory.getPreparedStatement(String.format(MARK_ACTIVE_CQL, getTable()), getSession());
         readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
         readAllCountStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_COUNT_CQL, getTable()), getSession());
     }
@@ -139,10 +139,12 @@ public class IndexRepository
         }
         return entity;
     }
-    
+
     public void markActive(Index entity)
     {
-        throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
+        BoundStatement bs = new BoundStatement(markActiveStmt);
+        bindIdentifier(bs, entity.getId());
+        getSession().execute(bs);
     }
 
     @Override
