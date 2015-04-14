@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,6 +105,7 @@ public class BackgroundIndexHandlerTest
      * Test of handle method, of class BackgroundIndexHandler.
      */
     @Test
+    @Ignore
     public void testHandle() throws Exception
     {
         System.out.println("handle");

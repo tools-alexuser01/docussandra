@@ -15,8 +15,10 @@
  */
 package com.strategicgains.docussandra.handler;
 
+import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
@@ -27,16 +29,19 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Handles our background indexing tasks.
+ *
  * @author udeyoje
  */
 public class BackgroundIndexHandler implements EventHandler
 {
-    
-     private static Logger logger = LoggerFactory.getLogger(BackgroundIndexHandler.class);
 
-     private IndexRepository indexRepo;
-     private IndexStatusRepository indexStatusRepo;
-     private DocumentRepository docRepo;
+    private static Logger logger = LoggerFactory.getLogger(BackgroundIndexHandler.class);
+
+    private final static int CHUNK = 1000;
+
+    private IndexRepository indexRepo;
+    private IndexStatusRepository indexStatusRepo;
+    private DocumentRepository docRepo;
 
     public BackgroundIndexHandler(IndexRepository indexRepo, IndexStatusRepository indexStatusRepo, DocumentRepository docRepo)
     {
@@ -55,12 +60,32 @@ public class BackgroundIndexHandler implements EventHandler
     public void handle(Object event) throws Exception
     {
         logger.debug("Handler recived background indexing event: " + event.toString());
-        UUID eventId = (UUID)event;
+        UUID eventId = (UUID) event;
         IndexCreationStatus status = indexStatusRepo.readEntityByUUID(eventId);
         Index index = indexRepo.read(status.getIndex().getId());
-        //docRepo.
-
+        long offset = 0;
+        QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.databaseName(), index.name(), CHUNK, offset);
+        boolean hasMore;
+        if (responseWrapper.isEmpty())
+        {
+            hasMore = false;
+        } else
+        {
+            hasMore = true;
+        }
+        while (hasMore)
+        {
+            for(Document toIndex : responseWrapper){
+                //actually index here
+                IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(null, toIndex, null);
+            }
+            //TODO: save status
+            offset = offset + CHUNK;
+            responseWrapper = docRepo.doReadAll(index.databaseName(), index.name(), CHUNK, offset);
+            if(responseWrapper.isEmpty()){
+                hasMore = false;
+            }
+        }
     }
-    
-    
+
 }

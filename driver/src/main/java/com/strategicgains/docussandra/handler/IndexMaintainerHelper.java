@@ -43,6 +43,10 @@ public class IndexMaintainerHelper
     public static final String ITABLE_DELETE_CQL = "DELETE FROM docussandra.%s WHERE bucket = ? AND %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
 
+    private IndexMaintainerHelper(){
+        //don't instantiate; call static methods only
+    }
+    
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
