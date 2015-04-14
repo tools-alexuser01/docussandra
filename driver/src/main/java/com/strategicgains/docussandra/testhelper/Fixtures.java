@@ -272,6 +272,22 @@ public class Fixtures
         toReturn.setStatusLastUpdatedAt(new Date());
         return toReturn;
     }
+    
+        /**
+     * Creates at test IndexCreationStatus.
+     *
+     * @return
+     */
+    public static final IndexCreationStatus createTestIndexCreationStatusWithBulkDataHit()
+    {
+        IndexCreationStatus toReturn = new IndexCreationStatus();
+        toReturn.setDateStarted(new Date());
+        toReturn.setIndex(createTestIndexWithBulkDataHit());
+        toReturn.setTotalRecords(1000);
+        toReturn.setUuid(UUID.randomUUID());
+        toReturn.setStatusLastUpdatedAt(new Date());
+        return toReturn;
+    }
 
     /**
      * Creates at test index with one field that will hit every row of our bulk

@@ -78,6 +78,7 @@ public class BackgroundIndexHandlerTest
         f.insertDocuments(Fixtures.getBulkDocuments());
         indexRepo = new IndexRepository(f.getSession());
         statusRepo = new IndexStatusRepository(f.getSession());
+        docRepo = new DocumentRepository(f.getSession());
     }
 
     @After
@@ -110,8 +111,8 @@ public class BackgroundIndexHandlerTest
     {
         System.out.println("handle");
         //datasetup
-        f.insertIndex(Fixtures.createTestIndexOneField());
-        IndexCreationStatus entity = Fixtures.createTestIndexCreationStatus();
+        f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
+        IndexCreationStatus entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
         statusRepo.createEntity(entity);
         Object event = entity.getUuid();
         //end data setup

@@ -69,7 +69,7 @@ public class BackgroundIndexHandler implements EventHandler
         IndexCreationStatus status = indexStatusRepo.readEntityByUUID(eventId);
         Index index = indexRepo.read(status.getIndex().getId());
         long offset = 0;
-        QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.databaseName(), index.name(), CHUNK, offset);
+        QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.databaseName(), index.tableName(), CHUNK, offset);
         boolean hasMore;
         if (responseWrapper.isEmpty())
         {
@@ -83,10 +83,11 @@ public class BackgroundIndexHandler implements EventHandler
             for (Document toIndex : responseWrapper)
             {
                 //actually index here
-                List<BoundStatement> statements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(indexStatusRepo.getSession(), toIndex, QueryRepository.getIbl());
-                BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
-                batch.addAll(statements);
-                indexStatusRepo.getSession().execute(batch);
+                BoundStatement statement = IndexMaintainerHelper.generateDocumentCreateIndexEntryStatement(indexStatusRepo.getSession(), index, toIndex, QueryRepository.getIbl());
+                if (statement != null)
+                {
+                    indexStatusRepo.getSession().execute(statement);
+                }
             }
             offset = offset + CHUNK;
             //update status
@@ -105,7 +106,7 @@ public class BackgroundIndexHandler implements EventHandler
         status.setIndex(index);
         indexRepo.markActive(index);
         //final update       
-        indexStatusRepo.doUpdate(status);
+        indexStatusRepo.updateEntity(status);
     }
 
 }

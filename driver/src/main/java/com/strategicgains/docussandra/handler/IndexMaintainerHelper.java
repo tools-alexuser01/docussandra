@@ -74,7 +74,7 @@ public class IndexMaintainerHelper
      * @param entity
      * @return
      */
-    private static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
+    public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
     {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
