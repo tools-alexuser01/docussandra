@@ -190,7 +190,7 @@ public class IndexRepository
     }
 
     /**
-     * Same as readAll, but will read from the cache if availible.
+     * Same as readAll, but will read from the cache if available.
      *
      * @param namespace
      * @param collection
