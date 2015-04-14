@@ -236,6 +236,8 @@ public class IndexControllerTest
                     .body("[0].index", notNullValue())
                     .body("[0].totalRecords", notNullValue())
                     .body("[0].recordsCompleted", notNullValue())
+                    .body("[0].precentComplete", notNullValue())
+                    .body("[0].statusLink", notNullValue())
                     .when().get("/").andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
         } finally
