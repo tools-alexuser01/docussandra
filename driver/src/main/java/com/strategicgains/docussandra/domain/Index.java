@@ -13,11 +13,12 @@ import com.strategicgains.syntaxe.ValidationException;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;
+import java.io.Serializable;
 import java.util.Objects;
 
 public class Index
         extends AbstractTimestampedIdentifiable
-        implements Validatable
+        implements Validatable, Serializable
 {
 
     @Required("Table")
