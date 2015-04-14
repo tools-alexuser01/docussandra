@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.domain;
 
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.domain.UuidIdentifiable;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
@@ -26,7 +27,7 @@ import java.util.UUID;
  *
  * @author udeyoje
  */
-public class IndexCreationStatus implements UuidIdentifiable
+public class IndexCreationStatus implements UuidIdentifiable, Serializable
 {
 
     /**
