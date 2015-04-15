@@ -15,13 +15,15 @@ import com.strategicgains.docussandra.domain.IndexCreationStatus;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Repository for interacting with the sys_idx_status and sys_idx_not_done tables.
- * Warning: I am not entirely happy with this class.
+ * Repository for interacting with the sys_idx_status and sys_idx_not_done
+ * tables. Warning: I am not entirely happy with this class.
+ *
  * @author udeyoje
  */
 public class IndexStatusRepository
@@ -29,6 +31,8 @@ public class IndexStatusRepository
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private IndexRepository indexRepo;
 
     public class Tables
     {
@@ -44,6 +48,7 @@ public class IndexStatusRepository
         static final String DATABASE = "db_name";
         static final String TABLE = "tbl_name";
         static final String INDEX_NAME = "index_name";
+        static final String TOTAL_RECORDS = "total_records";
         static final String RECORDS_COMPLETED = "records_completed";
         static final String STARTED_AT = "started_at";
         static final String UPDATED_AT = "updated_at";
@@ -52,7 +57,7 @@ public class IndexStatusRepository
     private static final String IDENTITY_CQL = " where id = ?";
     private static final String EXISTENCE_CQL = "select count(*) from " + Tables.BY_ID + IDENTITY_CQL;
     private static final String DELETE_FROM_NOT_DONE = "delete from " + Tables.BY_NOT_DONE + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ") values (?, ?, ?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.TOTAL_RECORDS + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ") values (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from " + Tables.BY_ID + IDENTITY_CQL;
     private static final String UPDATE_CQL = "update " + Tables.BY_ID + " set " + Columns.RECORDS_COMPLETED + " = ?, updated_at = ?" + IDENTITY_CQL;
     private static final String MARK_INDEXING_CQL = "insert into " + Tables.BY_NOT_DONE + "(" + Columns.ID + ") values (?)";//TODO: if not exists?
@@ -76,6 +81,7 @@ public class IndexStatusRepository
         super(session, Tables.BY_ID);
         addObserver(new IndexChangeObserver(session));
         initialize();
+        indexRepo = new IndexRepository(session);
     }
 
     protected void initialize()
@@ -194,7 +200,8 @@ public class IndexStatusRepository
         BoundStatement bs = new BoundStatement(readAllActiveStmt);
         List<UUID> ids = marshalActiveUUIDs(getSession().execute(bs));
         List<IndexCreationStatus> toReturn = new ArrayList<>(ids.size());
-        for(UUID id : ids){
+        for (UUID id : ids)
+        {
             toReturn.add(readEntityByUUID(id));
         }
         return toReturn;
@@ -213,6 +220,7 @@ public class IndexStatusRepository
                 entity.getIndex().tableName(),
                 entity.getIndex().name(),
                 entity.getRecordsCompleted(),
+                entity.getTotalRecords(),
                 entity.getDateStarted(),
                 entity.getStatusLastUpdatedAt());
     }
@@ -260,22 +268,29 @@ public class IndexStatusRepository
         }
         IndexCreationStatus i = new IndexCreationStatus();
         i.setUuid(row.getUUID(Columns.ID));
+        i.setRecordsCompleted(row.getLong(Columns.RECORDS_COMPLETED));
+        i.setTotalRecords(row.getLong(Columns.TOTAL_RECORDS));
+        i.setDateStarted(row.getDate(Columns.STARTED_AT));
+        i.setStatusLastUpdatedAt(row.getDate(Columns.UPDATED_AT));
+        //look up index here
         Index index = new Index();
         index.name(row.getString(Columns.INDEX_NAME));
         index.table(row.getString(Columns.DATABASE), row.getString(Columns.TABLE));
-        i.setIndex(index);
-        i.setRecordsCompleted(row.getLong(Columns.RECORDS_COMPLETED));
-        i.setDateStarted(row.getDate(Columns.STARTED_AT));
-        i.setStatusLastUpdatedAt(row.getDate(Columns.UPDATED_AT));
+        try
+        {
+            i.setIndex(indexRepo.doRead(index.getId()));
+        } catch (ItemNotFoundException e)//this should only happen in tests that do not have full test data established; errors will be evident if this happens in the actual app
+        {
+            i.setIndex(index);
+        }
         i.calculateValues();
-        //TODO: look up index here???
         return i;
     }
-    
+
     @Override
     public Session getSession()
     {
-    	return super.getSession();
+        return super.getSession();
     }
-    
+
 }

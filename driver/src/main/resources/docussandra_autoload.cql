@@ -47,6 +47,7 @@ create table IF NOT EXISTS sys_idx_status (
 	tbl_name text,
 	index_name text,
 	records_completed bigint,
+	total_records bigint,
 	started_at timestamp,
 	updated_at timestamp,
 	primary key (id)

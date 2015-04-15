@@ -60,7 +60,8 @@ public class IndexService
     public IndexCreationStatus status(UUID id)
     {
         logger.debug("Checking index creation status: " + id.toString());
-        return statusRepo.readEntityByUUID(id);
+        IndexCreationStatus toReturn = statusRepo.readEntityByUUID(id);
+        return toReturn;
     }
     
     /**

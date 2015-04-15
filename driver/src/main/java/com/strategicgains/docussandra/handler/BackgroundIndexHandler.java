@@ -63,48 +63,67 @@ public class BackgroundIndexHandler implements EventHandler
     public void handle(Object event) throws Exception
     {
         logger.debug("Handler recived background indexing event: " + event.toString());
-        UUID eventId = (UUID) event;
-        IndexCreationStatus status = indexStatusRepo.readEntityByUUID(eventId);
-        Index index = indexRepo.read(status.getIndex().getId());
-        long offset = 0;
-        QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.databaseName(), index.tableName(), CHUNK, offset);
-        boolean hasMore;
-        if (responseWrapper.isEmpty())
+        IndexCreationStatus status = null;
+        try
         {
-            hasMore = false;
-        } else
-        {
-            hasMore = true;
-        }
-        while (hasMore)
-        {
-            for (Document toIndex : responseWrapper)
-            {
-                //actually index here
-                BoundStatement statement = IndexMaintainerHelper.generateDocumentCreateIndexEntryStatement(indexStatusRepo.getSession(), index, toIndex, QueryRepository.getIbl());
-                if (statement != null)
-                {
-                    indexStatusRepo.getSession().execute(statement);
-                }
-            }
-            offset = offset + CHUNK;
-            //update status
-            status.setRecordsCompleted(offset);
-            status.setStatusLastUpdatedAt(new Date());
-            indexStatusRepo.doUpdate(status);
-            //get the next chunk
-            responseWrapper = docRepo.doReadAll(index.databaseName(), index.name(), CHUNK, offset);
+            UUID eventId = (UUID) event;
+
+            status = indexStatusRepo.readEntityByUUID(eventId);
+            Index index = indexRepo.read(status.getIndex().getId());
+            long offset = 0;
+            long recordsCompleted = 0;
+            QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.databaseName(), index.tableName(), CHUNK, offset);
+            boolean hasMore;
             if (responseWrapper.isEmpty())
             {
                 hasMore = false;
+            } else
+            {
+                hasMore = true;
             }
+            while (hasMore)
+            {
+                for (Document toIndex : responseWrapper)
+                {
+                    //actually index here
+                    BoundStatement statement = IndexMaintainerHelper.generateDocumentCreateIndexEntryStatement(indexStatusRepo.getSession(), index, toIndex, QueryRepository.getIbl());
+                    if (statement != null)
+                    {
+                        indexStatusRepo.getSession().execute(statement);
+                    }
+                    recordsCompleted++;
+                }
+                offset = offset + CHUNK;
+                //update status
+                status.setRecordsCompleted(recordsCompleted);
+                status.setStatusLastUpdatedAt(new Date());
+                indexStatusRepo.updateEntity(status);
+                //get the next chunk
+                responseWrapper = docRepo.doReadAll(index.databaseName(), index.tableName(), CHUNK, offset);
+                if (responseWrapper.isEmpty())
+                {
+                    hasMore = false;
+                }
+            }
+            //update index as done
+            index.setActive(true);
+            status.setIndex(index);
+            indexRepo.markActive(index);
+            //final update       
+            indexStatusRepo.updateEntity(status);
+        } catch (Exception e)
+        {
+            String indexName  = "Cannot be determined.";
+            if(status != null){
+                indexName = status.getIndex().name();
+            }
+            logger.error("Could not complete indexing event for index: " + indexName, e);
+            if(status != null){//intentionally a seperate clause so our error prints in case this throws.
+                //TODO: set an error and indicate a problem!
+                indexStatusRepo.updateEntity(status);
+            }
+            throw e;
         }
-        //update index as done
-        index.setActive(true);
-        status.setIndex(index);
-        indexRepo.markActive(index);
-        //final update       
-        indexStatusRepo.updateEntity(status);
     }
 
 }
