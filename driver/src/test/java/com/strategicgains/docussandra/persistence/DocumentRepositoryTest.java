@@ -157,6 +157,78 @@ public class DocumentRepositoryTest
     }
 
     /**
+     * Test of several methods, of class DocumentRepository. Basically makes
+     * sure our versioning doesn't screw up something unexpected.
+     */
+    @Test
+    public void testVersioningLogic()
+    {
+        System.out.println("testVersioningLogic");
+        DocumentRepository instance = new DocumentRepository(f.getSession());
+        //create
+        Document testDocument = Fixtures.createTestDocument();
+        Document createResult = instance.doCreate(testDocument);
+        assertNotNull(createResult);
+        //read create
+        Document readResult = instance.doRead(createResult.getId());
+        assertEquals(createResult, readResult);
+
+        //update
+        String newObject = "{\"newjson\": \"object\"}";
+        testDocument.object(newObject);
+        Document updateResult = instance.doUpdate(testDocument);
+        assertEquals(testDocument, updateResult);
+
+        //read update
+        readResult = instance.doRead(createResult.getId());
+        assertEquals(updateResult, readResult);
+
+        //delete
+        f.deleteDocument(testDocument);
+        //make sure it is actually gone
+        boolean exceptionThrown = false;
+        try
+        {
+            instance.doRead(testDocument.getId());
+        } catch (ItemNotFoundException e)
+        {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+
+        //create again
+        testDocument = Fixtures.createTestDocument();
+        createResult = instance.doCreate(testDocument);
+        assertNotNull(createResult);
+        //read create again
+        readResult = instance.doRead(createResult.getId());
+        assertEquals(createResult, readResult);
+
+        //update again
+        newObject = "{\"newjson\": \"objectNew\"}";
+        testDocument.object(newObject);
+        updateResult = instance.doUpdate(testDocument);
+        assertEquals(testDocument, updateResult);
+
+        //read update again
+        readResult = instance.doRead(createResult.getId());
+        assertEquals(updateResult, readResult);
+
+        //delete again
+        f.deleteDocument(testDocument);
+        //make sure it is actually gone
+        exceptionThrown = false;
+        try
+        {
+            instance.doRead(testDocument.getId());
+        } catch (ItemNotFoundException e)
+        {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+    }
+
+    /**
      * Test of exists method, of class DocumentRepository.
      */
     @Test
