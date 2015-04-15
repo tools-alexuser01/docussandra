@@ -115,7 +115,7 @@ public class IndexControllerTest
      * creates a index.
      */
     @Test
-    public void postIndexTest()
+    public void postIndexTest() throws Exception
     {
         Index testIndex = Fixtures.createTestIndexOneField();
         String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
@@ -134,6 +134,8 @@ public class IndexControllerTest
                 .body("totalRecords", equalTo(0))
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name());
+        
+        Thread.sleep(1000);//sleep for a second to let the indexing complete
 
         //check
         expect().statusCode(200)
@@ -141,7 +143,7 @@ public class IndexControllerTest
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .body("active", equalTo(false))
+                .body("active", equalTo(true))
                 .get("/" + testIndex.name());
     }
 
