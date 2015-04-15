@@ -52,10 +52,11 @@ public class DocumentRepository
     }
 
     private static final String EXISTENCE_CQL = "select count(*) from %s where %s = ?";
-    private static final String READ_CQL = "select * from %s where %s = ?";
+    private static final String READ_CQL = "select * from %s where %s = ? ORDER BY updated_at DESC";
     private static final String READ_ALL_CQL = "select * from %s LIMIT %d";
+    
     private static final String DELETE_CQL = "delete from %s where %s = ?";
-    private static final String UPDATE_CQL = "update %s set object = ?, updated_at = ? where %s = ?";
+    //private static final String UPDATE_CQL = "update %s set object = ?, updated_at = ? where %s = ?";
     private static final String CREATE_CQL = "insert into %s (%s, object, created_at, updated_at) values (?, ?, ?, ?)";
 
     private final IndexBucketLocator bucketLocator;
@@ -169,17 +170,13 @@ public class DocumentRepository
     @Override
     public Document doUpdate(Document entity)
     {
-        if (!exists(entity.getId()))
-        {
-            throw new ItemNotFoundException(entity.getClass().getSimpleName()
-                    + " ID not found: " + entity.getId().toString());
-        }
-
+        Document old = doRead(entity.getId()); //will throw exception of doc is not found
+        entity.setCreatedAt(old.getCreatedAt());//copy over the original create date
         Table table = entity.table();
-        PreparedStatement updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, table.toDbTable(), Columns.ID), session());
+        PreparedStatement updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), session());
 
         BoundStatement bs = new BoundStatement(updateStmt);
-        bindUpdate(bs, entity);
+        bindCreate(bs, entity);
         BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
         batch.add(bs);//the actual create
         List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
@@ -248,14 +245,14 @@ public class DocumentRepository
                 entity.getUpdatedAt());
     }
 
-    private void bindUpdate(BoundStatement bs, Document entity)
-    {
-        BSONObject bson = (BSONObject) JSON.parse(entity.object());
-
-        bs.bind(ByteBuffer.wrap(BSON.encode(bson)),
-                entity.getUpdatedAt(),
-                entity.getUuid());
-    }
+//    private void bindUpdate(BoundStatement bs, Document entity)
+//    {
+//        BSONObject bson = (BSONObject) JSON.parse(entity.object());
+//
+//        bs.bind(ByteBuffer.wrap(BSON.encode(bson)),
+//                entity.getUpdatedAt(),
+//                entity.getUuid());
+//    }
 
     private Identifier extractId(Identifier identifier)
     {
