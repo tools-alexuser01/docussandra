@@ -115,7 +115,7 @@ public class IndexControllerTest
      * creates a index.
      */
     @Test
-    public void postIndexTest() throws Exception
+    public void postIndexTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
         String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
@@ -135,7 +135,7 @@ public class IndexControllerTest
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name());
         
-        Thread.sleep(1000);//sleep for a second to let the indexing complete
+        Thread.sleep(100);//sleep for a hair to let the indexing complete
 
         //check
         expect().statusCode(200)
@@ -153,7 +153,7 @@ public class IndexControllerTest
      * GET/{database}/{table}/index_status/{status_id} endpoint is working.
      */
     @Test
-    public void postIndexAndCheckStatusTest()
+    public void postIndexAndCheckStatusTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
         String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
@@ -165,7 +165,7 @@ public class IndexControllerTest
                 .body("index.fields", notNullValue())
                 .body("index.createdAt", notNullValue())
                 .body("index.updatedAt", notNullValue())
-                .body("index.active", equalTo(false))
+                .body("index.active", notNullValue())
                 .body("id", notNullValue())
                 .body("dateStarted", notNullValue())
                 .body("statusLastUpdatedAt", notNullValue())
@@ -176,6 +176,7 @@ public class IndexControllerTest
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name()).andReturn();
 
+        
         String restAssuredBasePath = RestAssured.basePath;
         try
         {
@@ -189,6 +190,7 @@ public class IndexControllerTest
                     .body("eta", notNullValue())
                     .body("precentComplete", notNullValue())
                     .body("index", notNullValue())
+                    .body("index.active", notNullValue())
                     .body("totalRecords", notNullValue())
                     .body("statusLink", containsString(uuidString))
                     .body("recordsCompleted", notNullValue())

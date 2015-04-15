@@ -38,14 +38,16 @@ import testhelper.RestExpressManager;
  *
  * @author udeyoje
  */
-public class IndexControllerTest {
+public class IndexControllerTest
+{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public IndexControllerTest() throws Exception{
+    public IndexControllerTest() throws Exception
+    {
         f = Fixtures.getInstance(false);
     }
 
@@ -56,14 +58,16 @@ public class IndexControllerTest {
      * @throws Exception
      */
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() throws Exception
+    {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
         RestExpressManager.getManager().ensureRestExpressRunning(false);
     }
 
     @Before
-    public void beforeTest() {
+    public void beforeTest()
+    {
         f.clearTestTables();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
@@ -77,14 +81,16 @@ public class IndexControllerTest {
      * executed.
      */
     @AfterClass
-    public static void afterClass() {
+    public static void afterClass()
+    {
     }
 
     /**
      * Cleanup that is performed after each test is executed.
      */
     @After
-    public void afterTest() {
+    public void afterTest()
+    {
         f.clearTestTables();
     }
 
@@ -93,7 +99,8 @@ public class IndexControllerTest {
      * retrieves an existing index.
      */
     @Test
-    public void getIndexTest() {
+    public void getIndexTest()
+    {
         Index testIndex = Fixtures.createTestIndexOneField();
         f.insertIndex(testIndex);
         expect().statusCode(200)
@@ -109,7 +116,8 @@ public class IndexControllerTest {
      * creates a index.
      */
     @Test
-    public void postIndexTest() {
+    public void postIndexTest() throws InterruptedException
+    {
         Index testIndex = Fixtures.createTestIndexOneField();
         String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
                 + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
@@ -120,22 +128,22 @@ public class IndexControllerTest {
                 .body("index.fields", notNullValue())
                 .body("index.createdAt", notNullValue())
                 .body("index.updatedAt", notNullValue())
-                .body("index.active", equalTo(false))
+                .body("index.active", notNullValue())
                 .body("id", notNullValue())
                 .body("dateStarted", notNullValue())
                 .body("statusLastUpdatedAt", notNullValue())
                 .body("totalRecords", equalTo(0))
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name());
-                
 
+        Thread.sleep(100);//sleep for a hair to let the indexing complete
         //check
         expect().statusCode(200)
                 .body("name", equalTo(testIndex.name()))
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
-                .body("active", equalTo(false))
+                .body("active", equalTo(true))
                 .get("/" + testIndex.name());
     }
 
@@ -192,13 +200,13 @@ public class IndexControllerTest {
         }
     }
 
-
     /**
      * Tests that the DELETE /{databases}/{table}/indexes/{index} endpoint
      * properly deletes a index.
      */
     @Test
-    public void deleteIndexTest() {
+    public void deleteIndexTest()
+    {
         Index testIndex = Fixtures.createTestIndexOneField();
         f.insertIndex(testIndex);
         //act
