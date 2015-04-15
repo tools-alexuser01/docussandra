@@ -15,7 +15,6 @@
  */
 package com.strategicgains.docussandra.handler;
 
-import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.BoundStatement;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
@@ -27,7 +26,6 @@ import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.eventing.EventHandler;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
