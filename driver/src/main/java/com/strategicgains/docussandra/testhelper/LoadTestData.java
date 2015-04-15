@@ -39,7 +39,7 @@ public class LoadTestData
 
     public LoadTestData() throws Exception
     {
-        f = Fixtures.getInstance();
+        f = Fixtures.getInstance(false);//don't mock cassandra here
     }
 
     public void go() throws Exception
