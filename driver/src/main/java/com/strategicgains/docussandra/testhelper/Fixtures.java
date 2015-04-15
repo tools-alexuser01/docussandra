@@ -203,8 +203,8 @@ public class Fixtures
 
     public static List<Document> getBulkDocuments(String path, Table t) throws IOException, ParseException
     {
-        if (bulkDocs == null)
-        {
+//        if (bulkDocs == null)
+//        {
             JSONParser parser = new JSONParser();
             logger.info("Data path: " + new File(path).getAbsolutePath());
             JSONObject jsonObject = (JSONObject) parser.parse(new FileReader(path));
@@ -219,9 +219,10 @@ public class Fixtures
                 doc.object(object.toJSONString());
                 toReturn.add(doc);
             }
-            bulkDocs = toReturn;
-        }
-        return bulkDocs;
+            return toReturn;
+//            bulkDocs = toReturn;
+//        }
+//        return bulkDocs;
     }
 
     /**
