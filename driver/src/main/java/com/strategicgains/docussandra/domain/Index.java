@@ -270,13 +270,14 @@ public class Index
     @Override
     public int hashCode()
     {
-        int hash = 3;
+        int hash = 7;
         hash = 83 * hash + Objects.hashCode(this.table);
         hash = 83 * hash + Objects.hashCode(this.name);
         hash = 83 * hash + (this.isUnique ? 1 : 0);
         hash = 83 * hash + (int) (this.bucketSize ^ (this.bucketSize >>> 32));
         hash = 83 * hash + Objects.hashCode(this.fields);
         hash = 83 * hash + Objects.hashCode(this.includeOnly);
+        hash = 83 * hash + (this.active ? 1 : 0);
         return hash;
     }
 
@@ -316,13 +317,17 @@ public class Index
         {
             return false;
         }
+        if (this.active != other.active)
+        {
+            return false;
+        }
         return true;
     }
 
     @Override
     public String toString()
     {
-        return "Index{" + "table=" + table + ", name=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + '}';
+        return "Index{" + "table=" + table + ", name=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + ", active=" + active + '}';
     }
 
 }
