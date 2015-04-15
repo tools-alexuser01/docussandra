@@ -7,12 +7,8 @@ import org.restexpress.Request;
 import org.restexpress.Response;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexCreationStatus;
 import com.strategicgains.docussandra.service.IndexService;
-import com.strategicgains.hyperexpress.HyperExpress;
-import com.strategicgains.hyperexpress.builder.TokenBinder;
-import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import java.util.UUID;
 import org.slf4j.Logger;
