@@ -147,7 +147,7 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
 
     private void calculateEta()
     {
-        long duration = this.getStatusLastUpdatedAt().getTime() - this.getDateStarted().getTime();
+        long duration = new Date().getTime() - this.getDateStarted().getTime();
         if (getTotalRecords() == 0)
         {
             eta = 0;//we are functionally done
