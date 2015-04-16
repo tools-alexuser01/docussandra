@@ -18,13 +18,19 @@ package com.strategicgains.docussandra.handler;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepositoryTest;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import static com.strategicgains.docussandra.testhelper.Fixtures.createTestIndexWithBulkDataHit;
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import org.json.simple.parser.ParseException;
 import org.junit.After;
@@ -33,7 +39,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +55,7 @@ public class BackgroundIndexHandlerTest
     private IndexRepository indexRepo;
     private IndexStatusRepository statusRepo;
     private DocumentRepository docRepo;
-    
+
     public BackgroundIndexHandlerTest() throws Exception
     {
         f = Fixtures.getInstance(true);
@@ -106,20 +111,84 @@ public class BackgroundIndexHandlerTest
      * Test of handle method, of class BackgroundIndexHandler.
      */
     @Test
-    @Ignore
     public void testHandle() throws Exception
     {
         System.out.println("handle");
         //datasetup
-        f.insertIndex(Fixtures.createTestIndexWithBulkDataHit());
+        Index testIndex = Fixtures.createTestIndexWithBulkDataHit();
+        f.insertIndex(testIndex);
         IndexCreationStatus entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
+        entity.setTotalRecords(34);
         statusRepo.createEntity(entity);
         Object event = entity.getUuid();
         //end data setup
         BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
-        
+        //call
         instance.handle(event);
-
+        //verify
+        assertTrue(statusRepo.exists(entity.getUuid()));
+        IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        assertNotNull(storedStatus);
+        assertTrue(storedStatus.isDone());
+        assertEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
+        assertEquals(100, storedStatus.getPrecentComplete(), 0);
+        assertEquals(storedStatus.getEta(), 0);
+        assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
+        assertTrue(statusRepo.readAllActive().isEmpty());
+        assertNotNull(storedStatus.getStatusLink());
+        assertNotNull(storedStatus.getIndex());
+        Index readIndex = indexRepo.read(testIndex.getId());
+        assertNotNull(readIndex);
+        assertTrue(readIndex.isActive());
     }
 
+    /**
+     * Test of handle method, of class BackgroundIndexHandler.
+     */
+    @Test
+    public void testHandleWithData() throws Exception
+    {
+        System.out.println("handleWithData");
+        //datasetup
+        //insert test docs and stuff
+        Database testDb = Fixtures.createTestPlayersDatabase();
+        Table testTable = Fixtures.createTestPlayersTable();
+        f.insertDatabase(testDb);
+        f.insertTable(testTable);
+        List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
+        f.insertDocuments(docs);//put in a ton of data directly into the db
+
+        //insert index
+        Index lastname = Fixtures.createTestPlayersIndexLastName();
+        f.insertIndex(lastname);
+
+        IndexCreationStatus entity = new IndexCreationStatus();
+        entity.setDateStarted(new Date());
+        entity.setIndex(lastname);
+        entity.setTotalRecords(docs.size());
+        entity.setUuid(UUID.randomUUID());
+        entity.setStatusLastUpdatedAt(new Date());
+        
+        statusRepo.createEntity(entity);
+        Object event = entity.getUuid();
+        //end data setup
+        BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
+        //call
+        instance.handle(event);
+        //verify
+        assertTrue(statusRepo.exists(entity.getUuid()));
+        IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        assertNotNull(storedStatus);
+        assertTrue(storedStatus.isDone());
+        assertEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
+        assertEquals(100, storedStatus.getPrecentComplete(), 0);
+        assertEquals(storedStatus.getEta(), 0);
+        assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
+        assertTrue(statusRepo.readAllActive().isEmpty());
+        assertNotNull(storedStatus.getStatusLink());
+        assertNotNull(storedStatus.getIndex());
+        Index readIndex = indexRepo.read(lastname.getId());
+        assertNotNull(readIndex);
+        assertTrue(readIndex.isActive());
+    }
 }
