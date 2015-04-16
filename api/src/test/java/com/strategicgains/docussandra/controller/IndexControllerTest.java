@@ -142,7 +142,7 @@ public class IndexControllerTest
 
         Thread.sleep(100);//sleep for a hair to let the indexing complete
 
-        //check
+        //check self (index endpoint)
         expect().statusCode(200)
                 .body("name", equalTo(testIndex.name()))
                 .body("fields", notNullValue())
@@ -170,7 +170,7 @@ public class IndexControllerTest
                 .body("index.fields", notNullValue())
                 .body("index.createdAt", notNullValue())
                 .body("index.updatedAt", notNullValue())
-                .body("index.active", notNullValue())
+                .body("index.active", equalTo(false))//should not yet be active
                 .body("id", notNullValue())
                 .body("dateStarted", notNullValue())
                 .body("statusLastUpdatedAt", notNullValue())
@@ -180,6 +180,8 @@ public class IndexControllerTest
                 .body("statusLink", notNullValue())
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name()).andReturn();
+        
+        Thread.sleep(100);//sleep for a hair to let the indexing complete
 
         String restAssuredBasePath = RestAssured.basePath;
         try
@@ -194,11 +196,11 @@ public class IndexControllerTest
                     .body("eta", notNullValue())
                     .body("precentComplete", notNullValue())
                     .body("index", notNullValue())
-                    .body("index.active", notNullValue())
+                    .body("index.active", equalTo(true))//should now be active
                     .body("totalRecords", notNullValue())
                     .body("statusLink", containsString(uuidString))
                     .body("recordsCompleted", notNullValue())
-                    .when().get(uuidString).andReturn();
+                    .when().get(uuidString).andReturn();//check status (index_status endpoint)
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
         } finally
         {
