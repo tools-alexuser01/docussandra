@@ -57,6 +57,7 @@ create table sys_idx_status (
 	total_records bigint,
 	started_at timestamp,
 	updated_at timestamp,
+    error text,
 	primary key (id)
 );
 

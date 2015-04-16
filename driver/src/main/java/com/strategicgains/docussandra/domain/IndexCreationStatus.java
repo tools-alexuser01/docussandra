@@ -77,6 +77,12 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
     private long recordsCompleted;
 
     /**
+     * Error message if an error has occurred in the creation of this index.
+     * Will be null if no error has occurred yet.
+     */
+    private String error;
+
+    /**
      * Default constructor.
      */
     public IndexCreationStatus()
@@ -305,15 +311,16 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
     public int hashCode()
     {
         int hash = 3;
-        hash = 37 * hash + Objects.hashCode(this.id);
-        hash = 37 * hash + Objects.hashCode(this.dateStarted);
-        hash = 37 * hash + Objects.hashCode(this.statusLastUpdatedAt);
-        hash = 37 * hash + (int) (this.eta ^ (this.eta >>> 32));
-        hash = 37 * hash + (int) (Double.doubleToLongBits(this.precentComplete) ^ (Double.doubleToLongBits(this.precentComplete) >>> 32));
-        hash = 37 * hash + Objects.hashCode(this.statusLink);
-        hash = 37 * hash + Objects.hashCode(this.index);
-        hash = 37 * hash + (int) (this.totalRecords ^ (this.totalRecords >>> 32));
-        hash = 37 * hash + (int) (this.recordsCompleted ^ (this.recordsCompleted >>> 32));
+        hash = 89 * hash + Objects.hashCode(this.id);
+        hash = 89 * hash + Objects.hashCode(this.dateStarted);
+        hash = 89 * hash + Objects.hashCode(this.statusLastUpdatedAt);
+        hash = 89 * hash + (int) (this.eta ^ (this.eta >>> 32));
+        hash = 89 * hash + (int) (Double.doubleToLongBits(this.precentComplete) ^ (Double.doubleToLongBits(this.precentComplete) >>> 32));
+        hash = 89 * hash + Objects.hashCode(this.statusLink);
+        hash = 89 * hash + Objects.hashCode(this.index);
+        hash = 89 * hash + (int) (this.totalRecords ^ (this.totalRecords >>> 32));
+        hash = 89 * hash + (int) (this.recordsCompleted ^ (this.recordsCompleted >>> 32));
+        hash = 89 * hash + Objects.hashCode(this.error);
         return hash;
     }
 
@@ -365,13 +372,17 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
         {
             return false;
         }
+        if (!Objects.equals(this.error, other.error))
+        {
+            return false;
+        }
         return true;
     }
 
     @Override
     public String toString()
     {
-        return "IndexCreationStatus{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", precentComplete=" + precentComplete + ", statusLink=" + statusLink + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + '}';
+        return "IndexCreationStatus{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", precentComplete=" + precentComplete + ", statusLink=" + statusLink + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + ", error=" + error + '}';
     }
 
     /**
@@ -392,6 +403,28 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
     public String getStatusLink()
     {
         return statusLink;
+    }
+
+    /**
+     * Error message if an error has occurred in the creation of this index.
+     * Will be null if no error has occurred yet.
+     *
+     * @return the error
+     */
+    public String getError()
+    {
+        return error;
+    }
+
+    /**
+     * Error message if an error has occurred in the creation of this index.
+     * Will be null if no error has occurred yet.
+     *
+     * @param error the error to set
+     */
+    public void setError(String error)
+    {
+        this.error = error;
     }
 
 }
