@@ -92,6 +92,7 @@ public class DocumentControllerTest
     @AfterClass
     public static void afterClass()
     {
+        f.clearTestTables();
     }
 
     /**
@@ -100,7 +101,7 @@ public class DocumentControllerTest
     @After
     public void afterTest()
     {
-        f.clearTestTables();
+        
     }
 
     /**

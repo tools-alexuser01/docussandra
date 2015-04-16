@@ -39,13 +39,13 @@ import org.slf4j.LoggerFactory;
  */
 public class RestExpressManager
 {
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(RestExpressManager.class);
-
+    
     private static RestExpressManager manager = null;
-
+    
     private static boolean restExpressRunning = false;
-
+    
     private static RestExpress server;
 
     /**
@@ -107,7 +107,7 @@ public class RestExpressManager
             restExpressRunning = true;
         }
     }
-
+    
     /**
      * Shuts down the rest express instance.
      *
@@ -120,5 +120,5 @@ public class RestExpressManager
         server.shutdown();
         restExpressRunning = false;
     }
-
+    
 }

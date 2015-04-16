@@ -40,7 +40,7 @@ public class TableRepositoryTest
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableRepositoryTest.class);
-    private Fixtures f;
+    private static Fixtures f;
 
     public TableRepositoryTest() throws Exception
     {
@@ -55,6 +55,7 @@ public class TableRepositoryTest
     @AfterClass
     public static void tearDownClass()
     {
+        f.clearTestTables();
     }
 
     @Before
@@ -69,6 +70,7 @@ public class TableRepositoryTest
     @After
     public void tearDown()
     {
+        
     }
 
     /**

@@ -19,15 +19,16 @@ import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import com.jayway.restassured.response.ResponseOptions;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.time.StopWatch;
 import static org.hamcrest.Matchers.*;
@@ -76,6 +77,7 @@ public class IndexControllerTest
     public void beforeTest()
     {
         f.clearTestTables();
+        CacheFactory.clearAllCaches();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         Table testTable = Fixtures.createTestTable();
@@ -90,6 +92,7 @@ public class IndexControllerTest
     @AfterClass
     public static void afterClass()
     {
+        f.clearTestTables();
     }
 
     /**
@@ -98,7 +101,7 @@ public class IndexControllerTest
     @After
     public void afterTest()
     {
-        f.clearTestTables();
+
     }
 
     /**
@@ -217,29 +220,19 @@ public class IndexControllerTest
      * GET/{database}/{table}/index_status/{status_id} endpoint is working.
      */
     @Test
-    public void createDataThePostIndexAndCheckStatusTest() throws InterruptedException, Exception
+    public void createDataThenPostIndexAndCheckStatusTest() throws InterruptedException, Exception
     {
         String restAssuredBasePath = RestAssured.basePath;
+        Database testDb = Fixtures.createTestPlayersDatabase();
+        Table testTable = Fixtures.createTestPlayersTable();
+        List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
         try
         {
-            //data insert
-            Database testDb = new Database("players");
-            testDb.description("A database about athletic players");
-            Table testTable = new Table();
-            testTable.name("players");
-            testTable.database(testDb.name());
-            testTable.description("My Table stores a lot of data about players.");
+            //data insert          
             f.insertDatabase(testDb);
             f.insertTable(testTable);
-            List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
             f.insertDocuments(docs);//put in a ton of data directly into the db
-
-            Index lastname = new Index("lastname");
-            lastname.isUnique(false);
-            ArrayList<String> fields = new ArrayList<>(1);
-            fields.add("NAMELAST");
-            lastname.fields(fields);
-            lastname.table(testTable);
+            Index lastname = Fixtures.createTestPlayersIndexLastName();
             String tableStr = "{" + "\"fields\" : [\"" + lastname.fields().get(0)
                     + "\"]," + "\"name\" : \"" + lastname.name() + "\"}";
             RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/indexes";
@@ -316,6 +309,11 @@ public class IndexControllerTest
         } finally
         {
             RestAssured.basePath = restAssuredBasePath;
+            //clean up
+            DocumentRepository docrepo = new DocumentRepository(f.getSession());
+            for(Document d : docs){
+                docrepo.delete(d);
+            }
         }
     }
 
@@ -331,23 +329,13 @@ public class IndexControllerTest
         try
         {
             //data insert
-            Database testDb = new Database("players");
-            testDb.description("A database about athletic players");
-            Table testTable = new Table();
-            testTable.name("players");
-            testTable.database(testDb.name());
-            testTable.description("My Table stores a lot of data about players.");
+            Database testDb = Fixtures.createTestPlayersDatabase();
+            Table testTable = Fixtures.createTestPlayersTable();
             f.insertDatabase(testDb);
             f.insertTable(testTable);
             List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
             f.insertDocuments(docs);//put in a ton of data directly into the db
-
-            Index lastname = new Index("lastname");
-            lastname.isUnique(false);
-            ArrayList<String> fields = new ArrayList<>(1);
-            fields.add("NAMELAST");
-            lastname.fields(fields);
-            lastname.table(testTable);
+            Index lastname = Fixtures.createTestPlayersIndexLastName();
             String tableStr = "{" + "\"fields\" : [\"" + lastname.fields().get(0)
                     + "\"]," + "\"name\" : \"" + lastname.name() + "\"}";
             RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/indexes";

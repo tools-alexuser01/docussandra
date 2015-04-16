@@ -15,8 +15,6 @@
  */
 package com.strategicgains.docussandra.service;
 
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
@@ -43,7 +41,7 @@ public class ParsedQueryFactoryTest
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Fixtures f;
+    private static Fixtures f;
 
     public ParsedQueryFactoryTest() throws Exception
     {
@@ -58,6 +56,7 @@ public class ParsedQueryFactoryTest
     @AfterClass
     public static void tearDownClass() throws Exception
     {
+        f.clearTestTables();
     }
 
     @Before
@@ -72,7 +71,7 @@ public class ParsedQueryFactoryTest
     @After
     public void tearDown()
     {
-        f.clearTestTables();
+        
     }
 
     /**

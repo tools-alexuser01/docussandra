@@ -22,7 +22,7 @@ public class ITableRepositoryTest
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private Fixtures f;
+    private static Fixtures f;
 
     public ITableRepositoryTest() throws Exception
     {
@@ -37,6 +37,7 @@ public class ITableRepositoryTest
     @AfterClass
     public static void tearDownClass()
     {
+        f.clearTestTables();
     }
 
     @Before
@@ -48,7 +49,7 @@ public class ITableRepositoryTest
     @After
     public void tearDown()
     {
-        f.clearTestTables();
+        
     }
 
     /**

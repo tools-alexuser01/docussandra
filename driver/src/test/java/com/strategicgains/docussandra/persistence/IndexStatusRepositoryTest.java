@@ -42,7 +42,7 @@ public class IndexStatusRepositoryTest
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexStatusRepositoryTest.class);
-    private Fixtures f;
+    private static Fixtures f;
 
     public IndexStatusRepositoryTest() throws Exception
     {
@@ -57,6 +57,7 @@ public class IndexStatusRepositoryTest
     @AfterClass
     public static void tearDownClass()
     {
+        f.clearTestTables();
     }
 
     @Before

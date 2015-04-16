@@ -17,18 +17,13 @@ package com.strategicgains.docussandra.service;
 
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
-import com.strategicgains.docussandra.domain.ParsedQuery;
-import com.strategicgains.docussandra.domain.Query;
-import com.strategicgains.docussandra.domain.WhereClause;
-import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import java.util.ArrayList;
 import java.util.List;
 import org.bson.BSONObject;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -44,7 +39,7 @@ public class QueryServiceTest
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private QueryService instance;
-    private Fixtures f;
+    private static Fixtures f;
 
     public QueryServiceTest() throws Exception
     {
@@ -61,8 +56,8 @@ public class QueryServiceTest
         indexRepo.create(Fixtures.createTestIndexTwoField());
     }
 
-    @After
-    public void tearDown()
+    @AfterClass
+    public static void tearDown()
     {
         f.clearTestTables();
     }

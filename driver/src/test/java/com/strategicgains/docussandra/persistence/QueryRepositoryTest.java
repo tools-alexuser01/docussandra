@@ -21,6 +21,7 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import java.io.IOException;
 import java.util.List;
 import org.bson.BSONObject;
 import org.junit.After;
@@ -40,7 +41,7 @@ public class QueryRepositoryTest
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Fixtures f;
+    private static Fixtures f;
 
     public QueryRepositoryTest() throws Exception
     {
@@ -55,6 +56,7 @@ public class QueryRepositoryTest
     @AfterClass
     public static void tearDownClass()
     {
+        f.clearTestTables();
     }
 
     @Before
@@ -67,7 +69,7 @@ public class QueryRepositoryTest
     @After
     public void tearDown()
     {
-        f.clearTestTables();
+        
     }
 
     /**

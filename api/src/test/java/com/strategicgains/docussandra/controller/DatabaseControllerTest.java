@@ -68,7 +68,7 @@ public class DatabaseControllerTest {
     }
 
     @Before
-    public void beforeTest() {
+    public void beforeTest(){
         f.clearTestTables();
     }
 
@@ -78,6 +78,7 @@ public class DatabaseControllerTest {
      */
     @AfterClass
     public static void afterClass() {
+        f.clearTestTables();
     }
 
     /**
@@ -85,7 +86,7 @@ public class DatabaseControllerTest {
      */
     @After
     public void afterTest() {
-        f.clearTestTables();
+        
     }
 
 //    /**

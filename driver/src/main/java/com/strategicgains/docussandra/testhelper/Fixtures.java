@@ -5,6 +5,7 @@ import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.strategicgains.docussandra.Utils;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
@@ -46,19 +47,19 @@ import org.slf4j.LoggerFactory;
  */
 public class Fixtures
 {
-
+    
     private static Fixtures INSTANCE = null;
     private static final String CASSANDRA_SEEDS = "cassandra.seeds";
     private static final String CASSANDRA_KEYSPACE = "cassandra.keyspace";
     public static final String DB = "mydb";
     private static List<Document> bulkDocs = null;
-
+    
     private Session session;
     private final String[] cassandraSeeds;
     private final String cassandraKeyspace;
-
+    
     private static Logger logger = LoggerFactory.getLogger(Fixtures.class);
-
+    
     private static IndexRepository indexRepo;
     private static ITableRepository cleanUpInstance;
     private static DatabaseRepository databaseRepo;
@@ -95,7 +96,7 @@ public class Fixtures
             embeddedCassandra = false;
         }
         final Metadata metadata = cluster.getMetadata();
-
+        
         if (embeddedCassandra)
         {
             session = cluster.connect();
@@ -156,12 +157,12 @@ public class Fixtures
         }
         return INSTANCE;
     }
-
+    
     public String getCassandraSeedString()
     {
         return "127.0.0.1";
     }
-
+    
     public String getCassandraKeyspace()
     {
         return cassandraKeyspace;
@@ -195,31 +196,31 @@ public class Fixtures
             }
         }
     }
-
+    
     public static List<Document> getBulkDocuments() throws IOException, ParseException
     {
         return getBulkDocuments("./src/test/resources/documents.json", createTestTable());
     }
-
+    
     public static List<Document> getBulkDocuments(String path, Table t) throws IOException, ParseException
     {
 //        if (bulkDocs == null)
 //        {
-            JSONParser parser = new JSONParser();
-            logger.info("Data path: " + new File(path).getAbsolutePath());
-            JSONObject jsonObject = (JSONObject) parser.parse(new FileReader(path));
-            JSONArray docs = (JSONArray) jsonObject.get("documents");
-            List<Document> toReturn = new ArrayList<>(docs.size());
-            for (int i = 0; i < docs.size(); i++)
-            {
-                Document doc = new Document();
-                doc.table(t);
-                doc.setUuid(new UUID(Long.MAX_VALUE - i, 1));//give it a UUID that we will reconize
-                JSONObject object = (JSONObject) docs.get(i);
-                doc.object(object.toJSONString());
-                toReturn.add(doc);
-            }
-            return toReturn;
+        JSONParser parser = new JSONParser();
+        logger.info("Data path: " + new File(path).getAbsolutePath());
+        JSONObject jsonObject = (JSONObject) parser.parse(new FileReader(path));
+        JSONArray docs = (JSONArray) jsonObject.get("documents");
+        List<Document> toReturn = new ArrayList<>(docs.size());
+        for (int i = 0; i < docs.size(); i++)
+        {
+            Document doc = new Document();
+            doc.table(t);
+            doc.setUuid(new UUID(Long.MAX_VALUE - i, 1));//give it a UUID that we will reconize
+            JSONObject object = (JSONObject) docs.get(i);
+            doc.object(object.toJSONString());
+            toReturn.add(doc);
+        }
+        return toReturn;
 //            bulkDocs = toReturn;
 //        }
 //        return bulkDocs;
@@ -240,6 +241,22 @@ public class Fixtures
         index.fields(fields);
         index.isUnique(false);
         return index;
+    }
+
+    /**
+     * Creates at test index with two fields.
+     *
+     * @return
+     */
+    public static final Index createTestPlayersIndexLastName()
+    {
+        Index lastname = new Index("lastname");
+        lastname.isUnique(false);
+        ArrayList<String> fields = new ArrayList<>(1);
+        fields.add("NAMELAST");
+        lastname.fields(fields);
+        lastname.table(Fixtures.createTestPlayersTable());
+        return lastname;
     }
 
     /**
@@ -273,8 +290,8 @@ public class Fixtures
         toReturn.setStatusLastUpdatedAt(new Date());
         return toReturn;
     }
-    
-        /**
+
+    /**
      * Creates at test IndexCreationStatus.
      *
      * @return
@@ -306,14 +323,23 @@ public class Fixtures
         index.isUnique(false);
         return index;
     }
-
+    
     public void insertIndex(Index index)
     {
         indexRepo.create(index);
     }
-
+    
     public void clearTestTables()
     {
+//        try
+//        {
+//            Utils.initDatabase("/docussandra.cql", session);
+//            CacheFactory.clearAllCaches();//if we reinit, we need to clear our caches or else we will get prepared statements that are no longer valid
+//        } catch (IOException e)
+//        {
+//            logger.error("Couldn't re-init db.", e);
+//        }
+
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexwithonefield");
@@ -331,6 +357,14 @@ public class Fixtures
         try
         {
             cleanUpInstance.deleteITable("mydb_mytable_myindexbulkdata");
+        } catch (DriverException e)
+        {
+            //logger.debug("Not dropping iTable, probably doesn't exist.");
+        }
+        
+        try
+        {
+            cleanUpInstance.deleteITable("players_players_lastname");
         } catch (DriverException e)
         {
             //logger.debug("Not dropping iTable, probably doesn't exist.");
@@ -361,10 +395,35 @@ public class Fixtures
             throw new RuntimeException(e);
         }
 
+//        try
+//        {
+//            List<Document> toDelete = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", Fixtures.createTestPlayersTable());
+//            for (Document d : toDelete)
+//            {
+//                try
+//                {
+//                    docRepo.delete(d);
+//                } catch (DriverException e)
+//                {
+//                    //logger.debug("Not dropping bulk document, probably doesn't exist.");
+//                }
+//            }
+//        } catch (Exception e)
+//        {
+//            throw new RuntimeException(e);
+//        }
         try
         {
-
+            
             tableRepo.delete(Fixtures.createTestTable());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not dropping table, probably doesn't exist.");
+        }
+        try
+        {
+            
+            tableRepo.delete(Fixtures.createTestPlayersTable());
         } catch (DriverException e)
         {
             //logger.debug("Not dropping table, probably doesn't exist.");
@@ -397,9 +456,23 @@ public class Fixtures
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
-
+        try
+        {
+            databaseRepo.delete(Fixtures.createTestPlayersDatabase());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting database, probably doesn't exist.");
+        }
+        try
+        {
+            indexRepo.delete(Fixtures.createTestPlayersIndexLastName());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting database, probably doesn't exist.");
+        }
+        
     }
-
+    
     public void createTestITables()
     {
         System.out.println("createTestITables");
@@ -413,7 +486,7 @@ public class Fixtures
         iTableDao.createITable(index3);
         tableRepo.create(Fixtures.createTestTable());
     }
-
+    
     public static final Document createTestDocument()
     {
         Document entity = new Document();
@@ -440,13 +513,13 @@ public class Fixtures
         entity.setUpdatedAt(new Date());
         return entity;
     }
-
+    
     public void insertDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
         documentRepo.create(document);
     }
-
+    
     public void insertDocuments(List<Document> documents)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
@@ -455,7 +528,25 @@ public class Fixtures
             documentRepo.create(document);
         }
     }
-
+    
+//    public void insertDocumentsTemp(List<Document> documents) throws Exception
+//    {
+//        EmbeddedCassandraServerHelper.startEmbeddedCassandra(15000);
+//        DocumentRepository documentRepo = new DocumentRepository(getSession());
+//        int i = 0;
+//        for (Document document : documents)
+//        {
+//            logger.debug("Inserting test document: " + i++);
+//            try
+//            {
+//                documentRepo.create(document);
+//            } catch (Exception e)
+//            {                
+//                logger.error("Could not insert test document.", e);
+//            }
+//        }
+//    }
+    
     public void deleteDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
@@ -545,18 +636,39 @@ public class Fixtures
         return t;
     }
 
+    /**
+     * Creates a simple table for testing.
+     *
+     * @return
+     */
+    public static final Table createTestPlayersTable()
+    {
+        Table testTable = new Table();
+        testTable.name("players");
+        testTable.database(createTestPlayersDatabase().name());
+        testTable.description("My Table stores a lot of data about players.");
+        return testTable;
+    }
+    
+    public static Database createTestPlayersDatabase()
+    {
+        Database testDb = new Database("players");
+        testDb.description("A database about athletic players");
+        return testDb;
+    }
+    
     public void insertTable(Table table)
     {
         tableRepo.create(table);
     }
-
+    
     public static Database createTestDatabase()
     {
         Database database = new Database(DB);
         database.description("This is a test database.");
         return database;
     }
-
+    
     public void insertDatabase(Database database)
     {
         databaseRepo.create(database);

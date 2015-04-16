@@ -53,7 +53,7 @@ public class IndexMaintainerHelperTest
     private Index index2 = createTestIndexTwoField();
     private Table table;
 
-    private Fixtures f;
+    private static Fixtures f;
 
     public IndexMaintainerHelperTest() throws Exception
     {
@@ -68,6 +68,7 @@ public class IndexMaintainerHelperTest
     @AfterClass
     public static void tearDownClass()
     {
+        f.clearTestTables();// clear anything that might be there already
     }
 
     @Before
@@ -91,7 +92,7 @@ public class IndexMaintainerHelperTest
     @After
     public void tearDown()
     {
-        f.clearTestTables();// clear anything that might be there already
+        
     }
 
     /**

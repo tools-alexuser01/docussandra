@@ -61,6 +61,7 @@ public class DocumentRepositoryTest
     @AfterClass
     public static void tearDownClass()
     {
+        f.clearTestTables();
     }
 
     @Before
