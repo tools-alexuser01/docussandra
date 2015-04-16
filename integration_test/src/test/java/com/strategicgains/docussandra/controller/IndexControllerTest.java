@@ -225,12 +225,8 @@ public class IndexControllerTest
             List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
             f.insertDocuments(docs);//put in a ton of data directly into the db
 
-            Index lastname = new Index("lastname");
-            lastname.isUnique(false);
-            ArrayList<String> fields = new ArrayList<>(1);
-            fields.add("NAMELAST");
-            lastname.fields(fields);
-            lastname.table(testTable);
+            Index lastname = Fixtures.createTestPlayersIndexLastName();
+            
             String tableStr = "{" + "\"fields\" : [\"" + lastname.fields().get(0)
                     + "\"]," + "\"name\" : \"" + lastname.name() + "\"}";
             RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/indexes";
