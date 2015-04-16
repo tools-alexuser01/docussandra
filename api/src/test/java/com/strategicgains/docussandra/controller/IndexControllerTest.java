@@ -259,7 +259,7 @@ public class IndexControllerTest
             StopWatch sw = new StopWatch();
             sw.start();
 
-        //check the status endpoint to make sure it got created
+            //check the status endpoint to make sure it got created
             //get the uuid from the response
             String uuidString = response.getBody().jsonPath().get("id");
             RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/index_status/";
