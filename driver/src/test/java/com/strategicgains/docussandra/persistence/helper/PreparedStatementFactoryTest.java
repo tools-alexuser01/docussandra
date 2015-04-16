@@ -16,7 +16,6 @@
 package com.strategicgains.docussandra.persistence.helper;
 
 import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import org.junit.After;
 import org.junit.AfterClass;
