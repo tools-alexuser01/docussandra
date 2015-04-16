@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.time.StopWatch;
 import static org.hamcrest.Matchers.*;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.fail;
@@ -49,6 +51,7 @@ public class IndexControllerTest
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private static Fixtures f;
+    private JSONParser parser = new JSONParser();
 
     public IndexControllerTest() throws Exception
     {
@@ -180,7 +183,7 @@ public class IndexControllerTest
                 .body("statusLink", notNullValue())
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name()).andReturn();
-        
+
         Thread.sleep(100);//sleep for a hair to let the indexing complete
 
         String restAssuredBasePath = RestAssured.basePath;
@@ -322,42 +325,93 @@ public class IndexControllerTest
      * endpoint is working.
      */
     @Test
-    public void postIndexAndCheckStatusAllTest()
+    public void postIndexAndCheckStatusAllTest() throws Exception
     {
-        Index testIndex = Fixtures.createTestIndexOneField();
-        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
-                + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
-
-        //act
-        ResponseOptions response = given().body(tableStr).expect().statusCode(201)
-                .body("index.name", equalTo(testIndex.name()))
-                .body("index.fields", notNullValue())
-                .body("index.createdAt", notNullValue())
-                .body("index.updatedAt", notNullValue())
-                .body("index.active", equalTo(false))
-                .body("id", notNullValue())
-                .body("dateStarted", notNullValue())
-                .body("statusLastUpdatedAt", notNullValue())
-                .body("totalRecords", equalTo(0))
-                .body("recordsCompleted", equalTo(0))
-                .when().post("/" + testIndex.name()).andReturn();
-
         String restAssuredBasePath = RestAssured.basePath;
         try
         {
-            RestAssured.basePath = "/" + testIndex.databaseName() + "/" + testIndex.tableName() + "/index_status/";
+            //data insert
+            Database testDb = new Database("players");
+            testDb.description("A database about athletic players");
+            Table testTable = new Table();
+            testTable.name("players");
+            testTable.database(testDb.name());
+            testTable.description("My Table stores a lot of data about players.");
+            f.insertDatabase(testDb);
+            f.insertTable(testTable);
+            List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
+            f.insertDocuments(docs);//put in a ton of data directly into the db
+
+            Index lastname = new Index("lastname");
+            lastname.isUnique(false);
+            ArrayList<String> fields = new ArrayList<>(1);
+            fields.add("NAMELAST");
+            lastname.fields(fields);
+            lastname.table(testTable);
+            String tableStr = "{" + "\"fields\" : [\"" + lastname.fields().get(0)
+                    + "\"]," + "\"name\" : \"" + lastname.name() + "\"}";
+            RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/indexes";
+            //act -- create index
+            given().body(tableStr).expect().statusCode(201)
+                    .body("index.name", equalTo(lastname.name()))
+                    .body("index.fields", notNullValue())
+                    .body("index.createdAt", notNullValue())
+                    .body("index.updatedAt", notNullValue())
+                    .body("index.active", equalTo(false))//should not yet be active
+                    .body("id", notNullValue())
+                    .body("dateStarted", notNullValue())
+                    .body("statusLastUpdatedAt", notNullValue())
+                    .body("eta", notNullValue())
+                    .body("precentComplete", notNullValue())
+                    .body("totalRecords", equalTo(3308))
+                    .body("statusLink", notNullValue())
+                    .body("recordsCompleted", equalTo(0))
+                    .when().post("/" + lastname.name());
+
+            //start a timer
+            StopWatch sw = new StopWatch();
+            sw.start();
+
+            RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/index_status/";
+
+            //check to make sure it shows as present at least once
             ResponseOptions res = expect().statusCode(200)
-                    //                    .body("[0].id", notNullValue())
-                    //                    .body("[0].dateStarted", notNullValue())
-                    //                    .body("[0].statusLastUpdatedAt", notNullValue())
-                    //                    .body("[0].eta", notNullValue())
-                    //                    .body("[0].index", notNullValue())
-                    //                    .body("[0].totalRecords", notNullValue())
-                    //                    .body("[0].recordsCompleted", notNullValue())
-                    //                    .body("[0].precentComplete", notNullValue())
-                    //                    .body("[0].statusLink", notNullValue())
+                    .body("[0].id", notNullValue())
+                    .body("[0].dateStarted", notNullValue())
+                    .body("[0].statusLastUpdatedAt", notNullValue())
+                    .body("[0].eta", notNullValue())
+                    .body("[0].index", notNullValue())
+                    .body("[0].index.active", equalTo(false))//should not yet be active
+                    .body("[0].totalRecords", notNullValue())
+                    .body("[0].recordsCompleted", notNullValue())
+                    .body("[0].precentComplete", notNullValue())
+                    .body("[0].statusLink", notNullValue())
                     .when().get("/").andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
+            //wait for it to dissapear (meaning it's gone active)
+            boolean active = false;
+            while (!active)
+            {
+                res = expect().statusCode(200).when().get("/").andReturn();
+                String body = res.getBody().prettyPrint();
+                LOGGER.debug("Status Response: " + body);
+
+                JSONArray resultSet = (JSONArray) parser.parse(body);
+                if (resultSet.isEmpty())
+                {
+                    active = true;
+                    sw.stop();
+                    break;
+                }
+                LOGGER.debug("Waiting for index to go active for: " + sw.getTime());
+                if (sw.getTime() == 12000)
+                {
+                    fail("Index took too long to create");
+                }
+                Thread.sleep(5000);
+            }
+            LOGGER.info("It took: " + (sw.getTime() / 1000) + " seconds to create the index.");
+
         } finally
         {
             RestAssured.basePath = restAssuredBasePath;
