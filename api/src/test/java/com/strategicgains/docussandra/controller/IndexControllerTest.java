@@ -280,7 +280,7 @@ public class IndexControllerTest
             boolean active = false;
             while (!active)
             {
-                //poll the status to make sure an index did in fact get created
+                //poll the status until it is active to make sure an index did in fact get created
                 res = expect().statusCode(200)
                         .body("id", equalTo(uuidString))
                         .body("dateStarted", notNullValue())
