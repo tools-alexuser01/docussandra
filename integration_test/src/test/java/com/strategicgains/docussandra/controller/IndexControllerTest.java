@@ -127,7 +127,7 @@ public class IndexControllerTest
                 .body("index.fields", notNullValue())
                 .body("index.createdAt", notNullValue())
                 .body("index.updatedAt", notNullValue())
-                .body("index.active", notNullValue())
+                .body("index.active", equalTo(false))//should not yet be active
                 .body("id", notNullValue())
                 .body("dateStarted", notNullValue())
                 .body("statusLastUpdatedAt", notNullValue())
@@ -152,7 +152,7 @@ public class IndexControllerTest
      * GET/{database}/{table}/index_status/{status_id} endpoint is working.
      */
     @Test
-    public void postIndexAndCheckStatusTest()
+    public void postIndexAndCheckStatusTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
         String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
@@ -175,6 +175,7 @@ public class IndexControllerTest
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name()).andReturn();
 
+        Thread.sleep(100);//sleep for a hair to let the indexing complete
         String restAssuredBasePath = RestAssured.basePath;
         try
         {
@@ -188,6 +189,7 @@ public class IndexControllerTest
                     .body("eta", notNullValue())
                     .body("precentComplete", notNullValue())
                     .body("index", notNullValue())
+                    .body("index.active", equalTo(true))//should now be active
                     .body("totalRecords", notNullValue())
                     .body("statusLink", containsString(uuidString))
                     .body("recordsCompleted", notNullValue())
