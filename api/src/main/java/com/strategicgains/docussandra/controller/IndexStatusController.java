@@ -50,18 +50,6 @@ public class IndexStatusController
         String id = request.getHeader(Constants.Url.INDEX_STATUS, "No index status id provided.");
 
         IndexCreationStatus status = indexes.status(UUID.fromString(id));
-//        // Construct the response for create...
-//        response.setResponseCreated();
-//
-//        // enrich the resource with links, etc. here...
-//        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
-//                .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
-//                .bind(Constants.Url.INDEX, status.getIndex().name());
-//
-//        // Include the Location header...
-//        String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);
-//        response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
-//        // Return the newly-created resource...
 
         HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
                 .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
