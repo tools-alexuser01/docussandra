@@ -18,6 +18,7 @@ package com.strategicgains.docussandra.controller;
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
+import com.jayway.restassured.response.ResponseBody;
 import com.jayway.restassured.response.ResponseOptions;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
@@ -33,6 +34,7 @@ import java.util.List;
 import org.apache.commons.lang3.time.StopWatch;
 import static org.hamcrest.Matchers.*;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -183,7 +185,6 @@ public class IndexControllerTest
                 .body("eta", notNullValue())
                 .body("precentComplete", notNullValue())
                 .body("totalRecords", equalTo(0))
-                .body("statusLink", notNullValue())
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name()).andReturn();
 
@@ -204,7 +205,6 @@ public class IndexControllerTest
                     .body("index", notNullValue())
                     .body("index.active", equalTo(true))//should now be active
                     .body("totalRecords", notNullValue())
-                    .body("statusLink", containsString(uuidString))
                     .body("recordsCompleted", notNullValue())
                     .when().get(uuidString).andReturn();//check status (index_status endpoint)
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
@@ -249,7 +249,6 @@ public class IndexControllerTest
                     .body("eta", notNullValue())
                     .body("precentComplete", notNullValue())
                     .body("totalRecords", equalTo(3308))
-                    .body("statusLink", notNullValue())
                     .body("recordsCompleted", equalTo(0))
                     .when().post("/" + lastname.name()).andReturn();
 
@@ -270,7 +269,6 @@ public class IndexControllerTest
                     .body("index", notNullValue())
                     .body("index.active", notNullValue())
                     .body("index.active", equalTo(false))//should not yet be active
-                    .body("statusLink", containsString(uuidString))
                     .body("recordsCompleted", notNullValue())
                     .when().get(uuidString).andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
@@ -287,7 +285,6 @@ public class IndexControllerTest
                         .body("precentComplete", notNullValue())
                         .body("index", notNullValue())
                         .body("index.active", notNullValue())
-                        .body("statusLink", containsString(uuidString))
                         .body("recordsCompleted", notNullValue())
                         .when().get(uuidString).andReturn();
                 LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
@@ -352,7 +349,6 @@ public class IndexControllerTest
                     .body("eta", notNullValue())
                     .body("precentComplete", notNullValue())
                     .body("totalRecords", equalTo(3308))
-                    .body("statusLink", notNullValue())
                     .body("recordsCompleted", equalTo(0))
                     .when().post("/" + lastname.name());
 
@@ -364,16 +360,15 @@ public class IndexControllerTest
 
             //check to make sure it shows as present at least once
             ResponseOptions res = expect().statusCode(200)
-                    .body("[0].id", notNullValue())
-                    .body("[0].dateStarted", notNullValue())
-                    .body("[0].statusLastUpdatedAt", notNullValue())
-                    .body("[0].eta", notNullValue())
-                    .body("[0].index", notNullValue())
-                    .body("[0].index.active", equalTo(false))//should not yet be active
-                    .body("[0].totalRecords", notNullValue())
-                    .body("[0].recordsCompleted", notNullValue())
-                    .body("[0].precentComplete", notNullValue())
-                    .body("[0].statusLink", notNullValue())
+                    .body("_embedded.indexcreationstatus[0].id", notNullValue())
+                    .body("_embedded.indexcreationstatus[0].dateStarted", notNullValue())
+                    .body("_embedded.indexcreationstatus[0].statusLastUpdatedAt", notNullValue())
+                    .body("_embedded.indexcreationstatus[0].eta", notNullValue())
+                    .body("_embedded.indexcreationstatus[0].index", notNullValue())
+                    .body("_embedded.indexcreationstatus[0].index.active", equalTo(false))//should not yet be active
+                    .body("_embedded.indexcreationstatus[0].totalRecords", notNullValue())
+                    .body("_embedded.indexcreationstatus[0].recordsCompleted", notNullValue())
+                    .body("_embedded.indexcreationstatus[0].precentComplete", notNullValue())
                     .when().get("/").andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
             //wait for it to dissapear (meaning it's gone active)
@@ -384,7 +379,9 @@ public class IndexControllerTest
                 String body = res.getBody().prettyPrint();
                 LOGGER.debug("Status Response: " + body);
 
-                JSONArray resultSet = (JSONArray) parser.parse(body);
+                JSONObject bodyObject = (JSONObject) parser.parse(body);
+                JSONObject embedded = (JSONObject)bodyObject.get("_embedded");
+                JSONArray resultSet = (JSONArray)embedded.get("indexcreationstatus");
                 if (resultSet.isEmpty())
                 {
                     active = true;

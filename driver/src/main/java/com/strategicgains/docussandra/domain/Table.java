@@ -9,9 +9,10 @@ import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;
 import java.util.Objects;
+import org.restexpress.plugin.hyperexpress.Linkable;
 
 public class Table
-        extends AbstractTimestampedIdentifiable
+        extends AbstractTimestampedIdentifiable implements Linkable
 {
 
     @Required("Database")

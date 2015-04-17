@@ -1,6 +1,5 @@
 package com.strategicgains.docussandra.controller;
 
-
 import java.util.List;
 
 import org.restexpress.Request;
@@ -9,6 +8,9 @@ import org.restexpress.Response;
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.domain.IndexCreationStatus;
 import com.strategicgains.docussandra.service.IndexService;
+import com.strategicgains.hyperexpress.HyperExpress;
+import com.strategicgains.hyperexpress.builder.TokenBinder;
+import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -35,29 +37,62 @@ public class IndexStatusController
         super();
         this.indexes = indexService;
     }
-   
-    
+
     /**
      * Gets the status for an index creation request.
+     *
      * @param request
      * @param response
-     * @return 
+     * @return
      */
-    public IndexCreationStatus read(Request request, Response response){
+    public IndexCreationStatus read(Request request, Response response)
+    {
         String id = request.getHeader(Constants.Url.INDEX_STATUS, "No index status id provided.");
-        return indexes.status(UUID.fromString(id));
-    }
 
+        IndexCreationStatus status = indexes.status(UUID.fromString(id));
+//        // Construct the response for create...
+//        response.setResponseCreated();
+//
+//        // enrich the resource with links, etc. here...
+//        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
+//                .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
+//                .bind(Constants.Url.INDEX, status.getIndex().name());
+//
+//        // Include the Location header...
+//        String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);
+//        response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
+//        // Return the newly-created resource...
+
+        HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
+                .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
+                .bind(Constants.Url.INDEX, status.getIndex().name())
+                .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
+        return status;
+    }
 
     /**
      * Gets all presently active index creation requests.
+     *
      * @param request
      * @param response
-     * @return 
+     * @return
      */
     public List<IndexCreationStatus> readAll(Request request, Response response)
     {
-        return indexes.getAllCurrentlyIndexing();
+        List<IndexCreationStatus> status = indexes.getAllCurrentlyIndexing();
+        HyperExpress.tokenBinder(new TokenBinder<IndexCreationStatus>()
+        {
+            @Override
+            public void bind(IndexCreationStatus object, TokenResolver resolver)
+            {
+                resolver.bind(Constants.Url.TABLE, object.getIndex().tableName())
+                        .bind(Constants.Url.DATABASE, object.getIndex().databaseName())
+                        .bind(Constants.Url.INDEX, object.getIndex().name())
+                        .bind(Constants.Url.INDEX_STATUS, object.getUuid().toString());
+
+            }
+        });
+        return status;
     }
 
 }

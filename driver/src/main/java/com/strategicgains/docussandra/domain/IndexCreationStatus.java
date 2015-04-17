@@ -21,13 +21,14 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
+import org.restexpress.plugin.hyperexpress.Linkable;
 
 /**
  * POJO that contains the current status of an indexing action.
  *
  * @author udeyoje
  */
-public class IndexCreationStatus implements UuidIdentifiable, Serializable
+public class IndexCreationStatus implements UuidIdentifiable, Serializable, Linkable
 {
 
     /**
@@ -55,11 +56,6 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
      * Percent complete for this task.
      */
     private double precentComplete;
-
-    /**
-     * Status link for this status.
-     */
-    private String statusLink;
 
     /**
      * The requested index that is being created.
@@ -115,7 +111,6 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
     public void calculateValues()
     {
         calculatePercentComplete();
-        calulateStatusLink();
         calculateEta();
     }
 
@@ -143,13 +138,6 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
         }
     }
 
-    /**
-     * Calculates a status link that can be used to check on this request.
-     */
-    private void calulateStatusLink()
-    {
-        statusLink = "http://localhost:8081/" + index.databaseName() + "/" + index.tableName() + "/index_status/" + getUuid().toString();//TODO: finish
-    }
 
     private void calculateEta()
     {
@@ -315,7 +303,6 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
         hash = 89 * hash + Objects.hashCode(this.statusLastUpdatedAt);
         hash = 89 * hash + (int) (this.eta ^ (this.eta >>> 32));
         hash = 89 * hash + (int) (Double.doubleToLongBits(this.precentComplete) ^ (Double.doubleToLongBits(this.precentComplete) >>> 32));
-        hash = 89 * hash + Objects.hashCode(this.statusLink);
         hash = 89 * hash + Objects.hashCode(this.index);
         hash = 89 * hash + (int) (this.totalRecords ^ (this.totalRecords >>> 32));
         hash = 89 * hash + (int) (this.recordsCompleted ^ (this.recordsCompleted >>> 32));
@@ -355,10 +342,6 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
         {
             return false;
         }
-        if (!Objects.equals(this.statusLink, other.statusLink))
-        {
-            return false;
-        }
         if (!Objects.equals(this.index, other.index))
         {
             return false;
@@ -381,7 +364,7 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
     @Override
     public String toString()
     {
-        return "IndexCreationStatus{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", precentComplete=" + precentComplete + ", statusLink=" + statusLink + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + ", error=" + error + '}';
+        return "IndexCreationStatus{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", precentComplete=" + precentComplete + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + ", error=" + error + '}';
     }
 
     /**
@@ -392,16 +375,6 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
     public double getPrecentComplete()
     {
         return precentComplete;
-    }
-
-    /**
-     * Status link for this status.
-     *
-     * @return the statusLink
-     */
-    public String getStatusLink()
-    {
-        return statusLink;
     }
 
     /**

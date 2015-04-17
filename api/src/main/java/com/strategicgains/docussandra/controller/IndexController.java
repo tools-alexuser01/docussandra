@@ -54,7 +54,8 @@ public class IndexController
         t.name(table);
         entity.table(t);
         entity.name(name);
-        if(entity.includeOnly() == null){
+        if (entity.includeOnly() == null)
+        {
             entity.includeOnly(new ArrayList<String>(0));
         }
         IndexCreationStatus status;
@@ -72,7 +73,8 @@ public class IndexController
         // enrich the resource with links, etc. here...
         TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
                 .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
-                .bind(Constants.Url.INDEX, status.getIndex().name());
+                .bind(Constants.Url.INDEX, status.getIndex().name())
+                .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
 
         // Include the Location header...
         String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);
@@ -80,7 +82,6 @@ public class IndexController
         // Return the newly-created resource...
         return status;
     }
-    
 
     public Index read(Request request, Response response)
     {
@@ -93,7 +94,7 @@ public class IndexController
         HyperExpress.bind(Constants.Url.TABLE, entity.tableName())
                 .bind(Constants.Url.DATABASE, entity.databaseName())
                 .bind(Constants.Url.INDEX, entity.name());
-
+//TODO: add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
         return entity;
     }
 
@@ -110,6 +111,7 @@ public class IndexController
                 resolver.bind(Constants.Url.TABLE, object.tableName())
                         .bind(Constants.Url.DATABASE, object.databaseName())
                         .bind(Constants.Url.INDEX, object.name());
+                //TODO: add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
 
             }
         });
@@ -131,7 +133,6 @@ public class IndexController
 //        indexes.update(entity);
 //        response.setResponseNoContent();
 //    }
-
     public void delete(Request request, Response response)
     {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");

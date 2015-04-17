@@ -61,11 +61,11 @@ public abstract class Routes
 
         server.uri("/{database}/{table}/index_status/", config.getIndexStatusController())
                 .action("readAll", GET)
-                .name(Constants.Routes.INDEX_STATUS);
+                .name(Constants.Routes.INDEX_STATUS_ALL);//TODO: this route is wrong!
 
         server.uri("/{database}/{table}/index_status", config.getIndexStatusController())
                 .action("readAll", GET)
-                .name(Constants.Routes.INDEX_STATUS);
+                .name(Constants.Routes.INDEX_STATUS_ALL);//TODO: this route is wrong!
 
         server.uri("/{database}/{table}/{documentId}", config.getDocumentController())
                 .method(GET, PUT, DELETE)

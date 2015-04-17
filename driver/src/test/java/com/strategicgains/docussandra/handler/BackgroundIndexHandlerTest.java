@@ -135,7 +135,6 @@ public class BackgroundIndexHandlerTest
         assertEquals(storedStatus.getEta(), 0);
         assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
         assertTrue(statusRepo.readAllCurrentlyIndexing().isEmpty());
-        assertNotNull(storedStatus.getStatusLink());
         assertNotNull(storedStatus.getIndex());
         Index readIndex = indexRepo.read(testIndex.getId());
         assertNotNull(readIndex);
@@ -178,7 +177,6 @@ public class BackgroundIndexHandlerTest
         assertEquals(storedStatus.getEta(), -1);
         assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
         assertFalse(statusRepo.readAllCurrentlyIndexing().isEmpty());
-        assertNotNull(storedStatus.getStatusLink());
         assertEquals("Could not complete indexing event for index: 'myindexbulkdata'. Please contact a system administrator to resolve this issue.", storedStatus.getError());
     }
 
@@ -225,7 +223,6 @@ public class BackgroundIndexHandlerTest
         assertEquals(storedStatus.getEta(), 0);
         assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
         assertTrue(statusRepo.readAllCurrentlyIndexing().isEmpty());
-        assertNotNull(storedStatus.getStatusLink());
         assertNotNull(storedStatus.getIndex());
         Index readIndex = indexRepo.read(lastname.getId());
         assertNotNull(readIndex);

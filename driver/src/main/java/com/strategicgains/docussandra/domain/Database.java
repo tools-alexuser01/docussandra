@@ -5,9 +5,10 @@ import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import java.util.Objects;
+import org.restexpress.plugin.hyperexpress.Linkable;
 
 public class Database
-        extends AbstractTimestampedIdentifiable
+        extends AbstractTimestampedIdentifiable implements Linkable
 {
 
     @RegexValidation(name = "Namespace Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)

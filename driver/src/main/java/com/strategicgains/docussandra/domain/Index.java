@@ -15,10 +15,11 @@ import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;
 import java.io.Serializable;
 import java.util.Objects;
+import org.restexpress.plugin.hyperexpress.Linkable;
 
 public class Index
         extends AbstractTimestampedIdentifiable
-        implements Validatable, Serializable
+        implements Validatable, Serializable, Linkable
 {
 
     @Required("Table")

@@ -176,7 +176,6 @@ public class IndexControllerTest
                 .body("eta", notNullValue())
                 .body("precentComplete", notNullValue())
                 .body("totalRecords", equalTo(0))
-                .body("statusLink", notNullValue())
                 .body("recordsCompleted", equalTo(0))
                 .when().post("/" + testIndex.name()).andReturn();
 
@@ -196,7 +195,6 @@ public class IndexControllerTest
                     .body("index", notNullValue())
                     .body("index.active", equalTo(true))//should now be active
                     .body("totalRecords", notNullValue())
-                    .body("statusLink", containsString(uuidString))
                     .body("recordsCompleted", notNullValue())
                     .when().get(uuidString).andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
@@ -243,7 +241,6 @@ public class IndexControllerTest
                     .body("eta", notNullValue())
                     .body("precentComplete", notNullValue())
                     .body("totalRecords", equalTo(3308))
-                    .body("statusLink", notNullValue())
                     .body("recordsCompleted", equalTo(0))
                     .when().post("/" + lastname.name()).andReturn();
 
@@ -264,7 +261,6 @@ public class IndexControllerTest
                     .body("index", notNullValue())
                     .body("index.active", notNullValue())
                     .body("index.active", equalTo(false))//should not yet be active
-                    .body("statusLink", containsString(uuidString))
                     .body("recordsCompleted", notNullValue())
                     .when().get(uuidString).andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
@@ -281,7 +277,6 @@ public class IndexControllerTest
                         .body("precentComplete", notNullValue())
                         .body("index", notNullValue())
                         .body("index.active", notNullValue())
-                        .body("statusLink", containsString(uuidString))
                         .body("recordsCompleted", notNullValue())
                         .when().get(uuidString).andReturn();
                 LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
