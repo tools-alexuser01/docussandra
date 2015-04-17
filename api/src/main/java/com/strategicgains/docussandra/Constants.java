@@ -7,7 +7,6 @@ public class Constants
 	 */
 	public static class Url
 	{
-		//TODO: Your URL parameter names here...
 		public static final String UUID = "uuid";
 		public static final String KEY1 = "key1";
 		public static final String KEY2 = "key2";
