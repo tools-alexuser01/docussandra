@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Not super-happy with this test right now.
+ *
  * @author udeyoje
  */
 public class IndexStatusRepositoryTest
@@ -151,6 +152,50 @@ public class IndexStatusRepositoryTest
         //update
         entity.setRecordsCompleted(10);
         entity.setStatusLastUpdatedAt(new Date());
+        IndexCreationStatus result = instance.updateEntity(entity);
+        assertStatusEqualEnough(entity, result);
+        //fetch
+        IndexCreationStatus read = instance.readEntityByUUID(entity.getUuid());
+        assertStatusEqualEnough(entity, read);
+    }
+
+    /**
+     * Test of updateEntity method, of class IndexStatusRepository.
+     */
+    @Test
+    public void testUpdateEntityWithErrorField()
+    {
+        System.out.println("updateEntity");
+        IndexCreationStatus entity = Fixtures.createTestIndexCreationStatus();
+        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        //create
+        instance.createEntity(entity);
+        //update
+        entity.setRecordsCompleted(10);
+        entity.setStatusLastUpdatedAt(new Date());
+        entity.setError("Whoops! Something Went Wrong.");
+        IndexCreationStatus result = instance.updateEntity(entity);
+        assertStatusEqualEnough(entity, result);
+        //fetch
+        IndexCreationStatus read = instance.readEntityByUUID(entity.getUuid());
+        assertStatusEqualEnough(entity, read);
+    }
+
+    /**
+     * Test of updateEntity method, of class IndexStatusRepository.
+     */
+    @Test
+    public void testUpdateEntityWithNullErrorField()
+    {
+        System.out.println("updateEntity");
+        IndexCreationStatus entity = Fixtures.createTestIndexCreationStatus();
+        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        //create
+        instance.createEntity(entity);
+        //update
+        entity.setRecordsCompleted(10);
+        entity.setStatusLastUpdatedAt(new Date());
+        entity.setError(null);
         IndexCreationStatus result = instance.updateEntity(entity);
         assertStatusEqualEnough(entity, result);
         //fetch
@@ -333,6 +378,7 @@ public class IndexStatusRepositoryTest
         assertEquals(expected.getStatusLastUpdatedAt(), actual.getStatusLastUpdatedAt());
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getUuid(), actual.getUuid());
+        assertEquals(expected.getError(), actual.getError());
     }
 
 }
