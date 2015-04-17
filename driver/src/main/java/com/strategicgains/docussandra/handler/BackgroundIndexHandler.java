@@ -116,10 +116,10 @@ public class BackgroundIndexHandler implements EventHandler
             if(status != null && status.getIndex() != null){
                 indexName = status.getIndex().name();
             }
-            String errorMessage = "Could not complete indexing event for index: " + indexName;
+            String errorMessage = "Could not complete indexing event for index: '" + indexName + "'.";
             logger.error(errorMessage, e);
             if(status != null){//intentionally a seperate clause so our error prints in case this throws.
-                status.setError(errorMessage + ". Please contact a system administrator to resolve this issue.");
+                status.setError(errorMessage + " Please contact a system administrator to resolve this issue.");
                 status.setStatusLastUpdatedAt(new Date());
                 indexStatusRepo.updateEntity(status);
             }
