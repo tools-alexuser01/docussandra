@@ -26,7 +26,6 @@ public class Constants
 	 */
 	public static class Routes
 	{
-		//TODO: Your Route names here...
 		public static final String SINGLE_UUID_SAMPLE = "sample.uuid.single";
 		public static final String SINGLE_COMPOUND_SAMPLE = "sample.compound.single";
 		public static final String SAMPLE_UUID_COLLECTION = "sample.uuid.collection";
