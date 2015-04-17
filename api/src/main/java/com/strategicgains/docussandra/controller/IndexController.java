@@ -94,7 +94,7 @@ public class IndexController
         HyperExpress.bind(Constants.Url.TABLE, entity.tableName())
                 .bind(Constants.Url.DATABASE, entity.databaseName())
                 .bind(Constants.Url.INDEX, entity.name());
-//TODO: add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
+//TODO? add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
         return entity;
     }
 
@@ -111,7 +111,7 @@ public class IndexController
                 resolver.bind(Constants.Url.TABLE, object.tableName())
                         .bind(Constants.Url.DATABASE, object.databaseName())
                         .bind(Constants.Url.INDEX, object.name());
-                //TODO: add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
+                //TODO? add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
 
             }
         });
