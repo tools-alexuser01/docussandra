@@ -48,7 +48,7 @@ public class IndexService
             statusRepo.createEntity(toReturn);
         }
         toReturn.calculateValues();
-        DomainEvents.publish(uuid);
+        DomainEvents.publish(toReturn);
         return toReturn;
     }
 

@@ -26,7 +26,6 @@ import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.eventing.EventHandler;
 import java.util.Date;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +55,7 @@ public class BackgroundIndexHandler implements EventHandler
     @Override
     public boolean handles(Class<?> eventClass)
     {
-        return eventClass.getName().contains(UUID.class.getName());//TODO: make this better
+        return eventClass.equals(IndexCreationStatus.class);
     }
 
     @Override
@@ -66,8 +65,7 @@ public class BackgroundIndexHandler implements EventHandler
         IndexCreationStatus status = null;
         try
         {
-            UUID eventId = (UUID) event;
-            status = indexStatusRepo.readEntityByUUID(eventId);
+            status = (IndexCreationStatus) event;
             Index index = indexRepo.read(status.getIndex().getId());
             long offset = 0;
             long recordsCompleted = 0;

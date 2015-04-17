@@ -27,7 +27,6 @@ import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepositoryTest;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import static com.strategicgains.docussandra.testhelper.Fixtures.createTestIndexWithBulkDataHit;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -98,7 +97,7 @@ public class BackgroundIndexHandlerTest
     public void testHandles()
     {
         System.out.println("handles");
-        Class eventClass = UUID.class;
+        Class eventClass = IndexCreationStatus.class;
         BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
         boolean result = instance.handles(eventClass);
         assertEquals(true, result);
@@ -120,7 +119,7 @@ public class BackgroundIndexHandlerTest
         IndexCreationStatus entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
         entity.setTotalRecords(34);
         statusRepo.createEntity(entity);
-        Object event = entity.getUuid();
+        Object event = entity;
         //end data setup
         BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
         //call
@@ -154,7 +153,7 @@ public class BackgroundIndexHandlerTest
         IndexCreationStatus entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
         entity.setTotalRecords(34);
         statusRepo.createEntity(entity);
-        Object event = entity.getUuid();
+        Object event = entity;
         //end data setup
         BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
         //call
@@ -208,7 +207,7 @@ public class BackgroundIndexHandlerTest
         entity.setStatusLastUpdatedAt(new Date());
 
         statusRepo.createEntity(entity);
-        Object event = entity.getUuid();
+        Object event = entity;
         //end data setup
         BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
         //call
