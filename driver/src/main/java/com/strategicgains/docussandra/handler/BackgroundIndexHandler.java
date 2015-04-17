@@ -67,7 +67,6 @@ public class BackgroundIndexHandler implements EventHandler
         try
         {
             UUID eventId = (UUID) event;
-
             status = indexStatusRepo.readEntityByUUID(eventId);
             Index index = indexRepo.read(status.getIndex().getId());
             long offset = 0;
@@ -114,12 +113,14 @@ public class BackgroundIndexHandler implements EventHandler
         } catch (Exception e)
         {
             String indexName  = "Cannot be determined.";
-            if(status != null){
+            if(status != null && status.getIndex() != null){
                 indexName = status.getIndex().name();
             }
-            logger.error("Could not complete indexing event for index: " + indexName, e);
+            String errorMessage = "Could not complete indexing event for index: " + indexName;
+            logger.error(errorMessage, e);
             if(status != null){//intentionally a seperate clause so our error prints in case this throws.
-                //TODO: set an error and indicate a problem!
+                status.setError(errorMessage + ". Please contact a system administrator to resolve this issue.");
+                status.setStatusLastUpdatedAt(new Date());
                 indexStatusRepo.updateEntity(status);
             }
             throw e;
