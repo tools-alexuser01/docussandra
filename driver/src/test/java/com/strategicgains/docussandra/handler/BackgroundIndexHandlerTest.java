@@ -129,7 +129,7 @@ public class BackgroundIndexHandlerTest
         assertTrue(statusRepo.exists(entity.getUuid()));
         IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
         assertNotNull(storedStatus);
-        assertTrue(storedStatus.isDone());
+        assertTrue(storedStatus.isDoneIndexing());
         assertEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
         assertEquals(100, storedStatus.getPrecentComplete(), 0);
         assertEquals(storedStatus.getEta(), 0);
@@ -172,7 +172,7 @@ public class BackgroundIndexHandlerTest
         assertTrue(statusRepo.exists(entity.getUuid()));
         IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
         assertNotNull(storedStatus);
-        assertFalse(storedStatus.isDone());
+        assertFalse(storedStatus.isDoneIndexing());
         assertNotEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
         assertEquals(0, storedStatus.getPrecentComplete(), 0);
         assertEquals(storedStatus.getEta(), -1);
@@ -219,7 +219,7 @@ public class BackgroundIndexHandlerTest
         assertTrue(statusRepo.exists(entity.getUuid()));
         IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
         assertNotNull(storedStatus);
-        assertTrue(storedStatus.isDone());
+        assertTrue(storedStatus.isDoneIndexing());
         assertEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
         assertEquals(100, storedStatus.getPrecentComplete(), 0);
         assertEquals(storedStatus.getEta(), 0);

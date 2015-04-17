@@ -138,7 +138,7 @@ public class IndexStatusRepository
         BoundStatement create = new BoundStatement(createStmt);
         bindCreate(create, entity);
         BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
-        if (!entity.isDone())
+        if (!entity.isDoneIndexing())
         {
             markIndexing(entity.getUuid());
         }
@@ -152,7 +152,7 @@ public class IndexStatusRepository
     {
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
-        if (entity.isDone())
+        if (entity.isDoneIndexing())
         {
             markDone(entity.getUuid());
         } else

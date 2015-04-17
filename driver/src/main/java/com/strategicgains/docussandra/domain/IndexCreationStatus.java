@@ -119,7 +119,7 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
         calculateEta();
     }
 
-    public boolean isDone()
+    public boolean isDoneIndexing()
     {
         return getIndex().isActive();
     }
