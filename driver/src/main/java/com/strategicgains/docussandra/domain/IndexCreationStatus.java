@@ -157,9 +157,8 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable
         if (getTotalRecords() == 0)
         {
             eta = 0;//we are functionally done
-        } else if (duration == 0)
-        {
-            //nothing to go off of
+        } else if (duration == 0 || error != null)//nothing to go off of OR we have an error and it's never going to finish
+        {            
             eta = -1;
         } else
         {
