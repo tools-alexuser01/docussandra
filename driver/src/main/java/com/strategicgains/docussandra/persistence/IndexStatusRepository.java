@@ -13,8 +13,6 @@ import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexCreationStatus;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -22,12 +20,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Repository for interacting with the sys_idx_status and sys_idx_not_done
- * tables. Warning: I am not entirely happy with this class.
- *
+ * tables.
+ * TODO: Javadoc
  * @author udeyoje
  */
 public class IndexStatusRepository
-        extends AbstractCassandraRepository<IndexCreationStatus>
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -76,11 +73,12 @@ public class IndexStatusRepository
     private PreparedStatement readAllCurrentlyIndexingStmt;
     private PreparedStatement deleteFromNotDoneStmt;
     private PreparedStatement isCurrentlyIndexingStmt;
+    
+    private Session session;
 
     public IndexStatusRepository(Session session)
     {
-        super(session, Tables.BY_ID);
-        addObserver(new IndexChangeObserver(session));
+        this.session = session;
         initialize();
         indexRepo = new IndexRepository(session);
     }
@@ -98,11 +96,6 @@ public class IndexStatusRepository
         isCurrentlyIndexingStmt = PreparedStatementFactory.getPreparedStatement(IS_CURRENTLY_INDEXING_CQL, getSession());
     }
 
-    @Override
-    public boolean exists(Identifier identifier)
-    {
-        throw new UnsupportedOperationException("This is not a valid call for this class.");
-    }
 
     public boolean exists(UUID uuid)
     {
@@ -115,11 +108,6 @@ public class IndexStatusRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
-    @Override
-    protected IndexCreationStatus readEntityById(Identifier identifier)
-    {
-        throw new UnsupportedOperationException("This is not a valid call for this class.");
-    }
 
     public IndexCreationStatus readEntityByUUID(UUID uuid)
     {
@@ -132,7 +120,6 @@ public class IndexStatusRepository
         return marshalRow(getSession().execute(bs).one());
     }
 
-    @Override
     public IndexCreationStatus createEntity(IndexCreationStatus entity)
     {
         BoundStatement create = new BoundStatement(createStmt);
@@ -147,7 +134,6 @@ public class IndexStatusRepository
         return entity;
     }
 
-    @Override
     public IndexCreationStatus updateEntity(IndexCreationStatus entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
@@ -175,12 +161,6 @@ public class IndexStatusRepository
         BoundStatement delete = new BoundStatement(deleteFromNotDoneStmt);
         bindUUIDWhere(delete, id);
         getSession().execute(delete);
-    }
-
-    @Override
-    public void deleteEntity(final IndexCreationStatus id)
-    {
-        throw new UnsupportedOperationException("This not a valid call; we do not delete past status.");
     }
 
     public List<IndexCreationStatus> readAll()
@@ -291,10 +271,9 @@ public class IndexStatusRepository
         return i;
     }
 
-    @Override
     public Session getSession()
     {
-        return super.getSession();
+        return session;
     }
 
 }
