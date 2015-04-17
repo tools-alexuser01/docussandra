@@ -52,9 +52,9 @@ public class TableRepository
     private static final String READ_COUNT_TABLE_SIZE_CQL = "select count(*) from %s";
 
     private static final String CREATE_DOC_TABLE_CQL = "create table %s"
-            + " (id uuid, object blob, created_at timestamp, updated_at timestamp,"
-            + " primary key ((id), updated_at))"
-            + " with clustering order by (updated_at DESC);";
+            + " (id uuid, object blob, " + Columns.CREATED_AT + " timestamp, " + Columns.UPDATED_AT + " timestamp,"
+            + " primary key ((id), " + Columns.UPDATED_AT + "))"
+            + " with clustering order by (" + Columns.UPDATED_AT + " DESC);";
     private static final String DROP_DOC_TABLE_CQL = "drop table if exists %s;";
 
     private PreparedStatement existStmt;
