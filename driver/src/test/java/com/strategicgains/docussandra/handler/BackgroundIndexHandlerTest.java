@@ -146,6 +146,46 @@ public class BackgroundIndexHandlerTest
      * Test of handle method, of class BackgroundIndexHandler.
      */
     @Test
+    public void testHandleWithError() throws Exception
+    {
+        System.out.println("handleWithError");
+        //datasetup
+        //Index testIndex = Fixtures.createTestIndexWithBulkDataHit();
+        //f.insertIndex(testIndex);//no index associated with this status; not likley to happen, but easy way to cause an exception
+        IndexCreationStatus entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
+        entity.setTotalRecords(34);
+        statusRepo.createEntity(entity);
+        Object event = entity.getUuid();
+        //end data setup
+        BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
+        //call
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            instance.handle(event);
+        } catch (Exception e)
+        {
+            expectedExceptionThrown = true;
+        }
+        assertTrue("Expected exception not thrown.", expectedExceptionThrown);
+        //verify
+        assertTrue(statusRepo.exists(entity.getUuid()));
+        IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        assertNotNull(storedStatus);
+        assertFalse(storedStatus.isDone());
+        assertNotEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
+        assertEquals(0, storedStatus.getPrecentComplete(), 0);
+        assertEquals(storedStatus.getEta(), -1);
+        assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
+        assertFalse(statusRepo.readAllActive().isEmpty());
+        assertNotNull(storedStatus.getStatusLink());
+        assertEquals("Could not complete indexing event for index: 'myindexbulkdata'. Please contact a system administrator to resolve this issue.", storedStatus.getError());
+    }
+
+    /**
+     * Test of handle method, of class BackgroundIndexHandler.
+     */
+    @Test
     public void testHandleWithData() throws Exception
     {
         System.out.println("handleWithData");
@@ -168,7 +208,7 @@ public class BackgroundIndexHandlerTest
         entity.setTotalRecords(docs.size());
         entity.setUuid(UUID.randomUUID());
         entity.setStatusLastUpdatedAt(new Date());
-        
+
         statusRepo.createEntity(entity);
         Object event = entity.getUuid();
         //end data setup
