@@ -57,7 +57,7 @@ public class IndexStatusController
      */
     public List<IndexCreationStatus> readAll(Request request, Response response)
     {
-        return indexes.getAllActiveStatus();
+        return indexes.getAllCurrentlyIndexing();
     }
 
 }

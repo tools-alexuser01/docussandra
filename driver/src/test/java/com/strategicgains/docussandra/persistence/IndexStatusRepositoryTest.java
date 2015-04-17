@@ -278,7 +278,7 @@ public class IndexStatusRepositoryTest
     }
 
     /**
-     * Test of readAllActive method, of class IndexStatusRepository.
+     * Test of readAllCurrentlyIndexing method, of class IndexStatusRepository.
      */
     @Test
     public void testReadAllActive()
@@ -287,7 +287,7 @@ public class IndexStatusRepositoryTest
         IndexCreationStatus entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         instance.createEntity(entity);
-        List<IndexCreationStatus> result = instance.readAllActive();
+        List<IndexCreationStatus> result = instance.readAllCurrentlyIndexing();
         assertEquals(entity.getDateStarted(), result.get(0).getDateStarted());
         assertEquals(entity.getRecordsCompleted(), result.get(0).getRecordsCompleted());
         assertEquals(entity.getId(), result.get(0).getId());
@@ -296,7 +296,7 @@ public class IndexStatusRepositoryTest
         entityIndex.setActive(true);//simulate this index finishing
         entity.setIndex(entityIndex);
         instance.updateEntity(entity);
-        result = instance.readAllActive();
+        result = instance.readAllCurrentlyIndexing();
         assertTrue(result.isEmpty());
     }
 

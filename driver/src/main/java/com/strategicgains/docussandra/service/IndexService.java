@@ -68,10 +68,10 @@ public class IndexService
      * Gets all statuses for pending index creations.
      * @return a list of IndexCreationStatus.
      */
-    public List<IndexCreationStatus> getAllActiveStatus()
+    public List<IndexCreationStatus> getAllCurrentlyIndexing()
     {
         logger.debug("Checking index creation status.");
-        return statusRepo.readAllActive();
+        return statusRepo.readAllCurrentlyIndexing();
     }
 
     public Index read(Identifier identifier)

@@ -58,14 +58,14 @@ public class IndexStatusRepository
     private static final String IDENTITY_CQL = " where id = ?";
     private static final String EXISTENCE_CQL = "select count(*) from " + Tables.BY_ID + IDENTITY_CQL;
     private static final String DELETE_FROM_NOT_DONE = "delete from " + Tables.BY_NOT_DONE + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.TOTAL_RECORDS + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ", "+ Columns.ERROR + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.TOTAL_RECORDS + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ", " + Columns.ERROR + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from " + Tables.BY_ID + IDENTITY_CQL;
     private static final String UPDATE_CQL = "update " + Tables.BY_ID + " set " + Columns.RECORDS_COMPLETED + " = ?, " + Columns.UPDATED_AT + " = ?, " + Columns.ERROR + " = ?" + IDENTITY_CQL;
     private static final String MARK_INDEXING_CQL = "insert into " + Tables.BY_NOT_DONE + "(" + Columns.ID + ") values (?)";//TODO: if not exists?
 
     private static final String READ_ALL_CQL = "select * from " + Tables.BY_ID;
-    private static final String READ_ALL_ACTIVE_CQL = "select * from " + Tables.BY_NOT_DONE;
-    private static final String IS_ACTIVE_CQL = "select count(*) from " + Tables.BY_NOT_DONE + IDENTITY_CQL;
+    private static final String READ_ALL_CURRENTLY_INDEXING_CQL = "select * from " + Tables.BY_NOT_DONE;
+    private static final String IS_CURRENTLY_INDEXING_CQL = "select count(*) from " + Tables.BY_NOT_DONE + IDENTITY_CQL;//records that are currently indexing (not yet done)
 
     private PreparedStatement existStmt;
     private PreparedStatement readStmt;
@@ -73,9 +73,9 @@ public class IndexStatusRepository
     private PreparedStatement updateStmt;
     private PreparedStatement readAllStmt;
     private PreparedStatement markIndexingStmt;
-    private PreparedStatement readAllActiveStmt;
+    private PreparedStatement readAllCurrentlyIndexingStmt;
     private PreparedStatement deleteFromNotDoneStmt;
-    private PreparedStatement isActiveStmt;
+    private PreparedStatement isCurrentlyIndexingStmt;
 
     public IndexStatusRepository(Session session)
     {
@@ -92,10 +92,10 @@ public class IndexStatusRepository
         createStmt = PreparedStatementFactory.getPreparedStatement(CREATE_CQL, getSession());
         updateStmt = PreparedStatementFactory.getPreparedStatement(UPDATE_CQL, getSession());
         readAllStmt = PreparedStatementFactory.getPreparedStatement(READ_ALL_CQL, getSession());
-        readAllActiveStmt = PreparedStatementFactory.getPreparedStatement(READ_ALL_ACTIVE_CQL, getSession());
+        readAllCurrentlyIndexingStmt = PreparedStatementFactory.getPreparedStatement(READ_ALL_CURRENTLY_INDEXING_CQL, getSession());
         deleteFromNotDoneStmt = PreparedStatementFactory.getPreparedStatement(DELETE_FROM_NOT_DONE, getSession());
         markIndexingStmt = PreparedStatementFactory.getPreparedStatement(MARK_INDEXING_CQL, getSession());
-        isActiveStmt = PreparedStatementFactory.getPreparedStatement(IS_ACTIVE_CQL, getSession());
+        isCurrentlyIndexingStmt = PreparedStatementFactory.getPreparedStatement(IS_CURRENTLY_INDEXING_CQL, getSession());
     }
 
     @Override
@@ -177,13 +177,6 @@ public class IndexStatusRepository
         getSession().execute(delete);
     }
 
-    private boolean isActive(UUID id)
-    {
-        BoundStatement bs = new BoundStatement(isActiveStmt);
-        bindUUIDWhere(bs, id);
-        return (getSession().execute(bs).one().getLong(0) > 0);
-    }
-
     @Override
     public void deleteEntity(final IndexCreationStatus id)
     {
@@ -196,9 +189,9 @@ public class IndexStatusRepository
         return (marshalAll(getSession().execute(bs)));
     }
 
-    public List<IndexCreationStatus> readAllActive()
+    public List<IndexCreationStatus> readAllCurrentlyIndexing()
     {
-        BoundStatement bs = new BoundStatement(readAllActiveStmt);
+        BoundStatement bs = new BoundStatement(readAllCurrentlyIndexingStmt);
         List<UUID> ids = marshalActiveUUIDs(getSession().execute(bs));
         List<IndexCreationStatus> toReturn = new ArrayList<>(ids.size());
         for (UUID id : ids)
@@ -206,6 +199,13 @@ public class IndexStatusRepository
             toReturn.add(readEntityByUUID(id));
         }
         return toReturn;
+    }
+
+    private boolean isCurrentlyIndexing(UUID id)
+    {
+        BoundStatement bs = new BoundStatement(isCurrentlyIndexingStmt);
+        bindUUIDWhere(bs, id);
+        return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
 //    public long countAll(String namespace, String collection)

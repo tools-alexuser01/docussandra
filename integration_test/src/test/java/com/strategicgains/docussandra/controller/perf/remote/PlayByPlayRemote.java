@@ -69,10 +69,10 @@ public class PlayByPlayRemote extends PerfTestParent
         //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this
         postDB(getDb());
         postTable(getDb(), getTb());
-        for (Index i : getIndexes())
-        {
-            postIndex(getDb(), getTb(), i);
-        }
+//        for (Index i : getIndexes())
+//        {
+//            postIndex(getDb(), getTb(), i);
+//        }
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
