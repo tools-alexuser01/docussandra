@@ -239,21 +239,6 @@ public class IndexMaintainerHelperTest
         assertEquals("DELETE FROM docussandra.mydb_mytable_myindexwithtwofields WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", two.preparedStatement().getQueryString());
     }
 
-    /**
-     * Test of populateNewIndexWithExistingData method, of class
-     * IndexMaintainerHelper.
-     */
-    @Ignore
-    @Test
-    public void testPopulateNewIndexWithExistingData()
-    {
-        System.out.println("reindex");
-        Table t = null;
-        Index index = null;
-        IndexMaintainerHelper.populateNewIndexWithExistingData(f.getSession(), t, index);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
 
     /**
      * Test of getIndexForDocument method, of class IndexMaintainerHelper.
