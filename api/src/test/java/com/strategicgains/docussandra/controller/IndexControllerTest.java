@@ -18,7 +18,6 @@ package com.strategicgains.docussandra.controller;
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
-import com.jayway.restassured.response.ResponseBody;
 import com.jayway.restassured.response.ResponseOptions;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
