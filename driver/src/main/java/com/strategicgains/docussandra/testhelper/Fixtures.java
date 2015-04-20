@@ -299,6 +299,7 @@ public class Fixtures
     public static final IndexCreatedEvent createTestIndexCreationStatus()
     {
         IndexCreatedEvent toReturn = new IndexCreatedEvent(UUID.randomUUID(), new Date(), new Date(), createTestIndexOneField(), 1000, 0);
+        toReturn.calculateValues();
         return toReturn;
     }
 
@@ -310,6 +311,7 @@ public class Fixtures
     public static final IndexCreatedEvent createTestIndexCreationStatusWithBulkDataHit()
     {
         IndexCreatedEvent toReturn = new IndexCreatedEvent(UUID.randomUUID(), new Date(), new Date(), createTestIndexWithBulkDataHit(), 1000, 0);
+        toReturn.calculateValues();
         return toReturn;
     }
 
