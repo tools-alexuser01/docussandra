@@ -25,15 +25,22 @@ import org.slf4j.LoggerFactory;
 public class IndexRepository
         extends AbstractCassandraRepository<Index>
 {
-
+    /**
+     * Logger for this class.
+     */
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * Class that defines the Cassandra tables that this repository manages.
+     */
     private class Tables
     {
-
         static final String BY_ID = "sys_idx";
     }
-
+    
+    /**
+     * Class that defines the database columns that this repository manages.
+     */
     private class Columns
     {
 
@@ -66,6 +73,11 @@ public class IndexRepository
     private PreparedStatement readAllStmt;
     private PreparedStatement readAllCountStmt;
 
+    /**
+     * Constructor.
+     *
+     * @param session
+     */
     public IndexRepository(Session session)
     {
         super(session, Tables.BY_ID);
@@ -75,6 +87,9 @@ public class IndexRepository
         initialize();
     }
 
+    /**
+     * Sets up our prepared statements for this repository.
+     */
     protected void initialize()
     {
         existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, getTable()), getSession());
@@ -136,6 +151,11 @@ public class IndexRepository
         return entity;
     }
 
+    /**
+     * Marks an index as "active" meaning that indexing has completed on it.
+     *
+     * @param entity Index to mark active.
+     */
     public void markActive(Index entity)
     {
         BoundStatement bs = new BoundStatement(markActiveStmt);
