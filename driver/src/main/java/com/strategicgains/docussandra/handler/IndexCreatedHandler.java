@@ -8,6 +8,7 @@ import com.strategicgains.eventing.EventHandler;
  * @author toddf
  * @since Nov 19, 2014
  */
+@Deprecated //probably will not be used as logic will probably be handled in the service/obsever classes
 public class IndexCreatedHandler
 implements EventHandler
 {
