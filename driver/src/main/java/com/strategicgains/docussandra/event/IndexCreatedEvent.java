@@ -16,7 +16,6 @@
 package com.strategicgains.docussandra.event;
 
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.event.AbstractEvent;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.domain.UuidIdentifiable;
 import java.io.Serializable;
