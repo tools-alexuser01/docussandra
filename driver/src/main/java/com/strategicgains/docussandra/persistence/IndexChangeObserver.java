@@ -74,14 +74,4 @@ public class IndexChangeObserver<T extends Identifiable>
         //-----do nothing -- probably
     }
 
-    //probably not a valid use-case at this time
-//    @Override
-//    public void afterUpdate(T object) {
-//        Index index = (Index) object;
-//        //TODO: (maybe) schedule job to handle this at a later time (off hours); very expensive operation
-//        //create a new iTable
-//        //repopulate the iTable with existing data        
-//        //drop the old iTable
-//        
-//    }
 }
