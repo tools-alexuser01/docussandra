@@ -110,6 +110,10 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
         calculateEta();
     }
 
+    /**
+     * Returns if this index is done indexing or not.
+     * @return
+     */
     public boolean isDoneIndexing()
     {
         return getIndex().isActive();
