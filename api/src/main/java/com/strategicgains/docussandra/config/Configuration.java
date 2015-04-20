@@ -21,7 +21,6 @@ import com.strategicgains.docussandra.controller.QueryController;
 import com.strategicgains.docussandra.controller.TableController;
 import com.strategicgains.docussandra.handler.BackgroundIndexHandler;
 import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
-import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.IndexDeletedHandler;
 import com.strategicgains.docussandra.handler.TableDeleteHandler;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
@@ -118,7 +117,7 @@ public class Configuration
         // TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
         EventBus bus = new LocalEventBusBuilder()
-                .subscribe(new IndexCreatedHandler())
+                //.subscribe(new IndexCreatedHandler())
                 .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
                 .subscribe(new TableDeleteHandler(dbConfig.getSession()))
                 .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))

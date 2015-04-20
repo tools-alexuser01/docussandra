@@ -31,7 +31,7 @@ import org.restexpress.RestExpress;
 
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.hyperexpress.HyperExpress;
 
@@ -77,11 +77,11 @@ public class Relationships
 				.title("The list of indexes for this collection.")
                 
                    //N/A -- this is a global status of all current indexing operations
-//                .forCollectionOf(IndexCreationStatus.class)
+//                .forCollectionOf(IndexCreatedEvent.class)
 //			.rel(SELF, routes.get(INDEX))
 //			.rel(UP, routes.get(INDEXES))
                         
-                .forClass(IndexCreationStatus.class)
+                .forClass(IndexCreatedEvent.class)
 			.rel(SELF, routes.get(INDEX_STATUS))
 			.rel(UP, routes.get(INDEX))
                         .rel("index", routes.get(INDEX))

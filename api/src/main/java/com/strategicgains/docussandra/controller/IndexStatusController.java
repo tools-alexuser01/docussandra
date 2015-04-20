@@ -6,7 +6,7 @@ import org.restexpress.Request;
 import org.restexpress.Response;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.service.IndexService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenBinder;
@@ -45,11 +45,11 @@ public class IndexStatusController
      * @param response
      * @return
      */
-    public IndexCreationStatus read(Request request, Response response)
+    public IndexCreatedEvent read(Request request, Response response)
     {
         String id = request.getHeader(Constants.Url.INDEX_STATUS, "No index status id provided.");
 
-        IndexCreationStatus status = indexes.status(UUID.fromString(id));
+        IndexCreatedEvent status = indexes.status(UUID.fromString(id));
 
         HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
                 .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
@@ -65,13 +65,13 @@ public class IndexStatusController
      * @param response
      * @return
      */
-    public List<IndexCreationStatus> readAll(Request request, Response response)
+    public List<IndexCreatedEvent> readAll(Request request, Response response)
     {
-        List<IndexCreationStatus> status = indexes.getAllCurrentlyIndexing();
-        HyperExpress.tokenBinder(new TokenBinder<IndexCreationStatus>()
+        List<IndexCreatedEvent> status = indexes.getAllCurrentlyIndexing();
+        HyperExpress.tokenBinder(new TokenBinder<IndexCreatedEvent>()
         {
             @Override
-            public void bind(IndexCreationStatus object, TokenResolver resolver)
+            public void bind(IndexCreatedEvent object, TokenResolver resolver)
             {
                 resolver.bind(Constants.Url.TABLE, object.getIndex().tableName())
                         .bind(Constants.Url.DATABASE, object.getIndex().databaseName())

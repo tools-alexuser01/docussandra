@@ -9,7 +9,7 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
@@ -124,7 +124,7 @@ public class Fixtures
         
         //set up bus just like rest express would
         EventBus bus = new LocalEventBusBuilder()
-                .subscribe(new IndexCreatedHandler())
+                //.subscribe(new IndexCreatedHandler())
                 .subscribe(new IndexDeletedHandler(getSession()))
                 .subscribe(new TableDeleteHandler(getSession()))
                 .subscribe(new DatabaseDeletedHandler(getSession()))
@@ -293,24 +293,24 @@ public class Fixtures
     }
 
     /**
-     * Creates at test IndexCreationStatus.
+     * Creates at test IndexCreatedEvent.
      *
      * @return
      */
-    public static final IndexCreationStatus createTestIndexCreationStatus()
+    public static final IndexCreatedEvent createTestIndexCreationStatus()
     {
-        IndexCreationStatus toReturn = new IndexCreationStatus(UUID.randomUUID(), new Date(), new Date(), createTestIndexOneField(), 1000, 0);
+        IndexCreatedEvent toReturn = new IndexCreatedEvent(UUID.randomUUID(), new Date(), new Date(), createTestIndexOneField(), 1000, 0);
         return toReturn;
     }
 
     /**
-     * Creates at test IndexCreationStatus.
+     * Creates at test IndexCreatedEvent.
      *
      * @return
      */
-    public static final IndexCreationStatus createTestIndexCreationStatusWithBulkDataHit()
+    public static final IndexCreatedEvent createTestIndexCreationStatusWithBulkDataHit()
     {
-        IndexCreationStatus toReturn = new IndexCreationStatus(UUID.randomUUID(), new Date(), new Date(), createTestIndexWithBulkDataHit(), 1000, 0);
+        IndexCreatedEvent toReturn = new IndexCreatedEvent(UUID.randomUUID(), new Date(), new Date(), createTestIndexWithBulkDataHit(), 1000, 0);
         return toReturn;
     }
 

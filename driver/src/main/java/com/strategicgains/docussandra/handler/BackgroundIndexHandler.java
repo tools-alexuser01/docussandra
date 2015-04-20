@@ -18,7 +18,7 @@ package com.strategicgains.docussandra.handler;
 import com.datastax.driver.core.BoundStatement;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
@@ -55,17 +55,18 @@ public class BackgroundIndexHandler implements EventHandler
     @Override
     public boolean handles(Class<?> eventClass)
     {
-        return eventClass.equals(IndexCreationStatus.class);
+        return eventClass.equals(IndexCreatedEvent.class);
     }
 
     @Override
     public void handle(Object event) throws Exception
     {
         logger.debug("Handler recived background indexing event: " + event.toString());
-        IndexCreationStatus status = null;
+        //Thread.sleep(1000);//pause for a second to ensure the iTable gets created before proceeding (Todd: thoughts on this?)
+        IndexCreatedEvent status = null;
         try
         {
-            status = (IndexCreationStatus) event;
+            status = (IndexCreatedEvent) event;
             Index index = indexRepo.read(status.getIndex().getId());
             long offset = 0;
             long recordsCompleted = 0;

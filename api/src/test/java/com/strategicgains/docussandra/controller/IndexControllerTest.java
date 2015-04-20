@@ -294,7 +294,7 @@ public class IndexControllerTest
                     break;
                 }
                 LOGGER.debug("Waiting for index to go active for: " + sw.getTime());
-                if (sw.getTime() == 12000)
+                if (sw.getTime() >= 12000)
                 {
                     fail("Index took too long to create");
                 }
@@ -359,15 +359,15 @@ public class IndexControllerTest
 
             //check to make sure it shows as present at least once
             ResponseOptions res = expect().statusCode(200)
-                    .body("_embedded.indexcreationstatus[0].id", notNullValue())
-                    .body("_embedded.indexcreationstatus[0].dateStarted", notNullValue())
-                    .body("_embedded.indexcreationstatus[0].statusLastUpdatedAt", notNullValue())
-                    .body("_embedded.indexcreationstatus[0].eta", notNullValue())
-                    .body("_embedded.indexcreationstatus[0].index", notNullValue())
-                    .body("_embedded.indexcreationstatus[0].index.active", equalTo(false))//should not yet be active
-                    .body("_embedded.indexcreationstatus[0].totalRecords", notNullValue())
-                    .body("_embedded.indexcreationstatus[0].recordsCompleted", notNullValue())
-                    .body("_embedded.indexcreationstatus[0].precentComplete", notNullValue())
+                    .body("_embedded.indexcreatedevents[0].id", notNullValue())
+                    .body("_embedded.indexcreatedevents[0].dateStarted", notNullValue())
+                    .body("_embedded.indexcreatedevents[0].statusLastUpdatedAt", notNullValue())
+                    .body("_embedded.indexcreatedevents[0].eta", notNullValue())
+                    .body("_embedded.indexcreatedevents[0].index", notNullValue())
+                    .body("_embedded.indexcreatedevents[0].index.active", equalTo(false))//should not yet be active
+                    .body("_embedded.indexcreatedevents[0].totalRecords", notNullValue())
+                    .body("_embedded.indexcreatedevents[0].recordsCompleted", notNullValue())
+                    .body("_embedded.indexcreatedevents[0].precentComplete", notNullValue())
                     .when().get("/").andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
             //wait for it to dissapear (meaning it's gone active)
@@ -380,7 +380,7 @@ public class IndexControllerTest
 
                 JSONObject bodyObject = (JSONObject) parser.parse(body);
                 JSONObject embedded = (JSONObject)bodyObject.get("_embedded");
-                JSONArray resultSet = (JSONArray)embedded.get("indexcreationstatus");
+                JSONArray resultSet = (JSONArray)embedded.get("indexcreatedevents");
                 if (resultSet.isEmpty())
                 {
                     active = true;
@@ -388,7 +388,7 @@ public class IndexControllerTest
                     break;
                 }
                 LOGGER.debug("Waiting for index to go active for: " + sw.getTime());
-                if (sw.getTime() == 12000)
+                if (sw.getTime() >= 12000)
                 {
                     fail("Index took too long to create");
                 }

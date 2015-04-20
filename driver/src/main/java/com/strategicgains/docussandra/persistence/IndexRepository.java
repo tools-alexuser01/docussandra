@@ -74,7 +74,7 @@ public class IndexRepository
     {
         super(session, Tables.BY_ID);
         addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Index>());
-        addObserver(new StateChangeEventingObserver<>(new IndexEventFactory()));
+        //addObserver(new StateChangeEventingObserver<>(new IndexEventFactory()));
         addObserver(new IndexChangeObserver(session));
         initialize();
     }
@@ -284,27 +284,28 @@ public class IndexRepository
         i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
         return i;
     }
-
-    private class IndexEventFactory
-            implements EventFactory<Index>
-    {
-
-        @Override
-        public Object newCreatedEvent(Index object)
-        {
-            return new IndexCreatedEvent(object);
-        }
-
-        @Override
-        public Object newUpdatedEvent(Index object)
-        {
-            throw new UnsupportedOperationException("This is not a valid call. Updates of indexes are not supported.");
-        }
-
-        @Override
-        public Object newDeletedEvent(Index object)
-        {
-            return new IndexDeletedEvent(object);
-        }
-    }
+//
+    //we can add this back in if needed, but i perfer to do this logic explicitly at the service layer for now
+//    private class IndexEventFactory
+//            implements EventFactory<Index>
+//    {
+//
+//        @Override
+//        public Object newCreatedEvent(Index object)
+//        {
+//            return new IndexCreatedEvent(object);
+//        }
+//
+//        @Override
+//        public Object newUpdatedEvent(Index object)
+//        {
+//            throw new UnsupportedOperationException("This is not a valid call. Updates of indexes are not supported.");
+//        }
+//
+//        @Override
+//        public Object newDeletedEvent(Index object)
+//        {
+//            return new IndexDeletedEvent(object);
+//        }
+//    }
 }

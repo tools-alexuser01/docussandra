@@ -9,7 +9,7 @@ import org.restexpress.Response;
 
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.service.IndexService;
 import com.strategicgains.hyperexpress.HyperExpress;
@@ -43,7 +43,7 @@ public class IndexController
         this.indexes = indexService;
     }
 
-    public IndexCreationStatus create(Request request, Response response)
+    public IndexCreatedEvent create(Request request, Response response)
     {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
@@ -58,7 +58,7 @@ public class IndexController
         {
             entity.includeOnly(new ArrayList<String>(0));
         }
-        IndexCreationStatus status;
+        IndexCreatedEvent status;
         try
         {
             status = indexes.create(entity);

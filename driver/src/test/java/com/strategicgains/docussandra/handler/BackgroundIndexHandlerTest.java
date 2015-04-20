@@ -20,7 +20,7 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
@@ -97,7 +97,7 @@ public class BackgroundIndexHandlerTest
     public void testHandles()
     {
         System.out.println("handles");
-        Class eventClass = IndexCreationStatus.class;
+        Class eventClass = IndexCreatedEvent.class;
         BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
         boolean result = instance.handles(eventClass);
         assertEquals(true, result);
@@ -116,7 +116,7 @@ public class BackgroundIndexHandlerTest
         //datasetup
         Index testIndex = Fixtures.createTestIndexWithBulkDataHit();
         f.insertIndex(testIndex);
-        IndexCreationStatus entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
+        IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
         entity.setTotalRecords(34);
         statusRepo.createEntity(entity);
         Object event = entity;
@@ -126,7 +126,7 @@ public class BackgroundIndexHandlerTest
         instance.handle(event);
         //verify
         assertTrue(statusRepo.exists(entity.getUuid()));
-        IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
         assertNotNull(storedStatus);
         assertTrue(storedStatus.isDoneIndexing());
         assertEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
@@ -150,7 +150,7 @@ public class BackgroundIndexHandlerTest
         //datasetup
         //Index testIndex = Fixtures.createTestIndexWithBulkDataHit();
         //f.insertIndex(testIndex);//no index associated with this status; not likley to happen, but easy way to cause an exception
-        IndexCreationStatus entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
+        IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
         entity.setTotalRecords(34);
         statusRepo.createEntity(entity);
         Object event = entity;
@@ -168,7 +168,7 @@ public class BackgroundIndexHandlerTest
         assertTrue("Expected exception not thrown.", expectedExceptionThrown);
         //verify
         assertTrue(statusRepo.exists(entity.getUuid()));
-        IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
         assertNotNull(storedStatus);
         assertFalse(storedStatus.isDoneIndexing());
         assertNotEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
@@ -199,7 +199,7 @@ public class BackgroundIndexHandlerTest
         Index lastname = Fixtures.createTestPlayersIndexLastName();
         f.insertIndex(lastname);
 
-        IndexCreationStatus entity = new IndexCreationStatus(UUID.randomUUID(), new Date(), new Date(), lastname, docs.size(), 0);
+        IndexCreatedEvent entity = new IndexCreatedEvent(UUID.randomUUID(), new Date(), new Date(), lastname, docs.size(), 0);
 
         statusRepo.createEntity(entity);
         Object event = entity;
@@ -209,7 +209,7 @@ public class BackgroundIndexHandlerTest
         instance.handle(event);
         //verify
         assertTrue(statusRepo.exists(entity.getUuid()));
-        IndexCreationStatus storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
         assertNotNull(storedStatus);
         assertTrue(storedStatus.isDoneIndexing());
         assertEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());

@@ -11,7 +11,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexCreationStatus;
+import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import java.util.UUID;
@@ -27,6 +27,9 @@ import org.slf4j.LoggerFactory;
 public class IndexStatusRepository
 {
 
+    /**
+     * Logger for this class.
+     */
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private IndexRepository indexRepo;
@@ -109,7 +112,7 @@ public class IndexStatusRepository
     }
 
 
-    public IndexCreationStatus readEntityByUUID(UUID uuid)
+    public IndexCreatedEvent readEntityByUUID(UUID uuid)
     {
         if (uuid == null)
         {
@@ -120,7 +123,7 @@ public class IndexStatusRepository
         return marshalRow(getSession().execute(bs).one());
     }
 
-    public IndexCreationStatus createEntity(IndexCreationStatus entity)
+    public IndexCreatedEvent createEntity(IndexCreatedEvent entity)
     {
         BoundStatement create = new BoundStatement(createStmt);
         bindCreate(create, entity);
@@ -134,7 +137,7 @@ public class IndexStatusRepository
         return entity;
     }
 
-    public IndexCreationStatus updateEntity(IndexCreationStatus entity)
+    public IndexCreatedEvent updateEntity(IndexCreatedEvent entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
@@ -163,17 +166,17 @@ public class IndexStatusRepository
         getSession().execute(delete);
     }
 
-    public List<IndexCreationStatus> readAll()
+    public List<IndexCreatedEvent> readAll()
     {
         BoundStatement bs = new BoundStatement(readAllStmt);
         return (marshalAll(getSession().execute(bs)));
     }
 
-    public List<IndexCreationStatus> readAllCurrentlyIndexing()
+    public List<IndexCreatedEvent> readAllCurrentlyIndexing()
     {
         BoundStatement bs = new BoundStatement(readAllCurrentlyIndexingStmt);
         List<UUID> ids = marshalActiveUUIDs(getSession().execute(bs));
-        List<IndexCreationStatus> toReturn = new ArrayList<>(ids.size());
+        List<IndexCreatedEvent> toReturn = new ArrayList<>(ids.size());
         for (UUID id : ids)
         {
             toReturn.add(readEntityByUUID(id));
@@ -194,7 +197,7 @@ public class IndexStatusRepository
 //        bs.bind(namespace, collection);
 //        return (getSession().execute(bs).one().getLong(0));
 //    }
-    private void bindCreate(BoundStatement bs, IndexCreationStatus entity)
+    private void bindCreate(BoundStatement bs, IndexCreatedEvent entity)
     {
         bs.bind(entity.getUuid(),
                 entity.getIndex().databaseName(),
@@ -207,7 +210,7 @@ public class IndexStatusRepository
                 entity.getError());
     }
 
-    private void bindUpdate(BoundStatement bs, IndexCreationStatus entity)
+    private void bindUpdate(BoundStatement bs, IndexCreatedEvent entity)
     {
         bs.bind(entity.getRecordsCompleted(),
                 entity.getStatusLastUpdatedAt(),
@@ -220,13 +223,13 @@ public class IndexStatusRepository
         bs.bind(uuid);
     }
 
-    private List<IndexCreationStatus> marshalAll(ResultSet rs)
+    private List<IndexCreatedEvent> marshalAll(ResultSet rs)
     {
-        List<IndexCreationStatus> indexes = new ArrayList<>();
+        List<IndexCreatedEvent> indexes = new ArrayList<>();
         Iterator<Row> i = rs.iterator();
         while (i.hasNext())
         {
-            IndexCreationStatus status = marshalRow(i.next());
+            IndexCreatedEvent status = marshalRow(i.next());
             indexes.add(status);
         }
         return indexes;
@@ -243,7 +246,7 @@ public class IndexStatusRepository
         return activeIds;
     }
 
-    protected IndexCreationStatus marshalRow(Row row)
+    protected IndexCreatedEvent marshalRow(Row row)
     {
         if (row == null)
         {
@@ -261,7 +264,7 @@ public class IndexStatusRepository
         {
              toUse = index;
         }
-        IndexCreationStatus i = new IndexCreationStatus(row.getUUID(Columns.ID), row.getDate(Columns.STARTED_AT), row.getDate(Columns.UPDATED_AT), toUse, row.getLong(Columns.TOTAL_RECORDS), row.getLong(Columns.RECORDS_COMPLETED));
+        IndexCreatedEvent i = new IndexCreatedEvent(row.getUUID(Columns.ID), row.getDate(Columns.STARTED_AT), row.getDate(Columns.UPDATED_AT), toUse, row.getLong(Columns.TOTAL_RECORDS), row.getLong(Columns.RECORDS_COMPLETED));
         i.setError(row.getString(Columns.ERROR));
         i.calculateValues();
         return i;
