@@ -65,7 +65,8 @@ public class IndexService
     /**
      * Creates an index. Index will be created synchronously, but it will be
      * populated asynchronously, and it will not be "active" (meaning it can't
-     * be used for querying) until indexing is complete.
+     * be used for querying) until indexing is complete. Inactive indexes will
+     * still be populated by NEW records that are being inserted.
      *
      * @param index Index to create.
      * @return An IndexCreatedEvent that contains the index and some metadata
@@ -119,8 +120,9 @@ public class IndexService
 
     /**
      * Reads an index.
+     *
      * @param identifier
-     * @return 
+     * @return
      */
     public Index read(Identifier identifier)
     {
@@ -129,7 +131,8 @@ public class IndexService
 
     /**
      * Deletes an index. Will also remove the associated iTables.
-     * @param identifier 
+     *
+     * @param identifier
      */
     public void delete(Identifier identifier)
     {
@@ -139,7 +142,8 @@ public class IndexService
 
     /**
      * Deletes an index. Will also remove the associated iTables.
-     * @param index 
+     *
+     * @param index
      */
     public void delete(Index index)
     {
@@ -150,9 +154,10 @@ public class IndexService
 
     /**
      * Reads all indexes for the given namespace and collection.
+     *
      * @param namespace
      * @param collection
-     * @return 
+     * @return
      */
     public List<Index> readAll(String namespace, String collection)
     {
@@ -161,9 +166,10 @@ public class IndexService
 
     /**
      * Counts the number of indexes for this namespace and collection.
+     *
      * @param namespace
      * @param collection
-     * @return 
+     * @return
      */
     public long count(String namespace, String collection)
     {
@@ -172,8 +178,9 @@ public class IndexService
 
     /**
      * Verifies if a table exists or not.
+     *
      * @param database
-     * @param table 
+     * @param table
      */
     private void verifyTable(String database, String table)
     {
