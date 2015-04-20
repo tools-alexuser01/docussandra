@@ -235,12 +235,6 @@ public class IndexMaintainerHelper
         return bs;
     }
 
-    //just a concept right now -- issue #4
-    public static void populateNewIndexWithExistingData(Session session, Table t, Index index)
-    {
-        throw new UnsupportedOperationException("Not done yet");
-    }
-
     /**
      * Gets all the indexes that a document is or needs to be stored in. Note
      * that this actually makes a database call.
