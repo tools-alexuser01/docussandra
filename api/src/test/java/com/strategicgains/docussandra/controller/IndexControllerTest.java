@@ -294,7 +294,7 @@ public class IndexControllerTest
                     break;
                 }
                 LOGGER.debug("Waiting for index to go active for: " + sw.getTime());
-                if (sw.getTime() >= 12000)
+                if (sw.getTime() >= 24000)
                 {
                     fail("Index took too long to create");
                 }
