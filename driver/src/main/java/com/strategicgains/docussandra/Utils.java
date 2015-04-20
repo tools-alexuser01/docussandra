@@ -145,16 +145,4 @@ public class Utils
         }
     }
 
-    /**
-     * Establishes our background tasks. Probably not an ideal location for
-     * this, but it will work for now.
-     */
-    public static void establishBackgroundTasks(IndexRepository indexRepo, IndexStatusRepository indexStatusRepo, DocumentRepository docRepo)
-    {
-        EventBus q = new LocalEventBusBuilder()
-                .subscribe(new BackgroundIndexHandler(indexRepo, indexStatusRepo, docRepo))
-                .build();
-        DomainEvents.addBus("indexs", q);
-    }
-
 }

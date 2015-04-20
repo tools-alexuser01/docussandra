@@ -14,12 +14,20 @@ import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.domain.WhereClause;
+import com.strategicgains.docussandra.handler.BackgroundIndexHandler;
+import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
+import com.strategicgains.docussandra.handler.IndexCreatedHandler;
+import com.strategicgains.docussandra.handler.IndexDeletedHandler;
+import com.strategicgains.docussandra.handler.TableDeleteHandler;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.ITableRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
+import com.strategicgains.eventing.DomainEvents;
+import com.strategicgains.eventing.EventBus;
+import com.strategicgains.eventing.local.LocalEventBusBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -47,19 +55,19 @@ import org.slf4j.LoggerFactory;
  */
 public class Fixtures
 {
-    
+
     private static Fixtures INSTANCE = null;
     private static final String CASSANDRA_SEEDS = "cassandra.seeds";
     private static final String CASSANDRA_KEYSPACE = "cassandra.keyspace";
     public static final String DB = "mydb";
     private static List<Document> bulkDocs = null;
-    
+
     private Session session;
     private final String[] cassandraSeeds;
     private final String cassandraKeyspace;
-    
+
     private static Logger logger = LoggerFactory.getLogger(Fixtures.class);
-    
+
     private static IndexRepository indexRepo;
     private static ITableRepository cleanUpInstance;
     private static DatabaseRepository databaseRepo;
@@ -96,7 +104,7 @@ public class Fixtures
             embeddedCassandra = false;
         }
         final Metadata metadata = cluster.getMetadata();
-        
+
         if (embeddedCassandra)
         {
             session = cluster.connect();
@@ -113,7 +121,16 @@ public class Fixtures
         docRepo = new DocumentRepository(getSession());
         tableRepo = new TableRepository(getSession());
         indexStatusRepo = new IndexStatusRepository(getSession());
-        Utils.establishBackgroundTasks(indexRepo, indexStatusRepo, docRepo);
+        
+        //set up bus just like rest express would
+        EventBus bus = new LocalEventBusBuilder()
+                .subscribe(new IndexCreatedHandler())
+                .subscribe(new IndexDeletedHandler(getSession()))
+                .subscribe(new TableDeleteHandler(getSession()))
+                .subscribe(new DatabaseDeletedHandler(getSession()))
+                .subscribe(new BackgroundIndexHandler(indexRepo, indexStatusRepo, docRepo))
+                .build();
+        DomainEvents.addBus("local", bus);
     }
 
     /**
@@ -157,12 +174,12 @@ public class Fixtures
         }
         return INSTANCE;
     }
-    
+
     public String getCassandraSeedString()
     {
         return "127.0.0.1";
     }
-    
+
     public String getCassandraKeyspace()
     {
         return cassandraKeyspace;
@@ -196,12 +213,12 @@ public class Fixtures
             }
         }
     }
-    
+
     public static List<Document> getBulkDocuments() throws IOException, ParseException
     {
         return getBulkDocuments("./src/test/resources/documents.json", createTestTable());
     }
-    
+
     public static List<Document> getBulkDocuments(String path, Table t) throws IOException, ParseException
     {
 //        if (bulkDocs == null)
@@ -323,12 +340,12 @@ public class Fixtures
         index.isUnique(false);
         return index;
     }
-    
+
     public void insertIndex(Index index)
     {
         indexRepo.create(index);
     }
-    
+
     public void clearTestTables()
     {
 //        try
@@ -361,7 +378,7 @@ public class Fixtures
         {
             //logger.debug("Not dropping iTable, probably doesn't exist.");
         }
-        
+
         try
         {
             cleanUpInstance.deleteITable("players_players_lastname");
@@ -414,7 +431,7 @@ public class Fixtures
 //        }
         try
         {
-            
+
             tableRepo.delete(Fixtures.createTestTable());
         } catch (DriverException e)
         {
@@ -422,7 +439,7 @@ public class Fixtures
         }
         try
         {
-            
+
             tableRepo.delete(Fixtures.createTestPlayersTable());
         } catch (DriverException e)
         {
@@ -470,9 +487,9 @@ public class Fixtures
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
-        
+
     }
-    
+
     public void createTestITables()
     {
         System.out.println("createTestITables");
@@ -486,7 +503,7 @@ public class Fixtures
         iTableDao.createITable(index3);
         tableRepo.create(Fixtures.createTestTable());
     }
-    
+
     public static final Document createTestDocument()
     {
         Document entity = new Document();
@@ -513,13 +530,13 @@ public class Fixtures
         entity.setUpdatedAt(new Date());
         return entity;
     }
-    
+
     public void insertDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
         documentRepo.create(document);
     }
-    
+
     public void insertDocuments(List<Document> documents)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
@@ -528,7 +545,7 @@ public class Fixtures
             documentRepo.create(document);
         }
     }
-    
+
 //    public void insertDocumentsTemp(List<Document> documents) throws Exception
 //    {
 //        EmbeddedCassandraServerHelper.startEmbeddedCassandra(15000);
@@ -546,7 +563,6 @@ public class Fixtures
 //            }
 //        }
 //    }
-    
     public void deleteDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
@@ -649,26 +665,26 @@ public class Fixtures
         testTable.description("My Table stores a lot of data about players.");
         return testTable;
     }
-    
+
     public static Database createTestPlayersDatabase()
     {
         Database testDb = new Database("players");
         testDb.description("A database about athletic players");
         return testDb;
     }
-    
+
     public void insertTable(Table table)
     {
         tableRepo.create(table);
     }
-    
+
     public static Database createTestDatabase()
     {
         Database database = new Database(DB);
         database.description("This is a test database.");
         return database;
     }
-    
+
     public void insertDatabase(Database database)
     {
         databaseRepo.create(database);

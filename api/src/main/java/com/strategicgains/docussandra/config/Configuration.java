@@ -19,6 +19,7 @@ import com.strategicgains.docussandra.controller.IndexController;
 import com.strategicgains.docussandra.controller.IndexStatusController;
 import com.strategicgains.docussandra.controller.QueryController;
 import com.strategicgains.docussandra.controller.TableController;
+import com.strategicgains.docussandra.handler.BackgroundIndexHandler;
 import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.IndexDeletedHandler;
@@ -112,7 +113,7 @@ public class Configuration
         healthController = new HealthCheckController();
         buildInfoController = new BuildInfoController();
         //TODO: consider using the bus below instead
-        Utils.establishBackgroundTasks(indexRepository, indexStatusRepository, documentRepository);
+        //Utils.establishBackgroundTasks(indexRepository, indexStatusRepository, documentRepository);
 
         // TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
@@ -121,10 +122,12 @@ public class Configuration
                 .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
                 .subscribe(new TableDeleteHandler(dbConfig.getSession()))
                 .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
+                .subscribe(new BackgroundIndexHandler(indexRepository, indexStatusRepository, documentRepository))
                 .build();
         DomainEvents.addBus("local", bus);
         
     }
+
     
     public int getPort()
     {
