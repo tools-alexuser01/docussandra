@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Repository for interacting with the sys_idx_status and sys_idx_not_done
- * tables.
- * TODO: Javadoc
+ * tables. TODO: Javadoc
+ *
  * @author udeyoje
  */
 public class IndexStatusRepository
@@ -32,8 +32,14 @@ public class IndexStatusRepository
      */
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * IndexRepository to use for lookups.
+     */
     private IndexRepository indexRepo;
 
+    /**
+     * Class that defines the Cassandra tables that this repository manages.
+     */
     public class Tables
     {
 
@@ -41,6 +47,9 @@ public class IndexStatusRepository
         public static final String BY_NOT_DONE = "sys_idx_not_done";
     }
 
+    /**
+     * Class that defines the database columns that this repository manages.
+     */
     private class Columns
     {
 
@@ -76,9 +85,14 @@ public class IndexStatusRepository
     private PreparedStatement readAllCurrentlyIndexingStmt;
     private PreparedStatement deleteFromNotDoneStmt;
     private PreparedStatement isCurrentlyIndexingStmt;
-    
+
     private Session session;
 
+    /**
+     * Constructor.
+     *
+     * @param session
+     */
     public IndexStatusRepository(Session session)
     {
         this.session = session;
@@ -86,6 +100,9 @@ public class IndexStatusRepository
         indexRepo = new IndexRepository(session);
     }
 
+    /**
+     * Sets up our prepared statements for this repository.
+     */
     protected void initialize()
     {
         existStmt = PreparedStatementFactory.getPreparedStatement(EXISTENCE_CQL, getSession());
@@ -99,7 +116,12 @@ public class IndexStatusRepository
         isCurrentlyIndexingStmt = PreparedStatementFactory.getPreparedStatement(IS_CURRENTLY_INDEXING_CQL, getSession());
     }
 
-
+    /**
+     * Checks to see if an IndexCreatedEvent exists by UUID.
+     *
+     * @param uuid Index status UUID to check for existence.
+     * @return True if the index status exists, false if it does not.
+     */
     public boolean exists(UUID uuid)
     {
         if (uuid == null)
@@ -111,7 +133,12 @@ public class IndexStatusRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
-
+    /**
+     * Reads an IndexCreatedEvent by UUID.
+     *
+     * @param uuid UUID to fetch.
+     * @return an IndexCreatedEvent for that UUID.
+     */
     public IndexCreatedEvent readEntityByUUID(UUID uuid)
     {
         if (uuid == null)
@@ -123,6 +150,12 @@ public class IndexStatusRepository
         return marshalRow(getSession().execute(bs).one());
     }
 
+    /**
+     * Creates an index status in the db.
+     *
+     * @param entity IndexCreatedEvent to store as a status in the DB.
+     * @return The created IndexCreatedEvent.
+     */
     public IndexCreatedEvent createEntity(IndexCreatedEvent entity)
     {
         BoundStatement create = new BoundStatement(createStmt);
@@ -137,6 +170,16 @@ public class IndexStatusRepository
         return entity;
     }
 
+    /**
+     * Updates the status for an IndexCreatedEvent in the database. Take note:
+     * only a few fields are updatable: numberOfRecordsCompleted,
+     * statusLastUpdatedAt, and error. This is a logical decision; there should
+     * not be a reason to update any other fields. This will also mark the
+     * record as done indexing or not as appropriate.
+     *
+     * @param entity The IndexCreatedEvent to update with the proper fields set.
+     * @return The updated IndexCreatedEvent.
+     */
     public IndexCreatedEvent updateEntity(IndexCreatedEvent entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
@@ -152,6 +195,11 @@ public class IndexStatusRepository
         return entity;
     }
 
+    /**
+     * Marks a index as currently indexing.
+     *
+     * @param id
+     */
     private void markIndexing(UUID id)
     {
         BoundStatement activeStatement = new BoundStatement(markIndexingStmt);
@@ -159,6 +207,11 @@ public class IndexStatusRepository
         getSession().execute(activeStatement);
     }
 
+    /**
+     * Marks an index as done indexing.
+     *
+     * @param id
+     */
     private void markDone(UUID id)
     {
         BoundStatement delete = new BoundStatement(deleteFromNotDoneStmt);
@@ -166,12 +219,25 @@ public class IndexStatusRepository
         getSession().execute(delete);
     }
 
+    /**
+     * Reads all IndexCreatedEvents. This is quite possibly a very expensive
+     * operation; use with care.
+     *
+     * @return All IndexCreatedEvents that the database has a record of.
+     */
     public List<IndexCreatedEvent> readAll()
     {
         BoundStatement bs = new BoundStatement(readAllStmt);
         return (marshalAll(getSession().execute(bs)));
     }
 
+    /**
+     * Gets all IndexCreatedEvents that are currently indexing. This method is
+     * preferred to readAll(). This provides a sense of the indexing load on the
+     * database.
+     *
+     * @return All currently indexing IndexCreatedEvents.
+     */
     public List<IndexCreatedEvent> readAllCurrentlyIndexing()
     {
         BoundStatement bs = new BoundStatement(readAllCurrentlyIndexingStmt);
@@ -184,6 +250,11 @@ public class IndexStatusRepository
         return toReturn;
     }
 
+    /**
+     * Determines if a index is currently indexing or not. Not presently used.
+     * @param id
+     * @return 
+     */
     private boolean isCurrentlyIndexing(UUID id)
     {
         BoundStatement bs = new BoundStatement(isCurrentlyIndexingStmt);
@@ -251,7 +322,7 @@ public class IndexStatusRepository
         if (row == null)
         {
             return null;
-        }        
+        }
         //look up index here
         Index index = new Index();
         index.name(row.getString(Columns.INDEX_NAME));
@@ -262,7 +333,7 @@ public class IndexStatusRepository
             toUse = indexRepo.doRead(index.getId());
         } catch (ItemNotFoundException e)//this should only happen in tests that do not have full test data established; errors will be evident if this happens in the actual app
         {
-             toUse = index;
+            toUse = index;
         }
         IndexCreatedEvent i = new IndexCreatedEvent(row.getUUID(Columns.ID), row.getDate(Columns.STARTED_AT), row.getDate(Columns.UPDATED_AT), toUse, row.getLong(Columns.TOTAL_RECORDS), row.getLong(Columns.RECORDS_COMPLETED));
         i.setError(row.getString(Columns.ERROR));
