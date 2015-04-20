@@ -356,7 +356,7 @@ public class IndexControllerTest
             StopWatch sw = new StopWatch();
             sw.start();
 
-            RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/index_status/";
+            RestAssured.basePath = "/index_status/";
 
             //check to make sure it shows as present at least once
             ResponseOptions res = expect().statusCode(200)

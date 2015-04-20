@@ -24,6 +24,17 @@ public abstract class Routes
                 .action("getBuildInfo", GET)
                 .name(Constants.Routes.BUILD_INFO).noSerialization();
 
+        //note: the /index_status route is for ALL index status, not isolated to a specific dataset;
+        //this is intentional, it will allow ALL teams to see what ongoing operations that are occuring
+        //to better understand the current load on the system and help with estimating completion of tasks
+        server.uri("/index_status/", config.getIndexStatusController())
+                .action("readAll", GET)
+                .name(Constants.Routes.INDEX_STATUS_ALL);
+
+        server.uri("/index_status", config.getIndexStatusController())
+                .action("readAll", GET)
+                .name(Constants.Routes.INDEX_STATUS_ALL);
+
         server.uri("/", config.getDatabaseController())
                 .action("readAll", GET)
                 .method(OPTIONS)
@@ -59,14 +70,14 @@ public abstract class Routes
                 .method(GET)
                 .name(Constants.Routes.INDEX_STATUS);
 
-        server.uri("/{database}/{table}/index_status/", config.getIndexStatusController())
-                .action("readAll", GET)
-                .name(Constants.Routes.INDEX_STATUS_ALL);//TODO: this route is wrong!
-
-        server.uri("/{database}/{table}/index_status", config.getIndexStatusController())
-                .action("readAll", GET)
-                .name(Constants.Routes.INDEX_STATUS_ALL);//TODO: this route is wrong!
-
+//        server.uri("/{database}/{table}/index_status/", config.getIndexStatusController())
+//                .action("readAll", GET)
+//                .name(Constants.Routes.INDEX_STATUS_ALL);//this route isn't supported; we don't have the level of info needed presently
+//
+//        server.uri("/{database}/{table}/index_status", config.getIndexStatusController())
+//                .action("readAll", GET)
+//                .name(Constants.Routes.INDEX_STATUS_ALL);//this route isn't supported we don't have the level of info needed presently
+       
         server.uri("/{database}/{table}/{documentId}", config.getDocumentController())
                 .method(GET, PUT, DELETE)
                 .name(Constants.Routes.DOCUMENT);
