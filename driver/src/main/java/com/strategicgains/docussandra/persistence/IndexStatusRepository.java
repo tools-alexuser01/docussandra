@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Repository for interacting with the sys_idx_status and sys_idx_not_done
- * tables. TODO: Javadoc
+ * tables.
  *
  * @author udeyoje
  */
