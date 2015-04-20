@@ -299,12 +299,7 @@ public class Fixtures
      */
     public static final IndexCreationStatus createTestIndexCreationStatus()
     {
-        IndexCreationStatus toReturn = new IndexCreationStatus();
-        toReturn.setDateStarted(new Date());
-        toReturn.setIndex(createTestIndexOneField());
-        toReturn.setTotalRecords(1000);
-        toReturn.setUuid(UUID.randomUUID());
-        toReturn.setStatusLastUpdatedAt(new Date());
+        IndexCreationStatus toReturn = new IndexCreationStatus(UUID.randomUUID(), new Date(), new Date(), createTestIndexOneField(), 1000, 0);
         return toReturn;
     }
 
@@ -315,12 +310,7 @@ public class Fixtures
      */
     public static final IndexCreationStatus createTestIndexCreationStatusWithBulkDataHit()
     {
-        IndexCreationStatus toReturn = new IndexCreationStatus();
-        toReturn.setDateStarted(new Date());
-        toReturn.setIndex(createTestIndexWithBulkDataHit());
-        toReturn.setTotalRecords(1000);
-        toReturn.setUuid(UUID.randomUUID());
-        toReturn.setStatusLastUpdatedAt(new Date());
+        IndexCreationStatus toReturn = new IndexCreationStatus(UUID.randomUUID(), new Date(), new Date(), createTestIndexWithBulkDataHit(), 1000, 0);
         return toReturn;
     }
 

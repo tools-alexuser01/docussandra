@@ -248,24 +248,20 @@ public class IndexStatusRepository
         if (row == null)
         {
             return null;
-        }
-        IndexCreationStatus i = new IndexCreationStatus();
-        i.setUuid(row.getUUID(Columns.ID));
-        i.setRecordsCompleted(row.getLong(Columns.RECORDS_COMPLETED));
-        i.setTotalRecords(row.getLong(Columns.TOTAL_RECORDS));
-        i.setDateStarted(row.getDate(Columns.STARTED_AT));
-        i.setStatusLastUpdatedAt(row.getDate(Columns.UPDATED_AT));
+        }        
         //look up index here
         Index index = new Index();
         index.name(row.getString(Columns.INDEX_NAME));
         index.table(row.getString(Columns.DATABASE), row.getString(Columns.TABLE));
+        Index toUse;
         try
         {
-            i.setIndex(indexRepo.doRead(index.getId()));
+            toUse = indexRepo.doRead(index.getId());
         } catch (ItemNotFoundException e)//this should only happen in tests that do not have full test data established; errors will be evident if this happens in the actual app
         {
-            i.setIndex(index);
+             toUse = index;
         }
+        IndexCreationStatus i = new IndexCreationStatus(row.getUUID(Columns.ID), row.getDate(Columns.STARTED_AT), row.getDate(Columns.UPDATED_AT), toUse, row.getLong(Columns.TOTAL_RECORDS), row.getLong(Columns.RECORDS_COMPLETED));
         i.setError(row.getString(Columns.ERROR));
         i.calculateValues();
         return i;

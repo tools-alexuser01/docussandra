@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.domain;
 
+import com.strategicgains.docussandra.event.AbstractEvent;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.domain.UuidIdentifiable;
 import java.io.Serializable;
@@ -28,7 +29,7 @@ import org.restexpress.plugin.hyperexpress.Linkable;
  *
  * @author udeyoje
  */
-public class IndexCreationStatus implements UuidIdentifiable, Serializable, Linkable
+public class IndexCreationStatus extends AbstractEvent<Index> implements UuidIdentifiable, Serializable, Linkable
 {
 
     /**
@@ -78,12 +79,6 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable, Link
      */
     private String error;
 
-    /**
-     * Default constructor.
-     */
-    public IndexCreationStatus()
-    {
-    }
 
     /**
      * Constructor.
@@ -97,6 +92,7 @@ public class IndexCreationStatus implements UuidIdentifiable, Serializable, Link
      */
     public IndexCreationStatus(UUID id, Date dateStarted, Date statusLastUpdatedAt, Index index, long totalRecords, long recordsCompleted)
     {
+        super(index);
         this.id = id;
         this.dateStarted = dateStarted;
         this.statusLastUpdatedAt = statusLastUpdatedAt;

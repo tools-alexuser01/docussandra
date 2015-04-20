@@ -199,12 +199,7 @@ public class BackgroundIndexHandlerTest
         Index lastname = Fixtures.createTestPlayersIndexLastName();
         f.insertIndex(lastname);
 
-        IndexCreationStatus entity = new IndexCreationStatus();
-        entity.setDateStarted(new Date());
-        entity.setIndex(lastname);
-        entity.setTotalRecords(docs.size());
-        entity.setUuid(UUID.randomUUID());
-        entity.setStatusLastUpdatedAt(new Date());
+        IndexCreationStatus entity = new IndexCreationStatus(UUID.randomUUID(), new Date(), new Date(), lastname, docs.size(), 0);
 
         statusRepo.createEntity(entity);
         Object event = entity;

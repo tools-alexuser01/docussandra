@@ -298,7 +298,7 @@ public class IndexRepository
         @Override
         public Object newUpdatedEvent(Index object)
         {
-            return new IndexUpdatedEvent(object);
+            throw new UnsupportedOperationException("This is not a valid call. Updates of indexes are not supported.");
         }
 
         @Override
