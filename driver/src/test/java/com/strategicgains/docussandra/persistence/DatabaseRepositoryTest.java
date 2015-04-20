@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 public class DatabaseRepositoryTest
 {
 
-    private Fixtures f;
+    private static Fixtures f;
 
     public DatabaseRepositoryTest() throws Exception
     {
@@ -47,17 +47,19 @@ public class DatabaseRepositoryTest
     @AfterClass
     public static void tearDownClass()
     {
+        f.clearTestTables();// clear anything that might be there already
     }
 
     @Before
     public void setUp()
     {
+        f.clearTestTables();// clear anything that might be there already
     }
 
     @After
     public void tearDown()
     {
-        f.clearTestTables();// clear anything that might be there already
+        
     }
 
     /**

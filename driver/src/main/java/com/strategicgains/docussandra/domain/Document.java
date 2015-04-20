@@ -9,7 +9,6 @@ import com.strategicgains.repoexpress.domain.UuidIdentifiable;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.Required;
 import java.util.Objects;
-import org.bson.BSON;
 
 public class Document
         extends AbstractTimestampedIdentifiable

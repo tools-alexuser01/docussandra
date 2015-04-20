@@ -84,6 +84,7 @@ public class TableControllerTest
     @AfterClass
     public static void afterClass()
     {
+        f.clearTestTables();
     }
 
     /**
@@ -92,7 +93,7 @@ public class TableControllerTest
     @After
     public void afterTest()
     {
-        f.clearTestTables();
+        
     }
 
     /**

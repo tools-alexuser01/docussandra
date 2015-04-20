@@ -7,7 +7,6 @@ public class Constants
 	 */
 	public static class Url
 	{
-		//TODO: Your URL parameter names here...
 		public static final String UUID = "uuid";
 		public static final String KEY1 = "key1";
 		public static final String KEY2 = "key2";
@@ -15,6 +14,7 @@ public class Constants
 		public static final String DATABASE = "database";
 		public static final String TABLE = "table";
 		public static final String INDEX = "index";
+                public static final String INDEX_STATUS = "status_id";
 		public static final String DOCUMENT_ID = "documentId";
 		public static final String QUERY_ID = "queryId";
 	}
@@ -25,7 +25,6 @@ public class Constants
 	 */
 	public static class Routes
 	{
-		//TODO: Your Route names here...
 		public static final String SINGLE_UUID_SAMPLE = "sample.uuid.single";
 		public static final String SINGLE_COMPOUND_SAMPLE = "sample.compound.single";
 		public static final String SAMPLE_UUID_COLLECTION = "sample.uuid.collection";
@@ -38,6 +37,8 @@ public class Constants
 		public static final String DOCUMENT = "document.single";
 		public static final String INDEXES = "index.collection";
 		public static final String INDEX = "index.single";
+                public static final String INDEX_STATUS = "index.status";
+                public static final String INDEX_STATUS_ALL = "index.status.collection";
 		public static final String QUERIES = "query.collection";
 		public static final String QUERY = "query.single";
                 public static final String HEALTH = "health";

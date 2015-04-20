@@ -85,7 +85,7 @@ public class Main
         server.bind(config.getPort());
         return server;
     }
-
+    
     private static void configurePlugins(Configuration config, RestExpress server)
     {
         configureMetrics(config, server);

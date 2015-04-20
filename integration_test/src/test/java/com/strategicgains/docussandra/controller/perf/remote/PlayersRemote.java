@@ -16,6 +16,7 @@
 package com.strategicgains.docussandra.controller.perf.remote;
 
 import static com.jayway.restassured.RestAssured.given;
+import com.jayway.restassured.filter.log.ResponseLoggingFilter;
 import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestParent;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
@@ -63,10 +64,10 @@ public class PlayersRemote extends PerfTestParent
         //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
         postDB(getDb());
         postTable(getDb(), getTb());
-        for (Index i : getIndexes())
-        {
-            postIndex(getDb(), getTb(), i);
-        }
+//        for (Index i : getIndexes())
+//        {
+//            postIndex(getDb(), getTb(), i);
+//        }
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
@@ -188,7 +189,8 @@ public class PlayersRemote extends PerfTestParent
         for (int i = 0; i < numQueries; i++)
         {
             logger.debug("Query: " + i);
-            given().header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning'\"}").expect().statusCode(200)
+            given().filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500))
+                    .header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning'\"}").expect().statusCode(200)
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
@@ -214,7 +216,8 @@ public class PlayersRemote extends PerfTestParent
         for (int i = 0; i < numQueries; i++)
         {
             logger.debug("Query: " + i);
-            given().header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning' AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
+            given().filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500))
+                    .header("limit", "10000").body("{\"where\":\"NAMELAST = 'Manning' AND NAMEFIRST = 'Peyton'\"}").expect().statusCode(200)
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())

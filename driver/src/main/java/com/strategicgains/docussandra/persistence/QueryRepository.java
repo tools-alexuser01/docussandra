@@ -25,7 +25,7 @@ public class QueryRepository
     private static final String QUERY_CQL = "select * from %s where bucket = ? AND %s";
     private static final String QUERY_CQL_LIMIT = "select * from %s where bucket = ? AND %s LIMIT %s";//we use the limit as to not put any more stress on cassandra than we need to (even though our algorithm will discard the data anyway)
 
-    private IndexBucketLocator ibl = new SimpleIndexBucketLocatorImpl(200);
+    private static IndexBucketLocator ibl = new SimpleIndexBucketLocatorImpl(200);
 
     private Session session;
 
@@ -50,7 +50,7 @@ public class QueryRepository
         BoundStatement bs = new BoundStatement(ps);
         //set the bucket
         UUID fuzzyUUID = Utils.convertStringToFuzzyUUID(query.getWhereClause().getValues().get(0));//fuzzy UUID is based on first field value
-        String bucket = ibl.getBucket(null, fuzzyUUID);
+        String bucket = getIbl().getBucket(null, fuzzyUUID);
         bs.setString(0, bucket);
         int i = 1;
         for (String bindValue : query.getWhereClause().getValues())
@@ -77,36 +77,11 @@ public class QueryRepository
     }
 
     public QueryResponseWrapper doQuery(ParsedQuery query, int limit, long offset)
-    {
-        long maxIndex = offset + limit;
+    {        
         //run the query
+        long maxIndex = offset + limit;
         ResultSet results = session.execute(generateQueryStatement(query, maxIndex + 1));//we do one plus here so we know if there are additional results
-        //process result(s)
-        ArrayList<Document> toReturn = new ArrayList<>(limit);
-        Iterator<Row> ite = results.iterator();
-        long offsetCounter = 0;
-        Long additionalResults = 0l;//default to 0, will be set to null if there are additional results (or in a later implementation, the actual number)
-        while (ite.hasNext())//for each item in the result set
-        {
-            Row row = ite.next();
-            if (offsetCounter >= maxIndex)//if we are at a counter less than our max amount to return (offset + limit)
-            {
-                additionalResults = null;//we have additional results for sure (see comment about +1 limit)
-                break;//we are done; don't bother processing anymore, it's not going to be used anyway
-            } else if (offsetCounter >= offset)//if we are at a counter greater than or equal to our offset -- we are in the sweet spot of the result set to return
-            {
-                toReturn.add(DocumentRepository.marshalRow(row));//we can add it to our return list
-            } else
-            {
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("We are probably wasting processor time by processing a query inefficently");//TODO: obviously, consider improving this (or at least take out the logger if we decide not to)
-                }
-            }
-            offsetCounter++;
-
-        }
-        return new QueryResponseWrapper(toReturn, additionalResults);
+        return DocumentRepository.parseResultSetWithLimitAndOffset(results, limit, offset);
     }
 
     /**
@@ -115,6 +90,14 @@ public class QueryRepository
     public Session getSession()
     {
         return session;
+    }
+
+    /**
+     * @return the ibl
+     */
+    public static IndexBucketLocator getIbl()
+    {
+        return ibl;
     }
 
 }

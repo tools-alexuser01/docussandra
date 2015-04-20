@@ -9,12 +9,14 @@ import org.bson.BSONObject;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.event.DocumentCreatedEvent;
 import com.strategicgains.docussandra.event.DocumentDeletedEvent;
@@ -29,6 +31,10 @@ import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocumentRepository
         extends AbstractObservableRepository<Document>
@@ -47,12 +53,14 @@ public class DocumentRepository
 
     private static final String EXISTENCE_CQL = "select count(*) from %s where %s = ?";
     private static final String READ_CQL = "select * from %s where %s = ? ORDER BY updated_at DESC";
+    private static final String READ_ALL_CQL = "select * from %s LIMIT %d";
+    
     private static final String DELETE_CQL = "delete from %s where %s = ?";
     //private static final String UPDATE_CQL = "update %s set object = ?, updated_at = ? where %s = ?";
     private static final String CREATE_CQL = "insert into %s (%s, object, created_at, updated_at) values (?, ?, ?, ?)";
 
-
     private final IndexBucketLocator bucketLocator;
+    private static Logger logger = LoggerFactory.getLogger(DocumentRepository.class);
 
     public DocumentRepository(Session session)
     {
@@ -112,6 +120,51 @@ public class DocumentRepository
         //item.setId(identifier);
         item.table(table);
         return item;
+    }
+
+    public QueryResponseWrapper doReadAll(String database, String tableString, int limit, long offset)
+    {
+        Table table = new Table();
+        table.database(database);
+        table.name(tableString);
+        long maxIndex = offset + limit;
+        PreparedStatement readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, table.toDbTable(), maxIndex + 1), session());//we do one plus here so we know if there are additional results
+        BoundStatement bs = new BoundStatement(readStmt);
+        //run the query
+        ResultSet results = session.execute(bs);
+        
+        return parseResultSetWithLimitAndOffset(results, limit, offset);
+    }
+
+    public static QueryResponseWrapper parseResultSetWithLimitAndOffset(ResultSet results, int limit, long offset)
+    {
+        //process result(s)
+        long maxIndex = offset + limit;
+        ArrayList<Document> toReturn = new ArrayList<>(limit);
+        Iterator<Row> ite = results.iterator();
+        long offsetCounter = 0;
+        Long additionalResults = 0l;//default to 0, will be set to null if there are additional results (or in a later implementation, the actual number)
+        while (ite.hasNext())//for each item in the result set
+        {
+            Row row = ite.next();
+            if (offsetCounter >= maxIndex)//if we are at a counter less than our max amount to return (offset + limit)
+            {
+                additionalResults = null;//we have additional results for sure (see comment about +1 limit)
+                break;//we are done; don't bother processing anymore, it's not going to be used anyway
+            } else if (offsetCounter >= offset)//if we are at a counter greater than or equal to our offset -- we are in the sweet spot of the result set to return
+            {
+                toReturn.add(DocumentRepository.marshalRow(row));//we can add it to our return list
+            } else
+            {
+                if (logger.isTraceEnabled())
+                {
+                    logger.trace("We are probably wasting processor time by processing a query inefficently");//TODO: obviously, consider improving this (or at least take out the logger if we decide not to)
+                }
+            }
+            offsetCounter++;
+
+        }
+        return new QueryResponseWrapper(toReturn, additionalResults);
     }
 
     @Override

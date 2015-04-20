@@ -129,28 +129,34 @@ public class ParsedQueryFactory
         Index indexToUse = null;
         for (Index index : indices)
         {
-            if (equalLists(index.fields(), fieldsToQueryOn))
-            {
-                indexToUse = index;//we have a perfect match; the index matches the query exactly
-                break;
-            }
+//            if (index.isActive())//only use active indexes
+//            {
+                if (equalLists(index.fields(), fieldsToQueryOn))
+                {
+                    indexToUse = index;//we have a perfect match; the index matches the query exactly
+                    break;
+                }
+//            }
         }
         if (indexToUse == null)
         {//whoops, no perfect match, let try for a partial match (ie, the index has more fields than the query)
             //TODO: querying on non-primary fields will lead to us being unable to determine which bucket to search -- give the user an override option, but for now just throw an exception
             for (Index index : indices)
             {
-                //make a copy of the fieldsToQueryOn so we don't mutate the orginal
-                ArrayList<String> fieldsToQueryOnCopy = new ArrayList<>(fieldsToQueryOn);
-                ArrayList<String> indexFields = new ArrayList<>(index.fields());//make a copy here too
-                fieldsToQueryOnCopy.removeAll(indexFields);//we remove all the fields we have, from the fields we want
-                //if there are not any fields left in fields we want
-                if (fieldsToQueryOnCopy.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0)))
-                {//second clause in this statement is what ensure we have a primary index; see TODO above.
-                    //we have an index that will work (even though we have extra fields in it)
-                    indexToUse = index;
-                    break;
-                }
+//                if (index.isActive())//only use active indexes
+//                {
+                    //make a copy of the fieldsToQueryOn so we don't mutate the orginal
+                    ArrayList<String> fieldsToQueryOnCopy = new ArrayList<>(fieldsToQueryOn);
+                    ArrayList<String> indexFields = new ArrayList<>(index.fields());//make a copy here too
+                    fieldsToQueryOnCopy.removeAll(indexFields);//we remove all the fields we have, from the fields we want
+                    //if there are not any fields left in fields we want
+                    if (fieldsToQueryOnCopy.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0)))
+                    {//second clause in this statement is what ensure we have a primary index; see TODO above.
+                        //we have an index that will work (even though we have extra fields in it)
+                        indexToUse = index;
+                        break;
+                    }
+//                }
             }
         }
         if (indexToUse == null)

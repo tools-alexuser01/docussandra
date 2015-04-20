@@ -17,17 +17,10 @@
 package com.strategicgains.docussandra.bucketmanagement;
 
 import com.strategicgains.docussandra.Utils;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
-import com.yammer.metrics.Metrics;
-import com.yammer.metrics.core.Timer;
-import com.yammer.metrics.core.TimerContext;
 import org.junit.Assert;
 
 import static org.junit.Assert.assertEquals;
@@ -70,40 +63,40 @@ public class SimpleIndexBucketLocatorImplTest
         assertEquals(bucket3, "000000000000000000000000000000000000000");
     }
 
-    @Test
-    @Ignore
-    public void twoBuckets()
-    {
-
-        UUID appId = UUIDUtils.newTimeUUID();
-        String entityType = "user";
-        String propName = "firstName";
-
-        SimpleIndexBucketLocatorImpl locator = new SimpleIndexBucketLocatorImpl(2);
-
-        List<String> buckets = locator.getBuckets(appId, entityType, propName);
-
-        assertEquals(2, buckets.size());
-
-        UUID testId1 = UUIDUtils.minTimeUUID(0l);
-
-        UUID testId2 = UUIDUtils.maxTimeUUID(Long.MAX_VALUE / 2);
-
-        UUID testId3 = UUIDUtils.minTimeUUID(Long.MAX_VALUE);
-
-        String bucket1 = locator.getBucket(appId, testId1, entityType, propName);
-
-        String bucket2 = locator.getBucket(appId, testId2, entityType, propName);
-
-        String bucket3 = locator.getBucket(appId, testId3, entityType, propName);
-
-        String bucket4 = locator.getBucket(appId, UUIDUtils.minTimeUUID(Long.MAX_VALUE - 1), entityType, propName);
-
-        assertEquals(bucket1, "000000000000000000000000000000000000000");
-        assertEquals(bucket2, "085070591730234615865843651857942052863");
-        assertEquals(bucket3, "000000000000000000000000000000000000000");
-        assertEquals(bucket4, "085070591730234615865843651857942052863");
-    }
+//    @Test
+//    @Ignore
+//    public void twoBuckets()
+//    {
+//
+//        UUID appId = UUIDUtils.newTimeUUID();
+//        String entityType = "user";
+//        String propName = "firstName";
+//
+//        SimpleIndexBucketLocatorImpl locator = new SimpleIndexBucketLocatorImpl(2);
+//
+//        List<String> buckets = locator.getBuckets(appId, entityType, propName);
+//
+//        assertEquals(2, buckets.size());
+//
+//        UUID testId1 = UUIDUtils.minTimeUUID(0l);
+//
+//        UUID testId2 = UUIDUtils.maxTimeUUID(Long.MAX_VALUE / 2);
+//
+//        UUID testId3 = UUIDUtils.minTimeUUID(Long.MAX_VALUE);
+//
+//        String bucket1 = locator.getBucket(appId, testId1, entityType, propName);
+//
+//        String bucket2 = locator.getBucket(appId, testId2, entityType, propName);
+//
+//        String bucket3 = locator.getBucket(appId, testId3, entityType, propName);
+//
+//        String bucket4 = locator.getBucket(appId, UUIDUtils.minTimeUUID(Long.MAX_VALUE - 1), entityType, propName);
+//
+//        assertEquals(bucket1, "000000000000000000000000000000000000000");
+//        assertEquals(bucket2, "085070591730234615865843651857942052863");
+//        assertEquals(bucket3, "000000000000000000000000000000000000000");
+//        assertEquals(bucket4, "085070591730234615865843651857942052863");
+//    }
 
 //    @Test
 //    @Ignore

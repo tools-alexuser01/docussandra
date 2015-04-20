@@ -13,10 +13,6 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.event.EventFactory;
-import com.strategicgains.docussandra.event.IndexCreatedEvent;
-import com.strategicgains.docussandra.event.IndexDeletedEvent;
-import com.strategicgains.docussandra.event.IndexUpdatedEvent;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
@@ -29,15 +25,22 @@ import org.slf4j.LoggerFactory;
 public class IndexRepository
         extends AbstractCassandraRepository<Index>
 {
-
+    /**
+     * Logger for this class.
+     */
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * Class that defines the Cassandra tables that this repository manages.
+     */
     private class Tables
     {
-
         static final String BY_ID = "sys_idx";
     }
-
+    
+    /**
+     * Class that defines the database columns that this repository manages.
+     */
     private class Columns
     {
 
@@ -50,14 +53,15 @@ public class IndexRepository
         static final String ONLY = "only";
         static final String CREATED_AT = "created_at";
         static final String UPDATED_AT = "updated_at";
+        static final String IS_ACTIVE = "is_active";
     }
 
     private static final String IDENTITY_CQL = " where db_name = ? and tbl_name = ? and name = ?";
     private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, only, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, only, is_active, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
     private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
-    private static final String UPDATE_CQL = "update %s set bucket_sz = ?, updated_at = ?" + IDENTITY_CQL;
+    private static final String MARK_ACTIVE_CQL = "update %s set is_active = true" + IDENTITY_CQL;
     private static final String READ_ALL_CQL = "select * from %s where db_name = ? and tbl_name = ?";
     private static final String READ_ALL_COUNT_CQL = "select count(*) from %s where db_name = ? and tbl_name = ?";
 
@@ -65,26 +69,34 @@ public class IndexRepository
     private PreparedStatement readStmt;
     private PreparedStatement createStmt;
     private PreparedStatement deleteStmt;
-    private PreparedStatement updateStmt;
+    private PreparedStatement markActiveStmt;
     private PreparedStatement readAllStmt;
     private PreparedStatement readAllCountStmt;
 
+    /**
+     * Constructor.
+     *
+     * @param session
+     */
     public IndexRepository(Session session)
     {
         super(session, Tables.BY_ID);
         addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Index>());
-        addObserver(new StateChangeEventingObserver<Index>(new IndexEventFactory()));
+        //addObserver(new StateChangeEventingObserver<>(new IndexEventFactory()));
         addObserver(new IndexChangeObserver(session));
         initialize();
     }
 
+    /**
+     * Sets up our prepared statements for this repository.
+     */
     protected void initialize()
     {
         existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, getTable()), getSession());
         readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, getTable()), getSession());
         createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), Columns.NAME), getSession());
         deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, getTable()), getSession());
-        updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable()), getSession());
+        markActiveStmt = PreparedStatementFactory.getPreparedStatement(String.format(MARK_ACTIVE_CQL, getTable()), getSession());
         readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
         readAllCountStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_COUNT_CQL, getTable()), getSession());
     }
@@ -139,14 +151,22 @@ public class IndexRepository
         return entity;
     }
 
+    /**
+     * Marks an index as "active" meaning that indexing has completed on it.
+     *
+     * @param entity Index to mark active.
+     */
+    public void markActive(Index entity)
+    {
+        BoundStatement bs = new BoundStatement(markActiveStmt);
+        bindIdentifier(bs, entity.getId());
+        getSession().execute(bs);
+    }
+
     @Override
     protected Index updateEntity(Index entity)
     {
         throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
-//		BoundStatement bs = new BoundStatement(updateStmt);
-//		bindUpdate(bs, entity);
-//		getSession().execute(bs);
-//		return entity;
     }
 
     @Override
@@ -186,7 +206,7 @@ public class IndexRepository
     }
 
     /**
-     * Same as readAll, but will read from the cache if availible.
+     * Same as readAll, but will read from the cache if available.
      *
      * @param namespace
      * @param collection
@@ -232,19 +252,19 @@ public class IndexRepository
                 entity.bucketSize(),
                 entity.fields(),
                 entity.includeOnly(),
+                entity.isActive(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }
 
-    private void bindUpdate(BoundStatement bs, Index entity)
-    {
-        bs.bind(entity.bucketSize(),
-                entity.getUpdatedAt(),
-                entity.databaseName(),
-                entity.tableName(),
-                entity.name());
-    }
-
+//    private void bindUpdate(BoundStatement bs, Index entity)
+//    {
+//        bs.bind(entity.bucketSize(),
+//                entity.getUpdatedAt(),
+//                entity.databaseName(),
+//                entity.tableName(),
+//                entity.name());
+//    }
     private List<Index> marshalAll(ResultSet rs)
     {
         List<Index> indexes = new ArrayList<Index>();
@@ -275,31 +295,33 @@ public class IndexRepository
         i.bucketSize(row.getLong(Columns.BUCKET_SIZE));
         i.fields(row.getList(Columns.FIELDS, String.class));
         i.includeOnly(row.getList(Columns.ONLY, String.class));
+        i.setActive(row.getBool(Columns.IS_ACTIVE));
         i.setCreatedAt(row.getDate(Columns.CREATED_AT));
         i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
         return i;
     }
-
-    private class IndexEventFactory
-            implements EventFactory<Index>
-    {
-
-        @Override
-        public Object newCreatedEvent(Index object)
-        {
-            return new IndexCreatedEvent(object);
-        }
-
-        @Override
-        public Object newUpdatedEvent(Index object)
-        {
-            return new IndexUpdatedEvent(object);
-        }
-
-        @Override
-        public Object newDeletedEvent(Index object)
-        {
-            return new IndexDeletedEvent(object);
-        }
-    }
+//
+    //we can add this back in if needed, but i perfer to do this logic explicitly at the service layer for now
+//    private class IndexEventFactory
+//            implements EventFactory<Index>
+//    {
+//
+//        @Override
+//        public Object newCreatedEvent(Index object)
+//        {
+//            return new IndexCreatedEvent(object);
+//        }
+//
+//        @Override
+//        public Object newUpdatedEvent(Index object)
+//        {
+//            throw new UnsupportedOperationException("This is not a valid call. Updates of indexes are not supported.");
+//        }
+//
+//        @Override
+//        public Object newDeletedEvent(Index object)
+//        {
+//            return new IndexDeletedEvent(object);
+//        }
+//    }
 }

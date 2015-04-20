@@ -54,8 +54,8 @@ public class IndexChangeObserver<T extends Identifiable>
         //-----check to see if it is correct, suggest the user delete and try again if it's not -- probably
         //-----automatically re-index; hard to actually do, it would need a different name if the index was in use -- probably not
         //-----do nothing -- maybe?
-        //TODO: populate the index!
-        //IndexMaintainerHandler.populateNewIndexWithExistingData(session, table?, index);
+        
+        //note: index population will be called from the service layer
     }
 
     @Override
@@ -74,14 +74,4 @@ public class IndexChangeObserver<T extends Identifiable>
         //-----do nothing -- probably
     }
 
-    //probably not a valid use-case at this time
-//    @Override
-//    public void afterUpdate(T object) {
-//        Index index = (Index) object;
-//        //TODO: (maybe) schedule job to handle this at a later time (off hours); very expensive operation
-//        //create a new iTable
-//        //repopulate the iTable with existing data        
-//        //drop the old iTable
-//        
-//    }
 }

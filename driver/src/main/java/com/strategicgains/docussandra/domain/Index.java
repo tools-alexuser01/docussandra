@@ -13,11 +13,14 @@ import com.strategicgains.syntaxe.ValidationException;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;
+import java.io.Serializable;
 import java.util.Objects;
+import org.restexpress.plugin.hyperexpress.Linkable;
 
 public class Index
         extends AbstractTimestampedIdentifiable
-        implements Validatable {
+        implements Validatable, Serializable, Linkable
+{
 
     @Required("Table")
     @ChildValidation
@@ -51,202 +54,281 @@ public class Index
      */
     private List<String> includeOnly;
 
-    public Index() {
+    /**
+     * Field indicating if this index should be presently considered active.
+     */
+    private boolean active;
+
+    public Index()
+    {
+        active = false;
     }
 
-    public Index(String name) {
+    public Index(String name)
+    {
         this();
         name(name);
+        active = false;
     }
 
-    public boolean hasTable() {
+    public boolean hasTable()
+    {
         return (table != null);
     }
 
-    public Table table() {
+    public Table table()
+    {
         return (hasTable() ? table.asObject() : null);
     }
 
-    public void table(String database, String table) {
+    public void table(String database, String table)
+    {
         this.table = new TableReference(database, table);
     }
 
-    public void table(Table table) {
+    public void table(Table table)
+    {
         this.table = (table != null ? new TableReference(table) : null);
     }
 
-    public String tableName() {
+    public String tableName()
+    {
         return (hasTable() ? table.name() : null);
     }
 
-    public String databaseName() {
+    public String databaseName()
+    {
         return (hasTable() ? table.database() : null);
     }
 
-    public String name() {
+    public String name()
+    {
         return name;
     }
 
-    public Index name(String name) {
+    public Index name(String name)
+    {
         this.name = name;
         return this;
     }
 
-    public boolean isUnique() {
+    public boolean isUnique()
+    {
         return isUnique;
     }
 
-    public Index isUnique(boolean value) {
+    public Index isUnique(boolean value)
+    {
         this.isUnique = value;
         return this;
     }
 
-    public void fields(List<String> props) {
+    public void fields(List<String> props)
+    {
         this.fields = new ArrayList<String>(props);
     }
 
-    public List<String> fields() {
+    public List<String> fields()
+    {
         return (fields == null ? Collections.<String>emptyList() : Collections.unmodifiableList(fields));
     }
 
-    public void includeOnly(List<String> props) {
-        if(props != null && !props.isEmpty()){
+    public void includeOnly(List<String> props)
+    {
+        if (props != null && !props.isEmpty())
+        {
             this.includeOnly = new ArrayList<String>(props);
         }
     }
 
-    public List<String> includeOnly() {
+    public List<String> includeOnly()
+    {
         return (includeOnly == null ? Collections.<String>emptyList() : Collections.unmodifiableList(includeOnly));
     }
 
     @Override
-    public Identifier getId() {
+    public Identifier getId()
+    {
         return new Identifier(databaseName(), tableName(), name);
     }
 
     @Override
-    public void setId(Identifier id) {
+    public void setId(Identifier id)
+    {
         // intentionally left blank.
     }
 
-    public long bucketSize() {
+    public long bucketSize()
+    {
         return bucketSize;
     }
 
-    public void bucketSize(long bucketSize) {
+    public void bucketSize(long bucketSize)
+    {
         this.bucketSize = bucketSize;
     }
 
-    public void iterateFields(Callback<IndexField> callback) {
-        for (String field : fields) {
+    public void iterateFields(Callback<IndexField> callback)
+    {
+        for (String field : fields)
+        {
             callback.process(new IndexField(field));
         }
     }
 
-    public class IndexField {
+    /**
+     * Field indicating if this index should be presently considered active.
+     *
+     * @return the active
+     */
+    public boolean isActive()
+    {
+        return active;
+    }
+
+    /**
+     * Field indicating if this index should be presently considered active.
+     *
+     * @param isActive the active to set
+     */
+    public void setActive(boolean isActive)
+    {
+        this.active = isActive;
+    }
+
+    public class IndexField
+    {
 
         private String field;
         private boolean isAscending = true;
 
-        public IndexField(String value) {
+        public IndexField(String value)
+        {
             field = value.trim();
 
-            if (field.trim().startsWith("-")) {
+            if (field.trim().startsWith("-"))
+            {
                 field = value.substring(1);
                 isAscending = false;
             }
         }
 
-        public String field() {
+        public String field()
+        {
             return field;
         }
 
-        public boolean isAscending() {
+        public boolean isAscending()
+        {
             return isAscending;
         }
     }
 
     @Override
-    public void validate() {
+    public void validate()
+    {
         final List<String> errors = new ArrayList<String>();
 
-        if (fields.isEmpty()) {
+        if (fields.isEmpty())
+        {
             errors.add("Fields is required.");
         }
 
         Pattern fieldPattern = Pattern.compile("^[\\+-]?\\w+");
 
-        for (String field : fields) {
-            if (!fieldPattern.matcher(field).matches()) {
+        for (String field : fields)
+        {
+            if (!fieldPattern.matcher(field).matches())
+            {
                 errors.add("Invalid index field name: " + field);
             }
         }
 
         Pattern includePattern = Pattern.compile("^\\w+");
 
-        if (includeOnly != null) {
-            if (includeOnly.isEmpty()) {
+        if (includeOnly != null)
+        {
+            if (includeOnly.isEmpty())
+            {
                 errors.add("'includeOnly' cannot be empty, if included.");
             }
 
-            for (String field : includeOnly) {
-                if (!includePattern.matcher(field).matches()) {
+            for (String field : includeOnly)
+            {
+                if (!includePattern.matcher(field).matches())
+                {
                     errors.add("Invalid 'includeOnly' field name: " + field);
                 }
             }
         }
 
-        if (!errors.isEmpty()) {
+        if (!errors.isEmpty())
+        {
             throw new ValidationException(errors);
         }
     }
 
     @Override
-    public int hashCode() {
-        int hash = 3;
+    public int hashCode()
+    {
+        int hash = 7;
         hash = 83 * hash + Objects.hashCode(this.table);
         hash = 83 * hash + Objects.hashCode(this.name);
         hash = 83 * hash + (this.isUnique ? 1 : 0);
         hash = 83 * hash + (int) (this.bucketSize ^ (this.bucketSize >>> 32));
         hash = 83 * hash + Objects.hashCode(this.fields);
         hash = 83 * hash + Objects.hashCode(this.includeOnly);
+        hash = 83 * hash + (this.active ? 1 : 0);
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
+        {
             return false;
         }
         final Index other = (Index) obj;
-        if (!Objects.equals(this.table, other.table)) {
+        if (!Objects.equals(this.table, other.table))
+        {
             return false;
         }
-        if (!Objects.equals(this.name, other.name)) {
+        if (!Objects.equals(this.name, other.name))
+        {
             return false;
         }
-        if (this.isUnique != other.isUnique) {
+        if (this.isUnique != other.isUnique)
+        {
             return false;
         }
-        if (this.bucketSize != other.bucketSize) {
+        if (this.bucketSize != other.bucketSize)
+        {
             return false;
         }
-        if (!Objects.equals(this.fields, other.fields)) {
+        if (!Objects.equals(this.fields, other.fields))
+        {
             return false;
         }
-        if (!Objects.equals(this.includeOnly, other.includeOnly)) {
+        if (!Objects.equals(this.includeOnly, other.includeOnly))
+        {
+            return false;
+        }
+        if (this.active != other.active)
+        {
             return false;
         }
         return true;
     }
 
     @Override
-    public String toString() {
-        return "Index{" + "table=" + table + ", name=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + '}';
+    public String toString()
+    {
+        return "Index{" + "table=" + table + ", name=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + ", active=" + active + '}';
     }
 
-    
 }

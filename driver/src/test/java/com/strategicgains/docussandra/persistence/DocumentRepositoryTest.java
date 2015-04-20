@@ -18,10 +18,14 @@ package com.strategicgains.docussandra.persistence;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import org.json.simple.parser.ParseException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -41,6 +45,8 @@ public class DocumentRepositoryTest
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentRepositoryTest.class);
     private static Fixtures f;
+    private Database testDb;
+    private Table testTable;
 
     public DocumentRepositoryTest()
     {
@@ -55,6 +61,7 @@ public class DocumentRepositoryTest
     @AfterClass
     public static void tearDownClass()
     {
+        f.clearTestTables();
     }
 
     @Before
@@ -65,9 +72,11 @@ public class DocumentRepositoryTest
         //deleting more frequently than a real world operation causing the cache
         //to hit no longer relevent objects
         CacheFactory.clearAllCaches();
-        Database testDb = Fixtures.createTestDatabase();
+
+        testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
-        Table testTable = Fixtures.createTestTable();
+
+        testTable = Fixtures.createTestTable();
         f.insertTable(testTable);
     }
 
@@ -113,6 +122,73 @@ public class DocumentRepositoryTest
         assertEquals(expResult, result);
         //cleanup the random uuid'ed doc
         f.deleteDocument(testDocument);
+    }
+
+    /**
+     * Test of doReadAll method, of class DocumentRepository.
+     */
+    @Test
+    public void testDoReadAll() throws IOException, ParseException
+    {
+        System.out.println("doReadAll");
+        //setup        
+        f.insertDocuments(Fixtures.getBulkDocuments());
+
+        DocumentRepository instance = new DocumentRepository(f.getSession());
+
+        List<Document> result = instance.doReadAll(testDb.name(), testTable.name(), 10, 0);
+        assertTrue(result.size() == 10);
+        assertNotNull(result.get(0).getId());
+        assertNotNull(result.get(0).getUuid());
+        assertNotNull(result.get(0).getUpdatedAt());
+        result = instance.doReadAll(testDb.name(), testTable.name(), 10, 10);
+        assertTrue(result.size() == 10);
+        assertNotNull(result.get(0).getId());
+        assertNotNull(result.get(0).getUuid());
+        assertNotNull(result.get(0).getUpdatedAt());
+        result = instance.doReadAll(testDb.name(), testTable.name(), 100, 20);
+        assertTrue(result.size() == 14);
+    }
+
+    /*
+     * Test of doReadAll method, of class DocumentRepository.
+     */
+    @Test
+    public void testDoReadAll2() throws IOException, ParseException
+    {
+        System.out.println("doReadAll2");
+        //setup        
+        f.insertDocuments(Fixtures.getBulkDocuments());
+
+        DocumentRepository instance = new DocumentRepository(f.getSession());
+        
+        //let's get the first 5
+        QueryResponseWrapper result = instance.doReadAll(testDb.name(), testTable.name(), 5, 0);
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 5);
+        assertTrue(result.getNumAdditionalResults() == null);
+
+        //now lets get the second 5
+        result = instance.doReadAll(testDb.name(), testTable.name(), 5, 5);
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 5);
+        assertTrue(result.getNumAdditionalResults() == null);
+
+        //now lets get the third 5
+        result = instance.doReadAll(testDb.name(), testTable.name(), 5, 10);
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 5);
+        assertTrue(result.getNumAdditionalResults() == null);
+
+        //now lets get the last 4
+        result = instance.doReadAll(testDb.name(), testTable.name(), 5, 30);
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
+        assertTrue(result.size() == 4);
+        assertTrue(result.getNumAdditionalResults() == 0);
     }
 
     /**

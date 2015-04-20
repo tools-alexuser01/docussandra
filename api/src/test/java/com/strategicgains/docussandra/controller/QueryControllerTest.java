@@ -95,6 +95,7 @@ public class QueryControllerTest
     @AfterClass
     public static void afterClass()
     {
+        f.clearTestTables();
     }
 
     /**
@@ -103,7 +104,7 @@ public class QueryControllerTest
     @After
     public void afterTest()
     {
-        f.clearTestTables();
+        
     }
 
     /**

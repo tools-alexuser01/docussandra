@@ -43,6 +43,10 @@ public class IndexMaintainerHelper
     public static final String ITABLE_DELETE_CQL = "DELETE FROM docussandra.%s WHERE bucket = ? AND %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
 
+    private IndexMaintainerHelper(){
+        //don't instantiate; call static methods only
+    }
+    
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -70,7 +74,7 @@ public class IndexMaintainerHelper
      * @param entity
      * @return
      */
-    private static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
+    public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
     {
         //determine which fields need to write as PKs
         List<String> fields = index.fields();
@@ -229,12 +233,6 @@ public class IndexMaintainerHelper
             bs.setString(i + 1, fieldValue);
         }
         return bs;
-    }
-
-    //just a concept right now -- issue #4
-    public static void populateNewIndexWithExistingData(Session session, Table t, Index index)
-    {
-        throw new UnsupportedOperationException("Not done yet");
     }
 
     /**

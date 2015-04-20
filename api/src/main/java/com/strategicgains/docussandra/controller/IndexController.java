@@ -9,6 +9,7 @@ import org.restexpress.Response;
 
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.service.IndexService;
 import com.strategicgains.hyperexpress.HyperExpress;
@@ -42,7 +43,7 @@ public class IndexController
         this.indexes = indexService;
     }
 
-    public Index create(Request request, Response response)
+    public IndexCreatedEvent create(Request request, Response response)
     {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
@@ -53,13 +54,14 @@ public class IndexController
         t.name(table);
         entity.table(t);
         entity.name(name);
-        if(entity.includeOnly() == null){
+        if (entity.includeOnly() == null)
+        {
             entity.includeOnly(new ArrayList<String>(0));
         }
-        Index saved;
+        IndexCreatedEvent status;
         try
         {
-            saved = indexes.create(entity);
+            status = indexes.create(entity);
         } catch (Exception e)
         {
             LOGGER.error("Could not save index", e);
@@ -69,16 +71,16 @@ public class IndexController
         response.setResponseCreated();
 
         // enrich the resource with links, etc. here...
-        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, saved.tableName())
-                .bind(Constants.Url.DATABASE, saved.databaseName())
-                .bind(Constants.Url.INDEX, saved.name());
+        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
+                .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
+                .bind(Constants.Url.INDEX, status.getIndex().name())
+                .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
 
         // Include the Location header...
         String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.INDEX);
         response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
-
         // Return the newly-created resource...
-        return saved;
+        return status;
     }
 
     public Index read(Request request, Response response)
@@ -92,7 +94,7 @@ public class IndexController
         HyperExpress.bind(Constants.Url.TABLE, entity.tableName())
                 .bind(Constants.Url.DATABASE, entity.databaseName())
                 .bind(Constants.Url.INDEX, entity.name());
-
+//add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());//we don't have this information without doing another lookup
         return entity;
     }
 
@@ -109,26 +111,12 @@ public class IndexController
                 resolver.bind(Constants.Url.TABLE, object.tableName())
                         .bind(Constants.Url.DATABASE, object.databaseName())
                         .bind(Constants.Url.INDEX, object.name());
+                //add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());//we don't have this information without doing another lookup
 
             }
         });
 
         return indexes.readAll(database, table);
-    }
-
-    public void update(Request request, Response response)
-    {
-        String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
-        String table = request.getHeader(Constants.Url.TABLE, "No table provided");
-        String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
-        Index entity = request.getBodyAs(Index.class, "Resource details not provided");
-        Table t = new Table();
-        t.database(database);
-        t.name(table);
-        entity.table(t);
-        entity.name(name);
-        indexes.update(entity);
-        response.setResponseNoContent();
     }
 
     public void delete(Request request, Response response)
