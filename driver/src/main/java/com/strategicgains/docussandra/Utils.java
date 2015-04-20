@@ -3,7 +3,7 @@ package com.strategicgains.docussandra;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.handler.BackgroundIndexHandler;
+import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;

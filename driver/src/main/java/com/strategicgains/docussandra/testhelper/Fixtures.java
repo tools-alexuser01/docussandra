@@ -14,7 +14,7 @@ import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.domain.WhereClause;
-import com.strategicgains.docussandra.handler.BackgroundIndexHandler;
+import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.IndexDeletedHandler;
@@ -124,11 +124,10 @@ public class Fixtures
         
         //set up bus just like rest express would
         EventBus bus = new LocalEventBusBuilder()
-                //.subscribe(new IndexCreatedHandler())
                 .subscribe(new IndexDeletedHandler(getSession()))
                 .subscribe(new TableDeleteHandler(getSession()))
                 .subscribe(new DatabaseDeletedHandler(getSession()))
-                .subscribe(new BackgroundIndexHandler(indexRepo, indexStatusRepo, docRepo))
+                .subscribe(new IndexCreatedHandler(indexRepo, indexStatusRepo, docRepo))
                 .build();
         DomainEvents.addBus("local", bus);
     }

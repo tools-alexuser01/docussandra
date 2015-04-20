@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class BackgroundIndexHandlerTest
+public class IndexCreatedHandlerTest
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexStatusRepositoryTest.class);
@@ -55,7 +55,7 @@ public class BackgroundIndexHandlerTest
     private IndexStatusRepository statusRepo;
     private DocumentRepository docRepo;
 
-    public BackgroundIndexHandlerTest() throws Exception
+    public IndexCreatedHandlerTest() throws Exception
     {
         f = Fixtures.getInstance(true);
     }
@@ -91,14 +91,14 @@ public class BackgroundIndexHandlerTest
     }
 
     /**
-     * Test of handles method, of class BackgroundIndexHandler.
+     * Test of handles method, of class IndexCreatedHandler.
      */
     @Test
     public void testHandles()
     {
         System.out.println("handles");
         Class eventClass = IndexCreatedEvent.class;
-        BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
+        IndexCreatedHandler instance = new IndexCreatedHandler(indexRepo, statusRepo, docRepo);
         boolean result = instance.handles(eventClass);
         assertEquals(true, result);
         Object o = new Object();
@@ -107,7 +107,7 @@ public class BackgroundIndexHandlerTest
     }
 
     /**
-     * Test of handle method, of class BackgroundIndexHandler.
+     * Test of handle method, of class IndexCreatedHandler.
      */
     @Test
     public void testHandle() throws Exception
@@ -121,7 +121,7 @@ public class BackgroundIndexHandlerTest
         statusRepo.createEntity(entity);
         Object event = entity;
         //end data setup
-        BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
+        IndexCreatedHandler instance = new IndexCreatedHandler(indexRepo, statusRepo, docRepo);
         //call
         instance.handle(event);
         //verify
@@ -141,7 +141,7 @@ public class BackgroundIndexHandlerTest
     }
 
     /**
-     * Test of handle method, of class BackgroundIndexHandler.
+     * Test of handle method, of class IndexCreatedHandler.
      */
     @Test
     public void testHandleWithError() throws Exception
@@ -155,7 +155,7 @@ public class BackgroundIndexHandlerTest
         statusRepo.createEntity(entity);
         Object event = entity;
         //end data setup
-        BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
+        IndexCreatedHandler instance = new IndexCreatedHandler(indexRepo, statusRepo, docRepo);
         //call
         boolean expectedExceptionThrown = false;
         try
@@ -180,7 +180,7 @@ public class BackgroundIndexHandlerTest
     }
 
     /**
-     * Test of handle method, of class BackgroundIndexHandler.
+     * Test of handle method, of class IndexCreatedHandler.
      */
     @Test
     public void testHandleWithData() throws Exception
@@ -204,7 +204,7 @@ public class BackgroundIndexHandlerTest
         statusRepo.createEntity(entity);
         Object event = entity;
         //end data setup
-        BackgroundIndexHandler instance = new BackgroundIndexHandler(indexRepo, statusRepo, docRepo);
+        IndexCreatedHandler instance = new IndexCreatedHandler(indexRepo, statusRepo, docRepo);
         //call
         instance.handle(event);
         //verify
