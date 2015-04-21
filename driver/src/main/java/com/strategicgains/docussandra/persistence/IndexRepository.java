@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class IndexRepository
         extends AbstractCassandraRepository<Index>
 {
+
     /**
      * Logger for this class.
      */
@@ -35,9 +36,10 @@ public class IndexRepository
      */
     private class Tables
     {
+
         static final String BY_ID = "sys_idx";
     }
-    
+
     /**
      * Class that defines the database columns that this repository manages.
      */
@@ -222,8 +224,14 @@ public class IndexRepository
         Element e = c.get(key);
         if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
         {
-            e = new Element(key, readAll(namespace, collection));
-            c.put(e);
+            List<Index> all = readAll(namespace, collection);
+            if (all != null && !all.isEmpty())//don't store empty or null index lists; could cause problems if an index gets created and we are not treating it as created
+            {
+                e = new Element(key, all);
+                c.put(e);
+            } else {
+                return all;//it's empty or null; just return it now and not mess with the cache
+            }
         } else
         {
             if (logger.isTraceEnabled())

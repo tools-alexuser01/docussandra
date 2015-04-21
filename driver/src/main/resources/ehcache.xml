@@ -770,7 +770,7 @@ Here is an example of CacheManager level resource tuning, which will use up to 4
     
     <cache name="index" 
            maxBytesLocalHeap = "10000000"
-           timeToLiveSeconds="3600"
+           timeToLiveSeconds="60"
            memoryStoreEvictionPolicy="LFU">        
     </cache>
     
@@ -794,7 +794,7 @@ Here is an example of CacheManager level resource tuning, which will use up to 4
     
     <cache name="tableExist" 
            maxBytesLocalHeap = "10000000"
-           timeToLiveSeconds="240"
+           timeToLiveSeconds="60"
            memoryStoreEvictionPolicy="LFU">        
     </cache>
 
