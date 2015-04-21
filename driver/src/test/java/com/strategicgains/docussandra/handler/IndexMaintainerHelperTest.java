@@ -104,7 +104,7 @@ public class IndexMaintainerHelperTest
         System.out.println("generateDocumentCreateIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument2();
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
-        assertTrue(result.size() == 2);//one for each of our indices
+        assertEquals(result.size(), 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
         for (int i = 0; i < 5; i++)
