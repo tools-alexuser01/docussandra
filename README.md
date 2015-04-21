@@ -55,6 +55,7 @@ Naming restrictions on the table name are similar to the database: unique *to th
 * java -jar 'artifact jar file' [environment name]
 
 To run the integration tests:
+Ensure Cassandra is running locally, then:
 
 *mvn clean install -P integration
 
