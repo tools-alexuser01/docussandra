@@ -22,9 +22,14 @@ public class IndexChangeObserver<T extends Identifiable>
     private Session session;
 
     /**
-     * Dao for interacting with the iTables.
+     * Repo for interacting with the iTables.
      */
-    private ITableRepository dao;
+    private ITableRepository iTableRepo;
+    
+//    /**
+//     * Repo for interacting with the index status tables.
+//     */
+//    private IndexStatusRepository statusRepo;
 
     /**
      * Constructor. Creates a new IndexChangeObserver.
@@ -36,7 +41,7 @@ public class IndexChangeObserver<T extends Identifiable>
         super();
         this.session = session;
         //TODO: check thread safety here
-        dao = new ITableRepository(session);
+        iTableRepo = new ITableRepository(session);
 
     }
 
@@ -45,9 +50,9 @@ public class IndexChangeObserver<T extends Identifiable>
     {
         //create the iTable
         Index index = (Index) object;
-        if (!dao.iTableExists(index))
+        if (!iTableRepo.iTableExists(index))
         {
-            dao.createITable(index);
+            iTableRepo.createITable(index);
         }
         //TODO: what if it already exists?
         //options:
@@ -63,15 +68,16 @@ public class IndexChangeObserver<T extends Identifiable>
     {
         //drop the iTable
         Index index = (Index) object;
-        if (dao.iTableExists(index))
+        if (iTableRepo.iTableExists(index))
         {
-            dao.deleteITable(index);
+            iTableRepo.deleteITable(index);
         }
         //TODO: what if it doesn't exist?
         //options:
         //-----warn the user -- probably not
         //-----throw an exception -- probably not even more
         //-----do nothing -- probably
+        //TODO: delete the index status (or at least mark it permantly inactive/disabled with a new timestamp, ensuring that /index_status won't return it) and halt any active indexing to save processor time
     }
 
 }
