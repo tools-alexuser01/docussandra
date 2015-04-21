@@ -97,7 +97,7 @@ public class Fixtures
             EmbeddedCassandraServerHelper.startEmbeddedCassandra(timeout);
             cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
             embeddedCassandra = true;
-            Thread.sleep(10000);//time to let cassandra startup
+            Thread.sleep(15000);//time to let cassandra startup
         } else //using a remote or local server for testing
         {
             cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
