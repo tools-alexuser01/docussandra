@@ -59,4 +59,3 @@ Ensure Cassandra is running locally, then:
 
 *mvn clean install -P integration
 
-
