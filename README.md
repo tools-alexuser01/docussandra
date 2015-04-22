@@ -58,4 +58,4 @@ To run the integration tests:
 Ensure Cassandra is running locally, then:
 
 *mvn clean install -P integration
-
+  
