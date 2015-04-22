@@ -222,7 +222,7 @@ public class IndexMaintainerHelperTest
         Document entity = Fixtures.createTestDocument2();
         entity.object("{'greeting':'hello', 'myindexedfield': 'this is my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
-        assertTrue(result.size() == 2);//one for each of our indices
+        assertEquals(result.size(), 2);//one for each of our indices
         BoundStatement one = result.get(0);
         assertNotNull(one);
         assertTrue(one.isSet(0));//the UUID
