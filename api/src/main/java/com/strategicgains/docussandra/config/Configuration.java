@@ -39,6 +39,8 @@ import com.strategicgains.eventing.EventBus;
 import com.strategicgains.eventing.local.LocalEventBusBuilder;
 import com.strategicgains.repoexpress.cassandra.CassandraConfig;
 import com.strategicgains.restexpress.plugin.metrics.MetricsConfig;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +78,14 @@ public class Configuration
         this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
         this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_SIZE, DEFAULT_EXECUTOR_THREAD_POOL_SIZE));
         this.metricsSettings = new MetricsConfig(p);
-        p.setProperty("cassandra.contactPoints", "127.0.0.1");//using localhost for cassandra seed -- we are going to try cohosting; TODO: ensure thalassa health check checks DB as well
+        try
+        {
+            String currentIp = InetAddress.getLocalHost().getHostAddress();
+            p.setProperty("cassandra.contactPoints", currentIp);//using localhost for cassandra seed -- we are going to try cohosting; TODO: ensure thalassa health check checks DB as well
+        } catch (UnknownHostException e)
+        {
+            LOGGER.error("Could not determine Cassandra IP.");
+        }
         CassandraConfigWithGenericSessionAccess dbConfig = new CassandraConfigWithGenericSessionAccess(p);
         initialize(dbConfig);
         loadManifest();
@@ -123,7 +132,6 @@ public class Configuration
         DomainEvents.addBus("local", bus);
         
     }
-
     
     public int getPort()
     {
