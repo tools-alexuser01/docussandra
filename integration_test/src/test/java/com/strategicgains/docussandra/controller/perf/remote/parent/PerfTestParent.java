@@ -94,7 +94,7 @@ public abstract class PerfTestParent
         }
     }
 
-    protected static void postDocument(Database database, Table table, Document d)
+    protected static String postDocument(Database database, Table table, Document d)
     {
         //act
         //long start = new Date().getTime();
@@ -109,6 +109,7 @@ public abstract class PerfTestParent
             logger.info("Error publishing document: " + response.getBody().prettyPrint());
             logger.info("This is the: " + errorCount.toString() + " error.");
         }
+        return response.getBody().jsonPath().get("id");
     }
 
     //@Test
