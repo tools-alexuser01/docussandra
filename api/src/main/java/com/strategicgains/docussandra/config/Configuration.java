@@ -76,6 +76,7 @@ public class Configuration
         this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
         this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_SIZE, DEFAULT_EXECUTOR_THREAD_POOL_SIZE));
         this.metricsSettings = new MetricsConfig(p);
+        p.setProperty("cassandra.contactPoints", "127.0.0.1");//using localhost for cassandra seed -- we are going to try cohosting; TODO: ensure thalassa health check checks DB as well
         CassandraConfigWithGenericSessionAccess dbConfig = new CassandraConfigWithGenericSessionAccess(p);
         initialize(dbConfig);
         loadManifest();
@@ -248,7 +249,7 @@ public class Configuration
     }
 
     /**
-     * CassandraConfig object that we can get a session seperate from the
+     * CassandraConfig object that we can get a session separate from the
      * keyspace.
      */
     private class CassandraConfigWithGenericSessionAccess extends CassandraConfig
