@@ -81,6 +81,9 @@ public class Configuration
         try
         {
             String currentIp = InetAddress.getLocalHost().getHostAddress();
+            if(currentIp.equals("127.0.1.1")){//something odd with ubuntu; hack fix for now
+                currentIp = "127.0.0.1";
+            }
             p.setProperty("cassandra.contactPoints", currentIp);//using localhost for cassandra seed -- we are going to try cohosting; TODO: ensure thalassa health check checks DB as well
         } catch (UnknownHostException e)
         {
