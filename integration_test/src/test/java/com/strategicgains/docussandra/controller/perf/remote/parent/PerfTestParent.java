@@ -51,7 +51,7 @@ public abstract class PerfTestParent
     protected static final String BASE_URI = "https://docussandra.stg-prsn.com";//; "http://localhost";//
     //protected static final String BASE_URI = "http://localhost";
     //protected static final String BASE_URI = "http://localhost:8081";
-    //protected static final String BASE_URI = "http://10.199.30.15/";
+    //protected static final String BASE_URI = "http://10.199.30.15:8080";
     //protected static final int PORT = 19080;
     protected static final int NUM_WORKERS = 50; //NOTE: one more worker may be added to pick up any remainder
     protected static AtomicInteger errorCount = new AtomicInteger(0);
