@@ -36,11 +36,11 @@ public class IndexMaintainerHelper
 
     private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
 
-    public static final String ITABLE_INSERT_CQL = "INSERT INTO docussandra.%s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
+    public static final String ITABLE_INSERT_CQL = "INSERT INTO %s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
-    public static final String ITABLE_UPDATE_CQL = "UPDATE docussandra.%s SET object = ?, updated_at = ? WHERE bucket = ? AND %s;";
+    public static final String ITABLE_UPDATE_CQL = "UPDATE %s SET object = ?, updated_at = ? WHERE bucket = ? AND %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
-    public static final String ITABLE_DELETE_CQL = "DELETE FROM docussandra.%s WHERE bucket = ? AND %s;";
+    public static final String ITABLE_DELETE_CQL = "DELETE FROM %s WHERE bucket = ? AND %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
 
     private IndexMaintainerHelper(){

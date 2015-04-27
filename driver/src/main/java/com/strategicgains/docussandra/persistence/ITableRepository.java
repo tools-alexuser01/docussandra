@@ -41,14 +41,12 @@ public class ITableRepository
     /**
      * CQL statement for dynamically creating an iTable.
      */
-    private static final String TABLE_CREATE_CQL = "CREATE TABLE docussandra.%s (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY ((bucket), %s));";
-    //TODO: --------------------remove hard coding of keyspace name--^^^----
+    private static final String TABLE_CREATE_CQL = "CREATE TABLE %s (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY ((bucket), %s));";
 
     /**
      * CQL statement for deleting an iTable (or for that matter, any table).
      */
-    private static final String TABLE_DELETE_CQL = "DROP TABLE docussandra.%s;";
-    //TODO: --------------------remove hard coding of keyspace name--^^^----
+    private static final String TABLE_DELETE_CQL = "DROP TABLE %s;";
 
     /**
      * Constructor. Creates a new ITableDao.
