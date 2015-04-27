@@ -93,7 +93,7 @@ public class Fixtures
         Cluster cluster;
         if (mockCassandra)//using cassandra-unit for testing
         {
-            long timeout = 15000;
+            long timeout = 30000;
             EmbeddedCassandraServerHelper.startEmbeddedCassandra(timeout);
             cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
             embeddedCassandra = true;
