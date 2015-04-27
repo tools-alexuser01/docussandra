@@ -51,6 +51,7 @@ public abstract class PerfTestParent
     protected static final String BASE_URI = "https://docussandra.stg-prsn.com";//; "http://localhost";//
     //protected static final String BASE_URI = "http://localhost";
     //protected static final String BASE_URI = "http://localhost:8081";
+    //protected static final String BASE_URI = "http://10.199.30.15:8080";
     //protected static final int PORT = 19080;
     protected static final int NUM_WORKERS = 50; //NOTE: one more worker may be added to pick up any remainder
     protected static AtomicInteger errorCount = new AtomicInteger(0);
@@ -94,7 +95,7 @@ public abstract class PerfTestParent
         }
     }
 
-    protected static void postDocument(Database database, Table table, Document d)
+    protected static String postDocument(Database database, Table table, Document d)
     {
         //act
         //long start = new Date().getTime();
@@ -109,6 +110,7 @@ public abstract class PerfTestParent
             logger.info("Error publishing document: " + response.getBody().prettyPrint());
             logger.info("This is the: " + errorCount.toString() + " error.");
         }
+        return response.getBody().jsonPath().get("id");
     }
 
     //@Test
@@ -140,10 +142,10 @@ public abstract class PerfTestParent
                 {
                     @Override
                     public void run()
-                    {
-                        logger.debug("Processing document: " + queue.get(0).toString());
+                    {                        
                         for (Document d : queue)
                         {
+                            //logger.debug("Processing document: " + d.toString());
                             postDocument(getDb(), getTb(), d);
                         }
                         logger.info("Thread " + Thread.currentThread().getName() + " is done.");
@@ -168,10 +170,10 @@ public abstract class PerfTestParent
                         {
                             List<Document> docs = getDocumentsFromFS(chunk);//grab a handful of documents
                             while (docs.size() > 0)
-                            {
-                                logger.debug("Processing document: " + docs.get(0).toString());
+                            {                                
                                 for (Document d : docs)//process the documents we grabbed
                                 {
+                                    //logger.debug("Processing document: " + d.toString());
                                     postDocument(getDb(), getTb(), d);//post them up
                                     counter.set(counter.get() + 1);
                                 }
@@ -215,7 +217,7 @@ public abstract class PerfTestParent
             } else
             {
                 logger.info("We still have workers running...");
-                Thread.sleep(10000);
+                Thread.sleep(5000);
             }
         }
         long end = new Date().getTime();
@@ -227,6 +229,7 @@ public abstract class PerfTestParent
         double transactionTime = (double) miliseconds / (double) numDocs;
         output.info(this.getDb().name() + " Doc: Average Transactions Per Second: " + tps);
         output.info(this.getDb().name() + " Doc: Average Transactions Time (in miliseconds): " + transactionTime);
+        Thread.sleep(40000);//sleep a bit to let the DB digest that before trying anything else
     }
 
     protected static void postTable(Database database, Table table)

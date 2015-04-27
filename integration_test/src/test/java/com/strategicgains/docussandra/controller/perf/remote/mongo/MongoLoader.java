@@ -86,7 +86,7 @@ public class MongoLoader
                                     DBObject o = (DBObject) JSON.parse(d.object());
                                     coll.save(o);
                                 }
-                                logger.info("Thread " + Thread.currentThread().getName() + " is done.");
+                                logger.info("Thread " + Thread.currentThread().getName() + " is done. It processed " + queue.size() + " documents.");
                             }
                         });
                     }
