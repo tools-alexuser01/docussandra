@@ -47,6 +47,8 @@ public class Index
 
 //	@Required("Index Type")
 //	private IndexType type;
+    
+    //Note: not currently supported
     /**
      * Consider the index is only concerned with only a partial dataset. In this
      * case, instead of storing the entire BSON payload, we store only a
