@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.handler;
 
 import com.datastax.driver.core.BoundStatement;
 import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
+import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
@@ -68,6 +69,7 @@ public class IndexMaintainerHelperTest
     public static void tearDownClass()
     {
         f.clearTestTables();// clear anything that might be there already
+        CacheFactory.clearAllCaches();
     }
 
     @Before
@@ -77,6 +79,7 @@ public class IndexMaintainerHelperTest
         indexRepo = new IndexRepository(f.getSession());
         docRepo = new DocumentRepository(f.getSession());
         tableRepo = new TableRepository(f.getSession());
+        CacheFactory.clearAllCaches();//clear the caches so we don't grab an old record that is no longer present
         table = Fixtures.createTestTable();// new Table();
         f.clearTestTables();// clear anything that might be there already
         //f.createTestITables();
