@@ -35,7 +35,7 @@ public class Index
      * This is how many items will be stored in a single wide row, before
      * creating another wide row.
      */
-    //TODO: refactor to new concept of infinately sized buckets, but with a limit number of buckets
+    //TODO: refactor to new concept of infinately sized buckets, but with a limit number of buckets; I don't think that this is presently used.
     private long bucketSize = 2000l;
 
     /**
@@ -44,6 +44,12 @@ public class Index
      */
     @Required("Fields")
     private List<String> fields;
+
+    /**
+     * Data type of the above fields. Optional, will default to text.
+     */
+    @ChildValidation
+    private List<FieldDataType> fieldTypes;
 
 //	@Required("Index Type")
 //	private IndexType type;
@@ -127,7 +133,7 @@ public class Index
 
     public void fields(List<String> props)
     {
-        this.fields = new ArrayList<String>(props);
+        this.fields = new ArrayList<>(props);
     }
 
     public List<String> fields()
@@ -139,7 +145,7 @@ public class Index
     {
         if (props != null && !props.isEmpty())
         {
-            this.includeOnly = new ArrayList<String>(props);
+            this.includeOnly = new ArrayList<>(props);
         }
     }
 
@@ -198,38 +204,32 @@ public class Index
         this.active = isActive;
     }
 
-    public class IndexField
+    /**
+     * Data type of the above fields. Optional, will default to text. 1:1
+     * correlation to fields. If this is passed, it must include a data type for
+     * each field.
+     * @return the fieldTypes
+     */
+    public List<FieldDataType> fieldTypes()
     {
+        return fieldTypes;
+    }
 
-        private String field;
-        private boolean isAscending = true;
-
-        public IndexField(String value)
-        {
-            field = value.trim();
-
-            if (field.trim().startsWith("-"))
-            {
-                field = value.substring(1);
-                isAscending = false;
-            }
-        }
-
-        public String field()
-        {
-            return field;
-        }
-
-        public boolean isAscending()
-        {
-            return isAscending;
-        }
+    /**
+     * Data type of the above fields. Optional, will default to text. 1:1
+     * correlation to fields. If this is passed, it must include a data type for
+     * each field.
+     * @param fieldTypes the fieldTypes to set
+     */
+    public void fieldTypes(List<FieldDataType> fieldTypes)
+    {
+        this.fieldTypes = fieldTypes;
     }
 
     @Override
     public void validate()
     {
-        final List<String> errors = new ArrayList<String>();
+        final List<String> errors = new ArrayList<>();
 
         if (fields.isEmpty())
         {
@@ -263,13 +263,15 @@ public class Index
                 }
             }
         }
-
+        
         if (!errors.isEmpty())
         {
             throw new ValidationException(errors);
         }
     }
 
+    //TODO: left off here -- add fields to the boilerplate methods
+    
     @Override
     public int hashCode()
     {
