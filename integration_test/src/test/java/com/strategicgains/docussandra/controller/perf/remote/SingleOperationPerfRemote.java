@@ -41,6 +41,17 @@ import org.junit.Test;
 public class SingleOperationPerfRemote extends PerfTestParent
 {
 
+    private static boolean setupRun = false;
+
+    public SingleOperationPerfRemote() throws IOException, InterruptedException, ParseException
+    {
+        if (!setupRun)
+        {
+            setupRun = true;
+            setup();
+        }
+    }
+
     protected void setup() throws IOException, InterruptedException, ParseException
     {
         logger.info("Setup called!");
@@ -155,7 +166,6 @@ public class SingleOperationPerfRemote extends PerfTestParent
     }
 
     @Test
-    @Ignore
     public void testDbCreationTime()
     {
         StopWatch sw = new StopWatch();
@@ -175,7 +185,7 @@ public class SingleOperationPerfRemote extends PerfTestParent
         sw.start();
         String id = postDocument(d, t, doc);
         sw.stop();
-        output.info("Time to create a single doc: " + sw.getTime() + " id: " + id);
+        output.info("Time to create a single doc: " + sw.getTime() + " miliseconds, id: " + id);
         sw.reset();
         sw.start();
         String basePath = RestAssured.basePath;
@@ -186,7 +196,7 @@ public class SingleOperationPerfRemote extends PerfTestParent
                     .body("id", equalTo(id))
                     .get("/" + id);
             sw.stop();
-            output.info("Time to fetch a single doc: " + sw.getTime());
+            output.info("Time to fetch a single doc: " + sw.getTime() + " miliseconds");
         } finally
         {
             RestAssured.basePath = basePath;
