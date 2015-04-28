@@ -269,14 +269,6 @@ public class IndexRepository
                 entity.getUpdatedAt());
     }
 
-//    private void bindUpdate(BoundStatement bs, Index entity)
-//    {
-//        bs.bind(entity.bucketSize(),
-//                entity.getUpdatedAt(),
-//                entity.databaseName(),
-//                entity.tableName(),
-//                entity.name());
-//    }
     private List<Index> marshalAll(ResultSet rs)
     {
         List<Index> indexes = new ArrayList<Index>();
