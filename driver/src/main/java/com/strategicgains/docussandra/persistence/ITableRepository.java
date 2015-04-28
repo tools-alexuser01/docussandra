@@ -5,7 +5,9 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.Utils;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.Iterator;
 import org.slf4j.Logger;
@@ -112,7 +114,8 @@ public class ITableRepository
 //            primaryKeyCreateStatement.append("(id), ");//if the index is not unique, set the pk to include the id 
 //        }
         boolean first = true;
-        for (String field : index.fieldsValues())
+        
+        for (IndexField field : index.fields())
         {
             if (!first)
             {
@@ -122,8 +125,8 @@ public class ITableRepository
             {
                 first = false;
             }
-            fieldCreateStatement.append(field).append(" varchar");
-            primaryKeyCreateStatement.append(field);
+            fieldCreateStatement.append(field.getField()).append(" ").append(FieldDataType.mapToCassandaraDataType(field.getType()));
+            primaryKeyCreateStatement.append(field.getField());
         }
         if(!index.isUnique()){
             primaryKeyCreateStatement.append(", ").append("id");

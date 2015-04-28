@@ -28,4 +28,26 @@ public enum FieldDataType
     BOOLEAN,
     UUID,
     BINARY;// maybe?
+    
+    public static String mapToCassandaraDataType(FieldDataType in){
+        if(in.equals(TEXT)){
+            return "varchar";
+        } else if(in.equals(DATE_TIME)){
+            return "timestamp";
+        } else if(in.equals(DOUBLE)){
+            return "double";
+        } else if(in.equals(INTEGER)){
+            return "int";//should we use bigint instead?
+        } else if(in.equals(BOOLEAN)){
+            return "boolean";
+        } else if(in.equals(UUID)){
+            return "uuid";
+        } else if(in.equals(BINARY)){
+            return "blob";
+        } else {
+            throw new IllegalArgumentException("Type not supported. " + in.toString());//this should never happen
+        }
+    }
+    
+    
 }

@@ -49,7 +49,7 @@ public class ITableRepositoryTest
     @After
     public void tearDown()
     {
-        
+
     }
 
     /**
@@ -125,6 +125,22 @@ public class ITableRepositoryTest
         response = instance.generateTableCreationSyntax(two);
         Assert.assertNotNull(response);
         assertEquals("CREATE TABLE mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield1 varchar, myindexedfield2 varchar, PRIMARY KEY ((bucket), myindexedfield1, myindexedfield2));", response);
+    }
+
+    /**
+     * Test of generateTableCreationSyntax method, of class ITableDao. Tests datatypes other than text.
+     */
+    @Test
+    public void testGenerateTableCreationSyntaxWithDataTypes()
+    {
+        System.out.println("generateTableCreationSyntax");
+        ITableRepository instance = new ITableRepository(f.getSession());
+        String response = instance.generateTableCreationSyntax(Fixtures.createTestIndexNumericField());
+        Assert.assertNotNull(response);
+        assertEquals("CREATE TABLE mydb_mytable_myindexnumericfield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield3 int, PRIMARY KEY ((bucket), myindexedfield3, id));", response);
+        response = instance.generateTableCreationSyntax(Fixtures.createTestIndexUUIDField());
+        Assert.assertNotNull(response);
+        assertEquals("CREATE TABLE mydb_mytable_myindexuuidfield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield4 uuid, PRIMARY KEY ((bucket), myindexedfield4, id));", response);
     }
 
     /**

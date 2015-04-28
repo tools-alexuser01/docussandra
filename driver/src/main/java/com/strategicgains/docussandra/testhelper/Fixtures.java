@@ -319,7 +319,7 @@ public class Fixtures
         Index index = new Index("myindexuuidfield");
         index.table(DB, "mytable");
         ArrayList<IndexField> fields = new ArrayList<>();
-        fields.add(new IndexField("myindexedfield3", FieldDataType.UUID));
+        fields.add(new IndexField("myindexedfield4", FieldDataType.UUID));
         index.fields(fields);
         index.isUnique(false);
         return index;
