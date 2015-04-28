@@ -8,6 +8,7 @@ import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
@@ -98,7 +99,7 @@ public class Fixtures
             EmbeddedCassandraServerHelper.startEmbeddedCassandra(timeout);
             cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
             embeddedCassandra = true;
-            Thread.sleep(15000);//time to let cassandra startup
+            Thread.sleep(20000);//time to let cassandra startup
         } else //using a remote or local server for testing
         {
             cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
@@ -122,7 +123,7 @@ public class Fixtures
         docRepo = new DocumentRepository(getSession());
         tableRepo = new TableRepository(getSession());
         indexStatusRepo = new IndexStatusRepository(getSession());
-        
+
         //set up bus just like rest express would
         EventBus bus = new LocalEventBusBuilder()
                 .subscribe(new IndexDeletedHandler(getSession()))
@@ -292,6 +293,38 @@ public class Fixtures
         return index;
     }
 
+    /**
+     * Creates at test index with a numeric field.
+     *
+     * @return
+     */
+    public static final Index createTestIndexNumericField()
+    {
+        Index index = new Index("myindexnumericfield");
+        index.table(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield3", FieldDataType.INTEGER));
+        index.fields(fields);
+        index.isUnique(false);
+        return index;
+    }
+
+        /**
+     * Creates at test index with a UUID field.
+     *
+     * @return
+     */
+    public static final Index createTestIndexUUIDField()
+    {
+        Index index = new Index("myindexuuidfield");
+        index.table(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield3", FieldDataType.UUID));
+        index.fields(fields);
+        index.isUnique(false);
+        return index;
+    }
+    
     /**
      * Creates at test IndexCreatedEvent.
      *
