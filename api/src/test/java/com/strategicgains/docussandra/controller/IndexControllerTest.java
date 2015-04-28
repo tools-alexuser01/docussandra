@@ -130,7 +130,7 @@ public class IndexControllerTest
     public void postIndexTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
-        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
+        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fieldsValues().get(0)
                 + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
 
         //act
@@ -168,7 +168,7 @@ public class IndexControllerTest
     public void postIndexAndCheckStatusTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
-        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fields().get(0)
+        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fieldsValues().get(0)
                 + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
 
         //act
@@ -232,7 +232,7 @@ public class IndexControllerTest
             f.insertTable(testTable);
             f.insertDocuments(docs);//put in a ton of data directly into the db
             Index lastname = Fixtures.createTestPlayersIndexLastName();
-            String tableStr = "{" + "\"fields\" : [\"" + lastname.fields().get(0)
+            String tableStr = "{" + "\"fields\" : [\"" + lastname.fieldsValues().get(0)
                     + "\"]," + "\"name\" : \"" + lastname.name() + "\"}";
             RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/indexes";
             //act -- create index
@@ -332,7 +332,7 @@ public class IndexControllerTest
             List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
             f.insertDocuments(docs);//put in a ton of data directly into the db
             Index lastname = Fixtures.createTestPlayersIndexLastName();
-            String tableStr = "{" + "\"fields\" : [\"" + lastname.fields().get(0)
+            String tableStr = "{" + "\"fields\" : [\"" + lastname.fieldsValues().get(0)
                     + "\"]," + "\"name\" : \"" + lastname.name() + "\"}";
             RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/indexes";
             //act -- create index

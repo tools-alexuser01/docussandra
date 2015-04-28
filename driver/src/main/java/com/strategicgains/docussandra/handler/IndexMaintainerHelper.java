@@ -77,7 +77,7 @@ public class IndexMaintainerHelper
     public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
     {
         //determine which fields need to write as PKs
-        List<String> fields = index.fields();
+        List<String> fields = index.fieldsValues();
         String finalCQL = getCQLStatementForInsert(index);
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
@@ -134,7 +134,7 @@ public class IndexMaintainerHelper
         for (Index index : indices)
         {
             //determine which fields need to use as PKs
-            List<String> fields = index.fields();
+            List<String> fields = index.fieldsValues();
 
             //issue #35: we need to be able to update indexed fields as well,
             //which will require us to:
@@ -208,7 +208,7 @@ public class IndexMaintainerHelper
     private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
     {
         //determine which fields need to write as PKs
-        List<String> fields = index.fields();
+        List<String> fields = index.fieldsValues();
         String finalCQL = getCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
@@ -266,7 +266,7 @@ public class IndexMaintainerHelper
         DocumentRepository docRepo = new DocumentRepository(session);//TODO: if we do any sycronization on doc repo, this could be a problem
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
         BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
-        for (String field : index.fields())
+        for (String field : index.fieldsValues())
         {
             if (!newObject.get(field).equals(oldObject.get(field)))
             {
@@ -316,7 +316,7 @@ public class IndexMaintainerHelper
         //determine which iTables need to be written to
         String iTableToUpdate = Utils.calculateITableName(index);
         //determine which fields need to write as PKs
-        List<String> fields = index.fields();
+        List<String> fields = index.fieldsValues();
         String fieldNamesInsertSyntax = StringUtils.join(",", fields);
         //calculate the number of '?'s we need to append on the values clause
         StringBuilder fieldValueInsertSyntax = new StringBuilder();
@@ -385,7 +385,7 @@ public class IndexMaintainerHelper
     private static String getWhereClauseHelper(Index index)
     {
         //determine which fields need to write as PKs
-        List<String> fields = index.fields();
+        List<String> fields = index.fieldsValues();
         //determine the where clause
         StringBuilder setValues = new StringBuilder();
         for (int i = 0; i < fields.size(); i++)

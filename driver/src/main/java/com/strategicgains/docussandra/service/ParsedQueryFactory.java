@@ -131,7 +131,7 @@ public class ParsedQueryFactory
         {
 //            if (index.isActive())//only use active indexes
 //            {
-                if (equalLists(index.fields(), fieldsToQueryOn))
+                if (equalLists(index.fieldsValues(), fieldsToQueryOn))
                 {
                     indexToUse = index;//we have a perfect match; the index matches the query exactly
                     break;
@@ -147,7 +147,7 @@ public class ParsedQueryFactory
 //                {
                     //make a copy of the fieldsToQueryOn so we don't mutate the orginal
                     ArrayList<String> fieldsToQueryOnCopy = new ArrayList<>(fieldsToQueryOn);
-                    ArrayList<String> indexFields = new ArrayList<>(index.fields());//make a copy here too
+                    ArrayList<String> indexFields = new ArrayList<>(index.fieldsValues());//make a copy here too
                     fieldsToQueryOnCopy.removeAll(indexFields);//we remove all the fields we have, from the fields we want
                     //if there are not any fields left in fields we want
                     if (fieldsToQueryOnCopy.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0)))

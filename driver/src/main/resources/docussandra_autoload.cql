@@ -34,6 +34,7 @@ create table IF NOT EXISTS sys_idx (
 	is_unique boolean,
 	bucket_sz bigint,
 	fields list<text>,
+	fields_type list<text>,
 	only list<text>,
     is_active boolean,
 	created_at timestamp,

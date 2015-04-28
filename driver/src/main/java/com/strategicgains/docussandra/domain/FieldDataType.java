@@ -22,8 +22,10 @@ package com.strategicgains.docussandra.domain;
 public enum FieldDataType
 {
     TEXT,
-    TIME,
     DATE_TIME,
-    DATE,
-    NUMERIC;//maybe change to INTEGER/FLOAT?    
+    DOUBLE,
+    INTEGER,
+    BOOLEAN,
+    UUID,
+    BINARY;// maybe?
 }

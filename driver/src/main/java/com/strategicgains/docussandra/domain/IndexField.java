@@ -20,6 +20,8 @@ import com.strategicgains.syntaxe.ValidationException;
 import com.strategicgains.syntaxe.annotation.Required;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Describes a field that will be indexed.
@@ -28,6 +30,8 @@ import java.util.List;
  */
 public class IndexField implements Validatable
 {
+
+    private static final Pattern fieldPattern = Pattern.compile("^[\\+-]?\\w+");
 
     /**
      * String of the field of this field.
@@ -113,15 +117,62 @@ public class IndexField implements Validatable
             errors.add("Field is required.");// will probably never happen
         }
 
+        if (!fieldPattern.matcher(field).matches())
+        {
+            errors.add("Invalid index field name: " + field);
+        }
         if (type == null)
         {
-            errors.add("Field data type is required.");
+            errors.add("Field data type is required.");//this should not happen either, unless someone explicitly sets it to null
         }
 
         if (!errors.isEmpty())
         {
             throw new ValidationException(errors);
         }
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 3;
+        hash = 97 * hash + Objects.hashCode(this.field);
+        hash = 97 * hash + (this.isAscending ? 1 : 0);
+        hash = 97 * hash + Objects.hashCode(this.type);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        final IndexField other = (IndexField) obj;
+        if (!Objects.equals(this.field, other.field))
+        {
+            return false;
+        }
+        if (this.isAscending != other.isAscending)
+        {
+            return false;
+        }
+        if (this.type != other.type)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "IndexField{" + "field=" + field + ", isAscending=" + isAscending + ", type=" + type + '}';
     }
 
 }

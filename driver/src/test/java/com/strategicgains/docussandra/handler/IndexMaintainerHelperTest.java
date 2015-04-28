@@ -20,6 +20,7 @@ import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorI
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexChangeObserver;
@@ -351,8 +352,8 @@ public class IndexMaintainerHelperTest
     {
         Index index = new Index("myIndexWithOneField");
         index.table("mydb", "mytable");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("myindexedfield");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield"));
         index.fields(fields);
         index.isUnique(false);
         return index;
@@ -367,9 +368,9 @@ public class IndexMaintainerHelperTest
     {
         Index index = new Index("myIndexWithTwoFields");
         index.table("mydb", "mytable");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("myindexedfield1");
-        fields.add("myindexedfield2");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield1"));
+        fields.add(new IndexField("myindexedfield2"));
         index.fields(fields);
         index.isUnique(true);
         return index;

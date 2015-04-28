@@ -22,6 +22,7 @@ import com.jayway.restassured.response.Response;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -247,7 +248,7 @@ public abstract class PerfTestParent
         logger.info("POSTing index: " + index.toString());
         boolean first = true;
         StringBuilder tableStr = new StringBuilder("{" + "\"fields\" : [");
-        for (String field : index.fields())
+        for (IndexField field : index.fields())
         {
             if (!first)
             {
@@ -257,7 +258,7 @@ public abstract class PerfTestParent
                 first = false;
             }
             tableStr.append("\"");
-            tableStr.append(field);
+            tableStr.append(field.getField());
             tableStr.append("\"");
         }
         tableStr.append("],").append("\"name\" : \"").append(index.name()).append("\"}");

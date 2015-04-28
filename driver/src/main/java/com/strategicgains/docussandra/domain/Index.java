@@ -43,17 +43,10 @@ public class Index
      * with a dash ('-') means it's order in descending order.
      */
     @Required("Fields")
-    private List<String> fields;
-
-    /**
-     * Data type of the above fields. Optional, will default to text.
-     */
-    @ChildValidation
-    private List<FieldDataType> fieldTypes;
+    private List<IndexField> fields;
 
 //	@Required("Index Type")
 //	private IndexType type;
-    
     //Note: not currently supported
     /**
      * Consider the index is only concerned with only a partial dataset. In this
@@ -131,14 +124,48 @@ public class Index
         return this;
     }
 
-    public void fields(List<String> props)
+    public void fields(List<IndexField> props)
     {
         this.fields = new ArrayList<>(props);
     }
 
-    public List<String> fields()
+    public List<IndexField> fields()
     {
-        return (fields == null ? Collections.<String>emptyList() : Collections.unmodifiableList(fields));
+        return (fields == null ? Collections.<IndexField>emptyList() : Collections.unmodifiableList(fields));
+    }
+
+    @Deprecated //our goal should be to kill this method -- maybe
+    public List<String> fieldsValues()
+    {
+        if (fields == null)
+        {
+            return Collections.<String>emptyList();
+        } else
+        {
+            ArrayList<String> toReturn = new ArrayList<>();
+            for (IndexField i : fields)
+            {
+                toReturn.add(i.getField());
+            }
+            return Collections.unmodifiableList(toReturn);
+        }
+    }
+    
+    @Deprecated //our goal should be to kill this method -- maybe
+    public List<String> fieldsTypes()
+    {
+        if (fields == null)
+        {
+            return Collections.<String>emptyList();
+        } else
+        {
+            ArrayList<String> toReturn = new ArrayList<>();
+            for (IndexField i : fields)
+            {
+                toReturn.add(i.getType().name());
+            }
+            return Collections.unmodifiableList(toReturn);
+        }
     }
 
     public void includeOnly(List<String> props)
@@ -176,14 +203,13 @@ public class Index
         this.bucketSize = bucketSize;
     }
 
-    public void iterateFields(Callback<IndexField> callback)
-    {
-        for (String field : fields)
-        {
-            callback.process(new IndexField(field));
-        }
-    }
-
+//    public void iterateFields(Callback<IndexField> callback)
+//    {
+//        for (IndexField field : fields)
+//        {
+//            callback.process(field);
+//        }
+//    }
     /**
      * Field indicating if this index should be presently considered active.
      *
@@ -204,28 +230,6 @@ public class Index
         this.active = isActive;
     }
 
-    /**
-     * Data type of the above fields. Optional, will default to text. 1:1
-     * correlation to fields. If this is passed, it must include a data type for
-     * each field.
-     * @return the fieldTypes
-     */
-    public List<FieldDataType> fieldTypes()
-    {
-        return fieldTypes;
-    }
-
-    /**
-     * Data type of the above fields. Optional, will default to text. 1:1
-     * correlation to fields. If this is passed, it must include a data type for
-     * each field.
-     * @param fieldTypes the fieldTypes to set
-     */
-    public void fieldTypes(List<FieldDataType> fieldTypes)
-    {
-        this.fieldTypes = fieldTypes;
-    }
-
     @Override
     public void validate()
     {
@@ -234,16 +238,6 @@ public class Index
         if (fields.isEmpty())
         {
             errors.add("Fields is required.");
-        }
-
-        Pattern fieldPattern = Pattern.compile("^[\\+-]?\\w+");
-
-        for (String field : fields)
-        {
-            if (!fieldPattern.matcher(field).matches())
-            {
-                errors.add("Invalid index field name: " + field);
-            }
         }
 
         Pattern includePattern = Pattern.compile("^\\w+");
@@ -263,26 +257,24 @@ public class Index
                 }
             }
         }
-        
+
         if (!errors.isEmpty())
         {
             throw new ValidationException(errors);
         }
     }
 
-    //TODO: left off here -- add fields to the boilerplate methods
-    
     @Override
     public int hashCode()
     {
         int hash = 7;
-        hash = 83 * hash + Objects.hashCode(this.table);
-        hash = 83 * hash + Objects.hashCode(this.name);
-        hash = 83 * hash + (this.isUnique ? 1 : 0);
-        hash = 83 * hash + (int) (this.bucketSize ^ (this.bucketSize >>> 32));
-        hash = 83 * hash + Objects.hashCode(this.fields);
-        hash = 83 * hash + Objects.hashCode(this.includeOnly);
-        hash = 83 * hash + (this.active ? 1 : 0);
+        hash = 97 * hash + Objects.hashCode(this.table);
+        hash = 97 * hash + Objects.hashCode(this.name);
+        hash = 97 * hash + (this.isUnique ? 1 : 0);
+        hash = 97 * hash + (int) (this.bucketSize ^ (this.bucketSize >>> 32));
+        hash = 97 * hash + Objects.hashCode(this.fields);
+        hash = 97 * hash + Objects.hashCode(this.includeOnly);
+        hash = 97 * hash + (this.active ? 1 : 0);
         return hash;
     }
 

@@ -11,7 +11,9 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.cache.CacheSynchronizer;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
@@ -52,6 +54,7 @@ public class IndexRepository
         static final String IS_UNIQUE = "is_unique";
         static final String BUCKET_SIZE = "bucket_sz";
         static final String FIELDS = "fields";
+        static final String FIELDS_TYPE = "fields_type";        
         static final String ONLY = "only";
         static final String CREATED_AT = "created_at";
         static final String UPDATED_AT = "updated_at";
@@ -60,7 +63,7 @@ public class IndexRepository
 
     private static final String IDENTITY_CQL = " where db_name = ? and tbl_name = ? and name = ?";
     private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, only, is_active, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, fields_type, only, is_active, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
     private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
     private static final String MARK_ACTIVE_CQL = "update %s set is_active = true" + IDENTITY_CQL;
@@ -258,7 +261,8 @@ public class IndexRepository
                 entity.tableName(),
                 entity.isUnique(),
                 entity.bucketSize(),
-                entity.fields(),
+                entity.fieldsValues(),
+                entity.fieldsTypes(),
                 entity.includeOnly(),
                 entity.isActive(),
                 entity.getCreatedAt(),
@@ -301,7 +305,13 @@ public class IndexRepository
         i.table(t);
         i.isUnique(row.getBool(Columns.IS_UNIQUE));
         i.bucketSize(row.getLong(Columns.BUCKET_SIZE));
-        i.fields(row.getList(Columns.FIELDS, String.class));
+        List<String> fields = row.getList(Columns.FIELDS, String.class);
+        List<String> types = row.getList(Columns.FIELDS_TYPE, String.class);        
+        ArrayList<IndexField> indexFields = new ArrayList<>(fields.size());
+        for(int j = 0; j < fields.size(); j++){
+            indexFields.add(new IndexField(fields.get(j), FieldDataType.valueOf(types.get(j))));
+        }
+        i.fields(indexFields);
         i.includeOnly(row.getList(Columns.ONLY, String.class));
         i.setActive(row.getBool(Columns.IS_ACTIVE));
         i.setCreatedAt(row.getDate(Columns.CREATED_AT));

@@ -112,7 +112,7 @@ public class ITableRepository
 //            primaryKeyCreateStatement.append("(id), ");//if the index is not unique, set the pk to include the id 
 //        }
         boolean first = true;
-        for (String field : index.fields())
+        for (String field : index.fieldsValues())
         {
             if (!first)
             {

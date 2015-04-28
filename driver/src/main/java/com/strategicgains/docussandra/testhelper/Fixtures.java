@@ -9,6 +9,7 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
@@ -251,9 +252,9 @@ public class Fixtures
     {
         Index index = new Index("myindexwithtwofields");
         index.table(DB, "mytable");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("myindexedfield1");
-        fields.add("myindexedfield2");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield1"));
+        fields.add(new IndexField("myindexedfield2"));
         index.fields(fields);
         index.isUnique(false);
         return index;
@@ -268,8 +269,8 @@ public class Fixtures
     {
         Index lastname = new Index("lastname");
         lastname.isUnique(false);
-        ArrayList<String> fields = new ArrayList<>(1);
-        fields.add("NAMELAST");
+        ArrayList<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("NAMELAST"));
         lastname.fields(fields);
         lastname.table(Fixtures.createTestPlayersTable());
         return lastname;
@@ -284,8 +285,8 @@ public class Fixtures
     {
         Index index = new Index("myindexwithonefield");
         index.table(DB, "mytable");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("myindexedfield");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield"));
         index.fields(fields);
         index.isUnique(false);
         return index;
@@ -325,8 +326,8 @@ public class Fixtures
     {
         Index index = new Index("myindexbulkdata");
         index.table(DB, "mytable");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("field1");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("field1"));
         index.fields(fields);
         index.isUnique(false);
         return index;
