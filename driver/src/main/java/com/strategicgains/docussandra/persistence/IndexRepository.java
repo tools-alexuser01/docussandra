@@ -271,7 +271,7 @@ public class IndexRepository
 
     private List<Index> marshalAll(ResultSet rs)
     {
-        List<Index> indexes = new ArrayList<Index>();
+        List<Index> indexes = new ArrayList<>();
         Iterator<Row> i = rs.iterator();
 
         while (i.hasNext())
