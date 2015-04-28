@@ -47,7 +47,6 @@ public class IndexRepository
      */
     private class Columns
     {
-
         static final String DATABASE = "db_name";
         static final String TABLE = "tbl_name";
         static final String NAME = "name";
