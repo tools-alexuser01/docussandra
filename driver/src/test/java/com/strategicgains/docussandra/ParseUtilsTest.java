@@ -16,8 +16,8 @@
 package com.strategicgains.docussandra;
 
 import com.strategicgains.docussandra.exception.IndexParseFieldException;
-import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
 import java.util.Date;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +35,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ParseUtilsTest
 {
-    
-        private static Logger logger = LoggerFactory.getLogger(ParseUtilsTest.class);
+
+    private static Logger logger = LoggerFactory.getLogger(ParseUtilsTest.class);
 
     public ParseUtilsTest()
     {
@@ -145,19 +146,43 @@ public class ParseUtilsTest
         assertTrue(expectExceptionThrown);
     }
 
-//    /**
-//     * Test of convertStringToDate method, of class ParseUtils.
-//     */
-//    @Test
-//    public void testConvertStringToDate() throws Exception
-//    {
-//        System.out.println("convertStringToDate");
-//        String in = "";
-//        Date expResult = null;
-//        Date result = ParseUtils.convertStringToDate(in);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
+    /**
+     * Test of convertStringToDate method, of class ParseUtils.
+     */
+    @Test
+    @Ignore
+    public void testConvertStringToDate() throws Exception
+    {
+        System.out.println("convertStringToDate");
+        Date testDate = new Date();
+        String in = testDate.toString();
+        Date result = ParseUtils.convertStringToDate(in);
+        assertEquals(testDate.getTime(), result.getTime(), 100l);
+
+        DateFormat format = DateFormat.getDateInstance(DateFormat.LONG);
+        in = format.format(testDate);
+        result = ParseUtils.convertStringToDate(in);
+        assertEquals(testDate.getTime(), result.getTime(), 3600l);
+
+        format = DateFormat.getDateInstance(DateFormat.SHORT);
+        in = format.format(testDate);
+        result = ParseUtils.convertStringToDate(in);
+        assertEquals(testDate.getTime(), result.getTime(), 3600l);
+
+        testDate = new Date();
+        testDate.setYear(3);
+        testDate.setMonth(11);
+        testDate.setDate(17);
+        testDate.setHours(0);
+        testDate.setMinutes(0);
+        testDate.setSeconds(0);
+        in = "12/17/03";
+        result = ParseUtils.convertStringToDate(in);
+        assertEquals(testDate.getTime(), result.getTime(), 0l);
+
+        in = "17/12/03";
+        result = ParseUtils.convertStringToDate(in);
+        assertEquals(testDate.getTime(), result.getTime(), 0l);
+    }
 
 }

@@ -18,7 +18,9 @@ package com.strategicgains.docussandra;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 import com.strategicgains.docussandra.exception.IndexParseFieldException;
+import com.strategicgains.util.date.DateAdapter;
 import java.nio.ByteBuffer;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
@@ -60,19 +62,34 @@ public class ParseUtils
         throw new IndexParseFieldException(in);
     }
 
+    /**
+     * Converts a string to a date using the Natty library.
+     *
+     * @param in String to convert to a date.
+     * @return A date based on the string.
+     * @throws IndexParseFieldException If the field cannot be parsed.
+     */
     public static Date convertStringToDate(String in) throws IndexParseFieldException
     {
-        Parser parser = new Parser();
-        List<DateGroup> dg = parser.parse(in);
-        if (dg.isEmpty())
+        DateAdapter adapter = new DateAdapter();
+        try
         {
-            throw new IndexParseFieldException(in);
-        }
-        List<Date> dates = dg.get(0).getDates();
-        if (dates.isEmpty())
+            return adapter.parse(in);
+        } catch (ParseException e)//fall back to netty if that fails
         {
-            throw new IndexParseFieldException(in);
+            Parser parser = new Parser();
+            List<DateGroup> dg = parser.parse(in);
+            if (dg.isEmpty())
+            {
+                throw new IndexParseFieldException(in);
+            }
+            List<Date> dates = dg.get(0).getDates();
+            if (dates.isEmpty())
+            {
+                throw new IndexParseFieldException(in);
+            }
+            return dates.get(0);//dang; that actually works
         }
-        return dates.get(0);
+
     }
 }
