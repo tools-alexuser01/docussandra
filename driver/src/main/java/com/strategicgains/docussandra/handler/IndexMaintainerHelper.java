@@ -61,10 +61,17 @@ public class IndexMaintainerHelper
         for (Index index : indices)
         {
             //add row to the iTable(s)
-            BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
-            if (bs != null)
+            try
             {
-                statementList.add(bs);
+                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
+                if (bs != null)
+                {
+                    statementList.add(bs);
+                }
+            } catch (IndexParseException e)
+            {
+                //TODO: update the index status with a non-fatal error
+                logger.error("Couldn't parse value", e);
             }
         }
         //return a list of commands to accomplish all of this
@@ -79,7 +86,7 @@ public class IndexMaintainerHelper
      * @param entity
      * @return
      */
-    public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
+    public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
     {
         //determine which fields need to write as PKs
         List<IndexField> fieldsData = index.fields();
@@ -114,50 +121,51 @@ public class IndexMaintainerHelper
         bs.setDate(4, entity.getUpdatedAt());
         for (int i = 0; i < fieldsData.size(); i++)
         {
-            String field = fieldsData.get(i).getField();
+            IndexField fieldData = fieldsData.get(i);
+            String field = fieldData.getField();
             Object jObject = jsonObject.get(field);
 
             if (jObject == null)
             {
-                bs.setString(i + 5, "");//offset from the first five non-dynamic fields
+                setField(null, fieldData, bs, i + 5);//offset from the first five non-dynamic fields
             } else
             {
-                String fieldValue = jObject.toString();//note, could have parse problems here with non-string types: TODO: use proper types; need to set the tables correctly first
-                bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
+                String fieldValue = jObject.toString();
+                setField(fieldValue, fieldData, bs, i + 5);//offset from the first five non-dynamic fields
             }
 
         }
         return bs;
     }
 
-    private static void setField(IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    private static void setField(String jsonValue, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
         try
         {
-            if (fieldData.getField() == null)
+            if (jsonValue == null)
             {
                 bs.setToNull(index);
             } else if (fieldData.getType().equals(FieldDataType.BINARY))
             {
-                bs.setBytes(index, ParseUtils.convertBase64StringToByteBuffer(fieldData.getField()));
+                bs.setBytes(index, ParseUtils.convertBase64StringToByteBuffer(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.BOOLEAN))
             {
-                bs.setBool(index, ParseUtils.convertStringToBoolean(fieldData.getField()));
+                bs.setBool(index, ParseUtils.convertStringToBoolean(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
             {
-                bs.setDate(index, ParseUtils.convertStringToDate(fieldData.getField()));
+                bs.setDate(index, ParseUtils.convertStringToDate(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.DOUBLE))
             {
-                bs.setDouble(index, ParseUtils.convertStringToDouble(fieldData.getField()));
+                bs.setDouble(index, ParseUtils.convertStringToDouble(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.INTEGER))
             {
-                bs.setInt(index, ParseUtils.convertStringToInteger(fieldData.getField()));
+                bs.setInt(index, ParseUtils.convertStringToInteger(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.TEXT))
             {
-                bs.setString(index, fieldData.getField());
+                bs.setString(index, jsonValue);
             } else if (fieldData.getType().equals(FieldDataType.UUID))
             {
-                bs.setUUID(index, ParseUtils.convertStringToUUID(fieldData.getField()));
+                bs.setUUID(index, ParseUtils.convertStringToUUID(jsonValue));
             } else
             {
                 throw new IndexParseFieldException(fieldData.getField(), new Exception(fieldData.getType().toString() + " is an unsupported type. Please contact support."));//this should NEVER happen; it is a programming error if it does
@@ -185,10 +193,17 @@ public class IndexMaintainerHelper
             if (hasIndexedFieldChanged(session, index, entity))
             {
                 //2a. if the field has changed, create a new index entry
-                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
-                if (bs != null)
+                try
                 {
-                    statementList.add(bs);
+                    BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
+                    if (bs != null)
+                    {
+                        statementList.add(bs);
+                    }
+                } catch (IndexParseException e)
+                {
+                    //TODO: update the index status with a non-fatal error
+                    logger.error("Couldn't parse value", e);
                 }
                 //2b. after creating the new index entry, we must delete the old one
                 statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
