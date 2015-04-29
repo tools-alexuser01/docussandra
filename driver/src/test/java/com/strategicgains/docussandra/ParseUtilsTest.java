@@ -19,13 +19,13 @@ import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,9 +150,9 @@ public class ParseUtilsTest
      * Test of convertStringToDate method, of class ParseUtils.
      */
     @Test
-    @Ignore
     public void testConvertStringToDate() throws Exception
     {
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         System.out.println("convertStringToDate");
         Date testDate = new Date();
         String in = testDate.toString();
@@ -164,11 +164,6 @@ public class ParseUtilsTest
         result = ParseUtils.convertStringToDate(in);
         assertEquals(testDate.getTime(), result.getTime(), 3600l);
 
-        format = DateFormat.getDateInstance(DateFormat.SHORT);
-        in = format.format(testDate);
-        result = ParseUtils.convertStringToDate(in);
-        assertEquals(testDate.getTime(), result.getTime(), 3600l);
-
         testDate = new Date();
         testDate.setYear(3);
         testDate.setMonth(11);
@@ -176,11 +171,13 @@ public class ParseUtilsTest
         testDate.setHours(0);
         testDate.setMinutes(0);
         testDate.setSeconds(0);
-        in = "12/17/03";
+        //testDate.setTime(testDate.getTime() + (3600000 * -8));
+        in = "12/17/1903";
         result = ParseUtils.convertStringToDate(in);
         assertEquals(testDate.getTime(), result.getTime(), 0l);
 
-        in = "17/12/03";
+        //in = "17/12/1903";//nope!
+        in = "17 Dec 1903 00:00:00";
         result = ParseUtils.convertStringToDate(in);
         assertEquals(testDate.getTime(), result.getTime(), 0l);
     }

@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -69,7 +70,7 @@ public class ParseUtils
      * @return A date based on the string.
      * @throws IndexParseFieldException If the field cannot be parsed.
      */
-    public static Date convertStringToDate(String in) throws IndexParseFieldException
+    public static Date convertStringToDate(String in) throws IndexParseFieldException //TODO: come back to this and add more tests, i am not yet entirely happy with it
     {
         DateAdapter adapter = new DateAdapter();
         try
@@ -77,7 +78,7 @@ public class ParseUtils
             return adapter.parse(in);
         } catch (ParseException e)//fall back to netty if that fails
         {
-            Parser parser = new Parser();
+            Parser parser = new Parser(TimeZone.getTimeZone("GMT"));//assume all dates are GMT
             List<DateGroup> dg = parser.parse(in);
             if (dg.isEmpty())
             {
