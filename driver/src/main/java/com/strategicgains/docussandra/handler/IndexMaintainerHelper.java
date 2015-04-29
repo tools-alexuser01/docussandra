@@ -9,12 +9,14 @@ import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.nio.ByteBuffer;
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 import net.sf.ehcache.Cache;
@@ -43,10 +45,11 @@ public class IndexMaintainerHelper
     public static final String ITABLE_DELETE_CQL = "DELETE FROM %s WHERE bucket = ? AND %s;";
     //TODO: ----------------remove hard coding of keyspace name--^^^--------
 
-    private IndexMaintainerHelper(){
+    private IndexMaintainerHelper()
+    {
         //don't instantiate; call static methods only
     }
-    
+
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -77,15 +80,15 @@ public class IndexMaintainerHelper
     public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
     {
         //determine which fields need to write as PKs
-        List<String> fields = index.fieldsValues();
+        List<IndexField> fieldsData = index.fields();
         String finalCQL = getCQLStatementForInsert(index);
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
-        //pull the index fields out of the document for binding
+        //pull the index fieldsData out of the document for binding
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         //set the bucket
-        Object fieldToBucketOnObject = jsonObject.get(fields.get(0));
+        Object fieldToBucketOnObject = jsonObject.get(fieldsData.get(0).getField());//pull the field to bucket on out of the document
         if (fieldToBucketOnObject == null)
         {
             // we do not have an indexable field in our document -- therefore, it shouldn't be added to an index! (right?) -- is this right Todd?
@@ -107,9 +110,9 @@ public class IndexMaintainerHelper
         //set the dates
         bs.setDate(3, entity.getCreatedAt());
         bs.setDate(4, entity.getUpdatedAt());
-        for (int i = 0; i < fields.size(); i++)
+        for (int i = 0; i < fieldsData.size(); i++)
         {
-            String field = fields.get(i);
+            String field = fieldsData.get(i).getField();
             Object jObject = jsonObject.get(field);
 
             if (jObject == null)
@@ -124,6 +127,16 @@ public class IndexMaintainerHelper
         }
         return bs;
     }
+    
+//    private static void setField(IndexField fieldData, BoundStatement bs, int index){
+//        if(fieldData.getType().equals(FieldDataType.BINARY)){
+//            bs.setBytes(index, fieldData.getField().to)
+//        }
+//    }
+//    
+//    private static Blob convertStringToBlob(String in){
+//    
+//    }
 
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
@@ -336,7 +349,7 @@ public class IndexMaintainerHelper
      * Helper for generating update CQL statements for iTables. This would be
      * private but keeping public for ease of testing. Same as
      * generateCQLStatementForWhereClauses but will retrieve from cache when
-     * availible.
+     * available.
      *
      * @param CQL statement that is not yet formatted.
      * @param index Index to generate the statement for.
