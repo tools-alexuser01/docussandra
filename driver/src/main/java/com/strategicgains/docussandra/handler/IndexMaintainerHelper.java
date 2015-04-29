@@ -5,6 +5,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
+import com.strategicgains.docussandra.ParseUtils;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.cache.CacheFactory;
@@ -12,11 +13,12 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.nio.ByteBuffer;
-import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 import net.sf.ehcache.Cache;
@@ -35,9 +37,9 @@ import org.slf4j.LoggerFactory;
  */
 public class IndexMaintainerHelper
 {
-
+    
     private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
-
+    
     public static final String ITABLE_INSERT_CQL = "INSERT INTO %s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
     public static final String ITABLE_UPDATE_CQL = "UPDATE %s SET object = ?, updated_at = ? WHERE bucket = ? AND %s;";
@@ -49,7 +51,7 @@ public class IndexMaintainerHelper
     {
         //don't instantiate; call static methods only
     }
-
+    
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -114,7 +116,7 @@ public class IndexMaintainerHelper
         {
             String field = fieldsData.get(i).getField();
             Object jObject = jsonObject.get(field);
-
+            
             if (jObject == null)
             {
                 bs.setString(i + 5, "");//offset from the first five non-dynamic fields
@@ -123,21 +125,34 @@ public class IndexMaintainerHelper
                 String fieldValue = jObject.toString();//note, could have parse problems here with non-string types: TODO: use proper types; need to set the tables correctly first
                 bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
             }
-
+            
         }
         return bs;
     }
     
-//    private static void setField(IndexField fieldData, BoundStatement bs, int index){
-//        if(fieldData.getType().equals(FieldDataType.BINARY)){
-//            bs.setBytes(index, fieldData.getField().to)
-//        }
-//    }
-//    
-//    private static Blob convertStringToBlob(String in){
-//    
-//    }
-
+    private static void setField(IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    {
+        try
+        {
+            if (fieldData.getField() == null)
+            {
+                bs.setToNull(index);
+            } else if (fieldData.getType().equals(FieldDataType.BINARY))
+            {
+                bs.setBytes(index, ParseUtils.convertBase64StringToByteBuffer(fieldData.getField()));
+            } else if (fieldData.getType().equals(FieldDataType.BOOLEAN))
+            {
+                bs.setBool(index, ParseUtils.convertStringToBoolean(fieldData.getField()));
+            } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
+            {
+                bs.setDate(index, ParseUtils.convertStringToDate(fieldData.getField()));
+            }
+        } catch (IndexParseFieldException parseException)
+        {            
+            throw new IndexParseException(fieldData, parseException);
+        }
+    }
+    
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -193,7 +208,7 @@ public class IndexMaintainerHelper
         //return a list of commands to accomplish all of this
         return statementList;
     }
-
+    
     public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -394,7 +409,7 @@ public class IndexMaintainerHelper
         //create final CQL statement for updating a row in an iTable(s)        
         return String.format(CQL, iTableToUpdate, getWhereClauseHelper(index));
     }
-
+    
     private static String getWhereClauseHelper(Index index)
     {
         //determine which fields need to write as PKs
@@ -412,5 +427,5 @@ public class IndexMaintainerHelper
         }
         return setValues.toString();
     }
-
+    
 }
