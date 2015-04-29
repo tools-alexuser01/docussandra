@@ -184,55 +184,58 @@ public class IndexMaintainerHelper
         //for each index
         for (Index index : indices)
         {
-            //determine which fields need to use as PKs
-            List<String> fields = index.fieldsValues();
-
-            //issue #35: we need to be able to update indexed fields as well,
-            //which will require us to:
-            //1. determine if an indexed field has changed
-            if (hasIndexedFieldChanged(session, index, entity))
+            try
             {
-                //2a. if the field has changed, create a new index entry
-                try
+                //determine which fields need to use as PKs
+                List<IndexField> fields = index.fields();
+
+                //issue #35: we need to be able to update indexed fields as well,
+                //which will require us to:
+                //1. determine if an indexed field has changed
+                if (hasIndexedFieldChanged(session, index, entity))
                 {
+                    //2a. if the field has changed, create a new index entry
+
                     BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
                     if (bs != null)
                     {
                         statementList.add(bs);
                     }
-                } catch (IndexParseException e)
-                {
-                    //TODO: update the index status with a non-fatal error
-                    logger.error("Couldn't parse value", e);
-                }
-                //2b. after creating the new index entry, we must delete the old one
-                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
-            } else
-            {//3. if an indexed field has not changed, do a normal CQL update
-                String finalCQL = getCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
-                PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
-                BoundStatement bs = new BoundStatement(ps);
 
-                //set the blob
-                BSONObject bson = (BSONObject) JSON.parse(entity.object());
-                bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
-                //set the date
-                bs.setDate(1, entity.getUpdatedAt());
-                //pull the index fields out of the document for binding
-                String documentJSON = entity.object();
-                DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
-                //set the bucket
-                String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0))));//note, could have parse problems here with non-string types
-                logger.debug("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
-                bs.setString(2, bucketId);
-                for (int i = 0; i < fields.size(); i++)
-                {
-                    String field = fields.get(i);
-                    String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-                    bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
+                    //2b. after creating the new index entry, we must delete the old one
+                    statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
+                } else
+                {//3. if an indexed field has not changed, do a normal CQL update
+                    String finalCQL = getCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
+                    PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
+                    BoundStatement bs = new BoundStatement(ps);
+
+                    //set the blob
+                    BSONObject bson = (BSONObject) JSON.parse(entity.object());
+                    bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
+                    //set the date
+                    bs.setDate(1, entity.getUpdatedAt());
+                    //pull the index fields out of the document for binding
+                    String documentJSON = entity.object();
+                    DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+                    //set the bucket
+                    String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0).getField())));//note, could have parse problems here with non-string types
+                    logger.debug("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
+                    bs.setString(2, bucketId);
+                    for (int i = 0; i < fields.size(); i++)
+                    {
+                        String field = fields.get(i).getField();
+                        String fieldValue = (String) jsonObject.get(field);
+                        //bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
+                        setField(fieldValue, fields.get(i), bs, i + 3);//offset from the first three non-dynamic fields
+                    }
+                    //add row to the iTable(s)
+                    statementList.add(bs);
                 }
-                //add row to the iTable(s)
-                statementList.add(bs);
+            } catch (IndexParseException e)
+            {
+                //TODO: update the index status with a non-fatal error
+                logger.error("Couldn't parse value", e);
             }
         }
         //return a list of commands to accomplish all of this
@@ -247,10 +250,17 @@ public class IndexMaintainerHelper
         //for each index
         for (Index index : indices)
         {
-            BoundStatement bs = generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator);
-            if (bs != null)
+            try
             {
-                statementList.add(bs);
+                BoundStatement bs = generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator);
+                if (bs != null)
+                {
+                    statementList.add(bs);
+                }
+            } catch (IndexParseException e)
+            {
+                //TODO: update the index status with a non-fatal error
+                logger.error("Couldn't parse value", e);
             }
         }
         return statementList;
@@ -263,17 +273,17 @@ public class IndexMaintainerHelper
      * @param entity
      * @return
      */
-    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator)
+    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
     {
         //determine which fields need to write as PKs
-        List<String> fields = index.fieldsValues();
+        List<IndexField> fields = index.fields();
         String finalCQL = getCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
         //pull the index fields out of the document for binding
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
-        Object fieldToBucketOnObject = jsonObject.get(fields.get(0));
+        Object fieldToBucketOnObject = jsonObject.get(fields.get(0).getField());
         if (fieldToBucketOnObject == null)
         {
             // we do not have an indexable field in our document -- therefore, it shouldn't need to be removed an index! (right?) -- is this right Todd?
@@ -286,9 +296,10 @@ public class IndexMaintainerHelper
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)
         {
-            String field = fields.get(i);
+            String field = fields.get(i).getField();
             String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-            bs.setString(i + 1, fieldValue);
+            setField(fieldValue, fields.get(i), bs, i + 1);
+            //bs.setString(i + 1, fieldValue);
         }
         return bs;
     }
