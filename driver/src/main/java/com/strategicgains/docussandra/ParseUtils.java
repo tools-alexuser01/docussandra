@@ -15,9 +15,12 @@
  */
 package com.strategicgains.docussandra;
 
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
 import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -59,6 +62,17 @@ public class ParseUtils
 
     public static Date convertStringToDate(String in) throws IndexParseFieldException
     {
-        throw new UnsupportedOperationException("Not done yet.");
+        Parser parser = new Parser();
+        List<DateGroup> dg = parser.parse(in);
+        if (dg.isEmpty())
+        {
+            throw new IndexParseFieldException(in);
+        }
+        List<Date> dates = dg.get(0).getDates();
+        if (dates.isEmpty())
+        {
+            throw new IndexParseFieldException(in);
+        }
+        return dates.get(0);
     }
 }
