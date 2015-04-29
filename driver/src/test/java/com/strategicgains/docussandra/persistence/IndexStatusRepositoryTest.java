@@ -22,6 +22,7 @@ import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -76,22 +77,6 @@ public class IndexStatusRepositoryTest
     {
     }
 
-//not implemented    
-//    /**
-//     * Test of exists method, of class IndexStatusRepository.
-//     */
-//    @Test
-//    public void testExists_Identifier()
-//    {
-//        System.out.println("exists");
-//        Identifier identifier = null;
-//        IndexStatusRepository instance = null;
-//        boolean expResult = false;
-//        boolean result = instance.exists(identifier);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
     /**
      * Test of exists method, of class IndexStatusRepository.
      */
@@ -109,22 +94,6 @@ public class IndexStatusRepositoryTest
         assertEquals(true, result);
     }
 
-//not implemented
-//    /**
-//     * Test of readEntityById method, of class IndexStatusRepository.
-//     */
-//    @Test
-//    public void testReadEntityById()
-//    {
-//        System.out.println("readEntityById");
-//        Identifier identifier = null;
-//        IndexStatusRepository instance = null;
-//        IndexCreatedEvent expResult = null;
-//        IndexCreatedEvent result = instance.readEntityById(identifier);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
     /**
      * Test of createEntity method, of class IndexStatusRepository.
      */
@@ -163,9 +132,9 @@ public class IndexStatusRepositoryTest
      * Test of updateEntity method, of class IndexStatusRepository.
      */
     @Test
-    public void testUpdateEntityWithErrorField()
+    public void testUpdateEntityWithFatalErrorField()
     {
-        System.out.println("updateEntity");
+        System.out.println("updateEntityWithFatalErrorField");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         //create
@@ -173,7 +142,7 @@ public class IndexStatusRepositoryTest
         //update
         entity.setRecordsCompleted(10);
         entity.setStatusLastUpdatedAt(new Date());
-        entity.setError("Whoops! Something Went Wrong.");
+        entity.setFatalError("Whoops! Something Went Wrong.");
         IndexCreatedEvent result = instance.updateEntity(entity);
         assertStatusEqualEnough(entity, result);
         //fetch
@@ -185,9 +154,9 @@ public class IndexStatusRepositoryTest
      * Test of updateEntity method, of class IndexStatusRepository.
      */
     @Test
-    public void testUpdateEntityWithNullErrorField()
+    public void testUpdateEntityWithNullFatalErrorField()
     {
-        System.out.println("updateEntity");
+        System.out.println("updateEntityWithNullFatalErrorField");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         //create
@@ -195,7 +164,53 @@ public class IndexStatusRepositoryTest
         //update
         entity.setRecordsCompleted(10);
         entity.setStatusLastUpdatedAt(new Date());
-        entity.setError(null);
+        entity.setFatalError(null);
+        IndexCreatedEvent result = instance.updateEntity(entity);
+        assertStatusEqualEnough(entity, result);
+        //fetch
+        IndexCreatedEvent read = instance.readEntityByUUID(entity.getUuid());
+        assertStatusEqualEnough(entity, read);
+    }
+
+    /**
+     * Test of updateEntity method, of class IndexStatusRepository.
+     */
+    @Test
+    public void testUpdateEntityWithErrorsField()
+    {
+        System.out.println("updateEntityWithErrorsField");
+        IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
+        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        //create
+        instance.createEntity(entity);
+        //update
+        entity.setRecordsCompleted(10);
+        entity.setStatusLastUpdatedAt(new Date());
+        ArrayList<String> errors = new ArrayList<>();
+        errors.add("Whoops! Something Went Wrong.");
+        entity.setErrors(errors);
+        IndexCreatedEvent result = instance.updateEntity(entity);
+        assertStatusEqualEnough(entity, result);
+        //fetch
+        IndexCreatedEvent read = instance.readEntityByUUID(entity.getUuid());
+        assertStatusEqualEnough(entity, read);
+    }
+
+    /**
+     * Test of updateEntity method, of class IndexStatusRepository.
+     */
+    @Test
+    public void testUpdateEntityWithNullErrorsField()
+    {
+        System.out.println("updateEntityWithNullErrorsField");
+        IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
+        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        //create
+        instance.createEntity(entity);
+        //update
+        entity.setRecordsCompleted(10);
+        entity.setStatusLastUpdatedAt(new Date());
+        entity.setErrors(null);
         IndexCreatedEvent result = instance.updateEntity(entity);
         assertStatusEqualEnough(entity, result);
         //fetch
@@ -378,7 +393,7 @@ public class IndexStatusRepositoryTest
         assertEquals(expected.getStatusLastUpdatedAt(), actual.getStatusLastUpdatedAt());
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getUuid(), actual.getUuid());
-        assertEquals(expected.getError(), actual.getError());
+        assertEquals(expected.getFatalError(), actual.getFatalError());
     }
 
 }

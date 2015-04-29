@@ -61,15 +61,16 @@ public class IndexStatusRepository
         static final String RECORDS_COMPLETED = "records_completed";
         static final String STARTED_AT = "started_at";
         static final String UPDATED_AT = "updated_at";
-        static final String ERROR = "error";
+        static final String FATAL_ERROR = "fatal_error";
+        static final String ERRORS = "errors";
     }
 
     private static final String IDENTITY_CQL = " where id = ?";
     private static final String EXISTENCE_CQL = "select count(*) from " + Tables.BY_ID + IDENTITY_CQL;
     private static final String DELETE_FROM_NOT_DONE = "delete from " + Tables.BY_NOT_DONE + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.TOTAL_RECORDS + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ", " + Columns.ERROR + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.TOTAL_RECORDS + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ", " + Columns.ERRORS + ", " + Columns.FATAL_ERROR + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from " + Tables.BY_ID + IDENTITY_CQL;
-    private static final String UPDATE_CQL = "update " + Tables.BY_ID + " set " + Columns.RECORDS_COMPLETED + " = ?, " + Columns.UPDATED_AT + " = ?, " + Columns.ERROR + " = ?" + IDENTITY_CQL;
+    private static final String UPDATE_CQL = "update " + Tables.BY_ID + " set " + Columns.RECORDS_COMPLETED + " = ?, " + Columns.UPDATED_AT + " = ?, " + Columns.ERRORS + " = ?, " + Columns.FATAL_ERROR + " = ?" + IDENTITY_CQL;
     private static final String MARK_INDEXING_CQL = "insert into " + Tables.BY_NOT_DONE + "(" + Columns.ID + ") values (?)";//TODO: if not exists?
 
     private static final String READ_ALL_CQL = "select * from " + Tables.BY_ID;
@@ -251,7 +252,7 @@ public class IndexStatusRepository
     }
 
     /**
-     * Determines if a index is currently indexing or not. Not presently used.
+     * Determines if a index is currently indexing or not. Not presently used, but the method should work.
      * @param id
      * @return 
      */
@@ -278,14 +279,16 @@ public class IndexStatusRepository
                 entity.getTotalRecords(),
                 entity.getDateStarted(),
                 entity.getStatusLastUpdatedAt(),
-                entity.getError());
+                entity.getErrors(),
+                entity.getFatalError());
     }
 
     private void bindUpdate(BoundStatement bs, IndexCreatedEvent entity)
     {
         bs.bind(entity.getRecordsCompleted(),
                 entity.getStatusLastUpdatedAt(),
-                entity.getError(),
+                entity.getErrors(),
+                entity.getFatalError(),
                 entity.getUuid());
     }
 
@@ -336,7 +339,8 @@ public class IndexStatusRepository
             toUse = index;
         }
         IndexCreatedEvent i = new IndexCreatedEvent(row.getUUID(Columns.ID), row.getDate(Columns.STARTED_AT), row.getDate(Columns.UPDATED_AT), toUse, row.getLong(Columns.TOTAL_RECORDS), row.getLong(Columns.RECORDS_COMPLETED));
-        i.setError(row.getString(Columns.ERROR));
+        i.setFatalError(row.getString(Columns.FATAL_ERROR));
+        i.setErrors(row.getList(Columns.ERRORS, String.class));
         i.calculateValues();
         return i;
     }

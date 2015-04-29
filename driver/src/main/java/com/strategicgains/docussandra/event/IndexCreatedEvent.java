@@ -20,6 +20,7 @@ import com.strategicgains.repoexpress.domain.Identifier;
 import com.strategicgains.repoexpress.domain.UuidIdentifiable;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import org.restexpress.plugin.hyperexpress.Linkable;
@@ -74,11 +75,19 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
     private long recordsCompleted;
 
     /**
-     * Error message if an error has occurred in the creation of this index.
-     * Will be null if no error has occurred yet.
+     * Fatal error message if an error has occurred in the creation of this
+     * index. Will be null if no error has occurred yet. A fatal error will
+     * indicate that indexing cannot complete for some reason.
      */
-    private String error;
+    private String fatalError;
 
+    /**
+     * Error messages if a errors have occurred in the creation of this index.
+     * Will be null if no errors have occurred yet. As opposed to a fatalError,
+     * these errors are more like warnings; the index as a whole will still
+     * complete.
+     */
+    private List<String> errors;
 
     /**
      * Constructor.
@@ -112,6 +121,7 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
 
     /**
      * Returns if this index is done indexing or not.
+     *
      * @return
      */
     public boolean isDoneIndexing()
@@ -138,15 +148,14 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
         }
     }
 
-
     private void calculateEta()
     {
         long duration = new Date().getTime() - this.getDateStarted().getTime();
         if (getTotalRecords() == 0)
         {
             eta = 0;//we are functionally done
-        } else if (duration == 0 || error != null)//nothing to go off of OR we have an error and it's never going to finish
-        {            
+        } else if (duration == 0 || fatalError != null)//nothing to go off of OR we have an fatalError and it's never going to finish
+        {
             eta = -1;
         } else
         {
@@ -298,15 +307,16 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
     public int hashCode()
     {
         int hash = 3;
-        hash = 89 * hash + Objects.hashCode(this.id);
-        hash = 89 * hash + Objects.hashCode(this.dateStarted);
-        hash = 89 * hash + Objects.hashCode(this.statusLastUpdatedAt);
-        hash = 89 * hash + (int) (this.eta ^ (this.eta >>> 32));
-        hash = 89 * hash + (int) (Double.doubleToLongBits(this.precentComplete) ^ (Double.doubleToLongBits(this.precentComplete) >>> 32));
-        hash = 89 * hash + Objects.hashCode(this.index);
-        hash = 89 * hash + (int) (this.totalRecords ^ (this.totalRecords >>> 32));
-        hash = 89 * hash + (int) (this.recordsCompleted ^ (this.recordsCompleted >>> 32));
-        hash = 89 * hash + Objects.hashCode(this.error);
+        hash = 41 * hash + Objects.hashCode(this.id);
+        hash = 41 * hash + Objects.hashCode(this.dateStarted);
+        hash = 41 * hash + Objects.hashCode(this.statusLastUpdatedAt);
+        hash = 41 * hash + (int) (this.eta ^ (this.eta >>> 32));
+        hash = 41 * hash + (int) (Double.doubleToLongBits(this.precentComplete) ^ (Double.doubleToLongBits(this.precentComplete) >>> 32));
+        hash = 41 * hash + Objects.hashCode(this.index);
+        hash = 41 * hash + (int) (this.totalRecords ^ (this.totalRecords >>> 32));
+        hash = 41 * hash + (int) (this.recordsCompleted ^ (this.recordsCompleted >>> 32));
+        hash = 41 * hash + Objects.hashCode(this.fatalError);
+        hash = 41 * hash + Objects.hashCode(this.errors);
         return hash;
     }
 
@@ -354,7 +364,11 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
         {
             return false;
         }
-        if (!Objects.equals(this.error, other.error))
+        if (!Objects.equals(this.fatalError, other.fatalError))
+        {
+            return false;
+        }
+        if (!Objects.equals(this.errors, other.errors))
         {
             return false;
         }
@@ -364,7 +378,7 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
     @Override
     public String toString()
     {
-        return "IndexCreationStatus{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", precentComplete=" + precentComplete + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + ", error=" + error + '}';
+        return "IndexCreatedEvent{" + "id=" + id + ", dateStarted=" + dateStarted + ", statusLastUpdatedAt=" + statusLastUpdatedAt + ", eta=" + eta + ", precentComplete=" + precentComplete + ", index=" + index + ", totalRecords=" + totalRecords + ", recordsCompleted=" + recordsCompleted + ", fatalError=" + fatalError + ", errors=" + errors + '}';
     }
 
     /**
@@ -378,25 +392,51 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
     }
 
     /**
-     * Error message if an error has occurred in the creation of this index.
-     * Will be null if no error has occurred yet.
+     * Error message if an fatalError has occurred in the creation of this
+     * index. Will be null if no fatalError has occurred yet.
      *
-     * @return the error
+     * @return the fatalError
      */
-    public String getError()
+    public String getFatalError()
     {
-        return error;
+        return fatalError;
     }
 
     /**
-     * Error message if an error has occurred in the creation of this index.
-     * Will be null if no error has occurred yet.
+     * Error message if an fatalError has occurred in the creation of this
+     * index. Will be null if no fatalError has occurred yet.
      *
-     * @param error the error to set
+     * @param fatalError the fatalError to set
      */
-    public void setError(String error)
+    public void setFatalError(String fatalError)
     {
-        this.error = error;
+        this.fatalError = fatalError;
+    }
+
+    /**
+     * Error messages if a errors have occurred in the creation of this index.
+     * Will be null if no errors have occurred yet. As opposed to a fatalError,
+     * these errors are more like warnings; the index as a whole will still
+     * complete.
+     *
+     * @return the errors
+     */
+    public List<String> getErrors()
+    {
+        return errors;
+    }
+
+    /**
+     * Error messages if a errors have occurred in the creation of this index.
+     * Will be null if no errors have occurred yet. As opposed to a fatalError,
+     * these errors are more like warnings; the index as a whole will still
+     * complete.
+     *
+     * @param errors the errors to set
+     */
+    public void setErrors(List<String> errors)
+    {
+        this.errors = errors;
     }
 
 }
