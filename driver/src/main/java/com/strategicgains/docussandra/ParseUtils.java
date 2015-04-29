@@ -91,6 +91,27 @@ public class ParseUtils
             }
             return dates.get(0);//dang; that actually works
         }
+    }
 
+    public static double convertStringToDouble(String in) throws IndexParseFieldException
+    {
+        try
+        {
+            return Double.parseDouble(in);
+        } catch (NumberFormatException e)
+        {
+            throw new IndexParseFieldException(in, e);
+        }
+    }
+
+    public static int convertStringToInteger(String in) throws IndexParseFieldException
+    {
+        try
+        {
+            return Integer.parseInt(in);
+        } catch (NumberFormatException e)
+        {
+            throw new IndexParseFieldException(in, e);
+        }
     }
 }

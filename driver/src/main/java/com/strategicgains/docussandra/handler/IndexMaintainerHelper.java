@@ -37,9 +37,9 @@ import org.slf4j.LoggerFactory;
  */
 public class IndexMaintainerHelper
 {
-    
+
     private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
-    
+
     public static final String ITABLE_INSERT_CQL = "INSERT INTO %s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
     public static final String ITABLE_UPDATE_CQL = "UPDATE %s SET object = ?, updated_at = ? WHERE bucket = ? AND %s;";
@@ -51,7 +51,7 @@ public class IndexMaintainerHelper
     {
         //don't instantiate; call static methods only
     }
-    
+
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -116,7 +116,7 @@ public class IndexMaintainerHelper
         {
             String field = fieldsData.get(i).getField();
             Object jObject = jsonObject.get(field);
-            
+
             if (jObject == null)
             {
                 bs.setString(i + 5, "");//offset from the first five non-dynamic fields
@@ -125,11 +125,11 @@ public class IndexMaintainerHelper
                 String fieldValue = jObject.toString();//note, could have parse problems here with non-string types: TODO: use proper types; need to set the tables correctly first
                 bs.setString(i + 5, fieldValue);//offset from the first five non-dynamic fields
             }
-            
+
         }
         return bs;
     }
-    
+
     private static void setField(IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
         try
@@ -146,13 +146,22 @@ public class IndexMaintainerHelper
             } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
             {
                 bs.setDate(index, ParseUtils.convertStringToDate(fieldData.getField()));
+            } else if (fieldData.getType().equals(FieldDataType.DOUBLE))
+            {
+                bs.setDouble(index, ParseUtils.convertStringToDouble(fieldData.getField()));
+            } else if (fieldData.getType().equals(FieldDataType.INTEGER))
+            {
+                bs.setInt(index, ParseUtils.convertStringToInteger(fieldData.getField()));
+            } else if (fieldData.getType().equals(FieldDataType.TEXT))
+            {
+                bs.setString(index, fieldData.getField());
             }
         } catch (IndexParseFieldException parseException)
-        {            
+        {
             throw new IndexParseException(fieldData, parseException);
         }
     }
-    
+
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -208,7 +217,7 @@ public class IndexMaintainerHelper
         //return a list of commands to accomplish all of this
         return statementList;
     }
-    
+
     public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -409,7 +418,7 @@ public class IndexMaintainerHelper
         //create final CQL statement for updating a row in an iTable(s)        
         return String.format(CQL, iTableToUpdate, getWhereClauseHelper(index));
     }
-    
+
     private static String getWhereClauseHelper(Index index)
     {
         //determine which fields need to write as PKs
@@ -427,5 +436,5 @@ public class IndexMaintainerHelper
         }
         return setValues.toString();
     }
-    
+
 }

@@ -182,4 +182,68 @@ public class ParseUtilsTest
         assertEquals(testDate.getTime(), result.getTime(), 0l);
     }
 
+    /**
+     * Test of convertStringToDouble method, of class ParseUtils.
+     */
+    @Test
+    public void testConvertStringToDouble() throws Exception
+    {
+        System.out.println("convertStringToDouble");
+        String in = "0";
+        double expResult = 0.0;
+        double result = ParseUtils.convertStringToDouble(in);
+        assertEquals(expResult, result, 0.0);
+        in = "1.123456";
+        expResult = 1.123456;
+        result = ParseUtils.convertStringToDouble(in);
+        assertEquals(expResult, result, 0.0);
+        in = "-1.123456";
+        expResult = -1.123456;
+        result = ParseUtils.convertStringToDouble(in);
+        assertEquals(expResult, result, 0.0);
+        boolean expectExceptionThrown = false;
+        try
+        {
+            ParseUtils.convertStringToDouble("dafhfda");
+        } catch (IndexParseFieldException e)
+        {
+            expectExceptionThrown = true;
+            assertNotNull(e.getCause());
+            assertNotNull(e.getMessage());
+        }
+        assertTrue(expectExceptionThrown);
+    }
+
+    /**
+     * Test of convertStringToInteger method, of class ParseUtils.
+     */
+    @Test
+    public void testConvertStringToInteger() throws Exception
+    {
+        System.out.println("convertStringToInteger");
+        String in = "0";
+        int expResult = 0;
+        int result = ParseUtils.convertStringToInteger(in);
+        assertEquals(expResult, result);
+        in = "1";
+        expResult = 1;
+        result = ParseUtils.convertStringToInteger(in);
+        assertEquals(expResult, result, 0.0);
+        in = "-1";
+        expResult = -1;
+        result = ParseUtils.convertStringToInteger(in);
+        assertEquals(expResult, result, 0.0);
+        boolean expectExceptionThrown = false;
+        try
+        {
+            ParseUtils.convertStringToInteger("dafhfda");
+        } catch (IndexParseFieldException e)
+        {
+            expectExceptionThrown = true;
+            assertNotNull(e.getCause());
+            assertNotNull(e.getMessage());
+        }
+        assertTrue(expectExceptionThrown);
+    }
+
 }
