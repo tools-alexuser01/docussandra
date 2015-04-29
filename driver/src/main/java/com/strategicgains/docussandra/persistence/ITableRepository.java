@@ -125,7 +125,7 @@ public class ITableRepository
             {
                 first = false;
             }
-            fieldCreateStatement.append(field.getField()).append(" ").append(FieldDataType.mapToCassandaraDataType(field.getType()));
+            fieldCreateStatement.append(field.getField()).append(" ").append(field.getType().mapToCassandaraDataType());
             primaryKeyCreateStatement.append(field.getField());
         }
         if(!index.isUnique()){
