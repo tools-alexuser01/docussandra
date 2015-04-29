@@ -155,6 +155,12 @@ public class IndexMaintainerHelper
             } else if (fieldData.getType().equals(FieldDataType.TEXT))
             {
                 bs.setString(index, fieldData.getField());
+            } else if (fieldData.getType().equals(FieldDataType.UUID))
+            {
+                bs.setUUID(index, ParseUtils.convertStringToUUID(fieldData.getField()));
+            } else
+            {
+                throw new IndexParseFieldException(fieldData.getField(), new Exception(fieldData.getType().toString() + " is an unsupported type. Please contact support."));//this should NEVER happen; it is a programming error if it does
             }
         } catch (IndexParseFieldException parseException)
         {

@@ -17,6 +17,7 @@ package com.strategicgains.docussandra;
 
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import com.strategicgains.util.date.DateAdapter;
 import java.nio.ByteBuffer;
@@ -24,6 +25,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -33,6 +35,7 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class ParseUtils
 {
+    //TODO: javadoc
 
     public static ByteBuffer convertBase64StringToByteBuffer(String in)
     {
@@ -110,6 +113,17 @@ public class ParseUtils
         {
             return Integer.parseInt(in);
         } catch (NumberFormatException e)
+        {
+            throw new IndexParseFieldException(in, e);
+        }
+    }
+
+    public static UUID convertStringToUUID(String in) throws IndexParseFieldException
+    {
+        try
+        {
+            return UUID.fromString(in);
+        } catch (IllegalArgumentException e)
         {
             throw new IndexParseFieldException(in, e);
         }
