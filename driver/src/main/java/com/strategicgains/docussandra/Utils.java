@@ -6,6 +6,7 @@ import com.strategicgains.docussandra.domain.Index;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.UUID;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -137,6 +138,29 @@ public class Utils
                 session.execute(statement);
             }
         }
+    }
+
+    /**
+     * Converts a list to a human readable string.
+     * @param list List to convert to a String
+     * @return A String that represents the passed in list.
+     */
+    public static String listToString(List<String> list)//TODO: consider moving to Pearson Java Lib (if it is not there already)
+    {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String s : list)
+        {
+            if (!first)
+            {
+                sb.append(", ");
+            } else
+            {
+                first = false;
+            }
+            sb.append(s);
+        }
+        return sb.toString();
     }
 
 }
