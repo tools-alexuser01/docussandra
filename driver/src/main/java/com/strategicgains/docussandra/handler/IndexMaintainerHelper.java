@@ -139,50 +139,6 @@ public class IndexMaintainerHelper
         return bs;
     }
 
-    private static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
-    {
-        Object jObject = jsonObject.get(fieldData.getField());
-        String jsonValue = null;
-        if (jObject != null)
-        {
-            jsonValue = jObject.toString();
-        }
-        try
-        {
-            if (jsonValue == null)
-            {
-                bs.setToNull(index);
-            } else if (fieldData.getType().equals(FieldDataType.BINARY))
-            {
-                bs.setBytes(index, ParseUtils.parseBase64StringAsByteBuffer(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.BOOLEAN))
-            {
-                bs.setBool(index, ParseUtils.parseStringAsBoolean(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
-            {
-                bs.setDate(index, ParseUtils.parseStringAsDate(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.DOUBLE))
-            {
-                bs.setDouble(index, ParseUtils.parseStringAsDouble(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.INTEGER))
-            {
-                bs.setInt(index, ParseUtils.parseStringAsInt(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.TEXT))
-            {
-                bs.setString(index, jsonValue);
-            } else if (fieldData.getType().equals(FieldDataType.UUID))
-            {
-                bs.setUUID(index, ParseUtils.parseStringAsUUID(jsonValue));
-            } else
-            {
-                throw new IndexParseFieldException(fieldData.getField(), new Exception(fieldData.getType().toString() + " is an unsupported type. Please contact support."));//this should NEVER happen; it is a programming error if it does
-            }
-        } catch (IndexParseFieldException parseException)
-        {
-            throw new IndexParseException(fieldData, parseException);
-        }
-    }
-
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -225,7 +181,12 @@ public class IndexMaintainerHelper
                     String documentJSON = entity.object();
                     DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
                     //set the bucket
-                    String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) jsonObject.get(fields.get(0).getField())));//note, could have parse problems here with non-string types
+                    Object bucketField = jsonObject.get(fields.get(0).getField());
+                    if (bucketField == null)
+                    {//we can't even bucket, there isn't a field for this document to index on
+                        break;//TODO: i am unsure about this ^^, consider logging this; i think this may only be happening in tests
+                    }
+                    String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) bucketField));//note, could have parse problems here with non-string types
                     logger.debug("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
                     bs.setString(2, bucketId);
                     for (int i = 0; i < fields.size(); i++)
@@ -346,11 +307,13 @@ public class IndexMaintainerHelper
         for (IndexField indexField : index.fields())
         {
             String field = indexField.getField();
-//  this shouldn't happen?  if(newObject.get(field) == null && oldObject.get(field) == null){//if there is not a field in either index
-//                return false;//if it's not in ether doc, it couldn't have changed
-//            } else if(newObject.get(field) == null || oldObject.get(field) == null){//there is a field in one of the indexes, but not the other.
-//                return true;//the index field must have changed, it either went from missing to present or present to missing.
-//            }
+            if (newObject.get(field) == null && oldObject.get(field) == null)//this shouldn't happen?
+            {//if there is not a field in either index
+                return false;//if it's not in ether doc, it couldn't have changed
+            } else if (newObject.get(field) == null || oldObject.get(field) == null)
+            {//there is a field in one of the indexes, but not the other.
+                return true;//the index field must have changed, it either went from missing to present or present to missing.
+            }
             if (!newObject.get(field).equals(oldObject.get(field)))
             {
                 return true;//fail early
@@ -481,6 +444,50 @@ public class IndexMaintainerHelper
             setValues.append(field).append(" = ?");
         }
         return setValues.toString();
+    }
+
+    private static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    {
+        Object jObject = jsonObject.get(fieldData.getField());
+        String jsonValue = null;
+        if (jObject != null)
+        {
+            jsonValue = jObject.toString();
+        }
+        try
+        {
+            if (jsonValue == null)
+            {
+                bs.setToNull(index);
+            } else if (fieldData.getType().equals(FieldDataType.BINARY))
+            {
+                bs.setBytes(index, ParseUtils.parseBase64StringAsByteBuffer(jsonValue));
+            } else if (fieldData.getType().equals(FieldDataType.BOOLEAN))
+            {
+                bs.setBool(index, ParseUtils.parseStringAsBoolean(jsonValue));
+            } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
+            {
+                bs.setDate(index, ParseUtils.parseStringAsDate(jsonValue));
+            } else if (fieldData.getType().equals(FieldDataType.DOUBLE))
+            {
+                bs.setDouble(index, ParseUtils.parseStringAsDouble(jsonValue));
+            } else if (fieldData.getType().equals(FieldDataType.INTEGER))
+            {
+                bs.setInt(index, ParseUtils.parseStringAsInt(jsonValue));
+            } else if (fieldData.getType().equals(FieldDataType.TEXT))
+            {
+                bs.setString(index, jsonValue);
+            } else if (fieldData.getType().equals(FieldDataType.UUID))
+            {
+                bs.setUUID(index, ParseUtils.parseStringAsUUID(jsonValue));
+            } else
+            {
+                throw new IndexParseFieldException(fieldData.getField(), new Exception(fieldData.getType().toString() + " is an unsupported type. Please contact support."));//this should NEVER happen; it is a programming error if it does
+            }
+        } catch (IndexParseFieldException parseException)
+        {
+            throw new IndexParseException(fieldData, parseException);
+        }
     }
 
 }
