@@ -76,7 +76,7 @@ public class IndexMaintainerHelperTest
 
     @Before
     public void setUp()
-    {        
+    {
         IndexChangeObserver ico = new IndexChangeObserver(f.getSession());
         indexRepo = new IndexRepository(f.getSession());
         docRepo = new DocumentRepository(f.getSession());
@@ -97,7 +97,7 @@ public class IndexMaintainerHelperTest
     @After
     public void tearDown()
     {
-        
+
     }
 
     /**
@@ -115,7 +115,7 @@ public class IndexMaintainerHelperTest
         assertNotNull(one);
         for (int i = 0; i < 5; i++)
         {
-            assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
+            assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 4 is the single index field for index1
         }
         assertEquals("docussandra", one.getKeyspace());
         assertEquals("INSERT INTO mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
@@ -127,6 +127,44 @@ public class IndexMaintainerHelperTest
         }
         assertEquals("docussandra", two.getKeyspace());
         assertEquals("INSERT INTO mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1,myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
+    }
+
+    /**
+     * Test of generateDocumentCreateIndexEntriesStatements method, of class
+     * IndexMaintainerHelper.
+     */
+    @Test
+    public void testGenerateDocumentCreateIndexEntriesStatementsWithDataTypes()
+    {
+        System.out.println("generateDocumentCreateIndexEntriesStatementsWithDataTypes");
+        Document entity = Fixtures.createTestDocument3();
+        f.insertIndex(index3);
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
+        assertEquals(result.size(), 1);//one for each of our indices
+        BoundStatement one = result.get(0);
+        assertNotNull(one);
+        for (int i = 0; i < 12; i++)// 0 is the id, 1 is the blob, 2 and 3 are dates, 4 - 11 are the indexed fields
+        {
+            assertTrue(one.isSet(i));
+        }
+        //check the propert types were set
+        assertNotNull(one.getString(0));
+        assertNotNull(one.getUUID(1));
+        assertNotNull(one.getBytes(2));
+        assertNotNull(one.getDate(3));
+        assertNotNull(one.getDate(4));
+        assertNotNull(one.getUUID(5));
+        assertNotNull(one.getString(6));
+        assertNotNull(one.getInt(7));
+        assertNotNull(one.getDouble(8));
+        assertNotNull(one.getBytes(9));
+        assertNotNull(one.getBool(10));
+        assertNotNull(one.getDate(11));
+        assertEquals("docussandra", one.getKeyspace());
+        assertEquals("INSERT INTO mydb_mytable_myindexallfields (bucket, id,"
+                + " object, created_at, updated_at, thisisauudid,thisisastring,"
+                + "thisisanint,thisisadouble,thisisbase64,thisisaboolean,thisisadate)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
     }
 
     /**
@@ -243,7 +281,6 @@ public class IndexMaintainerHelperTest
         assertEquals("docussandra", two.getKeyspace());
         assertEquals("DELETE FROM mydb_mytable_myindexwithtwofields WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", two.preparedStatement().getQueryString());
     }
-
 
     /**
      * Test of getIndexForDocument method, of class IndexMaintainerHelper.
