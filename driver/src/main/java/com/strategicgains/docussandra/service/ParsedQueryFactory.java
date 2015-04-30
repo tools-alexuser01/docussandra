@@ -41,22 +41,9 @@ import org.slf4j.LoggerFactory;
 public class ParsedQueryFactory
 {
 
-    //private static Cache queryCache = null;
-    //private static boolean established = false;
     private static final Logger logger = LoggerFactory.getLogger(PreparedStatementFactory.class);
 
-//    /**
-//     * Establishes the cache if it doesn't exist.
-//     */
-//    private synchronized static void establishCache()
-//    {
-//        logger.debug("Establishing ParsedQuery cache...");
-//        if (queryCache == null)
-//        {
-//            queryCache = CacheFactory.getCache("parsedQuery");
-//        }
-//        established = true;
-//    }
+
     /**
      * Gets a parsed query for the passed in parameters. If the ParsedQuery
      * requested has already been created on this app node, it will retrieve it
