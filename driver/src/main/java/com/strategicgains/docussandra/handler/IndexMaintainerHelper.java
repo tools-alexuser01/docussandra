@@ -159,7 +159,7 @@ public class IndexMaintainerHelper
                 bs.setDouble(index, ParseUtils.convertStringToDouble(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.INTEGER))
             {
-                bs.setInt(index, ParseUtils.convertStringToInteger(jsonValue));
+                bs.setInt(index, ParseUtils.convertStringToInt(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.TEXT))
             {
                 bs.setString(index, jsonValue);

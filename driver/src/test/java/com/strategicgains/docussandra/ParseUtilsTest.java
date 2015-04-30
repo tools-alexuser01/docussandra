@@ -215,7 +215,7 @@ public class ParseUtilsTest
     }
 
     /**
-     * Test of convertStringToInteger method, of class ParseUtils.
+     * Test of convertStringToInt method, of class ParseUtils.
      */
     @Test
     public void testConvertStringToInteger() throws Exception
@@ -223,20 +223,20 @@ public class ParseUtilsTest
         System.out.println("convertStringToInteger");
         String in = "0";
         int expResult = 0;
-        int result = ParseUtils.convertStringToInteger(in);
+        int result = ParseUtils.convertStringToInt(in);
         assertEquals(expResult, result);
         in = "1";
         expResult = 1;
-        result = ParseUtils.convertStringToInteger(in);
+        result = ParseUtils.convertStringToInt(in);
         assertEquals(expResult, result, 0.0);
         in = "-1";
         expResult = -1;
-        result = ParseUtils.convertStringToInteger(in);
+        result = ParseUtils.convertStringToInt(in);
         assertEquals(expResult, result, 0.0);
         boolean expectExceptionThrown = false;
         try
         {
-            ParseUtils.convertStringToInteger("dafhfda");
+            ParseUtils.convertStringToInt("dafhfda");
         } catch (IndexParseFieldException e)
         {
             expectExceptionThrown = true;

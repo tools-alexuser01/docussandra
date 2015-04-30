@@ -29,21 +29,35 @@ import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
 
 /**
- * Utility class for parsing JSON fields to useful java objects.
+ * Utility class for parsing JSON field values to useful java objects.
  *
  * @author udeyoje
  */
 public class ParseUtils
 {
-    //TODO: javadoc
 
+    /**
+     * Converts a base64 encoded string to a ByteBuffer.
+     *
+     * @param in Base64 encoded string.
+     * @return A ByteBuffer containing the decoded string.
+     */
     public static ByteBuffer convertBase64StringToByteBuffer(String in)
     {
         return ByteBuffer.wrap(Base64.decodeBase64(in.getBytes()));
     }
 
+    /**
+     * Converts a string to a boolean.
+     *
+     * @param in String to convert to a boolean.
+     * @return a boolean representation of the string.
+     * @throws IndexParseFieldException if there is no way to determine if the
+     * string should be interpreted as true or false.
+     */
     public static boolean convertStringToBoolean(String in) throws IndexParseFieldException
     {
+        in = in.trim();
         if (in.equalsIgnoreCase("T"))//we could put this whole method in one or so line, but it is more readable this way
         {
             return true;
@@ -59,7 +73,7 @@ public class ParseUtils
         } else if (in.equalsIgnoreCase("FALSE"))
         {
             return false;
-        } else if (in.equalsIgnoreCase("0"))//byte level
+        } else if (in.equalsIgnoreCase("0"))//byte level?
         {
             return false;
         }
@@ -67,11 +81,12 @@ public class ParseUtils
     }
 
     /**
-     * Converts a string to a date using the Natty library.
+     * Converts a string to a date. Uses DateAdaptorJ, if that fails, falls back
+     * to Natty.
      *
      * @param in String to convert to a date.
      * @return A date based on the string.
-     * @throws IndexParseFieldException If the field cannot be parsed.
+     * @throws IndexParseFieldException If the field cannot be parsed as a date.
      */
     public static Date convertStringToDate(String in) throws IndexParseFieldException //TODO: come back to this and add more tests, i am not yet entirely happy with it
     {
@@ -96,6 +111,13 @@ public class ParseUtils
         }
     }
 
+    /**
+     * Parses a String as a double.
+     *
+     * @param in String to parse as a double.
+     * @return A double that is based on the passed in String.
+     * @throws IndexParseFieldException
+     */
     public static double convertStringToDouble(String in) throws IndexParseFieldException
     {
         try
@@ -107,7 +129,14 @@ public class ParseUtils
         }
     }
 
-    public static int convertStringToInteger(String in) throws IndexParseFieldException
+    /**
+     * Parses a String as a int.
+     *
+     * @param in String to parse as an int.
+     * @return A int that is based on the passed in String.
+     * @throws IndexParseFieldException
+     */
+    public static int convertStringToInt(String in) throws IndexParseFieldException
     {
         try
         {
@@ -118,6 +147,13 @@ public class ParseUtils
         }
     }
 
+    /**
+     * Parses a String as a UUID.
+     *
+     * @param in String to parse as an UUID.
+     * @return A UUID that is based on the passed in String.
+     * @throws IndexParseFieldException
+     */
     public static UUID convertStringToUUID(String in) throws IndexParseFieldException
     {
         try
