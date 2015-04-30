@@ -431,12 +431,12 @@ public class IndexMaintainerHelper
     private static String getWhereClauseHelper(Index index)
     {
         //determine which fields need to write as PKs
-        List<String> fields = index.fieldsValues();
+        List<IndexField> fields = index.fields();
         //determine the where clause
         StringBuilder setValues = new StringBuilder();
         for (int i = 0; i < fields.size(); i++)
         {
-            String field = fields.get(i);
+            String field = fields.get(i).getField();
             if (i != 0)
             {
                 setValues.append(" AND ");
