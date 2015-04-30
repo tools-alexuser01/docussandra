@@ -126,7 +126,7 @@ public class IndexMaintainerHelperTest
             assertTrue(two.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 4 and 5 are the indexed fields for index2
         }
         assertEquals("docussandra", two.getKeyspace());
-        assertEquals("INSERT INTO mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1,myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
+        assertEquals("INSERT INTO mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1, myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);", two.preparedStatement().getQueryString());
     }
 
     /**
@@ -162,8 +162,8 @@ public class IndexMaintainerHelperTest
         assertNotNull(one.getDate(11));
         assertEquals("docussandra", one.getKeyspace());
         assertEquals("INSERT INTO mydb_mytable_myindexallfields (bucket, id,"
-                + " object, created_at, updated_at, thisisauudid,thisisastring,"
-                + "thisisanint,thisisadouble,thisisbase64,thisisaboolean,thisisadate)"
+                + " object, created_at, updated_at, thisisauudid, thisisastring, "
+                + "thisisanint, thisisadouble, thisisbase64, thisisaboolean, thisisadate)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
     }
 
@@ -311,7 +311,7 @@ public class IndexMaintainerHelperTest
         String expResult = "INSERT INTO mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);";
         String result = IndexMaintainerHelper.generateCQLStatementForInsert(index1);
         assertEquals(expResult, result);
-        expResult = "INSERT INTO mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1,myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);";
+        expResult = "INSERT INTO mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1, myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);";
         result = IndexMaintainerHelper.generateCQLStatementForInsert(index2);
         assertEquals(expResult, result);
     }
@@ -327,7 +327,7 @@ public class IndexMaintainerHelperTest
         String expResult = "INSERT INTO mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);";
         String result = IndexMaintainerHelper.getCQLStatementForInsert(index1);
         assertEquals(expResult, result);
-        expResult = "INSERT INTO mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1,myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);";
+        expResult = "INSERT INTO mydb_mytable_myindexwithtwofields (bucket, id, object, created_at, updated_at, myindexedfield1, myindexedfield2) VALUES (?, ?, ?, ?, ?, ?, ?);";
         result = IndexMaintainerHelper.getCQLStatementForInsert(index2);
         assertEquals(expResult, result);
     }
