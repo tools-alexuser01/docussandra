@@ -57,10 +57,7 @@ public class ParsedQueryFactory
      */
     public static ParsedQuery getParsedQuery(String db, Query toParse, Session session)
     {
-//        if (!established)
-//        {
-//            establishCache();
-//        }
+
         if (db == null || db.trim().equals(""))
         {
             throw new IllegalArgumentException("Query must be populated.");
