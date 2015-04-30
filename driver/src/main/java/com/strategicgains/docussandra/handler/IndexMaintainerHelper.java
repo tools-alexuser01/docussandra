@@ -147,25 +147,25 @@ public class IndexMaintainerHelper
                 bs.setToNull(index);
             } else if (fieldData.getType().equals(FieldDataType.BINARY))
             {
-                bs.setBytes(index, ParseUtils.convertBase64StringToByteBuffer(jsonValue));
+                bs.setBytes(index, ParseUtils.parseBase64StringAsByteBuffer(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.BOOLEAN))
             {
-                bs.setBool(index, ParseUtils.convertStringToBoolean(jsonValue));
+                bs.setBool(index, ParseUtils.parseStringAsBoolean(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
             {
-                bs.setDate(index, ParseUtils.convertStringToDate(jsonValue));
+                bs.setDate(index, ParseUtils.parseStringAsDate(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.DOUBLE))
             {
-                bs.setDouble(index, ParseUtils.convertStringToDouble(jsonValue));
+                bs.setDouble(index, ParseUtils.parseStringAsDouble(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.INTEGER))
             {
-                bs.setInt(index, ParseUtils.convertStringToInt(jsonValue));
+                bs.setInt(index, ParseUtils.parseStringAsInt(jsonValue));
             } else if (fieldData.getType().equals(FieldDataType.TEXT))
             {
                 bs.setString(index, jsonValue);
             } else if (fieldData.getType().equals(FieldDataType.UUID))
             {
-                bs.setUUID(index, ParseUtils.convertStringToUUID(jsonValue));
+                bs.setUUID(index, ParseUtils.parseStringAsUUID(jsonValue));
             } else
             {
                 throw new IndexParseFieldException(fieldData.getField(), new Exception(fieldData.getType().toString() + " is an unsupported type. Please contact support."));//this should NEVER happen; it is a programming error if it does

@@ -17,7 +17,6 @@ package com.strategicgains.docussandra;
 
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
-import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import com.strategicgains.util.date.DateAdapter;
 import java.nio.ByteBuffer;
@@ -42,7 +41,7 @@ public class ParseUtils
      * @param in Base64 encoded string.
      * @return A ByteBuffer containing the decoded string.
      */
-    public static ByteBuffer convertBase64StringToByteBuffer(String in)
+    public static ByteBuffer parseBase64StringAsByteBuffer(String in)
     {
         return ByteBuffer.wrap(Base64.decodeBase64(in.getBytes()));
     }
@@ -53,9 +52,9 @@ public class ParseUtils
      * @param in String to convert to a boolean.
      * @return a boolean representation of the string.
      * @throws IndexParseFieldException if there is no way to determine if the
-     * string should be interpreted as true or false.
+     * String should be interpreted as true or false.
      */
-    public static boolean convertStringToBoolean(String in) throws IndexParseFieldException
+    public static boolean parseStringAsBoolean(String in) throws IndexParseFieldException
     {
         in = in.trim();
         if (in.equalsIgnoreCase("T"))//we could put this whole method in one or so line, but it is more readable this way
@@ -88,7 +87,7 @@ public class ParseUtils
      * @return A date based on the string.
      * @throws IndexParseFieldException If the field cannot be parsed as a date.
      */
-    public static Date convertStringToDate(String in) throws IndexParseFieldException //TODO: come back to this and add more tests, i am not yet entirely happy with it
+    public static Date parseStringAsDate(String in) throws IndexParseFieldException //TODO: come back to this and add more tests, i am not yet entirely happy with it
     {
         DateAdapter adapter = new DateAdapter();
         try
@@ -116,9 +115,10 @@ public class ParseUtils
      *
      * @param in String to parse as a double.
      * @return A double that is based on the passed in String.
-     * @throws IndexParseFieldException
+     * @throws IndexParseFieldException if the String cannot be parsed as a
+     * double.
      */
-    public static double convertStringToDouble(String in) throws IndexParseFieldException
+    public static double parseStringAsDouble(String in) throws IndexParseFieldException
     {
         try
         {
@@ -134,9 +134,10 @@ public class ParseUtils
      *
      * @param in String to parse as an int.
      * @return A int that is based on the passed in String.
-     * @throws IndexParseFieldException
+     * @throws IndexParseFieldException if the String cannot be parsed as an
+     * int.
      */
-    public static int convertStringToInt(String in) throws IndexParseFieldException
+    public static int parseStringAsInt(String in) throws IndexParseFieldException
     {
         try
         {
@@ -152,9 +153,10 @@ public class ParseUtils
      *
      * @param in String to parse as an UUID.
      * @return A UUID that is based on the passed in String.
-     * @throws IndexParseFieldException
+     * @throws IndexParseFieldException if the String cannot be parsed as an
+     * UUID.
      */
-    public static UUID convertStringToUUID(String in) throws IndexParseFieldException
+    public static UUID parseStringAsUUID(String in) throws IndexParseFieldException
     {
         try
         {

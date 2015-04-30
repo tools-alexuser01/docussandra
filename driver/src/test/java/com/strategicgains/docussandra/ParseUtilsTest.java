@@ -63,15 +63,15 @@ public class ParseUtilsTest
     }
 
     /**
-     * Test of convertBase64StringToByteBuffer method, of class ParseUtils.
+     * Test of parseBase64StringAsByteBuffer method, of class ParseUtils.
      */
     @Test
-    public void testConvertBase64StringToByteBuffer() throws Exception
+    public void testParseBase64StringAsByteBuffer() throws Exception
     {
-        System.out.println("convertBase64StringToByteBuffer");
+        System.out.println("parseBase64StringAsByteBuffer");
         //good test
         String in = "VGhpcyBpcyBhIGdvb2RseSB0ZXN0IG1lc3NhZ2Uu";
-        ByteBuffer result = ParseUtils.convertBase64StringToByteBuffer(in);
+        ByteBuffer result = ParseUtils.parseBase64StringAsByteBuffer(in);
         assertNotNull(result);
         assertTrue(result.hasArray());
         assertTrue(result.hasRemaining());
@@ -80,49 +80,49 @@ public class ParseUtilsTest
     }
 
     /**
-     * Test of convertStringToBoolean method, of class ParseUtils.
+     * Test of parseStringAsBoolean method, of class ParseUtils.
      */
     @Test
-    public void testConvertStringToBoolean() throws Exception
+    public void testParseStringAsBoolean() throws Exception
     {
-        System.out.println("convertStringToBoolean");
+        System.out.println("parseStringAsBoolean");
         //false
-        boolean result = ParseUtils.convertStringToBoolean("false");
+        boolean result = ParseUtils.parseStringAsBoolean("false");
         assertEquals(false, result);
-        result = ParseUtils.convertStringToBoolean("False");
+        result = ParseUtils.parseStringAsBoolean("False");
         assertEquals(false, result);
-        result = ParseUtils.convertStringToBoolean("faLSe");
+        result = ParseUtils.parseStringAsBoolean("faLSe");
         assertEquals(false, result);
-        result = ParseUtils.convertStringToBoolean("FALSE");
+        result = ParseUtils.parseStringAsBoolean("FALSE");
         assertEquals(false, result);
-        result = ParseUtils.convertStringToBoolean("f");
+        result = ParseUtils.parseStringAsBoolean("f");
         assertEquals(false, result);
-        result = ParseUtils.convertStringToBoolean("F");
+        result = ParseUtils.parseStringAsBoolean("F");
         assertEquals(false, result);
-        result = ParseUtils.convertStringToBoolean("0");
+        result = ParseUtils.parseStringAsBoolean("0");
         assertEquals(false, result);
 
         //true
-        result = ParseUtils.convertStringToBoolean("true");
+        result = ParseUtils.parseStringAsBoolean("true");
         assertEquals(true, result);
-        result = ParseUtils.convertStringToBoolean("True");
+        result = ParseUtils.parseStringAsBoolean("True");
         assertEquals(true, result);
-        result = ParseUtils.convertStringToBoolean("tRUe");
+        result = ParseUtils.parseStringAsBoolean("tRUe");
         assertEquals(true, result);
-        result = ParseUtils.convertStringToBoolean("TRUE");
+        result = ParseUtils.parseStringAsBoolean("TRUE");
         assertEquals(true, result);
-        result = ParseUtils.convertStringToBoolean("t");
+        result = ParseUtils.parseStringAsBoolean("t");
         assertEquals(true, result);
-        result = ParseUtils.convertStringToBoolean("T");
+        result = ParseUtils.parseStringAsBoolean("T");
         assertEquals(true, result);
-        result = ParseUtils.convertStringToBoolean("1");
+        result = ParseUtils.parseStringAsBoolean("1");
         assertEquals(true, result);
 
         //exception
         boolean expectExceptionThrown = false;
         try
         {
-            ParseUtils.convertStringToBoolean("");
+            ParseUtils.parseStringAsBoolean("");
         } catch (IndexParseFieldException e)
         {
             expectExceptionThrown = true;
@@ -134,7 +134,7 @@ public class ParseUtilsTest
         expectExceptionThrown = false;
         try
         {
-            ParseUtils.convertStringToBoolean("blah");
+            ParseUtils.parseStringAsBoolean("blah");
         } catch (IndexParseFieldException e)
         {
             expectExceptionThrown = true;
@@ -147,21 +147,21 @@ public class ParseUtilsTest
     }
 
     /**
-     * Test of convertStringToDate method, of class ParseUtils.
+     * Test of parseStringAsDate method, of class ParseUtils.
      */
     @Test
-    public void testConvertStringToDate() throws Exception
+    public void testParseStringAsDate() throws Exception
     {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-        System.out.println("convertStringToDate");
+        System.out.println("parseStringAsDate");
         Date testDate = new Date();
         String in = testDate.toString();
-        Date result = ParseUtils.convertStringToDate(in);
+        Date result = ParseUtils.parseStringAsDate(in);
         assertEquals(testDate.getTime(), result.getTime(), 100l);
 
         DateFormat format = DateFormat.getDateInstance(DateFormat.LONG);
         in = format.format(testDate);
-        result = ParseUtils.convertStringToDate(in);
+        result = ParseUtils.parseStringAsDate(in);
         assertEquals(testDate.getTime(), result.getTime(), 3600l);
 
         testDate = new Date();
@@ -173,38 +173,38 @@ public class ParseUtilsTest
         testDate.setSeconds(0);
         //testDate.setTime(testDate.getTime() + (3600000 * -8));
         in = "12/17/1903";
-        result = ParseUtils.convertStringToDate(in);
+        result = ParseUtils.parseStringAsDate(in);
         assertEquals(testDate.getTime(), result.getTime(), 0l);
 
         //in = "17/12/1903";//nope!
         in = "17 Dec 1903 00:00:00";
-        result = ParseUtils.convertStringToDate(in);
+        result = ParseUtils.parseStringAsDate(in);
         assertEquals(testDate.getTime(), result.getTime(), 0l);
     }
 
     /**
-     * Test of convertStringToDouble method, of class ParseUtils.
+     * Test of parseStringAsDouble method, of class ParseUtils.
      */
     @Test
-    public void testConvertStringToDouble() throws Exception
+    public void testParseStringAsDouble() throws Exception
     {
-        System.out.println("convertStringToDouble");
+        System.out.println("parseStringAsDouble");
         String in = "0";
         double expResult = 0.0;
-        double result = ParseUtils.convertStringToDouble(in);
+        double result = ParseUtils.parseStringAsDouble(in);
         assertEquals(expResult, result, 0.0);
         in = "1.123456";
         expResult = 1.123456;
-        result = ParseUtils.convertStringToDouble(in);
+        result = ParseUtils.parseStringAsDouble(in);
         assertEquals(expResult, result, 0.0);
         in = "-1.123456";
         expResult = -1.123456;
-        result = ParseUtils.convertStringToDouble(in);
+        result = ParseUtils.parseStringAsDouble(in);
         assertEquals(expResult, result, 0.0);
         boolean expectExceptionThrown = false;
         try
         {
-            ParseUtils.convertStringToDouble("dafhfda");
+            ParseUtils.parseStringAsDouble("dafhfda");
         } catch (IndexParseFieldException e)
         {
             expectExceptionThrown = true;
@@ -215,28 +215,28 @@ public class ParseUtilsTest
     }
 
     /**
-     * Test of convertStringToInt method, of class ParseUtils.
+     * Test of parseStringAsInt method, of class ParseUtils.
      */
     @Test
-    public void testConvertStringToInteger() throws Exception
+    public void testParseStringAsInteger() throws Exception
     {
-        System.out.println("convertStringToInteger");
+        System.out.println("parseStringAsInt");
         String in = "0";
         int expResult = 0;
-        int result = ParseUtils.convertStringToInt(in);
+        int result = ParseUtils.parseStringAsInt(in);
         assertEquals(expResult, result);
         in = "1";
         expResult = 1;
-        result = ParseUtils.convertStringToInt(in);
+        result = ParseUtils.parseStringAsInt(in);
         assertEquals(expResult, result, 0.0);
         in = "-1";
         expResult = -1;
-        result = ParseUtils.convertStringToInt(in);
+        result = ParseUtils.parseStringAsInt(in);
         assertEquals(expResult, result, 0.0);
         boolean expectExceptionThrown = false;
         try
         {
-            ParseUtils.convertStringToInt("dafhfda");
+            ParseUtils.parseStringAsInt("dafhfda");
         } catch (IndexParseFieldException e)
         {
             expectExceptionThrown = true;
