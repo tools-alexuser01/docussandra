@@ -37,9 +37,9 @@ import org.slf4j.LoggerFactory;
  */
 public class IndexMaintainerHelper
 {
-
+    
     private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
-
+    
     public static final String ITABLE_INSERT_CQL = "INSERT INTO %s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace name--^^^----
     public static final String ITABLE_UPDATE_CQL = "UPDATE %s SET object = ?, updated_at = ? WHERE bucket = ? AND %s;";
@@ -51,7 +51,7 @@ public class IndexMaintainerHelper
     {
         //don't instantiate; call static methods only
     }
-
+    
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -121,7 +121,7 @@ public class IndexMaintainerHelper
         bs.setDate(4, entity.getUpdatedAt());
         for (int i = 0; i < fieldsData.size(); i++)
         {
-            setField(jsonObject, fieldsData.get(i), bs, i + 5);//offset from the first five non-dynamic fields
+            Utils.setField(jsonObject, fieldsData.get(i), bs, i + 5);//offset from the first five non-dynamic fields
 //            IndexField fieldData = fieldsData.get(i);
 //            String field = fieldData.getField();
 //            Object jObject = jsonObject.get(field);
@@ -138,7 +138,7 @@ public class IndexMaintainerHelper
         }
         return bs;
     }
-
+    
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -191,7 +191,7 @@ public class IndexMaintainerHelper
                     bs.setString(2, bucketId);
                     for (int i = 0; i < fields.size(); i++)
                     {
-                        setField(jsonObject, fields.get(i), bs, i + 3);//offset from the first three non-dynamic fields
+                        Utils.setField(jsonObject, fields.get(i), bs, i + 3);//offset from the first three non-dynamic fields
 //                        String field = fields.get(i).getField();
 //                        String fieldValue = (String) jsonObject.get(field);
 //                        //bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
@@ -209,7 +209,7 @@ public class IndexMaintainerHelper
         //return a list of commands to accomplish all of this
         return statementList;
     }
-
+    
     public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this table per the index table
@@ -266,7 +266,7 @@ public class IndexMaintainerHelper
         {
 //            String field = fields.get(i).getField();
 //            String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-            setField(jsonObject, fields.get(i), bs, i + 1);
+            Utils.setField(jsonObject, fields.get(i), bs, i + 1);
             //setField(fieldValue, fields.get(i), bs, i + 1);
             //bs.setString(i + 1, fieldValue);
         }
@@ -427,7 +427,7 @@ public class IndexMaintainerHelper
         //create final CQL statement for updating a row in an iTable(s)        
         return String.format(CQL, iTableToUpdate, getWhereClauseHelper(index));
     }
-
+    
     private static String getWhereClauseHelper(Index index)
     {
         //determine which fields need to write as PKs
@@ -445,49 +445,5 @@ public class IndexMaintainerHelper
         }
         return setValues.toString();
     }
-
-    private static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
-    {
-        Object jObject = jsonObject.get(fieldData.getField());
-        String jsonValue = null;
-        if (jObject != null)
-        {
-            jsonValue = jObject.toString();
-        }
-        try
-        {
-            if (jsonValue == null)
-            {
-                bs.setToNull(index);
-            } else if (fieldData.getType().equals(FieldDataType.BINARY))
-            {
-                bs.setBytes(index, ParseUtils.parseBase64StringAsByteBuffer(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.BOOLEAN))
-            {
-                bs.setBool(index, ParseUtils.parseStringAsBoolean(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
-            {
-                bs.setDate(index, ParseUtils.parseStringAsDate(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.DOUBLE))
-            {
-                bs.setDouble(index, ParseUtils.parseStringAsDouble(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.INTEGER))
-            {
-                bs.setInt(index, ParseUtils.parseStringAsInt(jsonValue));
-            } else if (fieldData.getType().equals(FieldDataType.TEXT))
-            {
-                bs.setString(index, jsonValue);
-            } else if (fieldData.getType().equals(FieldDataType.UUID))
-            {
-                bs.setUUID(index, ParseUtils.parseStringAsUUID(jsonValue));
-            } else
-            {
-                throw new IndexParseFieldException(fieldData.getField(), new Exception(fieldData.getType().toString() + " is an unsupported type. Please contact support."));//this should NEVER happen; it is a programming error if it does
-            }
-        } catch (IndexParseFieldException parseException)
-        {
-            throw new IndexParseException(fieldData, parseException);
-        }
-    }
-
+    
 }
