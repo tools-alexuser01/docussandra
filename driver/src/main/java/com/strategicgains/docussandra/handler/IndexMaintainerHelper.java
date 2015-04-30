@@ -141,7 +141,6 @@ public class IndexMaintainerHelper
 
     private static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
-        //String field = fieldData.getField();
         Object jObject = jsonObject.get(fieldData.getField());
         String jsonValue = null;
         if (jObject != null)
