@@ -121,25 +121,33 @@ public class IndexMaintainerHelper
         bs.setDate(4, entity.getUpdatedAt());
         for (int i = 0; i < fieldsData.size(); i++)
         {
-            IndexField fieldData = fieldsData.get(i);
-            String field = fieldData.getField();
-            Object jObject = jsonObject.get(field);
-
-            if (jObject == null)
-            {
-                setField(null, fieldData, bs, i + 5);//offset from the first five non-dynamic fields
-            } else
-            {
-                String fieldValue = jObject.toString();
-                setField(fieldValue, fieldData, bs, i + 5);//offset from the first five non-dynamic fields
-            }
+            setField(jsonObject, fieldsData.get(i), bs, i + 5);//offset from the first five non-dynamic fields
+//            IndexField fieldData = fieldsData.get(i);
+//            String field = fieldData.getField();
+//            Object jObject = jsonObject.get(field);
+//
+//            if (jObject == null)
+//            {
+//                setField(null, fieldData, bs, i + 5);//offset from the first five non-dynamic fields
+//            } else
+//            {
+//                String fieldValue = jObject.toString();
+//                setField(fieldValue, fieldData, bs, i + 5);//offset from the first five non-dynamic fields
+//            }
 
         }
         return bs;
     }
 
-    private static void setField(String jsonValue, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    private static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
+        //String field = fieldData.getField();
+        Object jObject = jsonObject.get(fieldData.getField());
+        String jsonValue = null;
+        if (jObject != null)
+        {
+            jsonValue = jObject.toString();
+        }
         try
         {
             if (jsonValue == null)
@@ -224,10 +232,11 @@ public class IndexMaintainerHelper
                     bs.setString(2, bucketId);
                     for (int i = 0; i < fields.size(); i++)
                     {
-                        String field = fields.get(i).getField();
-                        String fieldValue = (String) jsonObject.get(field);
-                        //bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
-                        setField(fieldValue, fields.get(i), bs, i + 3);//offset from the first three non-dynamic fields
+                        setField(jsonObject, fields.get(i), bs, i + 3);//offset from the first three non-dynamic fields
+//                        String field = fields.get(i).getField();
+//                        String fieldValue = (String) jsonObject.get(field);
+//                        //bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
+//                        setField(fieldValue, fields.get(i), bs, i + 3);//offset from the first three non-dynamic fields
                     }
                     //add row to the iTable(s)
                     statementList.add(bs);
@@ -296,9 +305,10 @@ public class IndexMaintainerHelper
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)
         {
-            String field = fields.get(i).getField();
-            String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
-            setField(fieldValue, fields.get(i), bs, i + 1);
+//            String field = fields.get(i).getField();
+//            String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
+            setField(jsonObject, fields.get(i), bs, i + 1);
+            //setField(fieldValue, fields.get(i), bs, i + 1);
             //bs.setString(i + 1, fieldValue);
         }
         return bs;
