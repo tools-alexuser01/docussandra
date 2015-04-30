@@ -1,8 +1,14 @@
 package com.strategicgains.docussandra;
 
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Session;
+import com.mongodb.DBObject;
 import com.strategicgains.docussandra.cache.CacheFactory;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -161,6 +167,55 @@ public class Utils
             sb.append(s);
         }
         return sb.toString();
+    }
+
+    public static void setField(String value, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    {
+        try
+        {
+            if (value == null)
+            {
+                bs.setToNull(index);
+            } else if (fieldData.getType().equals(FieldDataType.BINARY))
+            {
+                bs.setBytes(index, ParseUtils.parseBase64StringAsByteBuffer(value));
+            } else if (fieldData.getType().equals(FieldDataType.BOOLEAN))
+            {
+                bs.setBool(index, ParseUtils.parseStringAsBoolean(value));
+            } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
+            {
+                bs.setDate(index, ParseUtils.parseStringAsDate(value));
+            } else if (fieldData.getType().equals(FieldDataType.DOUBLE))
+            {
+                bs.setDouble(index, ParseUtils.parseStringAsDouble(value));
+            } else if (fieldData.getType().equals(FieldDataType.INTEGER))
+            {
+                bs.setInt(index, ParseUtils.parseStringAsInt(value));
+            } else if (fieldData.getType().equals(FieldDataType.TEXT))
+            {
+                bs.setString(index, value);
+            } else if (fieldData.getType().equals(FieldDataType.UUID))
+            {
+                bs.setUUID(index, ParseUtils.parseStringAsUUID(value));
+            } else
+            {
+                throw new IndexParseFieldException(fieldData.getField(), new Exception(fieldData.getType().toString() + " is an unsupported type. Please contact support."));
+            }
+        } catch (IndexParseFieldException parseException)
+        {
+            throw new IndexParseException(fieldData, parseException);
+        }
+    }
+
+    public static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    {
+        Object jObject = jsonObject.get(fieldData.getField());
+        String jsonValue = null;
+        if (jObject != null)
+        {
+            jsonValue = jObject.toString();
+        }
+        setField(jsonValue, fieldData, bs, index);
     }
 
 }
