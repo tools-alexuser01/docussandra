@@ -186,7 +186,7 @@ public class IndexMaintainerHelperTest
         docRepo.doCreate(entity);//insert a document so we have something to reference
         entity.object("{'greeting':'hello', 'myindexedfield': 'this is NOT my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
-        assertEquals(result.size(), 3);//one for the create, one for the delete, one for the second index
+        assertEquals(3, result.size());//one for the create, one for the delete, one for the second index
 
         //create
         BoundStatement one = result.get(0);
