@@ -309,7 +309,7 @@ public class Fixtures
         return index;
     }
 
-        /**
+    /**
      * Creates at test index with a UUID field.
      *
      * @return
@@ -324,7 +324,29 @@ public class Fixtures
         index.isUnique(false);
         return index;
     }
-    
+
+    /**
+     * Creates at test index with a all possible field types.
+     *
+     * @return
+     */
+    public static final Index createTestIndexAllFieldTypes()
+    {
+        Index index = new Index("myindexallfields");
+        index.table(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("thisisauudid", FieldDataType.UUID));
+        fields.add(new IndexField("thisisastring", FieldDataType.TEXT));
+        fields.add(new IndexField("thisisanint", FieldDataType.INTEGER));
+        fields.add(new IndexField("thisisadouble", FieldDataType.DOUBLE));
+        fields.add(new IndexField("thisisbase64", FieldDataType.BINARY));
+        fields.add(new IndexField("thisisaboolean", FieldDataType.BOOLEAN));
+        fields.add(new IndexField("thisisadate", FieldDataType.DATE_TIME));
+        index.fields(fields);
+        index.isUnique(false);
+        return index;
+    }
+
     /**
      * Creates at test IndexCreatedEvent.
      *
@@ -415,6 +437,7 @@ public class Fixtures
         {
             docRepo.delete(Fixtures.createTestDocument());
             docRepo.delete(Fixtures.createTestDocument2());
+            docRepo.delete(Fixtures.createTestDocument3());
         } catch (DriverException e)
         {
             //logger.debug("Not dropping document, probably doesn't exist.");
@@ -486,6 +509,27 @@ public class Fixtures
         }
         try
         {
+            indexRepo.delete(Fixtures.createTestIndexAllFieldTypes());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try
+        {
+            indexRepo.delete(Fixtures.createTestIndexNumericField());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try
+        {
+            indexRepo.delete(Fixtures.createTestIndexUUIDField());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try
+        {
             indexRepo.delete(Fixtures.createTestIndexWithBulkDataHit());
         } catch (DriverException e)
         {
@@ -551,6 +595,24 @@ public class Fixtures
         entity.table("mydb", "mytable");
         entity.object("{\"greeting\":\"hello\", \"myindexedfield\": \"this is my field\", \"myindexedfield1\":\"my second field\", \"myindexedfield2\":\"my third field\"}");
         entity.setUuid(new UUID(0L, 2L));
+        entity.setCreatedAt(new Date());
+        entity.setUpdatedAt(new Date());
+        return entity;
+    }
+
+    /**
+     * Creates a test document with multiple datatype fields.
+     *
+     * @return
+     */
+    public static final Document createTestDocument3()
+    {
+        Document entity = new Document();
+        entity.table("mydb", "mytable");
+        entity.object("{\"thisisastring\":\"hello\", \"thisisanint\": \"5\", \"thisisadouble\":\"5.555\","
+                + " \"thisisbase64\":\"VGhpcyBpcyBhIGdvb2RseSB0ZXN0IG1lc3NhZ2Uu\", \"thisisaboolean\":\"f\","
+                + " \"thisisadate\":\"Thu Apr 30 09:52:04 MDT 2015\", \"thisisauudid\":\"3d069a5a-ef51-11e4-90ec-1681e6b88ec1\"}");
+        entity.setUuid(new UUID(0L, 3L));
         entity.setCreatedAt(new Date());
         entity.setUpdatedAt(new Date());
         return entity;

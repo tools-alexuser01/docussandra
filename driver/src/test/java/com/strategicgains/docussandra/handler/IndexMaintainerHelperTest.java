@@ -50,8 +50,9 @@ public class IndexMaintainerHelperTest
     private DocumentRepository docRepo;
     private TableRepository tableRepo;
     //some test records
-    private Index index1 = createTestIndexOneField();
-    private Index index2 = createTestIndexTwoField();
+    private Index index1;
+    private Index index2;
+    private Index index3;
     private Table table;
 
     private static Fixtures f;
@@ -88,6 +89,7 @@ public class IndexMaintainerHelperTest
         //reinsert with some fresh data
         index1 = Fixtures.createTestIndexOneField();
         index2 = Fixtures.createTestIndexTwoField();
+        index3 = Fixtures.createTestIndexAllFieldTypes();
         indexRepo.create(index1);
         indexRepo.create(index2);
     }
@@ -257,7 +259,7 @@ public class IndexMaintainerHelperTest
         List<Index> result = IndexMaintainerHelper.getIndexForDocument(f.getSession(), entity);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
-        assertTrue(result.size() == 2);
+        assertEquals(2, result.size());
         assertEquals(exp, result);
     }
 

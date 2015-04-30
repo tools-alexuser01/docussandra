@@ -203,7 +203,6 @@ public class IndexMaintainerHelper
                 if (hasIndexedFieldChanged(session, index, entity))
                 {
                     //2a. if the field has changed, create a new index entry
-
                     BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
                     if (bs != null)
                     {
@@ -345,8 +344,14 @@ public class IndexMaintainerHelper
         DocumentRepository docRepo = new DocumentRepository(session);//TODO: if we do any sycronization on doc repo, this could be a problem
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
         BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
-        for (String field : index.fieldsValues())
+        for (IndexField indexField : index.fields())
         {
+            String field = indexField.getField();
+//  this shouldn't happen?  if(newObject.get(field) == null && oldObject.get(field) == null){//if there is not a field in either index
+//                return false;//if it's not in ether doc, it couldn't have changed
+//            } else if(newObject.get(field) == null || oldObject.get(field) == null){//there is a field in one of the indexes, but not the other.
+//                return true;//the index field must have changed, it either went from missing to present or present to missing.
+//            }
             if (!newObject.get(field).equals(oldObject.get(field)))
             {
                 return true;//fail early
