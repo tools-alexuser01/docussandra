@@ -134,7 +134,7 @@ public class Index
         return (fields == null ? Collections.<IndexField>emptyList() : Collections.unmodifiableList(fields));
     }
 
-    @Deprecated //our goal should be to kill this method -- maybe
+    @Deprecated //todo: undeprecate
     public List<String> fieldsValues()
     {
         if (fields == null)
@@ -151,7 +151,7 @@ public class Index
         }
     }
     
-    @Deprecated //our goal should be to kill this method -- maybe
+    @Deprecated //todo: undeprecate
     public List<String> fieldsTypes()
     {
         if (fields == null)
