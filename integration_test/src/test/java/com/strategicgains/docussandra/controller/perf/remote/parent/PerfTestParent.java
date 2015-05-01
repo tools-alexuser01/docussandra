@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.lang3.time.StopWatch;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import org.json.simple.parser.ParseException;
@@ -190,7 +191,9 @@ public abstract class PerfTestParent
             }
         }
 
-        long start = new Date().getTime();
+        //long start = new Date().getTime();
+        StopWatch sw = new StopWatch();
+        sw.start();
         //start your threads!
         for (Thread t : workers)
         {
@@ -215,14 +218,15 @@ public abstract class PerfTestParent
             if (done)
             {
                 allDone = true;
+                sw.stop();
             } else
             {
                 logger.info("We still have workers running...");
                 Thread.sleep(5000);
             }
         }
-        long end = new Date().getTime();
-        long miliseconds = end - start;
+        
+        long miliseconds = sw.getTime();
         double seconds = (double) miliseconds / 1000d;
         output.info("Doc: Done loading data using: " + NUM_WORKERS + " and URL: " + BASE_URI + ". Took: " + seconds + " seconds");
         double tpms = (double) numDocs / (double) miliseconds;
