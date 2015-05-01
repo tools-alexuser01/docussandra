@@ -11,6 +11,7 @@ import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorI
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,7 +35,7 @@ public class QueryRepository
         this.session = session;
     }
 
-    private BoundStatement generateQueryStatement(ParsedQuery query, long maxIndex)
+    private BoundStatement generateQueryStatement(ParsedQuery query, long maxIndex) throws IndexParseException
     {
         String finalQuery;
         //format QUERY_CQL
@@ -55,13 +56,14 @@ public class QueryRepository
         int i = 1;
         for (String bindValue : query.getWhereClause().getValues())
         {
-            bs.setString(i, bindValue);
+            Utils.setField(bindValue, query.getIndex().fields().get(i - 1), bs, i);//TODO: i am not confident about this right now
+            //bs.setString(i, bindValue);
             i++;
         }
         return bs;
     }
 
-    public QueryResponseWrapper doQuery(ParsedQuery query)
+    public QueryResponseWrapper doQuery(ParsedQuery query) throws IndexParseException
     {
         //run the query
         ResultSet results = session.execute(generateQueryStatement(query, -1));
@@ -76,7 +78,7 @@ public class QueryRepository
         return new QueryResponseWrapper(toReturn, 0l);
     }
 
-    public QueryResponseWrapper doQuery(ParsedQuery query, int limit, long offset)
+    public QueryResponseWrapper doQuery(ParsedQuery query, int limit, long offset) throws IndexParseException
     {        
         //run the query
         long maxIndex = offset + limit;

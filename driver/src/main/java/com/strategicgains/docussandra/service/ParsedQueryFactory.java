@@ -16,7 +16,6 @@
 package com.strategicgains.docussandra.service;
 
 import com.datastax.driver.core.Session;
-import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
@@ -147,7 +146,7 @@ public class ParsedQueryFactory
         {
             throw new FieldNotIndexedException(fieldsToQueryOn);
         }
-        ParsedQuery toReturn = new ParsedQuery(toParse, where, Utils.calculateITableName(indexToUse));
+        ParsedQuery toReturn = new ParsedQuery(toParse, where, indexToUse);
         return toReturn;
     }
 

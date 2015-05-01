@@ -71,7 +71,7 @@ public class ParsedQueryFactoryTest
     @After
     public void tearDown()
     {
-        
+
     }
 
     /**
@@ -83,7 +83,7 @@ public class ParsedQueryFactoryTest
         System.out.println("testParseQueryBasic");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery();
-        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithonefield");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), Fixtures.createTestIndexOneField());
         ParsedQuery result = ParsedQueryFactory.parseQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
     }
@@ -97,7 +97,7 @@ public class ParsedQueryFactoryTest
         System.out.println("testParseQueryTwoFields");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery2();
-        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithtwofields");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), Fixtures.createTestIndexTwoField());
         ParsedQuery result = ParsedQueryFactory.parseQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
     }
@@ -112,7 +112,7 @@ public class ParsedQueryFactoryTest
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery2();
         toParse.setWhere("myindexedfield1 = 'thisismyfield'");
-        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithtwofields");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), Fixtures.createTestIndexTwoField());
         ParsedQuery result = ParsedQueryFactory.parseQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
     }
@@ -171,7 +171,7 @@ public class ParsedQueryFactoryTest
         String db = Fixtures.DB;
         CacheFactory.clearAllCaches();//kill the cache and make it re-create for the purposes of this test.
         Query toParse = Fixtures.createTestQuery();
-        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithonefield");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), Fixtures.createTestIndexOneField());
         ParsedQuery result = ParsedQueryFactory.getParsedQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
         //try again to ensure the cache isn't botched

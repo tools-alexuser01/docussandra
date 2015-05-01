@@ -7,8 +7,8 @@ import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.service.QueryService;
-import com.strategicgains.hyperexpress.builder.UrlBuilder;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.List;
 import org.restexpress.common.query.QueryRange;
@@ -37,7 +37,7 @@ public class QueryController
         this.service = queryService;
     }
 
-    public List<Document> query(Request request, Response response)
+    public List<Document> query(Request request, Response response) throws IndexParseException//TODO: handle this exception better
     {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");

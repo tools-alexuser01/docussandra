@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.domain;
 
+import com.strategicgains.docussandra.Utils;
 import java.util.Objects;
 
 /**
@@ -34,6 +35,11 @@ public class ParsedQuery {
     private WhereClause whereClause;
     
     /**
+     * Index for this query.
+     */
+    private Index index;
+    
+    /**
      * The iTable (index table) that needs to be queried in order to retrieve results.
      */
     private String iTable;   
@@ -42,12 +48,13 @@ public class ParsedQuery {
      * Constructor.
      * @param query Original query that was passed in.
      * @param whereClause Parsed where clause for this query.
-     * @param iTable The iTable (index table) that needs to be queried in order to retrieve results.
+     * @param index The index that needs to be queried in order to retrieve results.
      */
-    public ParsedQuery(Query query, WhereClause whereClause, String iTable) {
+    public ParsedQuery(Query query, WhereClause whereClause, Index index) {
         this.query = query;
         this.whereClause = whereClause;
-        this.iTable = iTable;
+        this.index = index;
+        this.iTable = Utils.calculateITableName(index);
     }
 
     /**
@@ -107,6 +114,15 @@ public class ParsedQuery {
     @Override
     public String toString() {
         return "ParsedQuery{" + "query=" + query + ", whereClause=" + whereClause + ", iTable=" + iTable + '}';
+    }
+
+    /**
+     * Index for this query.
+     * @return the index
+     */
+    public Index getIndex()
+    {
+        return index;
     }
     
 }

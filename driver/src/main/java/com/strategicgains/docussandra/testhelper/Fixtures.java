@@ -691,8 +691,8 @@ public class Fixtures
     {
         Query query = createTestQuery();
         WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexwithonefield";
-        return new ParsedQuery(query, whereClause, iTable);
+        //String iTable = "mydb_mytable_myindexwithonefield";
+        return new ParsedQuery(query, whereClause, createTestIndexOneField());
     }
 
     /**
@@ -706,8 +706,8 @@ public class Fixtures
         query.setWhere("myindexedfield = 'foo'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexwithonefield";
-        return new ParsedQuery(query, whereClause, iTable);
+        //String iTable = "mydb_mytable_myindexwithonefield";
+        return new ParsedQuery(query, whereClause, createTestIndexOneField());
     }
 
     /**
@@ -721,8 +721,8 @@ public class Fixtures
         query.setWhere("field1 = 'this is my data'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexbulkdata";
-        return new ParsedQuery(query, whereClause, iTable);
+        //String iTable = "mydb_mytable_myindexbulkdata";
+        return new ParsedQuery(query, whereClause, createTestIndexWithBulkDataHit());
     }
 
     /**

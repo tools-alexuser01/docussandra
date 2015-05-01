@@ -3,6 +3,7 @@ package com.strategicgains.docussandra.service;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 
 /**
@@ -37,7 +38,7 @@ public class QueryService
      * @return A query response object containing a list of documents and some
      * metadata about the query.
      */
-    public QueryResponseWrapper query(String db, Query toQuery)
+    public QueryResponseWrapper query(String db, Query toQuery) throws IndexParseException
     {
         ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());//note: throws a runtime exception
         return queries.doQuery(parsedQuery);
@@ -53,7 +54,7 @@ public class QueryService
      * @return A query response object containing a list of documents and some
      * metadata about the query.
      */
-    public QueryResponseWrapper query(String db, Query toQuery, int limit, long offset)
+    public QueryResponseWrapper query(String db, Query toQuery, int limit, long offset) throws IndexParseException
     {
         ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());//note: throws a runtime exception
         return queries.doQuery(parsedQuery, limit, offset);

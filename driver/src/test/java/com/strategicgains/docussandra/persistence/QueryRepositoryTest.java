@@ -16,12 +16,11 @@
 package com.strategicgains.docussandra.persistence;
 
 import com.mongodb.util.JSON;
-import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import java.io.IOException;
 import java.util.List;
 import org.bson.BSONObject;
 import org.junit.After;
@@ -76,7 +75,7 @@ public class QueryRepositoryTest
      * Test of doQuery method, of class QueryDao.
      */
     @Test
-    public void testDoQueryNoResults()
+    public void testDoQueryNoResults() throws IndexParseException
     {
         System.out.println("testDoQueryNoResults");
         QueryRepository instance = new QueryRepository(f.getSession());
@@ -89,7 +88,7 @@ public class QueryRepositoryTest
      * Test of doQuery method, of class QueryDao.
      */
     @Test
-    public void testDoQueryWithResults()
+    public void testDoQueryWithResults() throws IndexParseException
     {
         System.out.println("testDoQueryWithResults");
         Document doc = Fixtures.createTestDocument();
@@ -117,7 +116,7 @@ public class QueryRepositoryTest
      * Test of doQuery method, of class QueryDao.
      */
     @Test
-    public void testDoQueryWithDataButNoResults()
+    public void testDoQueryWithDataButNoResults() throws IndexParseException
     {
         System.out.println("testDoQueryWithDataButNoResults");
         Document doc = Fixtures.createTestDocument();
