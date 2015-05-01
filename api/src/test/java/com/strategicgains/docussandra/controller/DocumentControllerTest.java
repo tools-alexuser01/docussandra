@@ -101,7 +101,7 @@ public class DocumentControllerTest
     @After
     public void afterTest()
     {
-        
+
     }
 
     /**
@@ -159,6 +159,42 @@ public class DocumentControllerTest
     }
 
     /**
+     * Tests that the POST /{databases}/{table}/ endpoint properly creates a
+     * document.
+     */
+    @Test
+    public void postDocumentWithAllDataTypesTest()
+    {
+        //create the index first so we are sure it will get parsed
+        f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
+        Document testDocument = Fixtures.createTestDocument3();
+        String tableStr = testDocument.object();
+
+        //act
+        Response r = given().body(tableStr).expect().statusCode(201)
+                .body("id", notNullValue())
+                .body("object", notNullValue())
+                .body("object", containsString("thisisastring"))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue())
+                .when().post("/").andReturn();
+
+        BSONObject bson = (BSONObject) JSON.parse(r.getBody().asString());
+        String id = (String) bson.get("id");
+        //check
+        expect().statusCode(200)
+                .body("id", equalTo(id))
+                .body("object", notNullValue())
+                .body("object", containsString("thisisastring"))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue())
+                .get(id);
+        testDocument.setUuid(UUID.fromString(id));
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
+    }
+
+    /**
      * Tests that the PUT /{databases}/{table}/{document} endpoint properly
      * updates a document.
      */
@@ -166,6 +202,33 @@ public class DocumentControllerTest
     public void putDocumentTest()
     {
         Document testDocument = Fixtures.createTestDocument();
+        f.insertDocument(testDocument);
+        String newObject = "{\"newjson\": \"object\"}";
+        //act
+        given().body(newObject).expect().statusCode(204)
+                .when().put(testDocument.getUuid().toString());
+
+        //check
+        Response response = expect().statusCode(200)
+                .body("id", equalTo(testDocument.getUuid().toString()))
+                .body("object", notNullValue())
+                .body("object", equalTo("{ \"newjson\" : \"object\"}"))
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue()).when()
+                .get(testDocument.getUuid().toString()).andReturn();
+        LOGGER.debug("body for put response: " + response.getBody().prettyPrint());
+        //cleanup the random uuid'ed doc
+        f.deleteDocument(testDocument);
+    }
+
+    /**
+     * Tests that the PUT /{databases}/{table}/{document} endpoint properly
+     * updates a document.
+     */
+    @Test
+    public void putDocumentWithAllDataTypesTest()
+    {
+        Document testDocument = Fixtures.createTestDocument3();
         f.insertDocument(testDocument);
         String newObject = "{\"newjson\": \"object\"}";
         //act
