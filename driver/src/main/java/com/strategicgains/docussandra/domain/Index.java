@@ -134,7 +134,6 @@ public class Index
         return (fields == null ? Collections.<IndexField>emptyList() : Collections.unmodifiableList(fields));
     }
 
-    @Deprecated //todo: undeprecate
     public List<String> fieldsValues()
     {
         if (fields == null)
@@ -151,7 +150,6 @@ public class Index
         }
     }
     
-    @Deprecated //todo: undeprecate
     public List<String> fieldsTypes()
     {
         if (fields == null)

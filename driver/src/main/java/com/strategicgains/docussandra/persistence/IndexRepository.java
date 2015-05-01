@@ -260,8 +260,8 @@ public class IndexRepository
                 entity.tableName(),
                 entity.isUnique(),
                 entity.bucketSize(),
-                entity.fieldsValues(),//this might be the one place where it is ok to call this
-                entity.fieldsTypes(),//this might be the one place where it is ok to call this
+                entity.fieldsValues(),
+                entity.fieldsTypes(),
                 entity.includeOnly(),
                 entity.isActive(),
                 entity.getCreatedAt(),
