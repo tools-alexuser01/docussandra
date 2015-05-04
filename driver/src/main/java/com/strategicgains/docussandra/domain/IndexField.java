@@ -18,6 +18,7 @@ package com.strategicgains.docussandra.domain;
 import com.strategicgains.syntaxe.Validatable;
 import com.strategicgains.syntaxe.ValidationException;
 import com.strategicgains.syntaxe.annotation.Required;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
  *
  * @author udeyoje
  */
-public class IndexField implements Validatable
+public class IndexField implements Validatable, Serializable
 {
 
     private static final Pattern fieldPattern = Pattern.compile("^[\\+-]?\\w+");
@@ -48,6 +49,10 @@ public class IndexField implements Validatable
      * Type of field that the field represents.
      */
     private FieldDataType type = FieldDataType.TEXT;
+
+    public IndexField()
+    {
+    }        
 
     /**
      * Constructor.
