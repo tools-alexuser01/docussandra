@@ -35,7 +35,7 @@ public class Index
      * This is how many items will be stored in a single wide row, before
      * creating another wide row.
      */
-    //TODO: refactor to new concept of infinately sized buckets, but with a limit number of buckets; I don't think that this is presently used.
+    //TODO: refactor to new concept of infinately sized rows, but with a limit number of buckets; I don't think that this is presently used.
     private long bucketSize = 2000l;
 
     /**
@@ -43,10 +43,9 @@ public class Index
      * with a dash ('-') means it's order in descending order.
      */
     @Required("Fields")
+    //@ChildValidation
     private List<IndexField> fields;
 
-//	@Required("Index Type")
-//	private IndexType type;
     //Note: not currently supported
     /**
      * Consider the index is only concerned with only a partial dataset. In this
