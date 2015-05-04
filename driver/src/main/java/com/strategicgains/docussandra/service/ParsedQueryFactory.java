@@ -150,7 +150,7 @@ public class ParsedQueryFactory
         return toReturn;
     }
 
-    //TODO: move this to PearsonLibrary
+    //TODO: move this to common a library
     public static boolean equalLists(List<String> one, List<String> two)
     {
         if (one == null && two == null)
