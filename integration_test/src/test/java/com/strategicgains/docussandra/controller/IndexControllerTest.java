@@ -23,6 +23,7 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
@@ -105,7 +106,7 @@ public class IndexControllerTest
 
     /**
      * Tests that the GET /{databases}/{setTable}/indexes/{index} properly
- retrieves an existing index.
+     * retrieves an existing index.
      */
     @Test
     public void getIndexTest()
@@ -122,7 +123,7 @@ public class IndexControllerTest
 
     /**
      * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
- creates a index.
+     * creates a index.
      */
     @Test
     public void postIndexTest() throws InterruptedException
@@ -158,8 +159,59 @@ public class IndexControllerTest
 
     /**
      * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
- creates a index and that the
- GET/{database}/{setTable}/index_status/{status_id} endpoint is working.
+     * creates a index.
+     */
+    @Test
+    public void postIndexAllFieldsTest() throws InterruptedException
+    {
+        Index testIndex = Fixtures.createTestIndexAllFieldTypes();
+        StringBuilder tableStr = new StringBuilder("{\"name\" : \"" + testIndex.getName() + "\", \"fields\" : [");
+        boolean first = true;
+        for (IndexField f : testIndex.getFields())
+        {
+            if (!first)
+            {
+                tableStr.append(", ");
+            }
+            first = false;
+            tableStr.append("{\"field\" : \"");
+            tableStr.append(f.getField());
+            tableStr.append("\",\"type\": \"");
+            tableStr.append(f.getType().toString());
+            tableStr.append("\"}");
+        }
+        tableStr.append("]}");
+
+        //act
+        given().body(tableStr.toString()).expect().statusCode(201)
+                .body("index.name", equalTo(testIndex.getName()))
+                .body("index.fields", notNullValue())
+                .body("index.createdAt", notNullValue())
+                .body("index.updatedAt", notNullValue())
+                .body("index.active", equalTo(false))
+                .body("id", notNullValue())
+                .body("dateStarted", notNullValue())
+                .body("statusLastUpdatedAt", notNullValue())
+                .body("totalRecords", equalTo(0))
+                .body("recordsCompleted", equalTo(0))
+                .when().log().ifValidationFails().post("/" + testIndex.getName());
+
+        Thread.sleep(100);//sleep for a hair to let the indexing complete
+
+        //check self (index endpoint)
+        expect().statusCode(200)
+                .body("name", equalTo(testIndex.getName()))
+                .body("fields", notNullValue())
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue())
+                .body("active", equalTo(true))
+                .get("/" + testIndex.getName());
+    }
+
+    /**
+     * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
+     * creates a index and that the
+     * GET/{database}/{setTable}/index_status/{status_id} endpoint is working.
      */
     @Test
     public void postIndexAndCheckStatusTest() throws InterruptedException
@@ -211,8 +263,8 @@ public class IndexControllerTest
 
     /**
      * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
- creates a index and that the
- GET/{database}/{setTable}/index_status/{status_id} endpoint is working.
+     * creates a index and that the
+     * GET/{database}/{setTable}/index_status/{status_id} endpoint is working.
      */
     @Test
     public void createDataThePostIndexAndCheckStatusTest() throws InterruptedException, Exception
@@ -308,8 +360,8 @@ public class IndexControllerTest
 
     /**
      * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
- creates a index and that the GET/{database}/{setTable}/index_status/
- endpoint is working.
+     * creates a index and that the GET/{database}/{setTable}/index_status/
+     * endpoint is working.
      */
     @Test
     public void postIndexAndCheckStatusAllTest() throws Exception
@@ -397,7 +449,7 @@ public class IndexControllerTest
 
     /**
      * Tests that the DELETE /{databases}/{setTable}/indexes/{index} endpoint
- properly deletes a index.
+     * properly deletes a index.
      */
     @Test
     public void deleteIndexTest()
