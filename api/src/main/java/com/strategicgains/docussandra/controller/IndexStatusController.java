@@ -51,9 +51,9 @@ public class IndexStatusController
 
         IndexCreatedEvent status = indexes.status(UUID.fromString(id));
 
-        HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
-                .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
-                .bind(Constants.Url.INDEX, status.getIndex().name())
+        HyperExpress.bind(Constants.Url.TABLE, status.getIndex().getTableName())
+                .bind(Constants.Url.DATABASE, status.getIndex().getDatabaseName())
+                .bind(Constants.Url.INDEX, status.getIndex().getName())
                 .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
         return status;
     }
@@ -73,9 +73,9 @@ public class IndexStatusController
             @Override
             public void bind(IndexCreatedEvent object, TokenResolver resolver)
             {
-                resolver.bind(Constants.Url.TABLE, object.getIndex().tableName())
-                        .bind(Constants.Url.DATABASE, object.getIndex().databaseName())
-                        .bind(Constants.Url.INDEX, object.getIndex().name())
+                resolver.bind(Constants.Url.TABLE, object.getIndex().getTableName())
+                        .bind(Constants.Url.DATABASE, object.getIndex().getDatabaseName())
+                        .bind(Constants.Url.INDEX, object.getIndex().getName())
                         .bind(Constants.Url.INDEX_STATUS, object.getUuid().toString());
 
             }

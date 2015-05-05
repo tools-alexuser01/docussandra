@@ -176,8 +176,8 @@ public class IndexRepositoryTest
         Index testIndex2 = Fixtures.createTestIndexTwoField();
         f.insertIndex(testIndex);
         f.insertIndex(testIndex2);
-        String namespace = testIndex.databaseName();
-        String collection = testIndex.tableName();
+        String namespace = testIndex.getDatabaseName();
+        String collection = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
         List<Index> result = instance.readAll(namespace, collection);
         assertEquals(2, result.size());
@@ -197,8 +197,8 @@ public class IndexRepositoryTest
         Index testIndex2 = Fixtures.createTestIndexTwoField();
         f.insertIndex(testIndex);
         f.insertIndex(testIndex2);
-        String namespace = testIndex.databaseName();
-        String collection = testIndex.tableName();
+        String namespace = testIndex.getDatabaseName();
+        String collection = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
         List<Index> result = instance.readAllCached(namespace, collection);
         assertEquals(2, result.size());
@@ -217,8 +217,8 @@ public class IndexRepositoryTest
         Index testIndex2 = Fixtures.createTestIndexTwoField();
         f.insertIndex(testIndex);
         f.insertIndex(testIndex2);
-        String namespace = testIndex.databaseName();
-        String collection = testIndex.tableName();
+        String namespace = testIndex.getDatabaseName();
+        String collection = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
         long expResult = 2L;
         long result = instance.countAll(namespace, collection);

@@ -70,7 +70,7 @@ public class IndexCreatedHandler implements EventHandler
             Index index = indexRepo.read(status.getIndex().getId());
             long offset = 0;
             long recordsCompleted = 0;
-            QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.databaseName(), index.tableName(), CHUNK, offset);
+            QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
             boolean hasMore;
             if (responseWrapper.isEmpty())
             {
@@ -97,7 +97,7 @@ public class IndexCreatedHandler implements EventHandler
                 status.setStatusLastUpdatedAt(new Date());
                 indexStatusRepo.updateEntity(status);
                 //get the next chunk
-                responseWrapper = docRepo.doReadAll(index.databaseName(), index.tableName(), CHUNK, offset);
+                responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
                 if (responseWrapper.isEmpty())
                 {
                     hasMore = false;
@@ -113,7 +113,7 @@ public class IndexCreatedHandler implements EventHandler
         {
             String indexName  = "Cannot be determined.";
             if(status != null && status.getIndex() != null){
-                indexName = status.getIndex().name();
+                indexName = status.getIndex().getName();
             }
             String errorMessage = "Could not complete indexing event for index: '" + indexName + "'.";
             logger.error(errorMessage, e);

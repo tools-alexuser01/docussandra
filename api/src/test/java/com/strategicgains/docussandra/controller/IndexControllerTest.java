@@ -23,6 +23,7 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import org.junit.BeforeClass;
@@ -106,7 +107,7 @@ public class IndexControllerTest
     }
 
     /**
-     * Tests that the GET /{databases}/{table}/indexes/{index} properly
+     * Tests that the GET /{databases}/{setTable}/indexes/{index} properly
      * retrieves an existing index.
      */
     @Test
@@ -114,28 +115,30 @@ public class IndexControllerTest
     {
         Index testIndex = Fixtures.createTestIndexOneField();
         f.insertIndex(testIndex);
-        expect().statusCode(200)
-                .body("name", equalTo(testIndex.name()))
+        ResponseOptions result = expect().statusCode(200)
+                .body("name", equalTo(testIndex.getName()))
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get(testIndex.name());
+                .get(testIndex.getName()).andReturn();
+
+        LOGGER.info(result.body().prettyPrint());
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/indexes/ endpoint properly
+     * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
      * creates a index.
      */
     @Test
     public void postIndexTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
-        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fieldsValues().get(0)
-                + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
+        String tableStr = "{" + "\"fields\" : [\"" + testIndex.getFieldsValues().get(0)
+                + "\"], \"name\" : \"" + testIndex.getName() + "\"}";
 
         //act
         given().body(tableStr).expect().statusCode(201)
-                .body("index.name", equalTo(testIndex.name()))
+                .body("index.name", equalTo(testIndex.getName()))
                 .body("index.fields", notNullValue())
                 .body("index.createdAt", notNullValue())
                 .body("index.updatedAt", notNullValue())
@@ -145,35 +148,86 @@ public class IndexControllerTest
                 .body("statusLastUpdatedAt", notNullValue())
                 .body("totalRecords", equalTo(0))
                 .body("recordsCompleted", equalTo(0))
-                .when().post("/" + testIndex.name());
+                .when().post("/" + testIndex.getName());
 
         Thread.sleep(100);//sleep for a hair to let the indexing complete
 
         //check self (index endpoint)
         expect().statusCode(200)
-                .body("name", equalTo(testIndex.name()))
+                .body("name", equalTo(testIndex.getName()))
                 .body("fields", notNullValue())
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue())
                 .body("active", equalTo(true))
-                .get("/" + testIndex.name());
+                .get("/" + testIndex.getName());
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/indexes/ endpoint properly
+     * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
+     * creates a index.
+     */
+    @Test
+    public void postIndexAllFieldsTest() throws InterruptedException
+    {
+        Index testIndex = Fixtures.createTestIndexAllFieldTypes();
+        StringBuilder tableStr = new StringBuilder("{\"name\" : \"" + testIndex.getName() + "\", \"fields\" : [");
+        boolean first = true;
+        for (IndexField f : testIndex.getFields())
+        {
+            if (!first)
+            {
+                tableStr.append(", ");
+            }
+            first = false;
+            tableStr.append("{\"field\" : \"");
+            tableStr.append(f.getField());
+            tableStr.append("\",\"type\": \"");
+            tableStr.append(f.getType().toString());
+            tableStr.append("\"}");
+        }
+        tableStr.append("]}");
+
+        //act
+        given().body(tableStr.toString()).expect().statusCode(201)
+                .body("index.name", equalTo(testIndex.getName()))
+                .body("index.fields", notNullValue())
+                .body("index.createdAt", notNullValue())
+                .body("index.updatedAt", notNullValue())
+                .body("index.active", equalTo(false))
+                .body("id", notNullValue())
+                .body("dateStarted", notNullValue())
+                .body("statusLastUpdatedAt", notNullValue())
+                .body("totalRecords", equalTo(0))
+                .body("recordsCompleted", equalTo(0))
+                .when().log().ifValidationFails().post("/" + testIndex.getName());
+
+        Thread.sleep(100);//sleep for a hair to let the indexing complete
+
+        //check self (index endpoint)
+        expect().statusCode(200)
+                .body("name", equalTo(testIndex.getName()))
+                .body("fields", notNullValue())
+                .body("createdAt", notNullValue())
+                .body("updatedAt", notNullValue())
+                .body("active", equalTo(true))
+                .get("/" + testIndex.getName());
+    }
+
+    /**
+     * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
      * creates a index and that the
-     * GET/{database}/{table}/index_status/{status_id} endpoint is working.
+     * GET/{database}/{setTable}/index_status/{status_id} endpoint is working.
      */
     @Test
     public void postIndexAndCheckStatusTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
-        String tableStr = "{" + "\"fields\" : [\"" + testIndex.fieldsValues().get(0)
-                + "\"]," + "\"name\" : \"" + testIndex.name() + "\"}";
+        String tableStr = "{" + "\"fields\" : [\"" + testIndex.getFieldsValues().get(0)
+                + "\"]," + "\"name\" : \"" + testIndex.getName() + "\"}";
 
         //act
         ResponseOptions response = given().body(tableStr).expect().statusCode(201)
-                .body("index.name", equalTo(testIndex.name()))
+                .body("index.name", equalTo(testIndex.getName()))
                 .body("index.fields", notNullValue())
                 .body("index.createdAt", notNullValue())
                 .body("index.updatedAt", notNullValue())
@@ -185,7 +239,7 @@ public class IndexControllerTest
                 .body("precentComplete", notNullValue())
                 .body("totalRecords", equalTo(0))
                 .body("recordsCompleted", equalTo(0))
-                .when().post("/" + testIndex.name()).andReturn();
+                .when().post("/" + testIndex.getName()).andReturn();
 
         Thread.sleep(100);//sleep for a hair to let the indexing complete
 
@@ -194,7 +248,7 @@ public class IndexControllerTest
         {
             //get the uuid from the response
             String uuidString = response.getBody().jsonPath().get("id");
-            RestAssured.basePath = "/" + testIndex.databaseName() + "/" + testIndex.tableName() + "/index_status/";
+            RestAssured.basePath = "/" + testIndex.getDatabaseName() + "/" + testIndex.getTableName() + "/index_status/";
             ResponseOptions res = expect().statusCode(200)
                     .body("id", equalTo(uuidString))
                     .body("dateStarted", notNullValue())
@@ -214,9 +268,9 @@ public class IndexControllerTest
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/indexes/ endpoint properly
+     * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
      * creates a index and that the
-     * GET/{database}/{table}/index_status/{status_id} endpoint is working.
+     * GET/{database}/{setTable}/index_status/{status_id} endpoint is working.
      */
     @Test
     public void createDataThenPostIndexAndCheckStatusTest() throws InterruptedException, Exception
@@ -232,12 +286,12 @@ public class IndexControllerTest
             f.insertTable(testTable);
             f.insertDocuments(docs);//put in a ton of data directly into the db
             Index lastname = Fixtures.createTestPlayersIndexLastName();
-            String tableStr = "{" + "\"fields\" : [\"" + lastname.fieldsValues().get(0)
-                    + "\"]," + "\"name\" : \"" + lastname.name() + "\"}";
-            RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/indexes";
+            String tableStr = "{" + "\"fields\" : [\"" + lastname.getFieldsValues().get(0)
+                    + "\"]," + "\"name\" : \"" + lastname.getName() + "\"}";
+            RestAssured.basePath = "/" + lastname.getDatabaseName() + "/" + lastname.getTableName() + "/indexes";
             //act -- create index
             ResponseOptions response = given().body(tableStr).expect().statusCode(201)
-                    .body("index.name", equalTo(lastname.name()))
+                    .body("index.name", equalTo(lastname.getName()))
                     .body("index.fields", notNullValue())
                     .body("index.createdAt", notNullValue())
                     .body("index.updatedAt", notNullValue())
@@ -249,7 +303,7 @@ public class IndexControllerTest
                     .body("precentComplete", notNullValue())
                     .body("totalRecords", equalTo(3308))
                     .body("recordsCompleted", equalTo(0))
-                    .when().post("/" + lastname.name()).andReturn();
+                    .when().post("/" + lastname.getName()).andReturn();
 
             //start a timer
             StopWatch sw = new StopWatch();
@@ -258,7 +312,7 @@ public class IndexControllerTest
             //check the status endpoint to make sure it got created
             //get the uuid from the response
             String uuidString = response.getBody().jsonPath().get("id");
-            RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/index_status/";
+            RestAssured.basePath = "/" + lastname.getDatabaseName() + "/" + lastname.getTableName() + "/index_status/";
             ResponseOptions res = expect().statusCode(200)
                     .body("id", equalTo(uuidString))
                     .body("dateStarted", notNullValue())
@@ -307,15 +361,16 @@ public class IndexControllerTest
             RestAssured.basePath = restAssuredBasePath;
             //clean up
             DocumentRepository docrepo = new DocumentRepository(f.getSession());
-            for(Document d : docs){
+            for (Document d : docs)
+            {
                 docrepo.delete(d);
             }
         }
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/indexes/ endpoint properly
-     * creates a index and that the GET/{database}/{table}/index_status/
+     * Tests that the POST /{databases}/{setTable}/indexes/ endpoint properly
+     * creates a index and that the GET/{database}/{setTable}/index_status/
      * endpoint is working.
      */
     @Test
@@ -332,12 +387,12 @@ public class IndexControllerTest
             List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
             f.insertDocuments(docs);//put in a ton of data directly into the db
             Index lastname = Fixtures.createTestPlayersIndexLastName();
-            String tableStr = "{" + "\"fields\" : [\"" + lastname.fieldsValues().get(0)
-                    + "\"]," + "\"name\" : \"" + lastname.name() + "\"}";
-            RestAssured.basePath = "/" + lastname.databaseName() + "/" + lastname.tableName() + "/indexes";
+            String tableStr = "{" + "\"fields\" : [\"" + lastname.getFieldsValues().get(0)
+                    + "\"]," + "\"name\" : \"" + lastname.getName() + "\"}";
+            RestAssured.basePath = "/" + lastname.getDatabaseName() + "/" + lastname.getTableName() + "/indexes";
             //act -- create index
             given().body(tableStr).expect().statusCode(201)
-                    .body("index.name", equalTo(lastname.name()))
+                    .body("index.name", equalTo(lastname.getName()))
                     .body("index.fields", notNullValue())
                     .body("index.createdAt", notNullValue())
                     .body("index.updatedAt", notNullValue())
@@ -349,7 +404,7 @@ public class IndexControllerTest
                     .body("precentComplete", notNullValue())
                     .body("totalRecords", equalTo(3308))
                     .body("recordsCompleted", equalTo(0))
-                    .when().post("/" + lastname.name());
+                    .when().log().ifValidationFails().post("/" + lastname.getName());
 
             //start a timer
             StopWatch sw = new StopWatch();
@@ -368,7 +423,7 @@ public class IndexControllerTest
                     .body("_embedded.indexcreatedevents[0].totalRecords", notNullValue())
                     .body("_embedded.indexcreatedevents[0].recordsCompleted", notNullValue())
                     .body("_embedded.indexcreatedevents[0].precentComplete", notNullValue())
-                    .when().get("/").andReturn();
+                    .when().log().ifValidationFails().get("/").andReturn();
             LOGGER.debug("Status Response: " + res.getBody().prettyPrint());
             //wait for it to dissapear (meaning it's gone active)
             boolean active = false;
@@ -379,8 +434,8 @@ public class IndexControllerTest
                 LOGGER.debug("Status Response: " + body);
 
                 JSONObject bodyObject = (JSONObject) parser.parse(body);
-                JSONObject embedded = (JSONObject)bodyObject.get("_embedded");
-                JSONArray resultSet = (JSONArray)embedded.get("indexcreatedevents");
+                JSONObject embedded = (JSONObject) bodyObject.get("_embedded");
+                JSONArray resultSet = (JSONArray) embedded.get("indexcreatedevents");
                 if (resultSet.isEmpty())
                 {
                     active = true;
@@ -403,7 +458,7 @@ public class IndexControllerTest
     }
 
     /**
-     * Tests that the DELETE /{databases}/{table}/indexes/{index} endpoint
+     * Tests that the DELETE /{databases}/{setTable}/indexes/{index} endpoint
      * properly deletes a index.
      */
     @Test
@@ -413,9 +468,9 @@ public class IndexControllerTest
         f.insertIndex(testIndex);
         //act
         given().expect().statusCode(204)
-                .when().delete(testIndex.name());
+                .when().delete(testIndex.getName());
         //check
         expect().statusCode(404).when()
-                .get(testIndex.name());
+                .get(testIndex.getName());
     }
 }

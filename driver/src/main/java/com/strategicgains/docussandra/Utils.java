@@ -33,16 +33,16 @@ public class Utils
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     /**
-     * Calculates the name of an iTable based on the dataBaseName, the
-     * tableName, and the indexName.
+     * Calculates the getIndexName of an iTable based on the dataBaseName, the
+ getTableName, and the getIndexName.
      *
      * Note: No null checks.
      *
-     * @param databaseName database name for the iTable.
-     * @param tableName table name for the iTable.
-     * @param indexName index name for the iTable.
+     * @param databaseName database getIndexName for the iTable.
+     * @param tableName setTable getIndexName for the iTable.
+     * @param indexName index getIndexName for the iTable.
      *
-     * @return The name of the iTable for that index.
+     * @return The getIndexName of the iTable for that index.
      */
     public static String calculateITableName(String databaseName, String tableName, String indexName)
     {
@@ -69,16 +69,16 @@ public class Utils
     }
 
     /**
-     * Calculates the name of an iTable based on an index.
+     * Calculates the getIndexName of an iTable based on an index.
      *
      * Note: No null checks.
      *
-     * @param index Index whose iTable name you would like.
-     * @return The name of the iTable for that index.
+     * @param index Index whose iTable getIndexName you would like.
+     * @return The getIndexName of the iTable for that index.
      */
     public static String calculateITableName(Index index)
     {
-        return calculateITableName(index.databaseName(), index.tableName(), index.name());
+        return calculateITableName(index.getDatabaseName(), index.getTableName(), index.getName());
     }
 
     //TODO: ditch the UUID type; we are misusing it here and another type (probably a string or long) would be more approprate 

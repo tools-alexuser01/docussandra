@@ -111,7 +111,7 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
     }
 
     /**
-     * Computes any calculated fields.
+     * Computes any calculated getFields.
      */
     public void calculateValues()
     {
@@ -183,7 +183,7 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
     @Override
     public Identifier getId()
     {
-        return new Identifier(getIndex().databaseName(), getIndex().tableName(), getIndex().name(), id);
+        return new Identifier(getIndex().getDatabaseName(), getIndex().getTableName(), getIndex().getName(), id);
     }
 
     @Override

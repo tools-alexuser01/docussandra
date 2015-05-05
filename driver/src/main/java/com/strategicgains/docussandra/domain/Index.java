@@ -26,7 +26,7 @@ public class Index
     @ChildValidation
     private TableReference table;
 
-    @RegexValidation(name = "Index name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
+    @RegexValidation(name = "Index Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
     private String name;
 
     private boolean isUnique = false;
@@ -39,8 +39,8 @@ public class Index
     private long bucketSize = 2000l;
 
     /**
-     * The list of fields, in order, that are being indexed. Prefixing a field
-     * with a dash ('-') means it's order in descending order.
+     * The list of getFields, in order, that are being indexed. Prefixing a
+     * field with a dash ('-') means it's order in descending order.
      */
     @Required("Fields")
     //@ChildValidation
@@ -50,7 +50,7 @@ public class Index
     /**
      * Consider the index is only concerned with only a partial dataset. In this
      * case, instead of storing the entire BSON payload, we store only a
-     * subset--those listed in includeOnly.
+     * subset--those listed in setIncludeOnly.
      */
     private List<String> includeOnly;
 
@@ -67,7 +67,7 @@ public class Index
     public Index(String name)
     {
         this();
-        name(name);
+        setName(name);
         active = false;
     }
 
@@ -76,37 +76,37 @@ public class Index
         return (table != null);
     }
 
-    public Table table()
+    public Table getTable()
     {
         return (hasTable() ? table.asObject() : null);
     }
 
-    public void table(String database, String table)
+    public void setTable(String database, String table)
     {
         this.table = new TableReference(database, table);
     }
 
-    public void table(Table table)
+    public void setTable(Table table)
     {
         this.table = (table != null ? new TableReference(table) : null);
     }
 
-    public String tableName()
+    public String getTableName()
     {
         return (hasTable() ? table.name() : null);
     }
 
-    public String databaseName()
+    public String getDatabaseName()
     {
         return (hasTable() ? table.database() : null);
     }
 
-    public String name()
+    public String getName()
     {
         return name;
     }
 
-    public Index name(String name)
+    public Index setName(String name)
     {
         this.name = name;
         return this;
@@ -123,17 +123,17 @@ public class Index
         return this;
     }
 
-    public void fields(List<IndexField> props)
+    public void setFields(List<IndexField> props)
     {
         this.fields = new ArrayList<>(props);
     }
 
-    public List<IndexField> fields()
+    public List<IndexField> getFields()
     {
         return (fields == null ? Collections.<IndexField>emptyList() : Collections.unmodifiableList(fields));
     }
 
-    public List<String> fieldsValues()
+    public List<String> getFieldsValues()
     {
         if (fields == null)
         {
@@ -148,8 +148,8 @@ public class Index
             return Collections.unmodifiableList(toReturn);
         }
     }
-    
-    public List<String> fieldsTypes()
+
+    public List<String> getFieldsTypes()
     {
         if (fields == null)
         {
@@ -165,7 +165,7 @@ public class Index
         }
     }
 
-    public void includeOnly(List<String> props)
+    public void setIncludeOnly(List<String> props)
     {
         if (props != null && !props.isEmpty())
         {
@@ -173,7 +173,7 @@ public class Index
         }
     }
 
-    public List<String> includeOnly()
+    public List<String> getIncludeOnly()
     {
         return (includeOnly == null ? Collections.<String>emptyList() : Collections.unmodifiableList(includeOnly));
     }
@@ -181,7 +181,7 @@ public class Index
     @Override
     public Identifier getId()
     {
-        return new Identifier(databaseName(), tableName(), name);
+        return new Identifier(getDatabaseName(), getTableName(), name);
     }
 
     @Override
@@ -190,19 +190,19 @@ public class Index
         // intentionally left blank.
     }
 
-    public long bucketSize()
+    public long getBucketSize()
     {
         return bucketSize;
     }
 
-    public void bucketSize(long bucketSize)
+    public void setBucketSize(long bucketSize)
     {
         this.bucketSize = bucketSize;
     }
 
 //    public void iterateFields(Callback<IndexField> callback)
 //    {
-//        for (IndexField field : fields)
+//        for (IndexField field : getFields)
 //        {
 //            callback.process(field);
 //        }
@@ -232,9 +232,15 @@ public class Index
     {
         final List<String> errors = new ArrayList<>();
 
-        if (fields.isEmpty())
+        if (fields == null || fields.isEmpty())
         {
             errors.add("Fields is required.");
+        } else {
+            for(IndexField i : fields){
+                if(i.getField() == null){
+                    errors.add("Field name is required.");
+                }
+            }
         }
 
         Pattern includePattern = Pattern.compile("^\\w+");
@@ -321,7 +327,7 @@ public class Index
     @Override
     public String toString()
     {
-        return "Index{" + "table=" + table + ", name=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + ", active=" + active + '}';
+        return "Index{" + "table=" + table + ", indexName=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + ", active=" + active + '}';
     }
 
 }

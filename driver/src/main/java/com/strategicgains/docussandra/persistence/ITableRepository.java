@@ -45,7 +45,7 @@ public class ITableRepository
     private static final String TABLE_CREATE_CQL = "CREATE TABLE %s (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY ((bucket), %s));";
 
     /**
-     * CQL statement for deleting an iTable (or for that matter, any table).
+     * CQL statement for deleting an iTable (or for that matter, any setTable).
      */
     private static final String TABLE_DELETE_CQL = "DROP TABLE %s;";
 
@@ -96,13 +96,13 @@ public class ITableRepository
     }
 
     /**
-     * Dynamically generates a table creation command for an iTable based on an
-     * index. This would be private, the only reason it is public is for
+     * Dynamically generates a setTable creation command for an iTable based on an
+ index. This would be private, the only reason it is public is for
      * testing.
      *
      * @param index Index that needs an iTable generated for it.
-     * @return A CQL table creation command that will create the specified
-     * iTable.
+     * @return A CQL setTable creation command that will create the specified
+ iTable.
      */
     public String generateTableCreationSyntax(Index index)
     {
@@ -114,7 +114,7 @@ public class ITableRepository
 //        }
         boolean first = true;
         
-        for (IndexField field : index.fields())
+        for (IndexField field : index.getFields())
         {
             if (!first)
             {
@@ -149,7 +149,7 @@ public class ITableRepository
     /**
      * Deletes an iTable
      *
-     * @param tableName iTable name to delete.
+     * @param tableName iTable getIndexName to delete.
      */
     public void deleteITable(String tableName)
     {

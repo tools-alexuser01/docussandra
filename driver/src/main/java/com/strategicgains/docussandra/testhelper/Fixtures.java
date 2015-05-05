@@ -99,7 +99,7 @@ public class Fixtures
             EmbeddedCassandraServerHelper.startEmbeddedCassandra(timeout);
             cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
             embeddedCassandra = true;
-            Thread.sleep(20000);//time to let cassandra startup
+            //Thread.sleep(20000);//time to let cassandra startup
         } else //using a remote or local server for testing
         {
             cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
@@ -245,24 +245,24 @@ public class Fixtures
     }
 
     /**
-     * Creates at test index with two fields.
+     * Creates at test index with two getFields.
      *
      * @return
      */
     public static final Index createTestIndexTwoField()
     {
         Index index = new Index("myindexwithtwofields");
-        index.table(DB, "mytable");
+        index.setTable(DB, "mytable");
         ArrayList<IndexField> fields = new ArrayList<>();
         fields.add(new IndexField("myindexedfield1"));
         fields.add(new IndexField("myindexedfield2"));
-        index.fields(fields);
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
 
     /**
-     * Creates at test index with two fields.
+     * Creates at test index with two getFields.
      *
      * @return
      */
@@ -272,8 +272,8 @@ public class Fixtures
         lastname.isUnique(false);
         ArrayList<IndexField> fields = new ArrayList<>(1);
         fields.add(new IndexField("NAMELAST"));
-        lastname.fields(fields);
-        lastname.table(Fixtures.createTestPlayersTable());
+        lastname.setFields(fields);
+        lastname.setTable(Fixtures.createTestPlayersTable());
         return lastname;
     }
 
@@ -285,10 +285,10 @@ public class Fixtures
     public static final Index createTestIndexOneField()
     {
         Index index = new Index("myindexwithonefield");
-        index.table(DB, "mytable");
+        index.setTable(DB, "mytable");
         ArrayList<IndexField> fields = new ArrayList<>();
         fields.add(new IndexField("myindexedfield"));
-        index.fields(fields);
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
@@ -301,10 +301,10 @@ public class Fixtures
     public static final Index createTestIndexNumericField()
     {
         Index index = new Index("myindexnumericfield");
-        index.table(DB, "mytable");
+        index.setTable(DB, "mytable");
         ArrayList<IndexField> fields = new ArrayList<>();
         fields.add(new IndexField("myindexedfield3", FieldDataType.INTEGER));
-        index.fields(fields);
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
@@ -317,10 +317,10 @@ public class Fixtures
     public static final Index createTestIndexUUIDField()
     {
         Index index = new Index("myindexuuidfield");
-        index.table(DB, "mytable");
+        index.setTable(DB, "mytable");
         ArrayList<IndexField> fields = new ArrayList<>();
         fields.add(new IndexField("myindexedfield4", FieldDataType.UUID));
-        index.fields(fields);
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
@@ -333,7 +333,7 @@ public class Fixtures
     public static final Index createTestIndexAllFieldTypes()
     {
         Index index = new Index("myindexallfields");
-        index.table(DB, "mytable");
+        index.setTable(DB, "mytable");
         ArrayList<IndexField> fields = new ArrayList<>();
         fields.add(new IndexField("thisisauudid", FieldDataType.UUID));
         fields.add(new IndexField("thisisastring", FieldDataType.TEXT));
@@ -342,7 +342,7 @@ public class Fixtures
         fields.add(new IndexField("thisisbase64", FieldDataType.BINARY));
         fields.add(new IndexField("thisisaboolean", FieldDataType.BOOLEAN));
         fields.add(new IndexField("thisisadate", FieldDataType.DATE_TIME));
-        index.fields(fields);
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
@@ -380,10 +380,10 @@ public class Fixtures
     public static final Index createTestIndexWithBulkDataHit()
     {
         Index index = new Index("myindexbulkdata");
-        index.table(DB, "mytable");
+        index.setTable(DB, "mytable");
         ArrayList<IndexField> fields = new ArrayList<>();
         fields.add(new IndexField("field1"));
-        index.fields(fields);
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
@@ -483,7 +483,7 @@ public class Fixtures
             tableRepo.delete(Fixtures.createTestTable());
         } catch (DriverException e)
         {
-            //logger.debug("Not dropping table, probably doesn't exist.");
+            //logger.debug("Not dropping setTable, probably doesn't exist.");
         }
         try
         {
@@ -491,14 +491,14 @@ public class Fixtures
             tableRepo.delete(Fixtures.createTestPlayersTable());
         } catch (DriverException e)
         {
-            //logger.debug("Not dropping table, probably doesn't exist.");
+            //logger.debug("Not dropping setTable, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexOneField());
         } catch (DriverException e)
         {
-            //logger.debug("Not dropping table, probably doesn't exist.");
+            //logger.debug("Not dropping setTable, probably doesn't exist.");
         }
         try
         {
@@ -601,7 +601,7 @@ public class Fixtures
     }
 
     /**
-     * Creates a test document with multiple datatype fields.
+     * Creates a test document with multiple datatype getFields.
      *
      * @return
      */
@@ -726,7 +726,7 @@ public class Fixtures
     }
 
     /**
-     * Creates a simple table for testing.
+     * Creates a simple setTable for testing.
      *
      * @return
      */
@@ -740,7 +740,7 @@ public class Fixtures
     }
 
     /**
-     * Creates a simple table for testing.
+     * Creates a simple setTable for testing.
      *
      * @return
      */

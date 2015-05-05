@@ -56,7 +56,7 @@ public class QueryRepository
         int i = 1;
         for (String bindValue : query.getWhereClause().getValues())
         {
-            Utils.setField(bindValue, query.getIndex().fields().get(i - 1), bs, i);//TODO: i am not confident about this right now
+            Utils.setField(bindValue, query.getIndex().getFields().get(i - 1), bs, i);//TODO: i am not confident about this right now
             //bs.setString(i, bindValue);
             i++;
         }

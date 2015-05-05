@@ -41,11 +41,11 @@ public class IndexMaintainerHelper
     private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
     
     public static final String ITABLE_INSERT_CQL = "INSERT INTO %s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
-    //TODO: --------------------remove hard coding of keyspace name--^^^----
+    //TODO: --------------------remove hard coding of keyspace getIndexName--^^^----
     public static final String ITABLE_UPDATE_CQL = "UPDATE %s SET object = ?, updated_at = ? WHERE bucket = ? AND %s;";
-    //TODO: ----------------remove hard coding of keyspace name--^^^--------
+    //TODO: ----------------remove hard coding of keyspace getIndexName--^^^--------
     public static final String ITABLE_DELETE_CQL = "DELETE FROM %s WHERE bucket = ? AND %s;";
-    //TODO: ----------------remove hard coding of keyspace name--^^^--------
+    //TODO: ----------------remove hard coding of keyspace getIndexName--^^^--------
 
     private IndexMaintainerHelper()
     {
@@ -54,7 +54,7 @@ public class IndexMaintainerHelper
     
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
-        //check for any indices that should exist on this table per the index table
+        //check for any indices that should exist on this setTable per the index setTable
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
@@ -88,8 +88,8 @@ public class IndexMaintainerHelper
      */
     public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
     {
-        //determine which fields need to write as PKs
-        List<IndexField> fieldsData = index.fields();
+        //determine which getFields need to write as PKs
+        List<IndexField> fieldsData = index.getFields();
         String finalCQL = getCQLStatementForInsert(index);
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
@@ -121,18 +121,18 @@ public class IndexMaintainerHelper
         bs.setDate(4, entity.getUpdatedAt());
         for (int i = 0; i < fieldsData.size(); i++)
         {
-            Utils.setField(jsonObject, fieldsData.get(i), bs, i + 5);//offset from the first five non-dynamic fields
+            Utils.setField(jsonObject, fieldsData.get(i), bs, i + 5);//offset from the first five non-dynamic getFields
 //            IndexField fieldData = fieldsData.get(i);
 //            String field = fieldData.getField();
 //            Object jObject = jsonObject.get(field);
 //
 //            if (jObject == null)
 //            {
-//                setField(null, fieldData, bs, i + 5);//offset from the first five non-dynamic fields
+//                setField(null, fieldData, bs, i + 5);//offset from the first five non-dynamic getFields
 //            } else
 //            {
 //                String fieldValue = jObject.toString();
-//                setField(fieldValue, fieldData, bs, i + 5);//offset from the first five non-dynamic fields
+//                setField(fieldValue, fieldData, bs, i + 5);//offset from the first five non-dynamic getFields
 //            }
 
         }
@@ -141,7 +141,7 @@ public class IndexMaintainerHelper
     
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
-        //check for any indices that should exist on this table per the index table
+        //check for any indices that should exist on this setTable per the index setTable
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
@@ -149,10 +149,10 @@ public class IndexMaintainerHelper
         {
             try
             {
-                //determine which fields need to use as PKs
-                List<IndexField> fields = index.fields();
+                //determine which getFields need to use as PKs
+                List<IndexField> fields = index.getFields();
 
-                //issue #35: we need to be able to update indexed fields as well,
+                //issue #35: we need to be able to update indexed getFields as well,
                 //which will require us to:
                 //1. determine if an indexed field has changed
                 if (hasIndexedFieldChanged(session, index, entity))
@@ -177,7 +177,7 @@ public class IndexMaintainerHelper
                     bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
                     //set the date
                     bs.setDate(1, entity.getUpdatedAt());
-                    //pull the index fields out of the document for binding
+                    //pull the index getFields out of the document for binding
                     String documentJSON = entity.object();
                     DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
                     //set the bucket
@@ -191,11 +191,11 @@ public class IndexMaintainerHelper
                     bs.setString(2, bucketId);
                     for (int i = 0; i < fields.size(); i++)
                     {
-                        Utils.setField(jsonObject, fields.get(i), bs, i + 3);//offset from the first three non-dynamic fields
-//                        String field = fields.get(i).getField();
+                        Utils.setField(jsonObject, fields.get(i), bs, i + 3);//offset from the first three non-dynamic getFields
+//                        String field = getFields.get(i).getField();
 //                        String fieldValue = (String) jsonObject.get(field);
-//                        //bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic fields
-//                        setField(fieldValue, fields.get(i), bs, i + 3);//offset from the first three non-dynamic fields
+//                        //bs.setString(i + 3, fieldValue);//offset from the first three non-dynamic getFields
+//                        setField(fieldValue, getFields.get(i), bs, i + 3);//offset from the first three non-dynamic getFields
                     }
                     //add row to the iTable(s)
                     statementList.add(bs);
@@ -212,7 +212,7 @@ public class IndexMaintainerHelper
     
     public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
-        //check for any indices that should exist on this table per the index table
+        //check for any indices that should exist on this setTable per the index setTable
         List<Index> indices = getIndexForDocument(session, entity);
         ArrayList<BoundStatement> statementList = new ArrayList<>(indices.size());
         //for each index
@@ -243,12 +243,12 @@ public class IndexMaintainerHelper
      */
     private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
     {
-        //determine which fields need to write as PKs
-        List<IndexField> fields = index.fields();
+        //determine which getFields need to write as PKs
+        List<IndexField> fields = index.getFields();
         String finalCQL = getCQLStatementForWhereClauses(ITABLE_DELETE_CQL, index);
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
-        //pull the index fields out of the document for binding
+        //pull the index getFields out of the document for binding
         String documentJSON = entity.object();
         DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
         Object fieldToBucketOnObject = jsonObject.get(fields.get(0).getField());
@@ -264,10 +264,10 @@ public class IndexMaintainerHelper
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)
         {
-//            String field = fields.get(i).getField();
+//            String field = getFields.get(i).getField();
 //            String fieldValue = (String) jsonObject.get(field);//note, could have parse problems here with non-string types
             Utils.setField(jsonObject, fields.get(i), bs, i + 1);
-            //setField(fieldValue, fields.get(i), bs, i + 1);
+            //setField(fieldValue, getFields.get(i), bs, i + 1);
             //bs.setString(i + 1, fieldValue);
         }
         return bs;
@@ -294,17 +294,17 @@ public class IndexMaintainerHelper
      * would be private but keeping public for ease of testing.
      *
      * @param session DB session.
-     * @param index Index containing the fields to check for changes.
+     * @param index Index containing the getFields to check for changes.
      * @param entity New version of a document.
      * @return True if an indexed field has changed. False if there is no change
-     * of indexed fields.
+ of indexed getFields.
      */
     public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity)
     {
         DocumentRepository docRepo = new DocumentRepository(session);//TODO: if we do any sycronization on doc repo, this could be a problem
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
         BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
-        for (IndexField indexField : index.fields())
+        for (IndexField indexField : index.getFields())
         {
             String field = indexField.getField();
             if (newObject.get(field) == null && oldObject.get(field) == null)//this shouldn't happen?
@@ -332,7 +332,7 @@ public class IndexMaintainerHelper
      */
     public static String getCQLStatementForInsert(Index index)
     {
-        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
+        String key = index.getDatabaseName() + ":" + index.getTableName() + ":" + index.getName();
         Cache iTableCQLCache = CacheFactory.getCache("iTableInsertCQL");
         //synchronized (CacheSynchronizer.getLockingObject(key, "iTableInsertCQL"))
         //{
@@ -361,8 +361,8 @@ public class IndexMaintainerHelper
     {
         //determine which iTables need to be written to
         String iTableToUpdate = Utils.calculateITableName(index);
-        //determine which fields need to write as PKs
-        List<String> fields = index.fieldsValues();
+        //determine which getFields need to write as PKs
+        List<String> fields = index.getFieldsValues();
         String fieldNamesInsertSyntax = StringUtils.join(", ", fields);
         //calculate the number of '?'s we need to append on the values clause
         StringBuilder fieldValueInsertSyntax = new StringBuilder();
@@ -390,7 +390,7 @@ public class IndexMaintainerHelper
      */
     public static String getCQLStatementForWhereClauses(String CQL, Index index)
     {
-        String key = index.databaseName() + ":" + index.tableName() + ":" + index.name();
+        String key = index.getDatabaseName() + ":" + index.getTableName() + ":" + index.getName();
         String whereClause;
         String iTableToUpdate = Utils.calculateITableName(index);
         Cache whereCache = CacheFactory.getCache("iTableWhere");
@@ -430,8 +430,8 @@ public class IndexMaintainerHelper
     
     private static String getWhereClauseHelper(Index index)
     {
-        //determine which fields need to write as PKs
-        List<IndexField> fields = index.fields();
+        //determine which getFields need to write as PKs
+        List<IndexField> fields = index.getFields();
         //determine the where clause
         StringBuilder setValues = new StringBuilder();
         for (int i = 0; i < fields.size(); i++)

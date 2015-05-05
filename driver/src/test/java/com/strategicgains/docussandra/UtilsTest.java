@@ -73,7 +73,7 @@ public class UtilsTest
         String tableName = "myTable";
         String indexName = "yoIndex";
         Index index = new Index(indexName);
-        index.table(databaseName, tableName);
+        index.setTable(databaseName, tableName);
         String expResult = "mydb_mytable_yoindex";
         String result = Utils.calculateITableName(index);
         assertEquals(expResult, result);

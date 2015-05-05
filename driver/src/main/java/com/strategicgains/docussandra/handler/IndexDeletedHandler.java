@@ -33,7 +33,7 @@ public class IndexDeletedHandler
 
     public void handle(IndexDeletedEvent event)
     {
-        LOGGER.info("Cleaning up ITables for index: " + event.data.databaseName() + "/" + event.data.tableName() + "/" + event.data.name());
+        LOGGER.info("Cleaning up ITables for index: " + event.data.getDatabaseName() + "/" + event.data.getTableName() + "/" + event.data.getName());
         ITableRepository itr = new ITableRepository(dbSession);
         Index toDelete = event.data;
         if(itr.iTableExists(toDelete)){

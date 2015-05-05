@@ -65,14 +65,14 @@ public class LoadTestData
         } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create Table");
-            //logger.info("Probile creating table", e);
+            //logger.info("Probile creating setTable", e);
         }
         Index player = new Index("player");
         player.isUnique(false);
         List<IndexField> fields = new ArrayList<>(1);
         fields.add(new IndexField("NAMEFULL"));
-        player.fields(fields);
-        player.table(testTable);
+        player.setFields(fields);
+        player.setTable(testTable);
         try
         {
             f.insertIndex(player);
@@ -85,8 +85,8 @@ public class LoadTestData
         lastname.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add(new IndexField("NAMELAST"));
-        lastname.fields(fields);
-        lastname.table(testTable);
+        lastname.setFields(fields);
+        lastname.setTable(testTable);
         try
         {
             f.insertIndex(lastname);
@@ -100,8 +100,8 @@ public class LoadTestData
         fields = new ArrayList<>(2);
         fields.add(new IndexField("NAMELAST"));
         fields.add(new IndexField("NAMEFIRST"));
-        lastAndFirst.fields(fields);
-        lastAndFirst.table(testTable);
+        lastAndFirst.setFields(fields);
+        lastAndFirst.setTable(testTable);
         try
         {
             f.insertIndex(lastAndFirst);
@@ -114,8 +114,8 @@ public class LoadTestData
         team.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add(new IndexField("TEAM"));
-        team.fields(fields);
-        team.table(testTable);
+        team.setFields(fields);
+        team.setTable(testTable);
         try
         {
             f.insertIndex(team);
@@ -129,8 +129,8 @@ public class LoadTestData
         position.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add(new IndexField("POSITION"));
-        position.fields(fields);
-        position.table(testTable);
+        position.setFields(fields);
+        position.setTable(testTable);
         try
         {
             f.insertIndex(position);
@@ -144,8 +144,8 @@ public class LoadTestData
         rookie.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add(new IndexField("ROOKIEYEAR"));
-        rookie.fields(fields);
-        rookie.table(testTable);
+        rookie.setFields(fields);
+        rookie.setTable(testTable);
         try
         {
             f.insertIndex(rookie);

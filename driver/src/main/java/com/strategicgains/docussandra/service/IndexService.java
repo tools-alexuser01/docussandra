@@ -74,12 +74,12 @@ public class IndexService
      */
     public IndexCreatedEvent create(Index index)
     {
-        verifyTable(index.databaseName(), index.tableName());
+        verifyTable(index.getDatabaseName(), index.getTableName());
         ValidationEngine.validateAndThrow(index);
         index.setActive(false);//we default to not active when being created; we don't allow the user to change this; only the app can change this
         logger.debug("Creating index: " + index.toString());
         Index created = indexesRepo.create(index);
-        long dataSize = tablesRepo.countTableSize(index.databaseName(), index.tableName());
+        long dataSize = tablesRepo.countTableSize(index.getDatabaseName(), index.getTableName());
         Date now = new Date();
         UUID uuid = UUID.randomUUID();//TODO: is this right?
         IndexCreatedEvent toReturn = new IndexCreatedEvent(uuid, now, now, created, dataSize, 0l);
@@ -177,7 +177,7 @@ public class IndexService
     }
 
     /**
-     * Verifies if a table exists or not.
+     * Verifies if a setTable exists or not.
      *
      * @param database
      * @param table

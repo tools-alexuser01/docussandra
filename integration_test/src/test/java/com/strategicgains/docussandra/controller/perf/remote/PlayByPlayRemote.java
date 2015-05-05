@@ -190,42 +190,42 @@ public class PlayByPlayRemote extends PerfTestParent
         qtr.isUnique(false);
         List<IndexField> fields = new ArrayList<>(1);
         fields.add(new IndexField("qtr"));
-        qtr.fields(fields);
-        qtr.table(getTb());
+        qtr.setFields(fields);
+        qtr.setTable(getTb());
         qtr.isUnique(false);
 
         Index off = new Index("off");
         off.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add(new IndexField("off"));
-        off.fields(fields);
-        off.fields(fields);
-        off.table(getTb());
+        off.setFields(fields);
+        off.setFields(fields);
+        off.setTable(getTb());
 
         Index def = new Index("def");
         def.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add(new IndexField("def"));
-        def.fields(fields);
-        def.fields(fields);
-        def.table(getTb());
+        def.setFields(fields);
+        def.setFields(fields);
+        def.setTable(getTb());
 
         Index dwn = new Index("dwn");
         dwn.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add(new IndexField("dwn"));
-        dwn.fields(fields);
-        dwn.fields(fields);
-        dwn.table(getTb());
+        dwn.setFields(fields);
+        dwn.setFields(fields);
+        dwn.setTable(getTb());
 
         Index dwnAndYtg = new Index("dwnandytg");
         dwnAndYtg.isUnique(false);
         fields = new ArrayList<>(1);
         fields.add(new IndexField("dwn"));
         fields.add(new IndexField("ytg"));
-        dwnAndYtg.fields(fields);
-        dwnAndYtg.fields(fields);
-        dwnAndYtg.table(getTb());
+        dwnAndYtg.setFields(fields);
+        dwnAndYtg.setFields(fields);
+        dwnAndYtg.setTable(getTb());
 
         Index dwnAndYtgAndPts = new Index("dwnandytgandpts");
         dwnAndYtgAndPts.isUnique(false);
@@ -233,18 +233,18 @@ public class PlayByPlayRemote extends PerfTestParent
         fields.add(new IndexField("dwn"));
         fields.add(new IndexField("ytg"));
         fields.add(new IndexField("pts"));
-        dwnAndYtgAndPts.fields(fields);
-        dwnAndYtgAndPts.fields(fields);
-        dwnAndYtgAndPts.table(getTb());
+        dwnAndYtgAndPts.setFields(fields);
+        dwnAndYtgAndPts.setFields(fields);
+        dwnAndYtgAndPts.setTable(getTb());
 
         Index offAndPts = new Index("offandpts");
         offAndPts.isUnique(false);
         fields = new ArrayList<>(2);
         fields.add(new IndexField("off"));
         fields.add(new IndexField("pts"));
-        offAndPts.fields(fields);
-        offAndPts.fields(fields);
-        offAndPts.table(getTb());
+        offAndPts.setFields(fields);
+        offAndPts.setFields(fields);
+        offAndPts.setTable(getTb());
 
         indexes.add(qtr);
         indexes.add(off);
@@ -258,8 +258,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
-     * query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
+ query with a set time.
      */
     @Test
     public void postQueryTest()
@@ -284,8 +284,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
-     * two field query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
+ two field query with a set time.
      */
     @Test
     public void postQueryTestTwoField()
@@ -311,8 +311,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
-     * two field query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
+ two field query with a set time.
      */
     @Test
     public void postQueryTestThreeField()

@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Performs a perf test using the overridden data. 1. Creates a DB. 2. Creates a
- * table. 3. Creates all the indexes. 4. Inserts all the documents. 5. Cleans up
- * anything it did. Treat this as a singleton, even though it is not.
+ setTable. 3. Creates all the indexes. 4. Inserts all the documents. 5. Cleans up
+ anything it did. Treat this as a singleton, even though it is not.
  *
  * @author udeyoje
  */
@@ -93,7 +93,7 @@ public abstract class PerfTestParent
         given().when().delete(database.name() + "/" + table.name());
         for (Index i : index)
         {
-            given().when().delete(database.name() + "/" + table.name() + "/indexes/" + i.name());
+            given().when().delete(database.name() + "/" + table.name() + "/indexes/" + i.getName());
         }
     }
 
@@ -252,7 +252,7 @@ public abstract class PerfTestParent
         logger.info("POSTing index: " + index.toString());
         boolean first = true;
         StringBuilder tableStr = new StringBuilder("{" + "\"fields\" : [");
-        for (IndexField field : index.fields())
+        for (IndexField field : index.getFields())
         {
             if (!first)
             {
@@ -265,11 +265,11 @@ public abstract class PerfTestParent
             tableStr.append(field.getField());
             tableStr.append("\"");
         }
-        tableStr.append("],").append("\"name\" : \"").append(index.name()).append("\"}");
+        tableStr.append("],").append("\"name\" : \"").append(index.getName()).append("\"}");
         //act
-        given().body(tableStr.toString()).when().post(database.name() + "/" + table.name() + "/indexes/" + index.name());
+        given().body(tableStr.toString()).when().post(database.name() + "/" + table.name() + "/indexes/" + index.getName());
         //check
-        expect().statusCode(200).body("name", equalTo(index.name())).body("fields", notNullValue()).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).get(database.name() + "/" + table.name() + "/indexes/" + index.name());
+        expect().statusCode(200).body("name", equalTo(index.getName())).body("fields", notNullValue()).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).get(database.name() + "/" + table.name() + "/indexes/" + index.getName());
     }
 
     /**
@@ -280,7 +280,7 @@ public abstract class PerfTestParent
     public abstract Database getDb();
 
     /**
-     * Gets the table to use for this test.
+     * Gets the setTable to use for this test.
      *
      * @return the tb
      */
