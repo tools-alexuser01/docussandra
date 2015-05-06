@@ -262,7 +262,7 @@ public class Fixtures
     }
 
     /**
-     * Creates at test index with two getFields.
+     * Creates at test index for players last name.
      *
      * @return
      */
@@ -272,6 +272,38 @@ public class Fixtures
         lastname.isUnique(false);
         ArrayList<IndexField> fields = new ArrayList<>(1);
         fields.add(new IndexField("NAMELAST"));
+        lastname.setFields(fields);
+        lastname.setTable(Fixtures.createTestPlayersTable());
+        return lastname;
+    }
+
+    /**
+     * Creates at test index for players rookieyear. Integer type index.
+     *
+     * @return
+     */
+    public static final Index createTestPlayersIndexRookieYear()
+    {
+        Index lastname = new Index("rookieyear");
+        lastname.isUnique(false);
+        ArrayList<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("ROOKIEYEAR", FieldDataType.INTEGER));
+        lastname.setFields(fields);
+        lastname.setTable(Fixtures.createTestPlayersTable());
+        return lastname;
+    }
+
+    /**
+     * Creates at test index for players created on. Date type index.
+     *
+     * @return
+     */
+    public static final Index createTestPlayersIndexCreatedOn()
+    {
+        Index lastname = new Index("createdon");
+        lastname.isUnique(false);
+        ArrayList<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("CREATEDON", FieldDataType.DATE_TIME));
         lastname.setFields(fields);
         lastname.setTable(Fixtures.createTestPlayersTable());
         return lastname;
@@ -552,6 +584,20 @@ public class Fixtures
         try
         {
             indexRepo.delete(Fixtures.createTestPlayersIndexLastName());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting database, probably doesn't exist.");
+        }
+                try
+        {
+            indexRepo.delete(Fixtures.createTestPlayersIndexCreatedOn());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting database, probably doesn't exist.");
+        }
+                        try
+        {
+            indexRepo.delete(Fixtures.createTestPlayersIndexRookieYear());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
