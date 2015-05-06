@@ -34,7 +34,7 @@ public class Utils
 
     /**
      * Calculates the getIndexName of an iTable based on the dataBaseName, the
- getTableName, and the getIndexName.
+     * getTableName, and the getIndexName.
      *
      * Note: No null checks.
      *
@@ -148,6 +148,7 @@ public class Utils
 
     /**
      * Converts a list to a human readable string.
+     *
      * @param list List to convert to a String
      * @return A String that represents the passed in list.
      */
@@ -215,7 +216,13 @@ public class Utils
         {
             jsonValue = jObject.toString();
         }
-        setField(jsonValue, fieldData, bs, index);
+        if ((jsonValue == null || jsonValue.isEmpty()) && !fieldData.getType().equals(FieldDataType.TEXT))// if we have an empty string for a non-text field
+        {
+            throw new IndexParseException(fieldData, new IndexParseFieldException(jsonValue));//there's nothing we can do to index this document
+        } else
+        {
+            setField(jsonValue, fieldData, bs, index);
+        }
     }
 
 }

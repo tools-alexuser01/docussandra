@@ -37,9 +37,9 @@ import org.slf4j.LoggerFactory;
  */
 public class IndexMaintainerHelper
 {
-    
+
     private static Logger logger = LoggerFactory.getLogger(IndexMaintainerHelper.class);
-    
+
     public static final String ITABLE_INSERT_CQL = "INSERT INTO %s (bucket, id, object, created_at, updated_at, %s) VALUES (?, ?, ?, ?, ?, %s);";
     //TODO: --------------------remove hard coding of keyspace getIndexName--^^^----
     public static final String ITABLE_UPDATE_CQL = "UPDATE %s SET object = ?, updated_at = ? WHERE bucket = ? AND %s;";
@@ -51,7 +51,7 @@ public class IndexMaintainerHelper
     {
         //don't instantiate; call static methods only
     }
-    
+
     public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this setTable per the index setTable
@@ -138,7 +138,7 @@ public class IndexMaintainerHelper
         }
         return bs;
     }
-    
+
     public static List<BoundStatement> generateDocumentUpdateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this setTable per the index setTable
@@ -209,7 +209,7 @@ public class IndexMaintainerHelper
         //return a list of commands to accomplish all of this
         return statementList;
     }
-    
+
     public static List<BoundStatement> generateDocumentDeleteIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
     {
         //check for any indices that should exist on this setTable per the index setTable
@@ -297,7 +297,7 @@ public class IndexMaintainerHelper
      * @param index Index containing the getFields to check for changes.
      * @param entity New version of a document.
      * @return True if an indexed field has changed. False if there is no change
- of indexed getFields.
+     * of indexed getFields.
      */
     public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity)
     {
@@ -427,7 +427,7 @@ public class IndexMaintainerHelper
         //create final CQL statement for updating a row in an iTable(s)        
         return String.format(CQL, iTableToUpdate, getWhereClauseHelper(index));
     }
-    
+
     private static String getWhereClauseHelper(Index index)
     {
         //determine which getFields need to write as PKs
@@ -445,5 +445,5 @@ public class IndexMaintainerHelper
         }
         return setValues.toString();
     }
-    
+
 }
