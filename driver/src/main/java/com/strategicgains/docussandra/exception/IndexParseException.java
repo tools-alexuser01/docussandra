@@ -15,7 +15,6 @@
  */
 package com.strategicgains.docussandra.exception;
 
-import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.IndexField;
 
 /**
@@ -44,7 +43,7 @@ public class IndexParseException extends IndexParseFieldException
      */
     public IndexParseException(IndexField field, IndexParseFieldException parent)
     {
-        super("The field: " + field.toString() + " could not be parsed from the document, it is not a valid value for the specified datatype.", parent.getFieldValue(), parent.getCause());
+        super("The field: " + field.toString() + " could not be parsed from the document or query, it is not a valid value for the specified datatype.", parent.getFieldValue(), parent.getCause());
         this.field = field;
     }
 
