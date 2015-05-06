@@ -372,9 +372,9 @@ public class IndexControllerTest
                     break;
                 }
                 LOGGER.debug("Waiting for index to go active for: " + sw.getTime());
-                if (sw.getTime() >= 12000)
+                if (sw.getTime() >= 20000)
                 {
-                    fail("Index took too long to create");
+                    fail("Index took too long to create: " + sw.getTime());
                 }
                 Thread.sleep(5000);
             }
@@ -463,7 +463,7 @@ public class IndexControllerTest
                 LOGGER.debug("Waiting for index to go active for: " + sw.getTime());
                 if (sw.getTime() >= 12000)
                 {
-                    fail("Index took too long to create: " + body);
+                    fail("Index took too long to create: " + sw.getTime() + " -- " + body);
                 }
                 Thread.sleep(5000);
             }
