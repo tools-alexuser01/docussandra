@@ -17,19 +17,29 @@ package com.strategicgains.docussandra.controller;
 
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.given;
+import com.jayway.restassured.response.Response;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import static org.hamcrest.Matchers.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import testhelper.RestExpressManager;
@@ -45,6 +55,8 @@ public class QueryControllerTest
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private Fixtures f;
+
+    private JSONParser parser = new JSONParser();
 
     public QueryControllerTest() throws Exception
     {
@@ -237,6 +249,142 @@ public class QueryControllerTest
                 .body("object[1]", notNullValue())
                 .body("object[1]", containsString("this is some more random data29"))
                 .when().post("");
+    }
+
+    /**
+     * Tests querying on integer types.
+     *
+     * @throws IOException
+     * @throws ParseException
+     */
+    @Test
+    public void testQueryOnIntegerType() throws IOException, ParseException
+    {
+        String restAssuredBasePath = RestAssured.basePath;
+        Database testDb = Fixtures.createTestPlayersDatabase();
+        Table testTable = Fixtures.createTestPlayersTable();
+        List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
+        try
+        {
+            //data setup
+            RestAssured.basePath = "/" + testTable.databaseName() + "/" + testTable.name() + "/queries";
+            f.insertDatabase(testDb);
+            f.insertTable(testTable);
+            //throw a few indexes in (including the one we are testing)
+            f.insertIndex(Fixtures.createTestPlayersIndexRookieYear());
+            f.insertIndex(Fixtures.createTestPlayersIndexCreatedOn());
+            f.insertIndex(Fixtures.createTestPlayersIndexLastName());
+            f.insertDocuments(docs);//put in a ton of data directly into the db
+            //end setup
+
+            //act
+            Response response = given().body("{\"where\":\"ROOKIEYEAR = '2001'\"}").header("limit", "2000").expect().statusCode(200)
+                    //.header("Location", startsWith(RestAssured.basePath + "/"))
+                    .body("", notNullValue())
+                    .body("id", notNullValue())
+                    .body("id[0]", notNullValue())
+                    .body("object[0]", notNullValue())
+                    .body("object[0]", containsString("2001"))
+                    .when().post("").andReturn();
+
+            String body = response.getBody().prettyPrint();
+            LOGGER.debug("Status Response: " + body);
+
+            JSONArray bodyArray = (JSONArray) parser.parse(body);
+            for (Object responseElement : bodyArray)
+            {
+                JSONObject responseElementJson = (JSONObject) responseElement;
+                assertNotNull(responseElementJson);
+                assertNotNull(responseElementJson.get("id"));
+                String object = (String) responseElementJson.get("object");
+                assertNotNull(object);
+                assertTrue(object.contains("2001"));
+            }
+        } finally
+        {
+            //clean up
+            RestAssured.basePath = restAssuredBasePath;
+
+            DocumentRepository docrepo = new DocumentRepository(f.getSession());
+            for (Document d : docs)
+            {
+                try
+                {
+                    docrepo.delete(d);
+                } catch (Exception e)
+                {
+                    ;//eh -- the doc probably never got created
+                }
+            }
+        }
+    }
+
+    /**
+     * Tests querying on date types.
+     *
+     * @throws IOException
+     * @throws ParseException
+     */
+    @Test
+    public void testQueryOnDateType() throws IOException, ParseException
+    {
+        String restAssuredBasePath = RestAssured.basePath;
+        Database testDb = Fixtures.createTestPlayersDatabase();
+        Table testTable = Fixtures.createTestPlayersTable();
+        List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
+        try
+        {
+            //data setup
+            RestAssured.basePath = "/" + testTable.databaseName() + "/" + testTable.name() + "/queries";
+            f.insertDatabase(testDb);
+            f.insertTable(testTable);
+            //throw a few indexes in (including the one we are testing)
+            f.insertIndex(Fixtures.createTestPlayersIndexRookieYear());
+            f.insertIndex(Fixtures.createTestPlayersIndexCreatedOn());
+            f.insertIndex(Fixtures.createTestPlayersIndexLastName());
+            f.insertDocuments(docs);//put in a ton of data directly into the db
+            //end setup
+
+            //act
+            Response response = given().body("{\"where\":\"CREATEDON = 'July, 07 2012 00:00:00'\"}").header("limit", "2000").expect().statusCode(200)
+                    //.header("Location", startsWith(RestAssured.basePath + "/"))
+                    .body("", notNullValue())
+                    .body("id", notNullValue())
+                    .body("id[0]", notNullValue())
+                    .body("object[0]", notNullValue())
+                    .body("object[0]", containsString("July, 07 2012 00:00:00"))
+                    .when().post("").andReturn();
+
+            String body = response.getBody().prettyPrint();
+            LOGGER.debug("Status Response: " + body);
+
+            JSONArray bodyArray = (JSONArray) parser.parse(body);
+            for (Object responseElement : bodyArray)
+            {
+                JSONObject responseElementJson = (JSONObject) responseElement;
+                assertNotNull(responseElementJson);
+                assertNotNull(responseElementJson.get("id"));
+                String object = (String) responseElementJson.get("object");
+                assertNotNull(object);
+                assertTrue(object.contains("July, 07 2012 00:00:00"));
+            }
+        } finally
+        {
+            //clean up
+            RestAssured.basePath = restAssuredBasePath;
+
+            DocumentRepository docrepo = new DocumentRepository(f.getSession());
+            for (Document d : docs)
+            {
+                try
+                {
+                    docrepo.delete(d);
+                } catch (Exception e)
+                {
+                    ;//eh -- the doc probably never got created
+                }
+            }
+        }
     }
 
 }
