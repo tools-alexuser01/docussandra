@@ -501,7 +501,7 @@ public class Fixtures
 //                try
 //                {
 //                    docRepo.delete(d);
-//                } catch (DriverException e)
+//                } catch (Exception e)
 //                {
 //                    //logger.debug("Not dropping bulk document, probably doesn't exist.");
 //                }
