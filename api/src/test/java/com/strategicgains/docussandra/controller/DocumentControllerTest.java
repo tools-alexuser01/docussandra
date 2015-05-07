@@ -195,6 +195,27 @@ public class DocumentControllerTest
     }
 
     /**
+     * Tests that the POST /{databases}/{table}/ endpoint properly creates a
+     * document.
+     */
+    @Test
+    public void postDocumentWithInvalidDataTypesTest()
+    {
+        //create the index first so we are sure it will get parsed
+        f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
+        
+        String tableStr = "{\"thisisastring\":\"hello\", \"thisisanint\": \"five\", \"thisisadouble\":\"five point five five five\","
+                + " \"thisisbase64\":\"nope!\", \"thisisaboolean\":\"blah!\","
+                + " \"thisisadate\":\"day 0\", \"thisisauudid\":\"z\"}";//completely botched field types
+
+        //act
+        given().body(tableStr).expect().statusCode(400)
+                .body("error", notNullValue())
+                .body("error", containsString("could not be parsed"))
+                .when().post("/").andReturn();
+    }
+
+    /**
      * Tests that the PUT /{databases}/{table}/{document} endpoint properly
      * updates a document.
      */
