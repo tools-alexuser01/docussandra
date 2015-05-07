@@ -126,7 +126,8 @@ public class IndexCreatedHandler implements EventHandler
             String errorMessage = "Could not complete indexing event for index: '" + indexName + "'.";
             logger.error(errorMessage, e);
             if (status != null)
-            {//intentionally a seperate clause so our error prints in case this throws.
+            {
+                //intentionally a seperate clause so our error prints in case this throws.
                 status.setFatalError(errorMessage + " Please contact a system administrator to resolve this issue.");
                 status.setStatusLastUpdatedAt(new Date());
                 indexStatusRepo.updateEntity(status);
