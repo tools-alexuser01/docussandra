@@ -148,6 +148,24 @@ public class QueryControllerTest
      * query with limits.
      */
     @Test
+    public void postQueryTestOnNonIndexedField()
+    {
+        Query q = new Query();
+        q.setWhere("field9999 = 'this is my data'");
+        q.setTable("mytable");
+        //act
+        given().body("{\"where\":\"" + q.getWhere() + "\"}").expect().statusCode(206)
+                .expect().statusCode(400)
+                .body("", notNullValue())
+                .body("error", containsString("field9999"))
+                .when().post("");
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
+     * query with limits.
+     */
+    @Test
     public void postQueryTestWithLimit()
     {
         Query q = new Query();
@@ -300,6 +318,63 @@ public class QueryControllerTest
                 assertNotNull(object);
                 assertTrue(object.contains("2001"));
             }
+        } finally
+        {
+            //clean up
+            RestAssured.basePath = restAssuredBasePath;
+
+            DocumentRepository docrepo = new DocumentRepository(f.getSession());
+            for (Document d : docs)
+            {
+                try
+                {
+                    docrepo.delete(d);
+                } catch (Exception e)
+                {
+                    ;//eh -- the doc probably never got created
+                }
+            }
+        }
+    }
+
+    /**
+     * Tests querying on integer types, with a query that doesn't contain an
+     * integer.
+     *
+     * @throws IOException
+     * @throws ParseException
+     */
+    @Test
+    public void testQueryOnIntegerTypeBadFormat() throws IOException, ParseException
+    {
+        String restAssuredBasePath = RestAssured.basePath;
+        Database testDb = Fixtures.createTestPlayersDatabase();
+        Table testTable = Fixtures.createTestPlayersTable();
+        List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
+        try
+        {
+            //data setup
+            RestAssured.basePath = "/" + testTable.databaseName() + "/" + testTable.name() + "/queries";
+            f.insertDatabase(testDb);
+            f.insertTable(testTable);
+            //throw a few indexes in (including the one we are testing)
+            f.insertIndex(Fixtures.createTestPlayersIndexRookieYear());
+            f.insertIndex(Fixtures.createTestPlayersIndexCreatedOn());
+            f.insertIndex(Fixtures.createTestPlayersIndexLastName());
+            f.insertDocuments(docs);//put in a ton of data directly into the db
+            //end setup
+
+            //act
+            Response response = given().body("{\"where\":\"ROOKIEYEAR = 'Two Thousand and One'\"}").header("limit", "2000")
+                    .expect().statusCode(400)
+                    .body("", notNullValue())
+                    .body("error", containsString("Two Thousand and One"))
+                    .body("error", containsString("ROOKIEYEAR"))
+                    .when().post("").andReturn();
+
+            String body = response.getBody().prettyPrint();
+            LOGGER.debug("Status Response: " + body);
+
         } finally
         {
             //clean up
