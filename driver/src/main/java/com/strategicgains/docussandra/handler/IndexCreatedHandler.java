@@ -26,7 +26,9 @@ import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.eventing.EventHandler;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,9 +101,15 @@ public class IndexCreatedHandler implements EventHandler
                         recordsCompleted++;//we will still call this record "complete" for the sake of time calculation, and percent done
                         status.setRecordsCompleted(recordsCompleted);
                         //this will have to change if threading
-                        status.getErrors().add(e.toString() + " In document: " + toIndex.toString());//may want to reduce the verbosity here eventually -- or break some meta-data out into columns
+                        List<String> errors = status.getErrors();
+                        if (errors == null)
+                        {
+                            errors = new ArrayList<>();
+                        }
+                        errors.add(e.toString() + " In document: " + toIndex.toString());//may want to reduce the verbosity here eventually -- or break some meta-data out into columns
+                        status.setErrors(errors);
                         status.setStatusLastUpdatedAt(new Date());
-                        indexStatusRepo.updateEntity(status);
+                        //indexStatusRepo.updateEntity(status);//lets not save every time for now
                     }
                 }
                 offset = offset + CHUNK;

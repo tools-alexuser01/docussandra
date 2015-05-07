@@ -184,15 +184,21 @@ public class DocumentRepository
         BoundStatement bs = new BoundStatement(updateStmt);
         bindCreate(bs, entity);
         BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
-        batch.add(bs);//the actual create
-        //TODO: bug! we need to make sure we delete the old indexes as well, if that record doesn't have the field anymore, what do we do?
-        List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
-        for (BoundStatement boundIndexStatement : indexStatements)
+        batch.add(bs);//the actual update
+        try
         {
-            batch.add(boundIndexStatement);//the index updates
+            //TODO: bug! we need to make sure we delete the old indexes as well, if that record doesn't have the field anymore, what do we do?
+            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
+            for (BoundStatement boundIndexStatement : indexStatements)
+            {
+                batch.add(boundIndexStatement);//the index updates
+            }
+            session().execute(batch);
+            return entity;
+        } catch (IndexParseException e)
+        {
+            throw new RuntimeException(e);
         }
-        session().execute(batch);
-        return entity;
     }
 
     @Override
@@ -207,17 +213,24 @@ public class DocumentRepository
             BoundStatement bs = new BoundStatement(deleteStmt);
             bindIdentifier(bs, id);
             BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
-            batch.add(bs);//the actual create
-            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
-            for (BoundStatement boundIndexStatement : indexStatements)
+            batch.add(bs);//the actual delete
+            try
             {
-                batch.add(boundIndexStatement);//the index deletes
+                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
+                for (BoundStatement boundIndexStatement : indexStatements)
+                {
+                    batch.add(boundIndexStatement);//the index deletes
+                }
+                session().execute(batch);
+            } catch (IndexParseException e)
+            {
+                throw new RuntimeException(e);//this shouldn't actually happen outside of tests
             }
-            session().execute(batch);
         } catch (InvalidObjectIdException e)
         {
             throw new ItemNotFoundException("ID not found: " + entity.getId().toString());
         }
+
     }
 
     @Override
@@ -240,7 +253,6 @@ public class DocumentRepository
     private void bindIdentifier(BoundStatement bs, Identifier identifier)
     {
         bs.bind(identifier.primaryKey());
-//		bs.bind(identifier.components().toArray());
     }
 
     private void bindCreate(BoundStatement bs, Document entity)
@@ -252,14 +264,6 @@ public class DocumentRepository
                 entity.getUpdatedAt());
     }
 
-//    private void bindUpdate(BoundStatement bs, Document entity)
-//    {
-//        BSONObject bson = (BSONObject) JSON.parse(entity.object());
-//
-//        bs.bind(ByteBuffer.wrap(BSON.encode(bson)),
-//                entity.getUpdatedAt(),
-//                entity.getUuid());
-//    }
     private Identifier extractId(Identifier identifier)
     {
 		// This includes the date/version on the end...
@@ -301,6 +305,7 @@ public class DocumentRepository
         d.setCreatedAt(row.getDate(Columns.CREATED_AT));
         d.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
         return d;
+
     }
 
     private class DocumentEventFactory

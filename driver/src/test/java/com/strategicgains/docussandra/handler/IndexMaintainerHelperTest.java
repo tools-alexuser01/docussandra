@@ -212,7 +212,7 @@ public class IndexMaintainerHelperTest
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentUpdateIndexEntriesStatements()
+    public void testGenerateDocumentUpdateIndexEntriesStatements() throws IndexParseException
     {
         System.out.println("generateDocumentUpdateIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument2();
@@ -243,7 +243,7 @@ public class IndexMaintainerHelperTest
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentUpdateIndexEntriesStatementsWithDataTypes()
+    public void testGenerateDocumentUpdateIndexEntriesStatementsWithDataTypes() throws IndexParseException
     {
         System.out.println("generateDocumentUpdateIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument3();
@@ -281,7 +281,7 @@ public class IndexMaintainerHelperTest
      * indexed field has changed.
      */
     @Test
-    public void testGenerateDocumentUpdateIndexEntriesStatementsIndexChanged()
+    public void testGenerateDocumentUpdateIndexEntriesStatementsIndexChanged() throws IndexParseException
     {
         System.out.println("generateDocumentUpdateIndexEntriesStatementsIndexChanged");
         Document entity = Fixtures.createTestDocument2();
@@ -323,7 +323,7 @@ public class IndexMaintainerHelperTest
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentDeleteIndexEntriesStatements()
+    public void testGenerateDocumentDeleteIndexEntriesStatements() throws IndexParseException
     {
         System.out.println("generateDocumentDeleteIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument2();
@@ -350,7 +350,7 @@ public class IndexMaintainerHelperTest
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentDeleteIndexEntriesStatementsWithDataTypes()
+    public void testGenerateDocumentDeleteIndexEntriesStatementsWithDataTypes() throws IndexParseException
     {
         System.out.println("generateDocumentDeleteIndexEntriesStatementsWithDataTypes");
         Document entity = Fixtures.createTestDocument3();
