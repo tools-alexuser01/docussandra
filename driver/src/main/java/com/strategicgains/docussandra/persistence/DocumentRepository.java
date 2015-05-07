@@ -22,6 +22,7 @@ import com.strategicgains.docussandra.event.DocumentCreatedEvent;
 import com.strategicgains.docussandra.event.DocumentDeletedEvent;
 import com.strategicgains.docussandra.event.DocumentUpdatedEvent;
 import com.strategicgains.docussandra.event.EventFactory;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.handler.IndexMaintainerHelper;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.AbstractObservableRepository;
@@ -54,7 +55,7 @@ public class DocumentRepository
     private static final String EXISTENCE_CQL = "select count(*) from %s where %s = ?";
     private static final String READ_CQL = "select * from %s where %s = ? ORDER BY updated_at DESC";
     private static final String READ_ALL_CQL = "select * from %s LIMIT %d";
-    
+
     private static final String DELETE_CQL = "delete from %s where %s = ?";
     //private static final String UPDATE_CQL = "update %s set object = ?, updated_at = ? where %s = ?";
     private static final String CREATE_CQL = "insert into %s (%s, object, created_at, updated_at) values (?, ?, ?, ?)";
@@ -88,18 +89,23 @@ public class DocumentRepository
 
         Table table = entity.table();
         PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), session());
-
-        BoundStatement bs = new BoundStatement(createStmt);
-        bindCreate(bs, entity);
-        BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
-        batch.add(bs);//the actual create
-        List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity, bucketLocator);
-        for (BoundStatement boundIndexStatement : indexStatements)
+        try
         {
-            batch.add(boundIndexStatement);//the index creates
+            BoundStatement bs = new BoundStatement(createStmt);
+            bindCreate(bs, entity);
+            BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
+            batch.add(bs);//the actual create
+            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity, bucketLocator);
+            for (BoundStatement boundIndexStatement : indexStatements)
+            {
+                batch.add(boundIndexStatement);//the index creates
+            }
+            session().execute(batch);
+            return entity;
+        } catch (IndexParseException e)
+        {
+            throw new RuntimeException(e);
         }
-        session().execute(batch);
-        return entity;
     }
 
     @Override
@@ -132,7 +138,7 @@ public class DocumentRepository
         BoundStatement bs = new BoundStatement(readStmt);
         //run the query
         ResultSet results = session.execute(bs);
-        
+
         return parseResultSetWithLimitAndOffset(results, limit, offset);
     }
 
@@ -254,7 +260,6 @@ public class DocumentRepository
 //                entity.getUpdatedAt(),
 //                entity.getUuid());
 //    }
-
     private Identifier extractId(Identifier identifier)
     {
 		// This includes the date/version on the end...

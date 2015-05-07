@@ -16,6 +16,7 @@ import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.domain.WhereClause;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
@@ -588,14 +589,14 @@ public class Fixtures
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
-                try
+        try
         {
             indexRepo.delete(Fixtures.createTestPlayersIndexCreatedOn());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
-                        try
+        try
         {
             indexRepo.delete(Fixtures.createTestPlayersIndexRookieYear());
         } catch (DriverException e)
@@ -675,7 +676,20 @@ public class Fixtures
         DocumentRepository documentRepo = new DocumentRepository(getSession());
         for (Document document : documents)
         {
-            documentRepo.create(document);
+            try
+            {
+                documentRepo.create(document);
+            } catch (RuntimeException e)
+            {
+                if (e.getCause() != null && e.getCause() instanceof IndexParseException)
+                {
+                    ;// we had a bad a record; ignore it for the purposes of this test
+                } else
+                {
+                    throw e;
+                }
+
+            }
         }
     }
 

@@ -22,6 +22,7 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexChangeObserver;
 import com.strategicgains.docussandra.persistence.IndexRepository;
@@ -105,7 +106,7 @@ public class IndexMaintainerHelperTest
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentCreateIndexEntriesStatements()
+    public void testGenerateDocumentCreateIndexEntriesStatements() throws IndexParseException
     {
         System.out.println("generateDocumentCreateIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument2();
@@ -134,7 +135,7 @@ public class IndexMaintainerHelperTest
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentCreateIndexEntriesStatementsWithDataTypes()
+    public void testGenerateDocumentCreateIndexEntriesStatementsWithDataTypes() throws IndexParseException
     {
         System.out.println("generateDocumentCreateIndexEntriesStatementsWithDataTypes");
         Document entity = Fixtures.createTestDocument3();
@@ -172,7 +173,7 @@ public class IndexMaintainerHelperTest
      * IndexMaintainerHelper.
      */
     @Test
-    public void testGenerateDocumentCreateIndexEntriesStatementsNoIndexField()
+    public void testGenerateDocumentCreateIndexEntriesStatementsNoIndexField() throws IndexParseException
     {
         System.out.println("testGenerateDocumentCreateIndexEntriesStatementsNoIndexField");
         Document entity = Fixtures.createTestDocument2();
@@ -180,6 +181,21 @@ public class IndexMaintainerHelperTest
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
         assertTrue(result.isEmpty());
     }
+
+//    /**
+//     * Test of generateDocumentCreateIndexEntriesStatements method, of class
+//     * IndexMaintainerHelper.
+//     */
+//    @Test
+//    public void testGenerateDocumentCreateIndexEntriesStatementsBadIndexField() throws IndexParseException
+//    {
+//        System.out.println("testGenerateDocumentCreateIndexEntriesStatementsBadIndexField");
+//        Document entity = Fixtures.createTestDocument3();
+//        f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
+//        entity.object("{}");//good luck indexing that!
+//        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
+//        assertTrue(result.isEmpty());
+//    }
 
     /**
      * Test of generateDocumentUpdateIndexEntriesStatements method, of class
@@ -484,5 +500,4 @@ public class IndexMaintainerHelperTest
 //        index.isUnique(true);
 //        return index;
 //    }
-
 }

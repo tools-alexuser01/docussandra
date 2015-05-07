@@ -49,7 +49,7 @@ public class IndexMaintainerHelper
         //don't instantiate; call static methods only
     }
 
-    public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator)
+    public static List<BoundStatement> generateDocumentCreateIndexEntriesStatements(Session session, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
     {
         //check for any indices that should exist on this setTable per the index setTable
         List<Index> indices = getIndexForDocument(session, entity);
@@ -58,17 +58,10 @@ public class IndexMaintainerHelper
         for (Index index : indices)
         {
             //add row to the iTable(s)
-            try
+            BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
+            if (bs != null)
             {
-                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
-                if (bs != null)
-                {
-                    statementList.add(bs);
-                }
-            } catch (IndexParseException e)
-            {
-                //TODO: update the index status with a non-fatal error
-                logger.error("Couldn't parse value", e);
+                statementList.add(bs);
             }
         }
         //return a list of commands to accomplish all of this

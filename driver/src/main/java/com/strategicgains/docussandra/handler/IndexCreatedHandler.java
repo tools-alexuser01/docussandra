@@ -95,7 +95,13 @@ public class IndexCreatedHandler implements EventHandler
                         recordsCompleted++;
                     } catch (IndexParseException e)
                     {
-                        //TODO: update the index status with a non-fatal error
+                        //we couldn't parse this document for an index; make a note, and move on
+                        recordsCompleted++;//we will still call this record "complete" for the sake of time calculation, and percent done
+                        status.setRecordsCompleted(recordsCompleted);
+                        //this will have to change if threading
+                        status.getErrors().add(e.toString() + " In document: " + toIndex.toString());//may want to reduce the verbosity here eventually -- or break some meta-data out into columns
+                        status.setStatusLastUpdatedAt(new Date());
+                        indexStatusRepo.updateEntity(status);
                     }
                 }
                 offset = offset + CHUNK;
