@@ -129,7 +129,7 @@ public class QueryControllerTest
      * query.
      */
     @Test
-    public void postTableTest()
+    public void postQueryTest()
     {
         Query q = Fixtures.createTestQuery();
         //act
@@ -148,7 +148,7 @@ public class QueryControllerTest
      * query with limits.
      */
     @Test
-    public void postTableTestWithLimit()
+    public void postQueryTestWithLimit()
     {
         Query q = new Query();
         q.setWhere("field1 = 'this is my data'");
@@ -169,7 +169,7 @@ public class QueryControllerTest
      * query with limits.
      */
     @Test
-    public void postTableTestWithLimitSameAsResponse()
+    public void postQueryTestWithLimitSameAsResponse()
     {
         Query q = new Query();
         q.setWhere("field1 = 'this is my data'");
@@ -190,7 +190,7 @@ public class QueryControllerTest
      * query with limits.
      */
     @Test
-    public void postTableTestWithLimitMoreThanResponse()
+    public void postQueryTestWithLimitMoreThanResponse()
     {
         Query q = new Query();
         q.setWhere("field1 = 'this is my data'");
@@ -211,7 +211,7 @@ public class QueryControllerTest
      * query with limits.
      */
     @Test
-    public void postTableTestWithLimitAndOffset()
+    public void postQueryTestWithLimitAndOffset()
     {
         Query q = new Query();
         q.setWhere("field1 = 'this is my data'");
@@ -232,7 +232,7 @@ public class QueryControllerTest
      * query with limits.
      */
     @Test
-    public void postTableTestWithLimitAndOffset2()
+    public void postQueryTestWithLimitAndOffset2()
     {
         Query q = new Query();
         q.setWhere("field1 = 'this is my data'");
