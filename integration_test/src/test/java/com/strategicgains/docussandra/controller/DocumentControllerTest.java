@@ -126,10 +126,10 @@ public class DocumentControllerTest
     public void postDocumentTest()
     {
         Document testDocument = Fixtures.createTestDocument();
-        String tableStr = testDocument.object();
+        String documentStr = testDocument.object();
 
         //act
-        Response r = given().body(tableStr).expect().statusCode(201)
+        Response r = given().body(documentStr).expect().statusCode(201)
                 .body("id", notNullValue())
                 .body("object", notNullValue())
                 .body("object", containsString("greeting"))
@@ -162,10 +162,10 @@ public class DocumentControllerTest
         //create the index first so we are sure it will get parsed
         f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
         Document testDocument = Fixtures.createTestDocument3();
-        String tableStr = testDocument.object();
+        String documentStr = testDocument.object();
 
         //act
-        Response r = given().body(tableStr).expect().statusCode(201)
+        Response r = given().body(documentStr).expect().statusCode(201)
                 .body("id", notNullValue())
                 .body("object", notNullValue())
                 .body("object", containsString("thisisastring"))
@@ -186,6 +186,27 @@ public class DocumentControllerTest
         testDocument.setUuid(UUID.fromString(id));
         //cleanup the random uuid'ed doc
         f.deleteDocument(testDocument);
+    }
+
+    /**
+     * Tests that the POST /{databases}/{table}/ endpoint properly creates a
+     * document.
+     */
+    @Test
+    public void postDocumentWithInvalidDataTypesTest()
+    {
+        //create the index first so we are sure it will get parsed
+        f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
+
+        String documentStr = "{\"thisisastring\":\"hello\", \"thisisanint\": \"five\", \"thisisadouble\":\"five point five five five\","
+                + " \"thisisbase64\":\"nope!\", \"thisisaboolean\":\"blah!\","
+                + " \"thisisadate\":\"day 0\", \"thisisauudid\":\"z\"}";//completely botched field types
+
+        //act
+        given().body(documentStr).expect().statusCode(400)
+                .body("error", notNullValue())
+                .body("error", containsString("could not be parsed"))
+                .when().post("/").andReturn();
     }
 
     /**
