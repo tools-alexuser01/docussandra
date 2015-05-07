@@ -3,6 +3,7 @@ package com.strategicgains.docussandra.service;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
+import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 
@@ -37,10 +38,14 @@ public class QueryService
      * @param toQuery Query perform.
      * @return A query response object containing a list of documents and some
      * metadata about the query.
+     * @throws FieldNotIndexedException If the field that was attempted to be
+     * queried on is not part of an index.
+     * @throws IndexParseException If the field that was attempted to be queried
+     * on was not in a recognized format.
      */
-    public QueryResponseWrapper query(String db, Query toQuery) throws IndexParseException
+    public QueryResponseWrapper query(String db, Query toQuery) throws IndexParseException, FieldNotIndexedException
     {
-        ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());//note: throws a runtime exception
+        ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());
         return queries.doQuery(parsedQuery);
     }
 
@@ -53,33 +58,14 @@ public class QueryService
      * @param offset offset of the query results
      * @return A query response object containing a list of documents and some
      * metadata about the query.
+     * @throws FieldNotIndexedException If the field that was attempted to be
+     * queried on is not part of an index.
+     * @throws IndexParseException If the field that was attempted to be queried
+     * on was not in a recognized format.
      */
-    public QueryResponseWrapper query(String db, Query toQuery, int limit, long offset) throws IndexParseException
+    public QueryResponseWrapper query(String db, Query toQuery, int limit, long offset) throws IndexParseException, FieldNotIndexedException
     {
-        ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());//note: throws a runtime exception
+        ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());
         return queries.doQuery(parsedQuery, limit, offset);
     }
-
-//
-//	public Query create(Query entity)
-//	{
-//		ValidationEngine.validateAndThrow(entity);
-//		return queries.create(entity);
-//	}
-//
-//	public Query read(Identifier id)
-//    {
-//		return queries.read(id);
-//    }
-//
-//	public void update(Query entity)
-//    {
-//		ValidationEngine.validateAndThrow(entity);
-//		queries.update(entity);
-//    }
-//
-//	public void delete(Identifier id)
-//    {
-//		queries.delete(id);
-//    }
 }

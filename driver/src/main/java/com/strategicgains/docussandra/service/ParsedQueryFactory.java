@@ -54,7 +54,7 @@ public class ParsedQueryFactory
      * @param session Database session.
      * @return a PreparedStatement to use.
      */
-    public static ParsedQuery getParsedQuery(String db, Query toParse, Session session)
+    public static ParsedQuery getParsedQuery(String db, Query toParse, Session session) throws FieldNotIndexedException
     {
 
         if (db == null || db.trim().equals(""))

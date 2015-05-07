@@ -78,7 +78,7 @@ public class ParsedQueryFactoryTest
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryBasic()
+    public void testParseQueryBasic() throws FieldNotIndexedException
     {
         System.out.println("testParseQueryBasic");
         String db = Fixtures.DB;
@@ -92,7 +92,7 @@ public class ParsedQueryFactoryTest
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryTwoFields()
+    public void testParseQueryTwoFields() throws FieldNotIndexedException
     {
         System.out.println("testParseQueryTwoFields");
         String db = Fixtures.DB;
@@ -106,7 +106,7 @@ public class ParsedQueryFactoryTest
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryTwoFieldsImperfectMatch()
+    public void testParseQueryTwoFieldsImperfectMatch() throws FieldNotIndexedException
     {
         System.out.println("testParseQueryTwoFieldsImperfectMatch");
         String db = Fixtures.DB;
@@ -165,7 +165,7 @@ public class ParsedQueryFactoryTest
      * Test of getParsedQuery method, of class ParsedQueryFactory.
      */
     @Test
-    public void testGetParsedQuery()
+    public void testGetParsedQuery() throws FieldNotIndexedException
     {
         System.out.println("testGetParsedQuery");
         String db = Fixtures.DB;

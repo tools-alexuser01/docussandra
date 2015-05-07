@@ -49,7 +49,7 @@ public class IndexParseFieldException extends Exception
      */
     protected IndexParseFieldException(String message, String fieldValue, Throwable e)
     {
-        super(message, e);
+        super(message + " Could not parse field with value: " + fieldValue, e);
         this.fieldValue = fieldValue;
     }   
 
