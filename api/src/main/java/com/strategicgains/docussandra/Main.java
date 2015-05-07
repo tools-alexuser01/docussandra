@@ -55,8 +55,10 @@ public class Main
         RestExpress server = initializeServer(args);
         LOG.info("Server started up!");
         server.awaitShutdown();
-         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            public void run() {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
+        {
+            public void run()
+            {
                 LOG.info("Shutting down Docussandra...");
                 CacheFactory.shutdownCacheManger();
             }
@@ -85,7 +87,7 @@ public class Main
         server.bind(config.getPort());
         return server;
     }
-    
+
     private static void configurePlugins(Configuration config, RestExpress server)
     {
         configureMetrics(config, server);
