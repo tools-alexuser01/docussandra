@@ -229,7 +229,6 @@ public class IndexStatusRepositoryTest
 //        IndexCreatedEvent id = null;
 //        IndexStatusRepository instance = null;
 //        instance.deleteEntity(id);
-//        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
     /**
@@ -272,7 +271,6 @@ public class IndexStatusRepositoryTest
 //        long expResult = 0L;
 //        long result = instance.countAll(namespace, collection);
 //        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
     /**
@@ -324,7 +322,6 @@ public class IndexStatusRepositoryTest
 //        System.out.println("initialize");
 //        IndexStatusRepository instance = null;
 //        instance.initialize();
-//        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
 //    /**
@@ -339,7 +336,6 @@ public class IndexStatusRepositoryTest
 //        IndexCreatedEvent expResult = null;
 //        IndexCreatedEvent result = instance.updateEntityPkChange(entity);
 //        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
 //
@@ -354,7 +350,6 @@ public class IndexStatusRepositoryTest
 //        UUID uuid = null;
 //        IndexStatusRepository instance = null;
 //        instance.bindUUIDWhere(bs, uuid);
-//        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
 //
@@ -370,7 +365,6 @@ public class IndexStatusRepositoryTest
 //        IndexCreatedEvent expResult = null;
 //        IndexCreatedEvent result = instance.marshalRow(row);
 //        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
 //    /**
@@ -383,7 +377,6 @@ public class IndexStatusRepositoryTest
 //        UUID id = null;
 //        IndexStatusRepository instance = null;
 //        instance.markDone(id);
-//        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
     private void assertStatusEqualEnough(IndexCreatedEvent expected, IndexCreatedEvent actual)
