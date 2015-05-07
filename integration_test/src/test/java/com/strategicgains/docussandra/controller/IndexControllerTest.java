@@ -129,11 +129,11 @@ public class IndexControllerTest
     public void postIndexTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
-        String tableStr = "{" + "\"fields\" : [\"" + testIndex.getFieldsValues().get(0)
+        String indexStr = "{" + "\"fields\" : [\"" + testIndex.getFieldsValues().get(0)
                 + "\"]," + "\"name\" : \"" + testIndex.getName() + "\"}";
 
         //act
-        given().body(tableStr).expect().statusCode(201)
+        given().body(indexStr).expect().statusCode(201)
                 .body("index.name", equalTo(testIndex.getName()))
                 .body("index.fields", notNullValue())
                 .body("index.createdAt", notNullValue())
@@ -165,25 +165,25 @@ public class IndexControllerTest
     public void postIndexAllFieldsTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexAllFieldTypes();
-        StringBuilder tableStr = new StringBuilder("{\"name\" : \"" + testIndex.getName() + "\", \"fields\" : [");
+        StringBuilder indexStr = new StringBuilder("{\"name\" : \"" + testIndex.getName() + "\", \"fields\" : [");
         boolean first = true;
         for (IndexField f : testIndex.getFields())
         {
             if (!first)
             {
-                tableStr.append(", ");
+                indexStr.append(", ");
             }
             first = false;
-            tableStr.append("{\"field\" : \"");
-            tableStr.append(f.getField());
-            tableStr.append("\",\"type\": \"");
-            tableStr.append(f.getType().toString());
-            tableStr.append("\"}");
+            indexStr.append("{\"field\" : \"");
+            indexStr.append(f.getField());
+            indexStr.append("\",\"type\": \"");
+            indexStr.append(f.getType().toString());
+            indexStr.append("\"}");
         }
-        tableStr.append("]}");
+        indexStr.append("]}");
 
         //act
-        given().body(tableStr.toString()).expect().statusCode(201)
+        given().body(indexStr.toString()).expect().statusCode(201)
                 .body("index.name", equalTo(testIndex.getName()))
                 .body("index.fields", notNullValue())
                 .body("index.fields[0].field", equalTo(testIndex.getFields().get(0).getField()))
@@ -245,11 +245,11 @@ public class IndexControllerTest
     public void postIndexAndCheckStatusTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexOneField();
-        String tableStr = "{" + "\"fields\" : [\"" + testIndex.getFieldsValues().get(0)
+        String indexStr = "{" + "\"fields\" : [\"" + testIndex.getFieldsValues().get(0)
                 + "\"]," + "\"name\" : \"" + testIndex.getName() + "\"}";
 
         //act
-        ResponseOptions response = given().body(tableStr).expect().statusCode(201)
+        ResponseOptions response = given().body(indexStr).expect().statusCode(201)
                 .body("index.name", equalTo(testIndex.getName()))
                 .body("index.fields", notNullValue())
                 .body("index.createdAt", notNullValue())
@@ -310,11 +310,11 @@ public class IndexControllerTest
 
             Index lastname = Fixtures.createTestPlayersIndexLastName();
 
-            String tableStr = "{" + "\"fields\" : [\"" + lastname.getFieldsValues().get(0)
+            String indexStr = "{" + "\"fields\" : [\"" + lastname.getFieldsValues().get(0)
                     + "\"]," + "\"name\" : \"" + lastname.getName() + "\"}";
             RestAssured.basePath = "/" + lastname.getDatabaseName() + "/" + lastname.getTableName() + "/indexes";
             //act -- create index
-            ResponseOptions response = given().body(tableStr).expect().statusCode(201)
+            ResponseOptions response = given().body(indexStr).expect().statusCode(201)
                     .body("index.name", equalTo(lastname.getName()))
                     .body("index.fields", notNullValue())
                     .body("index.createdAt", notNullValue())
@@ -405,11 +405,11 @@ public class IndexControllerTest
             List<Document> docs = Fixtures.getBulkDocuments("./src/test/resources/players-short.json", testTable);
             f.insertDocuments(docs);//put in a ton of data directly into the db
             Index lastname = Fixtures.createTestPlayersIndexLastName();
-            String tableStr = "{" + "\"fields\" : [\"" + lastname.getFieldsValues().get(0)
+            String indexStr = "{" + "\"fields\" : [\"" + lastname.getFieldsValues().get(0)
                     + "\"]," + "\"name\" : \"" + lastname.getName() + "\"}";
             RestAssured.basePath = "/" + lastname.getDatabaseName() + "/" + lastname.getTableName() + "/indexes";
             //act -- create index
-            given().body(tableStr).expect().statusCode(201)
+            given().body(indexStr).expect().statusCode(201)
                     .body("index.name", equalTo(lastname.getName()))
                     .body("index.fields", notNullValue())
                     .body("index.createdAt", notNullValue())
