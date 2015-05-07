@@ -132,10 +132,10 @@ public class DocumentControllerTest
     public void postDocumentTest()
     {
         Document testDocument = Fixtures.createTestDocument();
-        String tableStr = testDocument.object();
+        String documentStr = testDocument.object();
 
         //act
-        Response r = given().body(tableStr).expect().statusCode(201)
+        Response r = given().body(documentStr).expect().statusCode(201)
                 .body("id", notNullValue())
                 .body("object", notNullValue())
                 .body("object", containsString("greeting"))
@@ -168,10 +168,10 @@ public class DocumentControllerTest
         //create the index first so we are sure it will get parsed
         f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
         Document testDocument = Fixtures.createTestDocument3();
-        String tableStr = testDocument.object();
+        String documentStr = testDocument.object();
 
         //act
-        Response r = given().body(tableStr).expect().statusCode(201)
+        Response r = given().body(documentStr).expect().statusCode(201)
                 .body("id", notNullValue())
                 .body("object", notNullValue())
                 .body("object", containsString("thisisastring"))
@@ -204,12 +204,12 @@ public class DocumentControllerTest
         //create the index first so we are sure it will get parsed
         f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
         
-        String tableStr = "{\"thisisastring\":\"hello\", \"thisisanint\": \"five\", \"thisisadouble\":\"five point five five five\","
+        String documentStr = "{\"thisisastring\":\"hello\", \"thisisanint\": \"five\", \"thisisadouble\":\"five point five five five\","
                 + " \"thisisbase64\":\"nope!\", \"thisisaboolean\":\"blah!\","
                 + " \"thisisadate\":\"day 0\", \"thisisauudid\":\"z\"}";//completely botched field types
 
         //act
-        given().body(tableStr).expect().statusCode(400)
+        given().body(documentStr).expect().statusCode(400)
                 .body("error", notNullValue())
                 .body("error", containsString("could not be parsed"))
                 .when().post("/").andReturn();
