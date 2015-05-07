@@ -152,7 +152,7 @@ public class Utils
      * @param list List to convert to a String
      * @return A String that represents the passed in list.
      */
-    public static String listToString(List<String> list)//TODO: consider moving to Pearson Java Lib (if it is not there already)
+    public static String listToString(List<String> list)//TODO: consider moving to a common lib
     {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
