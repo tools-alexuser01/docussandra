@@ -182,20 +182,30 @@ public class IndexMaintainerHelperTest
         assertTrue(result.isEmpty());
     }
 
-//    /**
-//     * Test of generateDocumentCreateIndexEntriesStatements method, of class
-//     * IndexMaintainerHelper.
-//     */
-//    @Test
-//    public void testGenerateDocumentCreateIndexEntriesStatementsBadIndexField() throws IndexParseException
-//    {
-//        System.out.println("testGenerateDocumentCreateIndexEntriesStatementsBadIndexField");
-//        Document entity = Fixtures.createTestDocument3();
-//        f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
-//        entity.object("{}");//good luck indexing that!
-//        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
-//        assertTrue(result.isEmpty());
-//    }
+    /**
+     * Test of generateDocumentCreateIndexEntriesStatements method, of class
+     * IndexMaintainerHelper.
+     */
+    @Test
+    public void testGenerateDocumentCreateIndexEntriesStatementsBadIndexField()
+    {
+        System.out.println("testGenerateDocumentCreateIndexEntriesStatementsBadIndexField");
+        Document entity = Fixtures.createTestDocument3();
+        f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
+        entity.object("{\"thisisastring\":\"hello\", \"thisisanint\": \"five\", \"thisisadouble\":\"five point five five five\","
+                + " \"thisisbase64\":\"nope!\", \"thisisaboolean\":\"blah!\","
+                + " \"thisisadate\":\"day 0\", \"thisisauudid\":\"z\"}");//completely botched field types
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            List<BoundStatement> result = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
+        } catch (IndexParseException e)
+        {
+            expectedExceptionThrown = true;
+        }
+        assertTrue("Expected exception was not thrown.", expectedExceptionThrown);
+        
+    }
 
     /**
      * Test of generateDocumentUpdateIndexEntriesStatements method, of class
