@@ -22,11 +22,10 @@ import com.jayway.restassured.response.Response;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.time.StopWatch;
@@ -99,6 +98,10 @@ public abstract class PerfTestParent
 
     protected static String postDocument(Database database, Table table, Document d)
     {
+        //setup
+        //set rookie year to be empty so we don't cause more problems than we need
+        String object = d.object().replaceAll("\\Q\"ROOKIEYEAR\":\"\"\\E", "");
+        d.object(object);
         //act
         //long start = new Date().getTime();
         Response response = given().body(d.object()).expect().when().post(database.name() + "/" + table.name() + "/").andReturn();
@@ -110,6 +113,7 @@ public abstract class PerfTestParent
         {
             errorCount.addAndGet(1);
             logger.info("Error publishing document: " + response.getBody().prettyPrint());
+            logger.info("The document was: " + d.toString());
             logger.info("This is the: " + errorCount.toString() + " error.");
         }
         return response.getBody().jsonPath().get("id");
@@ -250,22 +254,7 @@ public abstract class PerfTestParent
     protected static void postIndex(Database database, Table table, Index index)
     {
         logger.info("POSTing index: " + index.toString());
-        boolean first = true;
-        StringBuilder tableStr = new StringBuilder("{" + "\"fields\" : [");
-        for (IndexField field : index.getFields())
-        {
-            if (!first)
-            {
-                tableStr.append(", ");
-            } else
-            {
-                first = false;
-            }
-            tableStr.append("\"");
-            tableStr.append(field.getField());
-            tableStr.append("\"");
-        }
-        tableStr.append("],").append("\"name\" : \"").append(index.getName()).append("\"}");
+        String tableStr = Fixtures.generateIndexCreationStringWithFields(index);
         //act
         given().body(tableStr.toString()).when().post(database.name() + "/" + table.name() + "/indexes/" + index.getName());
         //check

@@ -844,4 +844,25 @@ public class Fixtures
     {
         return session;
     }
+
+    public static String generateIndexCreationStringWithFields(Index index)
+    {
+        StringBuilder indexStr = new StringBuilder("{\"name\" : \"" + index.getName() + "\", \"fields\" : [");
+        boolean first = true;
+        for (IndexField f : index.getFields())
+        {
+            if (!first)
+            {
+                indexStr.append(", ");
+            }
+            first = false;
+            indexStr.append("{\"field\" : \"");
+            indexStr.append(f.getField());
+            indexStr.append("\",\"type\": \"");
+            indexStr.append(f.getType().toString());
+            indexStr.append("\"}");
+        }
+        indexStr.append("]}");
+        return indexStr.toString();
+    }
 }

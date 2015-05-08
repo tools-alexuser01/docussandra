@@ -171,7 +171,7 @@ public class IndexControllerTest
     public void postIndexAllFieldsTest() throws InterruptedException
     {
         Index testIndex = Fixtures.createTestIndexAllFieldTypes();
-        String indexStr = generateIndexCreationStringWithFields(testIndex);
+        String indexStr = Fixtures.generateIndexCreationStringWithFields(testIndex);
 
         //act
         given().body(indexStr).expect().statusCode(201)
@@ -413,7 +413,7 @@ public class IndexControllerTest
             f.insertDocuments(docs);//put in a ton of data directly into the db
             Index rookieyear = Fixtures.createTestPlayersIndexRookieYear();
 
-            String indexString = generateIndexCreationStringWithFields(rookieyear);
+            String indexString = Fixtures.generateIndexCreationStringWithFields(rookieyear);
             RestAssured.basePath = "/" + rookieyear.getDatabaseName() + "/" + rookieyear.getTableName() + "/indexes";
             //act -- create index
             ResponseOptions response = given().body(indexString).expect().statusCode(201)
@@ -621,25 +621,4 @@ public class IndexControllerTest
                 .get(testIndex.getName());
     }
 
-    private String generateIndexCreationStringWithFields(Index index)
-    {
-
-        StringBuilder indexStr = new StringBuilder("{\"name\" : \"" + index.getName() + "\", \"fields\" : [");
-        boolean first = true;
-        for (IndexField f : index.getFields())
-        {
-            if (!first)
-            {
-                indexStr.append(", ");
-            }
-            first = false;
-            indexStr.append("{\"field\" : \"");
-            indexStr.append(f.getField());
-            indexStr.append("\",\"type\": \"");
-            indexStr.append(f.getType().toString());
-            indexStr.append("\"}");
-        }
-        indexStr.append("]}");
-        return indexStr.toString();
-    }
 }

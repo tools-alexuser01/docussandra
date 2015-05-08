@@ -203,10 +203,10 @@ public class DocumentControllerTest
     {
         //create the index first so we are sure it will get parsed
         f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
-        
+
         String documentStr = "{\"thisisastring\":\"hello\", \"thisisanint\": \"five\", \"thisisadouble\":\"five point five five five\","
                 + " \"thisisbase64\":\"nope!\", \"thisisaboolean\":\"blah!\","
-                + " \"thisisadate\":\"day 0\", \"thisisauudid\":\"z\"}";//completely botched field types
+                + " \"thisisadate\":\"day 0\", \"thisisauudid\":\"x\"}";//completely botched field types
 
         //act
         given().body(documentStr).expect().statusCode(400)
