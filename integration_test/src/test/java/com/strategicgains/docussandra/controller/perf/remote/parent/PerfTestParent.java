@@ -238,7 +238,7 @@ public abstract class PerfTestParent
         double transactionTime = (double) miliseconds / (double) numDocs;
         output.info(this.getDb().name() + " Doc: Average Transactions Per Second: " + tps);
         output.info(this.getDb().name() + " Doc: Average Transactions Time (in miliseconds): " + transactionTime);
-        Thread.sleep(40000);//sleep a bit to let the DB digest that before trying anything else
+        Thread.sleep(100000);//sleep a bit to let the DB digest that before trying anything else
     }
 
     protected static void postTable(Database database, Table table)
