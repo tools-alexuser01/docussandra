@@ -235,6 +235,33 @@ public class PlayersRemote extends PerfTestParent
     }
 
     /**
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs
+     * a query with a set time.
+     */
+    @Test
+    public void postQueryWithIntegerTypeQuery()
+    {
+        int numQueries = 50;
+        Date start = new Date();
+        for (int i = 0; i < numQueries; i++)
+        {
+            logger.debug("Query: " + i);
+            given().filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500))
+                    .header("limit", "10000").body("{\"where\":\"ROOKIEYEAR = '2001'\"}").expect().statusCode(200)
+                    //.header("Location", startsWith(RestAssured.basePath + "/"))
+                    .body("", notNullValue())
+                    .body("id", notNullValue())
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
+        }
+        Date end = new Date();
+        long executionTime = end.getTime() - start.getTime();
+        double inSeconds = (double) executionTime / 1000d;
+        double average = (double) inSeconds / (double) numQueries;
+        output.info("Players-Doc: Time to execute (integer field) for " + numQueries + " is: " + inSeconds + " seconds");
+        output.info("Players-Doc: Averge time for integer field is: " + average);
+    }
+
+    /**
      * Tests that the querying directly with the driver endpoint properly runs a
      * query with a set time (test should always pass; check output for stats.)
      */

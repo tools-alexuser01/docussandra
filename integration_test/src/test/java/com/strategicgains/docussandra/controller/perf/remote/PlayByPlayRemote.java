@@ -19,6 +19,7 @@ import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestParent;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
@@ -189,7 +190,7 @@ public class PlayByPlayRemote extends PerfTestParent
         Index qtr = new Index("qtr");
         qtr.isUnique(false);
         List<IndexField> fields = new ArrayList<>(1);
-        fields.add(new IndexField("qtr"));
+        fields.add(new IndexField("qtr", FieldDataType.INTEGER));
         qtr.setFields(fields);
         qtr.setTable(getTb());
         qtr.isUnique(false);
@@ -213,7 +214,7 @@ public class PlayByPlayRemote extends PerfTestParent
         Index dwn = new Index("dwn");
         dwn.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add(new IndexField("dwn"));
+        fields.add(new IndexField("dwn", FieldDataType.INTEGER));
         dwn.setFields(fields);
         dwn.setFields(fields);
         dwn.setTable(getTb());
@@ -221,7 +222,7 @@ public class PlayByPlayRemote extends PerfTestParent
         Index dwnAndYtg = new Index("dwnandytg");
         dwnAndYtg.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add(new IndexField("dwn"));
+        fields.add(new IndexField("dwn", FieldDataType.INTEGER));
         fields.add(new IndexField("ytg"));
         dwnAndYtg.setFields(fields);
         dwnAndYtg.setFields(fields);
@@ -230,9 +231,9 @@ public class PlayByPlayRemote extends PerfTestParent
         Index dwnAndYtgAndPts = new Index("dwnandytgandpts");
         dwnAndYtgAndPts.isUnique(false);
         fields = new ArrayList<>(3);
-        fields.add(new IndexField("dwn"));
-        fields.add(new IndexField("ytg"));
-        fields.add(new IndexField("pts"));
+        fields.add(new IndexField("dwn", FieldDataType.INTEGER));
+        fields.add(new IndexField("ytg", FieldDataType.INTEGER));
+        fields.add(new IndexField("pts", FieldDataType.INTEGER));
         dwnAndYtgAndPts.setFields(fields);
         dwnAndYtgAndPts.setFields(fields);
         dwnAndYtgAndPts.setTable(getTb());
@@ -241,7 +242,7 @@ public class PlayByPlayRemote extends PerfTestParent
         offAndPts.isUnique(false);
         fields = new ArrayList<>(2);
         fields.add(new IndexField("off"));
-        fields.add(new IndexField("pts"));
+        fields.add(new IndexField("pts", FieldDataType.INTEGER));
         offAndPts.setFields(fields);
         offAndPts.setFields(fields);
         offAndPts.setTable(getTb());
