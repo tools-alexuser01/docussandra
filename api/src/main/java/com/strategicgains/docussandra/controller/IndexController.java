@@ -1,5 +1,6 @@
 package com.strategicgains.docussandra.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.codec.http.HttpMethod;
 
 import java.util.List;
@@ -43,20 +44,23 @@ public class IndexController
         this.indexes = indexService;
     }
 
-    public IndexCreatedEvent create(Request request, Response response)
+    public IndexCreatedEvent create(Request request, Response response) throws Exception
     {
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
         String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
+        //TODO: check name passed in with url and name in domain object
+        
         Index entity = request.getBodyAs(Index.class, "Resource details not provided");
+        
         Table t = new Table();
         t.database(database);
         t.name(table);
-        entity.table(t);
-        entity.name(name);
-        if (entity.includeOnly() == null)
+        entity.setTable(t);
+        entity.setName(name);
+        if (entity.getIncludeOnly() == null)
         {
-            entity.includeOnly(new ArrayList<String>(0));
+            entity.setIncludeOnly(new ArrayList<String>(0));
         }
         IndexCreatedEvent status;
         try
@@ -71,9 +75,9 @@ public class IndexController
         response.setResponseCreated();
 
         // enrich the resource with links, etc. here...
-        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.getIndex().tableName())
-                .bind(Constants.Url.DATABASE, status.getIndex().databaseName())
-                .bind(Constants.Url.INDEX, status.getIndex().name())
+        TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, status.getIndex().getTableName())
+                .bind(Constants.Url.DATABASE, status.getIndex().getDatabaseName())
+                .bind(Constants.Url.INDEX, status.getIndex().getName())
                 .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());
 
         // Include the Location header...
@@ -91,9 +95,9 @@ public class IndexController
         Index entity = indexes.read(new Identifier(database, table, name));
 
         // enrich the entity with links, etc. here...
-        HyperExpress.bind(Constants.Url.TABLE, entity.tableName())
-                .bind(Constants.Url.DATABASE, entity.databaseName())
-                .bind(Constants.Url.INDEX, entity.name());
+        HyperExpress.bind(Constants.Url.TABLE, entity.getTableName())
+                .bind(Constants.Url.DATABASE, entity.getDatabaseName())
+                .bind(Constants.Url.INDEX, entity.getName());
 //add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());//we don't have this information without doing another lookup
         return entity;
     }
@@ -108,9 +112,9 @@ public class IndexController
             @Override
             public void bind(Index object, TokenResolver resolver)
             {
-                resolver.bind(Constants.Url.TABLE, object.tableName())
-                        .bind(Constants.Url.DATABASE, object.databaseName())
-                        .bind(Constants.Url.INDEX, object.name());
+                resolver.bind(Constants.Url.TABLE, object.getTableName())
+                        .bind(Constants.Url.DATABASE, object.getDatabaseName())
+                        .bind(Constants.Url.INDEX, object.getName());
                 //add: .bind(Constants.Url.INDEX_STATUS, status.getUuid().toString());//we don't have this information without doing another lookup
 
             }

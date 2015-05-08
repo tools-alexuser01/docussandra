@@ -17,6 +17,8 @@ package com.strategicgains.docussandra.service;
 
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.exception.FieldNotIndexedException;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.QueryRepository;
@@ -66,7 +68,7 @@ public class QueryServiceTest
      * Test of query method, of class QueryService.
      */
     @Test
-    public void testQuery()
+    public void testQuery() throws IndexParseException, FieldNotIndexedException
     {
         System.out.println("query");
         Document doc = Fixtures.createTestDocument();

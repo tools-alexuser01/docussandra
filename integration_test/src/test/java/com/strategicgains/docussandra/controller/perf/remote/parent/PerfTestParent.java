@@ -23,11 +23,12 @@ import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.lang3.time.StopWatch;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import org.json.simple.parser.ParseException;
@@ -38,8 +39,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Performs a perf test using the overridden data. 1. Creates a DB. 2. Creates a
- * table. 3. Creates all the indexes. 4. Inserts all the documents. 5. Cleans up
- * anything it did. Treat this as a singleton, even though it is not.
+ * setTable. 3. Creates all the indexes. 4. Inserts all the documents. 5. Cleans
+ * up anything it did. Treat this as a singleton, even though it is not.
  *
  * @author udeyoje
  */
@@ -91,12 +92,16 @@ public abstract class PerfTestParent
         given().when().delete(database.name() + "/" + table.name());
         for (Index i : index)
         {
-            given().when().delete(database.name() + "/" + table.name() + "/indexes/" + i.name());
+            given().when().delete(database.name() + "/" + table.name() + "/indexes/" + i.getName());
         }
     }
 
     protected static String postDocument(Database database, Table table, Document d)
     {
+        //setup
+        //set rookie year to be empty so we don't cause more problems than we need
+        String object = d.object().replaceAll("\\Q\"ROOKIEYEAR\":\"\"\\E", "");
+        d.object(object);
         //act
         //long start = new Date().getTime();
         Response response = given().body(d.object()).expect().when().post(database.name() + "/" + table.name() + "/").andReturn();
@@ -108,6 +113,7 @@ public abstract class PerfTestParent
         {
             errorCount.addAndGet(1);
             logger.info("Error publishing document: " + response.getBody().prettyPrint());
+            logger.info("The document was: " + d.toString());
             logger.info("This is the: " + errorCount.toString() + " error.");
         }
         return response.getBody().jsonPath().get("id");
@@ -142,7 +148,7 @@ public abstract class PerfTestParent
                 {
                     @Override
                     public void run()
-                    {                        
+                    {
                         for (Document d : queue)
                         {
                             //logger.debug("Processing document: " + d.toString());
@@ -170,7 +176,7 @@ public abstract class PerfTestParent
                         {
                             List<Document> docs = getDocumentsFromFS(chunk);//grab a handful of documents
                             while (docs.size() > 0)
-                            {                                
+                            {
                                 for (Document d : docs)//process the documents we grabbed
                                 {
                                     //logger.debug("Processing document: " + d.toString());
@@ -189,7 +195,9 @@ public abstract class PerfTestParent
             }
         }
 
-        long start = new Date().getTime();
+        //long start = new Date().getTime();
+        StopWatch sw = new StopWatch();
+        sw.start();
         //start your threads!
         for (Thread t : workers)
         {
@@ -214,14 +222,15 @@ public abstract class PerfTestParent
             if (done)
             {
                 allDone = true;
+                sw.stop();
             } else
             {
                 logger.info("We still have workers running...");
-                Thread.sleep(5000);
+                Thread.sleep(61000);
             }
         }
-        long end = new Date().getTime();
-        long miliseconds = end - start;
+
+        long miliseconds = sw.getTime();
         double seconds = (double) miliseconds / 1000d;
         output.info("Doc: Done loading data using: " + NUM_WORKERS + " and URL: " + BASE_URI + ". Took: " + seconds + " seconds");
         double tpms = (double) numDocs / (double) miliseconds;
@@ -245,26 +254,12 @@ public abstract class PerfTestParent
     protected static void postIndex(Database database, Table table, Index index)
     {
         logger.info("POSTing index: " + index.toString());
-        boolean first = true;
-        StringBuilder tableStr = new StringBuilder("{" + "\"fields\" : [");
-        for (String field : index.fields())
-        {
-            if (!first)
-            {
-                tableStr.append(", ");
-            } else
-            {
-                first = false;
-            }
-            tableStr.append("\"");
-            tableStr.append(field);
-            tableStr.append("\"");
-        }
-        tableStr.append("],").append("\"name\" : \"").append(index.name()).append("\"}");
+        String tableStr = Fixtures.generateIndexCreationStringWithFields(index);
         //act
-        given().body(tableStr.toString()).when().post(database.name() + "/" + table.name() + "/indexes/" + index.name());
+        given().body(tableStr.toString()).when().post(database.name() + "/" + table.name() + "/indexes/" + index.getName());
         //check
-        expect().statusCode(200).body("name", equalTo(index.name())).body("fields", notNullValue()).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).get(database.name() + "/" + table.name() + "/indexes/" + index.name());
+        Response r = expect().statusCode(200).body("name", equalTo(index.getName())).body("fields", notNullValue()).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).get(database.name() + "/" + table.name() + "/indexes/" + index.getName()).andReturn();
+        logger.debug("Index created: \r\n" + r.getBody().prettyPrint());
     }
 
     /**
@@ -275,7 +270,7 @@ public abstract class PerfTestParent
     public abstract Database getDb();
 
     /**
-     * Gets the table to use for this test.
+     * Gets the setTable to use for this test.
      *
      * @return the tb
      */

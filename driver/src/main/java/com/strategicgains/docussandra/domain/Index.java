@@ -26,7 +26,7 @@ public class Index
     @ChildValidation
     private TableReference table;
 
-    @RegexValidation(name = "Index name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
+    @RegexValidation(name = "Index Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
     private String name;
 
     private boolean isUnique = false;
@@ -35,22 +35,22 @@ public class Index
      * This is how many items will be stored in a single wide row, before
      * creating another wide row.
      */
-    //TODO: refactor to new concept of infinately sized buckets, but with a limit number of buckets
+    //TODO: refactor to new concept of infinately sized rows, but with a limit number of buckets; I don't think that this is presently used.
     private long bucketSize = 2000l;
 
     /**
-     * The list of fields, in order, that are being indexed. Prefixing a field
-     * with a dash ('-') means it's order in descending order.
+     * The list of getFields, in order, that are being indexed. Prefixing a
+     * field with a dash ('-') means it's order in descending order.
      */
     @Required("Fields")
-    private List<String> fields;
+    //@ChildValidation
+    private List<IndexField> fields;
 
-//	@Required("Index Type")
-//	private IndexType type;
+    //Note: not currently supported
     /**
      * Consider the index is only concerned with only a partial dataset. In this
      * case, instead of storing the entire BSON payload, we store only a
-     * subset--those listed in includeOnly.
+     * subset--those listed in setIncludeOnly.
      */
     private List<String> includeOnly;
 
@@ -67,7 +67,7 @@ public class Index
     public Index(String name)
     {
         this();
-        name(name);
+        setName(name);
         active = false;
     }
 
@@ -76,37 +76,37 @@ public class Index
         return (table != null);
     }
 
-    public Table table()
+    public Table getTable()
     {
         return (hasTable() ? table.asObject() : null);
     }
 
-    public void table(String database, String table)
+    public void setTable(String database, String table)
     {
         this.table = new TableReference(database, table);
     }
 
-    public void table(Table table)
+    public void setTable(Table table)
     {
         this.table = (table != null ? new TableReference(table) : null);
     }
 
-    public String tableName()
+    public String getTableName()
     {
         return (hasTable() ? table.name() : null);
     }
 
-    public String databaseName()
+    public String getDatabaseName()
     {
         return (hasTable() ? table.database() : null);
     }
 
-    public String name()
+    public String getName()
     {
         return name;
     }
 
-    public Index name(String name)
+    public Index setName(String name)
     {
         this.name = name;
         return this;
@@ -123,25 +123,57 @@ public class Index
         return this;
     }
 
-    public void fields(List<String> props)
+    public void setFields(List<IndexField> props)
     {
-        this.fields = new ArrayList<String>(props);
+        this.fields = new ArrayList<>(props);
     }
 
-    public List<String> fields()
+    public List<IndexField> getFields()
     {
-        return (fields == null ? Collections.<String>emptyList() : Collections.unmodifiableList(fields));
+        return (fields == null ? Collections.<IndexField>emptyList() : Collections.unmodifiableList(fields));
     }
 
-    public void includeOnly(List<String> props)
+    public List<String> getFieldsValues()
     {
-        if (props != null && !props.isEmpty())
+        if (fields == null)
         {
-            this.includeOnly = new ArrayList<String>(props);
+            return Collections.<String>emptyList();
+        } else
+        {
+            ArrayList<String> toReturn = new ArrayList<>();
+            for (IndexField i : fields)
+            {
+                toReturn.add(i.getField());
+            }
+            return Collections.unmodifiableList(toReturn);
         }
     }
 
-    public List<String> includeOnly()
+    public List<String> getFieldsTypes()
+    {
+        if (fields == null)
+        {
+            return Collections.<String>emptyList();
+        } else
+        {
+            ArrayList<String> toReturn = new ArrayList<>();
+            for (IndexField i : fields)
+            {
+                toReturn.add(i.getType().name());
+            }
+            return Collections.unmodifiableList(toReturn);
+        }
+    }
+
+    public void setIncludeOnly(List<String> props)
+    {
+        if (props != null && !props.isEmpty())
+        {
+            this.includeOnly = new ArrayList<>(props);
+        }
+    }
+
+    public List<String> getIncludeOnly()
     {
         return (includeOnly == null ? Collections.<String>emptyList() : Collections.unmodifiableList(includeOnly));
     }
@@ -149,7 +181,7 @@ public class Index
     @Override
     public Identifier getId()
     {
-        return new Identifier(databaseName(), tableName(), name);
+        return new Identifier(getDatabaseName(), getTableName(), name);
     }
 
     @Override
@@ -158,24 +190,23 @@ public class Index
         // intentionally left blank.
     }
 
-    public long bucketSize()
+    public long getBucketSize()
     {
         return bucketSize;
     }
 
-    public void bucketSize(long bucketSize)
+    public void setBucketSize(long bucketSize)
     {
         this.bucketSize = bucketSize;
     }
 
-    public void iterateFields(Callback<IndexField> callback)
-    {
-        for (String field : fields)
-        {
-            callback.process(new IndexField(field));
-        }
-    }
-
+//    public void iterateFields(Callback<IndexField> callback)
+//    {
+//        for (IndexField field : getFields)
+//        {
+//            callback.process(field);
+//        }
+//    }
     /**
      * Field indicating if this index should be presently considered active.
      *
@@ -196,51 +227,19 @@ public class Index
         this.active = isActive;
     }
 
-    public class IndexField
-    {
-
-        private String field;
-        private boolean isAscending = true;
-
-        public IndexField(String value)
-        {
-            field = value.trim();
-
-            if (field.trim().startsWith("-"))
-            {
-                field = value.substring(1);
-                isAscending = false;
-            }
-        }
-
-        public String field()
-        {
-            return field;
-        }
-
-        public boolean isAscending()
-        {
-            return isAscending;
-        }
-    }
-
     @Override
     public void validate()
     {
-        final List<String> errors = new ArrayList<String>();
+        final List<String> errors = new ArrayList<>();
 
-        if (fields.isEmpty())
+        if (fields == null || fields.isEmpty())
         {
             errors.add("Fields is required.");
-        }
-
-        Pattern fieldPattern = Pattern.compile("^[\\+-]?\\w+");
-
-        for (String field : fields)
-        {
-            if (!fieldPattern.matcher(field).matches())
-            {
-                errors.add("Invalid index field name: " + field);
+        } else {
+            for(IndexField i : fields){
+                if(i.getField() == null){
+                    errors.add("Field name is required.");
+                }
             }
         }
 
@@ -272,13 +271,13 @@ public class Index
     public int hashCode()
     {
         int hash = 7;
-        hash = 83 * hash + Objects.hashCode(this.table);
-        hash = 83 * hash + Objects.hashCode(this.name);
-        hash = 83 * hash + (this.isUnique ? 1 : 0);
-        hash = 83 * hash + (int) (this.bucketSize ^ (this.bucketSize >>> 32));
-        hash = 83 * hash + Objects.hashCode(this.fields);
-        hash = 83 * hash + Objects.hashCode(this.includeOnly);
-        hash = 83 * hash + (this.active ? 1 : 0);
+        hash = 97 * hash + Objects.hashCode(this.table);
+        hash = 97 * hash + Objects.hashCode(this.name);
+        hash = 97 * hash + (this.isUnique ? 1 : 0);
+        hash = 97 * hash + (int) (this.bucketSize ^ (this.bucketSize >>> 32));
+        hash = 97 * hash + Objects.hashCode(this.fields);
+        hash = 97 * hash + Objects.hashCode(this.includeOnly);
+        hash = 97 * hash + (this.active ? 1 : 0);
         return hash;
     }
 
@@ -328,7 +327,7 @@ public class Index
     @Override
     public String toString()
     {
-        return "Index{" + "table=" + table + ", name=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + ", active=" + active + '}';
+        return "Index{" + "table=" + table + ", indexName=" + name + ", isUnique=" + isUnique + ", bucketSize=" + bucketSize + ", fields=" + fields + ", includeOnly=" + includeOnly + ", active=" + active + '}';
     }
 
 }

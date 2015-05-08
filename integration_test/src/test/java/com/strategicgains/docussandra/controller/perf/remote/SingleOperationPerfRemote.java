@@ -21,17 +21,15 @@ import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestPare
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.time.StopWatch;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -56,7 +54,7 @@ public class SingleOperationPerfRemote extends PerfTestParent
     {
         logger.info("Setup called!");
         beforeClass();
-        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this setTable
         postDB(getDb());
         postTable(getDb(), getTb());
         for (Index i : getIndexes())
@@ -115,46 +113,46 @@ public class SingleOperationPerfRemote extends PerfTestParent
         ArrayList<Index> indexes = new ArrayList<>(6);
         Index player = new Index("player");
         player.isUnique(false);
-        List<String> fields = new ArrayList<>(1);
-        fields.add("NAMEFULL");
-        player.fields(fields);
-        player.table(getTb());
+        List<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("NAMEFULL"));
+        player.setFields(fields);
+        player.setTable(getTb());
 
         Index lastname = new Index("lastname");
         lastname.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("NAMELAST");
-        lastname.fields(fields);
-        lastname.table(getTb());
+        fields.add(new IndexField("NAMELAST"));
+        lastname.setFields(fields);
+        lastname.setTable(getTb());
 
         Index lastAndFirst = new Index("lastandfirst");
         lastAndFirst.isUnique(false);
         fields = new ArrayList<>(2);
-        fields.add("NAMELAST");
-        fields.add("NAMEFIRST");
-        lastAndFirst.fields(fields);
-        lastAndFirst.table(getTb());
+        fields.add(new IndexField("NAMELAST"));
+        fields.add(new IndexField("NAMEFIRST"));
+        lastAndFirst.setFields(fields);
+        lastAndFirst.setTable(getTb());
 
         Index team = new Index("team");
         team.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("TEAM");
-        team.fields(fields);
-        team.table(getTb());
+        fields.add(new IndexField("TEAM"));
+        team.setFields(fields);
+        team.setTable(getTb());
 
         Index position = new Index("postion");
         position.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("POSITION");
-        position.fields(fields);
-        position.table(getTb());
+        fields.add(new IndexField("POSITION"));
+        position.setFields(fields);
+        position.setTable(getTb());
 
         Index rookie = new Index("rookieyear");
         rookie.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("ROOKIEYEAR");
-        rookie.fields(fields);
-        rookie.table(getTb());
+        fields.add(new IndexField("ROOKIEYEAR"));
+        rookie.setFields(fields);
+        rookie.setTable(getTb());
 
         indexes.add(team);
         indexes.add(position);

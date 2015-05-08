@@ -18,6 +18,7 @@ package com.strategicgains.docussandra.testhelper;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import java.util.ArrayList;
@@ -64,14 +65,14 @@ public class LoadTestData
         } catch (DuplicateItemException e)
         {
             System.out.println("Didn't re-create Table");
-            //logger.info("Probile creating table", e);
+            //logger.info("Probile creating setTable", e);
         }
         Index player = new Index("player");
         player.isUnique(false);
-        List<String> fields = new ArrayList<>(1);
-        fields.add("NAMEFULL");
-        player.fields(fields);
-        player.table(testTable);
+        List<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("NAMEFULL"));
+        player.setFields(fields);
+        player.setTable(testTable);
         try
         {
             f.insertIndex(player);
@@ -83,9 +84,9 @@ public class LoadTestData
         Index lastname = new Index("lastname");
         lastname.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("NAMELAST");
-        lastname.fields(fields);
-        lastname.table(testTable);
+        fields.add(new IndexField("NAMELAST"));
+        lastname.setFields(fields);
+        lastname.setTable(testTable);
         try
         {
             f.insertIndex(lastname);
@@ -97,10 +98,10 @@ public class LoadTestData
         Index lastAndFirst = new Index("lastandfirst");
         lastAndFirst.isUnique(false);
         fields = new ArrayList<>(2);
-        fields.add("NAMELAST");
-        fields.add("NAMEFIRST");
-        lastAndFirst.fields(fields);
-        lastAndFirst.table(testTable);
+        fields.add(new IndexField("NAMELAST"));
+        fields.add(new IndexField("NAMEFIRST"));
+        lastAndFirst.setFields(fields);
+        lastAndFirst.setTable(testTable);
         try
         {
             f.insertIndex(lastAndFirst);
@@ -112,9 +113,9 @@ public class LoadTestData
         Index team = new Index("team");
         team.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("TEAM");
-        team.fields(fields);
-        team.table(testTable);
+        fields.add(new IndexField("TEAM"));
+        team.setFields(fields);
+        team.setTable(testTable);
         try
         {
             f.insertIndex(team);
@@ -127,9 +128,9 @@ public class LoadTestData
         Index position = new Index("postion");
         position.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("POSITION");
-        position.fields(fields);
-        position.table(testTable);
+        fields.add(new IndexField("POSITION"));
+        position.setFields(fields);
+        position.setTable(testTable);
         try
         {
             f.insertIndex(position);
@@ -142,9 +143,9 @@ public class LoadTestData
         Index rookie = new Index("rookieyear");
         rookie.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("ROOKIEYEAR");
-        rookie.fields(fields);
-        rookie.table(testTable);
+        fields.add(new IndexField("ROOKIEYEAR"));
+        rookie.setFields(fields);
+        rookie.setTable(testTable);
         try
         {
             f.insertIndex(rookie);

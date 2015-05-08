@@ -20,7 +20,9 @@ import com.jayway.restassured.filter.log.ResponseLoggingFilter;
 import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestParent;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
@@ -61,7 +63,7 @@ public class PlayersRemote extends PerfTestParent
     {
         logger.info("Setup called!");
         beforeClass();
-        //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this setTable
         postDB(getDb());
         postTable(getDb(), getTb());
         for (Index i : getIndexes())
@@ -74,7 +76,7 @@ public class PlayersRemote extends PerfTestParent
 //    @AfterClass
 //    public static void afterTest() throws InterruptedException
 //    {
-//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this table
+//        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this setTable
 //        Thread.sleep(10000); //have to let the deletes finish before shutting down
 //    }
     @Override
@@ -127,46 +129,46 @@ public class PlayersRemote extends PerfTestParent
         ArrayList<Index> indexes = new ArrayList<>(6);
         Index player = new Index("player");
         player.isUnique(false);
-        List<String> fields = new ArrayList<>(1);
-        fields.add("NAMEFULL");
-        player.fields(fields);
-        player.table(getTb());
+        List<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("NAMEFULL"));
+        player.setFields(fields);
+        player.setTable(getTb());
 
         Index lastname = new Index("lastname");
         lastname.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("NAMELAST");
-        lastname.fields(fields);
-        lastname.table(getTb());
+        fields.add(new IndexField("NAMELAST"));
+        lastname.setFields(fields);
+        lastname.setTable(getTb());
 
         Index lastAndFirst = new Index("lastandfirst");
         lastAndFirst.isUnique(false);
         fields = new ArrayList<>(2);
-        fields.add("NAMELAST");
-        fields.add("NAMEFIRST");
-        lastAndFirst.fields(fields);
-        lastAndFirst.table(getTb());
+        fields.add(new IndexField("NAMELAST"));
+        fields.add(new IndexField("NAMEFIRST"));
+        lastAndFirst.setFields(fields);
+        lastAndFirst.setTable(getTb());
 
         Index team = new Index("team");
         team.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("TEAM");
-        team.fields(fields);
-        team.table(getTb());
+        fields.add(new IndexField("TEAM"));
+        team.setFields(fields);
+        team.setTable(getTb());
 
         Index position = new Index("postion");
         position.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("POSITION");
-        position.fields(fields);
-        position.table(getTb());
+        fields.add(new IndexField("POSITION"));
+        position.setFields(fields);
+        position.setTable(getTb());
 
         Index rookie = new Index("rookieyear");
         rookie.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("ROOKIEYEAR");
-        rookie.fields(fields);
-        rookie.table(getTb());
+        fields.add(new IndexField("ROOKIEYEAR", FieldDataType.INTEGER));
+        rookie.setFields(fields);
+        rookie.setTable(getTb());
 
         indexes.add(team);
         indexes.add(position);
@@ -178,8 +180,8 @@ public class PlayersRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
-     * query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs
+     * a query with a set time.
      */
     @Test
     public void postQueryTest()
@@ -194,7 +196,7 @@ public class PlayersRemote extends PerfTestParent
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
-                    .when().post(getDb().name() + "/" + getTb().name() + "/queries");
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
         }
         Date end = new Date();
         long executionTime = end.getTime() - start.getTime();
@@ -205,8 +207,8 @@ public class PlayersRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
-     * two field query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs
+     * a two field query with a set time.
      */
     @Test
     public void postQueryTestTwoField()
@@ -221,7 +223,7 @@ public class PlayersRemote extends PerfTestParent
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
-                    .when().post(getDb().name() + "/" + getTb().name() + "/queries");
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
         }
         Date end = new Date();
 
@@ -237,11 +239,10 @@ public class PlayersRemote extends PerfTestParent
      * query with a set time (test should always pass; check output for stats.)
      */
     @Test
-    @Ignore
     public void directQueryTest() throws Exception
     {
         int numQueries = 50;
-        Fixtures f = Fixtures.getInstance("10.199.0.23,10.199.8.47,10.199.4.248,10.199.24.172,10.199.28.84,10.199.23.113", false);
+        Fixtures f = Fixtures.getInstance("10.199.26.75,10.199.26.6,10.199.24.5,10.199.28.137,10.199.30.205,10.199.28.199", false);
         QueryService qs = new QueryService(new QueryRepository(f.getSession()));
         Query q = new Query();
         q.setWhere("NAMELAST = 'Manning'");

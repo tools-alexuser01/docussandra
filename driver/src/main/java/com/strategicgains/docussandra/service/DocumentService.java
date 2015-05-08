@@ -1,8 +1,8 @@
 package com.strategicgains.docussandra.service;
 
 import com.strategicgains.docussandra.cache.CacheFactory;
-import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.repoexpress.domain.Identifier;
@@ -25,7 +25,7 @@ public class DocumentService
         this.tables = databaseRepository;
     }
 
-    public Document create(String database, String table, String json)
+    public Document create(String database, String table, String json) throws IndexParseException
     {
         verifyTable(database, table);
 
@@ -33,7 +33,19 @@ public class DocumentService
         doc.table(database, table);
         doc.object(json);
         ValidationEngine.validateAndThrow(doc);
-        return docs.create(doc);
+        try
+        {
+            return docs.create(doc);
+        } catch (RuntimeException e)//the framework does not allow us to throw the IndexParseException directly from the repository layer
+        {
+            if (e.getCause() != null && e.getCause() instanceof IndexParseException)
+            {
+                throw (IndexParseException) e.getCause();
+            } else
+            {
+                throw e;
+            }
+        }
     }
 
     public Document read(String database, String table, Identifier id)
@@ -70,16 +82,16 @@ public class DocumentService
         Identifier tableId = new Identifier(database, table);
 //        synchronized (CacheSynchronizer.getLockingObject(key, "tableExist"))
 //        {
-            Element e = tableCache.get(key);
-            if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
-            {
-                //not cached; let's read it                        
-                e = new Element(key, (Boolean) tables.exists(tableId));
-            }
-            if (!(Boolean) e.getObjectValue())
-            {
-                throw new ItemNotFoundException("Table not found: " + tableId.toString());
-            }
+        Element e = tableCache.get(key);
+        if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
+        {
+            //not cached; let's read it                        
+            e = new Element(key, (Boolean) tables.exists(tableId));
+        }
+        if (!(Boolean) e.getObjectValue())
+        {
+            throw new ItemNotFoundException("Table not found: " + tableId.toString());
+        }
 //        }
 //        if (!tables.exists(tableId)){
 //            throw new ItemNotFoundException("Table not found: " + tableId.toString());

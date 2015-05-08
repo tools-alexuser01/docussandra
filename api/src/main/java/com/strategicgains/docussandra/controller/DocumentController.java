@@ -8,7 +8,9 @@ import org.restexpress.Response;
 import org.restexpress.exception.BadRequestException;
 
 import com.strategicgains.docussandra.Constants;
+import com.strategicgains.docussandra.ServiceUtils;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.service.DocumentService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
@@ -40,20 +42,27 @@ public class DocumentController
             throw new BadRequestException("No document data provided");
         }
 
-        Document saved = documents.create(database, table, data);
+        try
+        {
+            Document saved = documents.create(database, table, data);
 
-        // Construct the response for create...
-        response.setResponseCreated();
+            // Construct the response for create...
+            response.setResponseCreated();
 
-        // enrich the resource with links, etc. here...
-        TokenResolver resolver = HyperExpress.bind(Constants.Url.DOCUMENT_ID, saved.getUuid().toString());
+            // enrich the resource with links, etc. here...
+            TokenResolver resolver = HyperExpress.bind(Constants.Url.DOCUMENT_ID, saved.getUuid().toString());
 
-        // Include the Location header...
-        String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.DOCUMENT);
-        response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
+            // Include the Location header...
+            String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.DOCUMENT);
+            response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
-        // Return the newly-created resource...
-        return saved;
+            // Return the newly-created resource...
+            return saved;
+        } catch (IndexParseException e)
+        {
+            ServiceUtils.setBadRequestExceptionToResponse(e, response);
+            return null;
+        }
     }
 
     public Document read(Request request, Response response)

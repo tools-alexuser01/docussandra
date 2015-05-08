@@ -20,6 +20,7 @@ import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestPare
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -66,7 +67,7 @@ public class PlayByPlayRemote extends PerfTestParent
     {
         logger.info("Setup called!");
         beforeClass();
-        //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this
+        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this
         postDB(getDb());
         postTable(getDb(), getTb());
         for (Index i : getIndexes())
@@ -187,63 +188,63 @@ public class PlayByPlayRemote extends PerfTestParent
         ArrayList<Index> indexes = new ArrayList<>(6);
         Index qtr = new Index("qtr");
         qtr.isUnique(false);
-        List<String> fields = new ArrayList<>(1);
-        fields.add("qtr");
-        qtr.fields(fields);
-        qtr.table(getTb());
+        List<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("qtr"));
+        qtr.setFields(fields);
+        qtr.setTable(getTb());
         qtr.isUnique(false);
 
         Index off = new Index("off");
         off.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("off");
-        off.fields(fields);
-        off.fields(fields);
-        off.table(getTb());
+        fields.add(new IndexField("off"));
+        off.setFields(fields);
+        off.setFields(fields);
+        off.setTable(getTb());
 
         Index def = new Index("def");
         def.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("def");
-        def.fields(fields);
-        def.fields(fields);
-        def.table(getTb());
+        fields.add(new IndexField("def"));
+        def.setFields(fields);
+        def.setFields(fields);
+        def.setTable(getTb());
 
         Index dwn = new Index("dwn");
         dwn.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("dwn");
-        dwn.fields(fields);
-        dwn.fields(fields);
-        dwn.table(getTb());
+        fields.add(new IndexField("dwn"));
+        dwn.setFields(fields);
+        dwn.setFields(fields);
+        dwn.setTable(getTb());
 
         Index dwnAndYtg = new Index("dwnandytg");
         dwnAndYtg.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add("dwn");
-        fields.add("ytg");
-        dwnAndYtg.fields(fields);
-        dwnAndYtg.fields(fields);
-        dwnAndYtg.table(getTb());
+        fields.add(new IndexField("dwn"));
+        fields.add(new IndexField("ytg"));
+        dwnAndYtg.setFields(fields);
+        dwnAndYtg.setFields(fields);
+        dwnAndYtg.setTable(getTb());
 
         Index dwnAndYtgAndPts = new Index("dwnandytgandpts");
         dwnAndYtgAndPts.isUnique(false);
         fields = new ArrayList<>(3);
-        fields.add("dwn");
-        fields.add("ytg");
-        fields.add("pts");
-        dwnAndYtgAndPts.fields(fields);
-        dwnAndYtgAndPts.fields(fields);
-        dwnAndYtgAndPts.table(getTb());
+        fields.add(new IndexField("dwn"));
+        fields.add(new IndexField("ytg"));
+        fields.add(new IndexField("pts"));
+        dwnAndYtgAndPts.setFields(fields);
+        dwnAndYtgAndPts.setFields(fields);
+        dwnAndYtgAndPts.setTable(getTb());
 
         Index offAndPts = new Index("offandpts");
         offAndPts.isUnique(false);
         fields = new ArrayList<>(2);
-        fields.add("off");
-        fields.add("pts");
-        offAndPts.fields(fields);
-        offAndPts.fields(fields);
-        offAndPts.table(getTb());
+        fields.add(new IndexField("off"));
+        fields.add(new IndexField("pts"));
+        offAndPts.setFields(fields);
+        offAndPts.setFields(fields);
+        offAndPts.setTable(getTb());
 
         indexes.add(qtr);
         indexes.add(off);
@@ -257,8 +258,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
-     * query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
+ query with a set time.
      */
     @Test
     public void postQueryTest()
@@ -272,7 +273,7 @@ public class PlayByPlayRemote extends PerfTestParent
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
-                    .when().post(getDb().name() + "/" + getTb().name() + "/queries");
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
         }
         Date end = new Date();
         long executionTime = end.getTime() - start.getTime();
@@ -283,8 +284,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
-     * two field query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
+ two field query with a set time.
      */
     @Test
     public void postQueryTestTwoField()
@@ -298,7 +299,7 @@ public class PlayByPlayRemote extends PerfTestParent
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
-                    .when().post(getDb().name() + "/" + getTb().name() + "/queries");
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
         }
         Date end = new Date();
 
@@ -310,8 +311,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{table}/query endpoint properly runs a
-     * two field query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
+ two field query with a set time.
      */
     @Test
     public void postQueryTestThreeField()

@@ -34,6 +34,7 @@ create table IF NOT EXISTS sys_idx (
 	is_unique boolean,
 	bucket_sz bigint,
 	fields list<text>,
+	fields_type list<text>,
 	only list<text>,
     is_active boolean,
 	created_at timestamp,
@@ -50,7 +51,8 @@ create table IF NOT EXISTS sys_idx_status (
 	total_records bigint,
 	started_at timestamp,
 	updated_at timestamp,
-    error text,
+    errors list<text>,
+    fatal_error text,
 	primary key (id)
 );
 

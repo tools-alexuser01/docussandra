@@ -1,6 +1,9 @@
 package com.strategicgains.docussandra;
 
+import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Index;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -70,7 +73,7 @@ public class UtilsTest
         String tableName = "myTable";
         String indexName = "yoIndex";
         Index index = new Index(indexName);
-        index.table(databaseName, tableName);
+        index.setTable(databaseName, tableName);
         String expResult = "mydb_mytable_yoindex";
         String result = Utils.calculateITableName(index);
         assertEquals(expResult, result);
@@ -191,5 +194,26 @@ public class UtilsTest
         result2 = Utils.convertStringToFuzzyUUID(s);
         assertEquals(result2, result);
         assertEquals("e38193e3-81ae-e382-0000-000000000000", result.toString());
+    }
+
+    /**
+     * Test of listToString method, of class Utils.
+     */
+    @Test
+    public void testListToString()
+    {
+        System.out.println("listToString");
+        List<String> list = new ArrayList<>();
+        String expResult = "";
+        String result = Utils.listToString(list);
+        assertEquals(expResult, result);
+        list.add("one");
+        expResult = "one";
+        result = Utils.listToString(list);
+        assertEquals(expResult, result);
+        list.add("two");
+        expResult = "one, two";
+        result = Utils.listToString(list);
+        assertEquals(expResult, result);
     }
 }

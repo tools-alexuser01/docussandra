@@ -71,19 +71,19 @@ public class ParsedQueryFactoryTest
     @After
     public void tearDown()
     {
-        
+
     }
 
     /**
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryBasic()
+    public void testParseQueryBasic() throws FieldNotIndexedException
     {
         System.out.println("testParseQueryBasic");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery();
-        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithonefield");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), Fixtures.createTestIndexOneField());
         ParsedQuery result = ParsedQueryFactory.parseQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
     }
@@ -92,12 +92,12 @@ public class ParsedQueryFactoryTest
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryTwoFields()
+    public void testParseQueryTwoFields() throws FieldNotIndexedException
     {
         System.out.println("testParseQueryTwoFields");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery2();
-        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithtwofields");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), Fixtures.createTestIndexTwoField());
         ParsedQuery result = ParsedQueryFactory.parseQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
     }
@@ -106,13 +106,13 @@ public class ParsedQueryFactoryTest
      * Test of parseQuery method, of class QueryService.
      */
     @Test
-    public void testParseQueryTwoFieldsImperfectMatch()
+    public void testParseQueryTwoFieldsImperfectMatch() throws FieldNotIndexedException
     {
         System.out.println("testParseQueryTwoFieldsImperfectMatch");
         String db = Fixtures.DB;
         Query toParse = Fixtures.createTestQuery2();
         toParse.setWhere("myindexedfield1 = 'thisismyfield'");
-        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithtwofields");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), Fixtures.createTestIndexTwoField());
         ParsedQuery result = ParsedQueryFactory.parseQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
     }
@@ -165,13 +165,13 @@ public class ParsedQueryFactoryTest
      * Test of getParsedQuery method, of class ParsedQueryFactory.
      */
     @Test
-    public void testGetParsedQuery()
+    public void testGetParsedQuery() throws FieldNotIndexedException
     {
         System.out.println("testGetParsedQuery");
         String db = Fixtures.DB;
         CacheFactory.clearAllCaches();//kill the cache and make it re-create for the purposes of this test.
         Query toParse = Fixtures.createTestQuery();
-        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), "mydb_mytable_myindexwithonefield");
+        ParsedQuery expResult = new ParsedQuery(toParse, new WhereClause(toParse.getWhere()), Fixtures.createTestIndexOneField());
         ParsedQuery result = ParsedQueryFactory.getParsedQuery(db, toParse, f.getSession());
         assertEquals(expResult, result);
         //try again to ensure the cache isn't botched

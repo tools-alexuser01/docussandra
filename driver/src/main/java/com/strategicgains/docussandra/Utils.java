@@ -1,18 +1,18 @@
 package com.strategicgains.docussandra;
 
+import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Session;
+import com.mongodb.DBObject;
 import com.strategicgains.docussandra.cache.CacheFactory;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.handler.IndexCreatedHandler;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
-import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.IndexStatusRepository;
-import com.strategicgains.eventing.DomainEvents;
-import com.strategicgains.eventing.EventBus;
-import com.strategicgains.eventing.local.LocalEventBusBuilder;
+import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.UUID;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -33,16 +33,16 @@ public class Utils
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     /**
-     * Calculates the name of an iTable based on the dataBaseName, the
-     * tableName, and the indexName.
+     * Calculates the getIndexName of an iTable based on the dataBaseName, the
+     * getTableName, and the getIndexName.
      *
      * Note: No null checks.
      *
-     * @param databaseName database name for the iTable.
-     * @param tableName table name for the iTable.
-     * @param indexName index name for the iTable.
+     * @param databaseName database getIndexName for the iTable.
+     * @param tableName setTable getIndexName for the iTable.
+     * @param indexName index getIndexName for the iTable.
      *
-     * @return The name of the iTable for that index.
+     * @return The getIndexName of the iTable for that index.
      */
     public static String calculateITableName(String databaseName, String tableName, String indexName)
     {
@@ -69,18 +69,19 @@ public class Utils
     }
 
     /**
-     * Calculates the name of an iTable based on an index.
+     * Calculates the getIndexName of an iTable based on an index.
      *
      * Note: No null checks.
      *
-     * @param index Index whose iTable name you would like.
-     * @return The name of the iTable for that index.
+     * @param index Index whose iTable getIndexName you would like.
+     * @return The getIndexName of the iTable for that index.
      */
     public static String calculateITableName(Index index)
     {
-        return calculateITableName(index.databaseName(), index.tableName(), index.name());
+        return calculateITableName(index.getDatabaseName(), index.getTableName(), index.getName());
     }
 
+    //TODO: ditch the UUID type; we are misusing it here and another type (probably a string or long) would be more approprate 
     /**
      * Converts a string to a fuzzy UUID. Fuzzy, as in it isn't going to be
      * unique and is only for the first 8 bytes. Should only be used for
@@ -142,6 +143,85 @@ public class Utils
                 logger.info("Executing CQL statement: " + statement);
                 session.execute(statement);
             }
+        }
+    }
+
+    /**
+     * Converts a list to a human readable string.
+     *
+     * @param list List to convert to a String
+     * @return A String that represents the passed in list.
+     */
+    public static String listToString(List<String> list)//TODO: consider moving to a common lib
+    {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String s : list)
+        {
+            if (!first)
+            {
+                sb.append(", ");
+            } else
+            {
+                first = false;
+            }
+            sb.append(s);
+        }
+        return sb.toString();
+    }
+
+    public static void setField(String value, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    {
+        try
+        {
+            if (value == null)
+            {
+                bs.setToNull(index);
+            } else if (fieldData.getType().equals(FieldDataType.BINARY))
+            {
+                bs.setBytes(index, ParseUtils.parseBase64StringAsByteBuffer(value));
+            } else if (fieldData.getType().equals(FieldDataType.BOOLEAN))
+            {
+                bs.setBool(index, ParseUtils.parseStringAsBoolean(value));
+            } else if (fieldData.getType().equals(FieldDataType.DATE_TIME))
+            {
+                bs.setDate(index, ParseUtils.parseStringAsDate(value));
+            } else if (fieldData.getType().equals(FieldDataType.DOUBLE))
+            {
+                bs.setDouble(index, ParseUtils.parseStringAsDouble(value));
+            } else if (fieldData.getType().equals(FieldDataType.INTEGER))
+            {
+                bs.setInt(index, ParseUtils.parseStringAsInt(value));
+            } else if (fieldData.getType().equals(FieldDataType.TEXT))
+            {
+                bs.setString(index, value);
+            } else if (fieldData.getType().equals(FieldDataType.UUID))
+            {
+                bs.setUUID(index, ParseUtils.parseStringAsUUID(value));
+            } else
+            {
+                throw new IndexParseFieldException(fieldData.getField(), new Exception(fieldData.getType().toString() + " is an unsupported type. Please contact support."));
+            }
+        } catch (IndexParseFieldException parseException)
+        {
+            throw new IndexParseException(fieldData, parseException);
+        }
+    }
+
+    public static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    {
+        Object jObject = jsonObject.get(fieldData.getField());
+        String jsonValue = null;
+        if (jObject != null)
+        {
+            jsonValue = jObject.toString();
+        }
+        if ((jsonValue == null || jsonValue.isEmpty()) && !fieldData.getType().equals(FieldDataType.TEXT))// if we have an empty string for a non-text field
+        {
+            throw new IndexParseException(fieldData, new IndexParseFieldException(jsonValue));//there's nothing we can do to index this document
+        } else
+        {
+            setField(jsonValue, fieldData, bs, index);
         }
     }
 

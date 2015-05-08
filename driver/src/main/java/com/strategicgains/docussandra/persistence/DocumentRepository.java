@@ -22,6 +22,7 @@ import com.strategicgains.docussandra.event.DocumentCreatedEvent;
 import com.strategicgains.docussandra.event.DocumentDeletedEvent;
 import com.strategicgains.docussandra.event.DocumentUpdatedEvent;
 import com.strategicgains.docussandra.event.EventFactory;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.handler.IndexMaintainerHelper;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.AbstractObservableRepository;
@@ -54,7 +55,7 @@ public class DocumentRepository
     private static final String EXISTENCE_CQL = "select count(*) from %s where %s = ?";
     private static final String READ_CQL = "select * from %s where %s = ? ORDER BY updated_at DESC";
     private static final String READ_ALL_CQL = "select * from %s LIMIT %d";
-    
+
     private static final String DELETE_CQL = "delete from %s where %s = ?";
     //private static final String UPDATE_CQL = "update %s set object = ?, updated_at = ? where %s = ?";
     private static final String CREATE_CQL = "insert into %s (%s, object, created_at, updated_at) values (?, ?, ?, ?)";
@@ -69,7 +70,7 @@ public class DocumentRepository
         this.bucketLocator = new SimpleIndexBucketLocatorImpl(200);//TODO: maybe we do actually want to let users set this
         addObserver(new UuidIdentityRepositoryObserver<Document>());
         addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Document>());
-        addObserver(new StateChangeEventingObserver<Document>(new DocumentEventFactory()));
+        addObserver(new StateChangeEventingObserver<>(new DocumentEventFactory()));
     }
 
     protected Session session()
@@ -88,18 +89,23 @@ public class DocumentRepository
 
         Table table = entity.table();
         PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), session());
-
-        BoundStatement bs = new BoundStatement(createStmt);
-        bindCreate(bs, entity);
-        BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
-        batch.add(bs);//the actual create
-        List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity, bucketLocator);
-        for (BoundStatement boundIndexStatement : indexStatements)
+        try
         {
-            batch.add(boundIndexStatement);//the index creates
+            BoundStatement bs = new BoundStatement(createStmt);
+            bindCreate(bs, entity);
+            BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
+            batch.add(bs);//the actual create
+            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity, bucketLocator);
+            for (BoundStatement boundIndexStatement : indexStatements)
+            {
+                batch.add(boundIndexStatement);//the index creates
+            }
+            session().execute(batch);
+            return entity;
+        } catch (IndexParseException e)
+        {
+            throw new RuntimeException(e);
         }
-        session().execute(batch);
-        return entity;
     }
 
     @Override
@@ -132,7 +138,7 @@ public class DocumentRepository
         BoundStatement bs = new BoundStatement(readStmt);
         //run the query
         ResultSet results = session.execute(bs);
-        
+
         return parseResultSetWithLimitAndOffset(results, limit, offset);
     }
 
@@ -178,14 +184,21 @@ public class DocumentRepository
         BoundStatement bs = new BoundStatement(updateStmt);
         bindCreate(bs, entity);
         BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
-        batch.add(bs);//the actual create
-        List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
-        for (BoundStatement boundIndexStatement : indexStatements)
+        batch.add(bs);//the actual update
+        try
         {
-            batch.add(boundIndexStatement);//the index updates
+            //TODO: bug! we need to make sure we delete the old indexes as well, if that record doesn't have the field anymore, what do we do?
+            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
+            for (BoundStatement boundIndexStatement : indexStatements)
+            {
+                batch.add(boundIndexStatement);//the index updates
+            }
+            session().execute(batch);
+            return entity;
+        } catch (IndexParseException e)
+        {
+            throw new RuntimeException(e);
         }
-        session().execute(batch);
-        return entity;
     }
 
     @Override
@@ -200,17 +213,24 @@ public class DocumentRepository
             BoundStatement bs = new BoundStatement(deleteStmt);
             bindIdentifier(bs, id);
             BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
-            batch.add(bs);//the actual create
-            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
-            for (BoundStatement boundIndexStatement : indexStatements)
+            batch.add(bs);//the actual delete
+            try
             {
-                batch.add(boundIndexStatement);//the index deletes
+                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
+                for (BoundStatement boundIndexStatement : indexStatements)
+                {
+                    batch.add(boundIndexStatement);//the index deletes
+                }
+                session().execute(batch);
+            } catch (IndexParseException e)
+            {
+                throw new RuntimeException(e);//this shouldn't actually happen outside of tests
             }
-            session().execute(batch);
         } catch (InvalidObjectIdException e)
         {
             throw new ItemNotFoundException("ID not found: " + entity.getId().toString());
         }
+
     }
 
     @Override
@@ -233,7 +253,6 @@ public class DocumentRepository
     private void bindIdentifier(BoundStatement bs, Identifier identifier)
     {
         bs.bind(identifier.primaryKey());
-//		bs.bind(identifier.components().toArray());
     }
 
     private void bindCreate(BoundStatement bs, Document entity)
@@ -244,15 +263,6 @@ public class DocumentRepository
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }
-
-//    private void bindUpdate(BoundStatement bs, Document entity)
-//    {
-//        BSONObject bson = (BSONObject) JSON.parse(entity.object());
-//
-//        bs.bind(ByteBuffer.wrap(BSON.encode(bson)),
-//                entity.getUpdatedAt(),
-//                entity.getUuid());
-//    }
 
     private Identifier extractId(Identifier identifier)
     {
@@ -295,6 +305,7 @@ public class DocumentRepository
         d.setCreatedAt(row.getDate(Columns.CREATED_AT));
         d.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
         return d;
+
     }
 
     private class DocumentEventFactory

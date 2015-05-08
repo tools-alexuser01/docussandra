@@ -20,12 +20,15 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.eventing.EventHandler;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +73,7 @@ public class IndexCreatedHandler implements EventHandler
             Index index = indexRepo.read(status.getIndex().getId());
             long offset = 0;
             long recordsCompleted = 0;
-            QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.databaseName(), index.tableName(), CHUNK, offset);
+            QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
             boolean hasMore;
             if (responseWrapper.isEmpty())
             {
@@ -83,13 +86,31 @@ public class IndexCreatedHandler implements EventHandler
             {
                 for (Document toIndex : responseWrapper)
                 {
-                    //actually index here
-                    BoundStatement statement = IndexMaintainerHelper.generateDocumentCreateIndexEntryStatement(indexStatusRepo.getSession(), index, toIndex, QueryRepository.getIbl());
-                    if (statement != null)
+                    try
                     {
-                        indexStatusRepo.getSession().execute(statement);
+                        //actually index here
+                        BoundStatement statement = IndexMaintainerHelper.generateDocumentCreateIndexEntryStatement(indexStatusRepo.getSession(), index, toIndex, QueryRepository.getIbl());
+                        if (statement != null)
+                        {
+                            indexStatusRepo.getSession().execute(statement);
+                        }
+                        recordsCompleted++;
+                    } catch (IndexParseException e)
+                    {
+                        //we couldn't parse this document for an index; make a note, and move on
+                        recordsCompleted++;//we will still call this record "complete" for the sake of time calculation, and percent done
+                        status.setRecordsCompleted(recordsCompleted);
+                        //this will have to change if threading
+                        List<String> errors = status.getErrors();
+                        if (errors == null)
+                        {
+                            errors = new ArrayList<>();
+                        }
+                        errors.add(e.toString() + " In document: " + toIndex.toString());//may want to reduce the verbosity here eventually -- or break some meta-data out into columns
+                        status.setErrors(errors);
+                        status.setStatusLastUpdatedAt(new Date());
+                        //indexStatusRepo.updateEntity(status);//lets not save every time for now
                     }
-                    recordsCompleted++;
                 }
                 offset = offset + CHUNK;
                 //update status
@@ -97,7 +118,7 @@ public class IndexCreatedHandler implements EventHandler
                 status.setStatusLastUpdatedAt(new Date());
                 indexStatusRepo.updateEntity(status);
                 //get the next chunk
-                responseWrapper = docRepo.doReadAll(index.databaseName(), index.tableName(), CHUNK, offset);
+                responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
                 if (responseWrapper.isEmpty())
                 {
                     hasMore = false;
@@ -111,14 +132,17 @@ public class IndexCreatedHandler implements EventHandler
             indexStatusRepo.updateEntity(status);
         } catch (Exception e)
         {
-            String indexName  = "Cannot be determined.";
-            if(status != null && status.getIndex() != null){
-                indexName = status.getIndex().name();
+            String indexName = "Cannot be determined.";
+            if (status != null && status.getIndex() != null)
+            {
+                indexName = status.getIndex().getName();
             }
             String errorMessage = "Could not complete indexing event for index: '" + indexName + "'.";
             logger.error(errorMessage, e);
-            if(status != null){//intentionally a seperate clause so our error prints in case this throws.
-                status.setError(errorMessage + " Please contact a system administrator to resolve this issue.");
+            if (status != null)
+            {
+                //intentionally a seperate clause so our error prints in case this throws.
+                status.setFatalError(errorMessage + " Please contact a system administrator to resolve this issue.");
                 status.setStatusLastUpdatedAt(new Date());
                 indexStatusRepo.updateEntity(status);
             }

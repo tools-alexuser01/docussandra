@@ -8,12 +8,15 @@ import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.domain.WhereClause;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
@@ -97,7 +100,7 @@ public class Fixtures
             EmbeddedCassandraServerHelper.startEmbeddedCassandra(timeout);
             cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
             embeddedCassandra = true;
-            Thread.sleep(15000);//time to let cassandra startup
+            //Thread.sleep(20000);//time to let cassandra startup
         } else //using a remote or local server for testing
         {
             cluster = Cluster.builder().addContactPoints(cassandraSeeds).build();
@@ -121,7 +124,7 @@ public class Fixtures
         docRepo = new DocumentRepository(getSession());
         tableRepo = new TableRepository(getSession());
         indexStatusRepo = new IndexStatusRepository(getSession());
-        
+
         //set up bus just like rest express would
         EventBus bus = new LocalEventBusBuilder()
                 .subscribe(new IndexDeletedHandler(getSession()))
@@ -243,24 +246,24 @@ public class Fixtures
     }
 
     /**
-     * Creates at test index with two fields.
+     * Creates at test index with two getFields.
      *
      * @return
      */
     public static final Index createTestIndexTwoField()
     {
         Index index = new Index("myindexwithtwofields");
-        index.table(DB, "mytable");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("myindexedfield1");
-        fields.add("myindexedfield2");
-        index.fields(fields);
+        index.setTable(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield1"));
+        fields.add(new IndexField("myindexedfield2"));
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
 
     /**
-     * Creates at test index with two fields.
+     * Creates at test index for players last name.
      *
      * @return
      */
@@ -268,10 +271,42 @@ public class Fixtures
     {
         Index lastname = new Index("lastname");
         lastname.isUnique(false);
-        ArrayList<String> fields = new ArrayList<>(1);
-        fields.add("NAMELAST");
-        lastname.fields(fields);
-        lastname.table(Fixtures.createTestPlayersTable());
+        ArrayList<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("NAMELAST"));
+        lastname.setFields(fields);
+        lastname.setTable(Fixtures.createTestPlayersTable());
+        return lastname;
+    }
+
+    /**
+     * Creates at test index for players rookieyear. Integer type index.
+     *
+     * @return
+     */
+    public static final Index createTestPlayersIndexRookieYear()
+    {
+        Index lastname = new Index("rookieyear");
+        lastname.isUnique(false);
+        ArrayList<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("ROOKIEYEAR", FieldDataType.INTEGER));
+        lastname.setFields(fields);
+        lastname.setTable(Fixtures.createTestPlayersTable());
+        return lastname;
+    }
+
+    /**
+     * Creates at test index for players created on. Date type index.
+     *
+     * @return
+     */
+    public static final Index createTestPlayersIndexCreatedOn()
+    {
+        Index lastname = new Index("createdon");
+        lastname.isUnique(false);
+        ArrayList<IndexField> fields = new ArrayList<>(1);
+        fields.add(new IndexField("CREATEDON", FieldDataType.DATE_TIME));
+        lastname.setFields(fields);
+        lastname.setTable(Fixtures.createTestPlayersTable());
         return lastname;
     }
 
@@ -283,10 +318,64 @@ public class Fixtures
     public static final Index createTestIndexOneField()
     {
         Index index = new Index("myindexwithonefield");
-        index.table(DB, "mytable");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("myindexedfield");
-        index.fields(fields);
+        index.setTable(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield"));
+        index.setFields(fields);
+        index.isUnique(false);
+        return index;
+    }
+
+    /**
+     * Creates at test index with a numeric field.
+     *
+     * @return
+     */
+    public static final Index createTestIndexNumericField()
+    {
+        Index index = new Index("myindexnumericfield");
+        index.setTable(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield3", FieldDataType.INTEGER));
+        index.setFields(fields);
+        index.isUnique(false);
+        return index;
+    }
+
+    /**
+     * Creates at test index with a UUID field.
+     *
+     * @return
+     */
+    public static final Index createTestIndexUUIDField()
+    {
+        Index index = new Index("myindexuuidfield");
+        index.setTable(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("myindexedfield4", FieldDataType.UUID));
+        index.setFields(fields);
+        index.isUnique(false);
+        return index;
+    }
+
+    /**
+     * Creates at test index with a all possible field types.
+     *
+     * @return
+     */
+    public static final Index createTestIndexAllFieldTypes()
+    {
+        Index index = new Index("myindexallfields");
+        index.setTable(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("thisisauudid", FieldDataType.UUID));
+        fields.add(new IndexField("thisisastring", FieldDataType.TEXT));
+        fields.add(new IndexField("thisisanint", FieldDataType.INTEGER));
+        fields.add(new IndexField("thisisadouble", FieldDataType.DOUBLE));
+        fields.add(new IndexField("thisisbase64", FieldDataType.BINARY));
+        fields.add(new IndexField("thisisaboolean", FieldDataType.BOOLEAN));
+        fields.add(new IndexField("thisisadate", FieldDataType.DATE_TIME));
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
@@ -324,10 +413,10 @@ public class Fixtures
     public static final Index createTestIndexWithBulkDataHit()
     {
         Index index = new Index("myindexbulkdata");
-        index.table(DB, "mytable");
-        ArrayList<String> fields = new ArrayList<>();
-        fields.add("field1");
-        index.fields(fields);
+        index.setTable(DB, "mytable");
+        ArrayList<IndexField> fields = new ArrayList<>();
+        fields.add(new IndexField("field1"));
+        index.setFields(fields);
         index.isUnique(false);
         return index;
     }
@@ -381,6 +470,7 @@ public class Fixtures
         {
             docRepo.delete(Fixtures.createTestDocument());
             docRepo.delete(Fixtures.createTestDocument2());
+            docRepo.delete(Fixtures.createTestDocument3());
         } catch (DriverException e)
         {
             //logger.debug("Not dropping document, probably doesn't exist.");
@@ -411,7 +501,7 @@ public class Fixtures
 //                try
 //                {
 //                    docRepo.delete(d);
-//                } catch (DriverException e)
+//                } catch (Exception e)
 //                {
 //                    //logger.debug("Not dropping bulk document, probably doesn't exist.");
 //                }
@@ -426,7 +516,7 @@ public class Fixtures
             tableRepo.delete(Fixtures.createTestTable());
         } catch (DriverException e)
         {
-            //logger.debug("Not dropping table, probably doesn't exist.");
+            //logger.debug("Not dropping setTable, probably doesn't exist.");
         }
         try
         {
@@ -434,18 +524,39 @@ public class Fixtures
             tableRepo.delete(Fixtures.createTestPlayersTable());
         } catch (DriverException e)
         {
-            //logger.debug("Not dropping table, probably doesn't exist.");
+            //logger.debug("Not dropping setTable, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexOneField());
         } catch (DriverException e)
         {
-            //logger.debug("Not dropping table, probably doesn't exist.");
+            //logger.debug("Not dropping setTable, probably doesn't exist.");
         }
         try
         {
             indexRepo.delete(Fixtures.createTestIndexTwoField());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try
+        {
+            indexRepo.delete(Fixtures.createTestIndexAllFieldTypes());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try
+        {
+            indexRepo.delete(Fixtures.createTestIndexNumericField());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting index, probably doesn't exist.");
+        }
+        try
+        {
+            indexRepo.delete(Fixtures.createTestIndexUUIDField());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
@@ -474,6 +585,20 @@ public class Fixtures
         try
         {
             indexRepo.delete(Fixtures.createTestPlayersIndexLastName());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting database, probably doesn't exist.");
+        }
+        try
+        {
+            indexRepo.delete(Fixtures.createTestPlayersIndexCreatedOn());
+        } catch (DriverException e)
+        {
+            //logger.debug("Not deleting database, probably doesn't exist.");
+        }
+        try
+        {
+            indexRepo.delete(Fixtures.createTestPlayersIndexRookieYear());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
@@ -522,6 +647,24 @@ public class Fixtures
         return entity;
     }
 
+    /**
+     * Creates a test document with multiple datatype getFields.
+     *
+     * @return
+     */
+    public static final Document createTestDocument3()
+    {
+        Document entity = new Document();
+        entity.table("mydb", "mytable");
+        entity.object("{\"thisisastring\":\"hello\", \"thisisanint\": \"5\", \"thisisadouble\":\"5.555\","
+                + " \"thisisbase64\":\"VGhpcyBpcyBhIGdvb2RseSB0ZXN0IG1lc3NhZ2Uu\", \"thisisaboolean\":\"f\","
+                + " \"thisisadate\":\"Thu Apr 30 09:52:04 MDT 2015\", \"thisisauudid\":\"3d069a5a-ef51-11e4-90ec-1681e6b88ec1\"}");
+        entity.setUuid(new UUID(0L, 3L));
+        entity.setCreatedAt(new Date());
+        entity.setUpdatedAt(new Date());
+        return entity;
+    }
+
     public void insertDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
@@ -533,7 +676,20 @@ public class Fixtures
         DocumentRepository documentRepo = new DocumentRepository(getSession());
         for (Document document : documents)
         {
-            documentRepo.create(document);
+            try
+            {
+                documentRepo.create(document);
+            } catch (RuntimeException e)
+            {
+                if (e.getCause() != null && e.getCause() instanceof IndexParseException)
+                {
+                    ;// we had a bad a record; ignore it for the purposes of this test
+                } else
+                {
+                    throw e;
+                }
+
+            }
         }
     }
 
@@ -595,8 +751,8 @@ public class Fixtures
     {
         Query query = createTestQuery();
         WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexwithonefield";
-        return new ParsedQuery(query, whereClause, iTable);
+        //String iTable = "mydb_mytable_myindexwithonefield";
+        return new ParsedQuery(query, whereClause, createTestIndexOneField());
     }
 
     /**
@@ -610,8 +766,8 @@ public class Fixtures
         query.setWhere("myindexedfield = 'foo'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexwithonefield";
-        return new ParsedQuery(query, whereClause, iTable);
+        //String iTable = "mydb_mytable_myindexwithonefield";
+        return new ParsedQuery(query, whereClause, createTestIndexOneField());
     }
 
     /**
@@ -625,12 +781,12 @@ public class Fixtures
         query.setWhere("field1 = 'this is my data'");
         query.setTable("mytable");
         WhereClause whereClause = new WhereClause(query.getWhere());
-        String iTable = "mydb_mytable_myindexbulkdata";
-        return new ParsedQuery(query, whereClause, iTable);
+        //String iTable = "mydb_mytable_myindexbulkdata";
+        return new ParsedQuery(query, whereClause, createTestIndexWithBulkDataHit());
     }
 
     /**
-     * Creates a simple table for testing.
+     * Creates a simple setTable for testing.
      *
      * @return
      */
@@ -644,7 +800,7 @@ public class Fixtures
     }
 
     /**
-     * Creates a simple table for testing.
+     * Creates a simple setTable for testing.
      *
      * @return
      */
@@ -687,5 +843,26 @@ public class Fixtures
     public Session getSession()
     {
         return session;
+    }
+
+    public static String generateIndexCreationStringWithFields(Index index)
+    {
+        StringBuilder indexStr = new StringBuilder("{\"name\" : \"" + index.getName() + "\", \"fields\" : [");
+        boolean first = true;
+        for (IndexField f : index.getFields())
+        {
+            if (!first)
+            {
+                indexStr.append(", ");
+            }
+            first = false;
+            indexStr.append("{\"field\" : \"");
+            indexStr.append(f.getField());
+            indexStr.append("\",\"type\": \"");
+            indexStr.append(f.getType().toString());
+            indexStr.append("\"}");
+        }
+        indexStr.append("]}");
+        return indexStr.toString();
     }
 }

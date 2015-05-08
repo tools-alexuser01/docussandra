@@ -15,14 +15,14 @@
  */
 package com.strategicgains.docussandra.exception;
 
+import com.strategicgains.docussandra.Utils;
 import java.util.List;
 
 /**
  * Exception that indicates an attempted query on a field that is not indexed.
- * TODO: consider adding a better error code for this; it comes out as a 500 now.
  * @author udeyoje
  */
-public class FieldNotIndexedException extends RuntimeException
+public class FieldNotIndexedException extends Exception
 {
 
     /**
@@ -38,26 +38,8 @@ public class FieldNotIndexedException extends RuntimeException
      */
     public FieldNotIndexedException(List<String> fields)
     {
-        super("One of the following fields: [" + listToString(fields) + "] does not exist in any known indices (or may not be yet active). Try adding an index (if you understand the ramifications of this).");
+        super("One of the following fields: [" + Utils.listToString(fields) + "] does not exist in any known indices (or may not be yet active). Try adding an index (if you understand the ramifications of this).");
         this.fields = fields;
-    }
-
-    private static String listToString(List<String> list)
-    {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (String s : list)
-        {
-            if (!first)
-            {
-                sb.append(", ");
-            } else
-            {
-                first = false;
-            }
-            sb.append(s);
-        }
-        return sb.toString();
     }
 
     /**
@@ -68,5 +50,5 @@ public class FieldNotIndexedException extends RuntimeException
     public List<String> getFields()
     {
         return fields;
-    }
+    }    
 }

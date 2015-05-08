@@ -108,7 +108,7 @@ public class IndexCreatedEventTest
     {
         System.out.println("getId");
         IndexCreatedEvent instance = Fixtures.createTestIndexCreationStatus();
-        Identifier expResult = new Identifier(instance.getIndex().databaseName(), instance.getIndex().tableName(), instance.getIndex().name(), instance.getUuid());
+        Identifier expResult = new Identifier(instance.getIndex().getDatabaseName(), instance.getIndex().getTableName(), instance.getIndex().getName(), instance.getUuid());
         Identifier result = instance.getId();
         assertEquals(expResult, result);
     }
@@ -370,7 +370,7 @@ public class IndexCreatedEventTest
     {
         System.out.println("getError");
         IndexCreatedEvent instance = Fixtures.createTestIndexCreationStatus();
-        String result = instance.getError();
+        String result = instance.getFatalError();
         assertNull(result);
     }
 
@@ -383,10 +383,10 @@ public class IndexCreatedEventTest
         System.out.println("setError");
         String error = "New error";
         IndexCreatedEvent instance = Fixtures.createTestIndexCreationStatus();
-        String result = instance.getError();
+        String result = instance.getFatalError();
         assertNull(result);
-        instance.setError(error);
-        assertEquals(error, instance.getError());
+        instance.setFatalError(error);
+        assertEquals(error, instance.getFatalError());
     }
 
 }

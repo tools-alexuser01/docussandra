@@ -176,7 +176,7 @@ public class IndexCreatedHandlerTest
         assertEquals(storedStatus.getEta(), -1);
         assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
         assertFalse(statusRepo.readAllCurrentlyIndexing().isEmpty());
-        assertEquals("Could not complete indexing event for index: 'myindexbulkdata'. Please contact a system administrator to resolve this issue.", storedStatus.getError());
+        assertEquals("Could not complete indexing event for index: 'myindexbulkdata'. Please contact a system administrator to resolve this issue.", storedStatus.getFatalError());
     }
 
     /**

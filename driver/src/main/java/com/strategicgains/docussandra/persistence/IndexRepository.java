@@ -11,7 +11,9 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.cache.CacheSynchronizer;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
@@ -45,13 +47,13 @@ public class IndexRepository
      */
     private class Columns
     {
-
         static final String DATABASE = "db_name";
         static final String TABLE = "tbl_name";
         static final String NAME = "name";
         static final String IS_UNIQUE = "is_unique";
         static final String BUCKET_SIZE = "bucket_sz";
         static final String FIELDS = "fields";
+        static final String FIELDS_TYPE = "fields_type";        
         static final String ONLY = "only";
         static final String CREATED_AT = "created_at";
         static final String UPDATED_AT = "updated_at";
@@ -60,7 +62,7 @@ public class IndexRepository
 
     private static final String IDENTITY_CQL = " where db_name = ? and tbl_name = ? and name = ?";
     private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, only, is_active, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into %s (%s, db_name, tbl_name, is_unique, bucket_sz, fields, fields_type, only, is_active, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
     private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
     private static final String MARK_ACTIVE_CQL = "update %s set is_active = true" + IDENTITY_CQL;
@@ -139,10 +141,10 @@ public class IndexRepository
         try//we do this in a try/catch because we don't want to cause an app error if this fails
         {
             Cache c = CacheFactory.getCache("index");
-            String key = entity.databaseName() + ":" + entity.tableName();
+            String key = entity.getDatabaseName() + ":" + entity.getTableName();
             synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
             {
-                List<Index> currentIndex = this.readAll(entity.databaseName(), entity.tableName());
+                List<Index> currentIndex = this.readAll(entity.getDatabaseName(), entity.getTableName());
                 Element e = new Element(key, currentIndex);
                 c.put(e);
             }
@@ -181,10 +183,10 @@ public class IndexRepository
         try//we do this in a try/catch because we don't want to cause an app error if this fails
         {
             Cache c = CacheFactory.getCache("index");
-            String key = entity.databaseName() + ":" + entity.tableName();
+            String key = entity.getDatabaseName() + ":" + entity.getTableName();
             synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
             {
-                List<Index> currentIndex = this.readAll(entity.databaseName(), entity.tableName());
+                List<Index> currentIndex = this.readAll(entity.getDatabaseName(), entity.getTableName());
                 if (!currentIndex.isEmpty())
                 {
                     Element e = new Element(key, currentIndex);
@@ -253,29 +255,22 @@ public class IndexRepository
 
     private void bindCreate(BoundStatement bs, Index entity)
     {
-        bs.bind(entity.name(),
-                entity.databaseName(),
-                entity.tableName(),
+        bs.bind(entity.getName(),
+                entity.getDatabaseName(),
+                entity.getTableName(),
                 entity.isUnique(),
-                entity.bucketSize(),
-                entity.fields(),
-                entity.includeOnly(),
+                entity.getBucketSize(),
+                entity.getFieldsValues(),
+                entity.getFieldsTypes(),
+                entity.getIncludeOnly(),
                 entity.isActive(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }
 
-//    private void bindUpdate(BoundStatement bs, Index entity)
-//    {
-//        bs.bind(entity.bucketSize(),
-//                entity.getUpdatedAt(),
-//                entity.databaseName(),
-//                entity.tableName(),
-//                entity.name());
-//    }
     private List<Index> marshalAll(ResultSet rs)
     {
-        List<Index> indexes = new ArrayList<Index>();
+        List<Index> indexes = new ArrayList<>();
         Iterator<Row> i = rs.iterator();
 
         while (i.hasNext())
@@ -294,15 +289,21 @@ public class IndexRepository
         }
 
         Index i = new Index();
-        i.name(row.getString(Columns.NAME));
+        i.setName(row.getString(Columns.NAME));
         Table t = new Table();
         t.database(row.getString(Columns.DATABASE));
         t.name(row.getString(Columns.TABLE));
-        i.table(t);
+        i.setTable(t);
         i.isUnique(row.getBool(Columns.IS_UNIQUE));
-        i.bucketSize(row.getLong(Columns.BUCKET_SIZE));
-        i.fields(row.getList(Columns.FIELDS, String.class));
-        i.includeOnly(row.getList(Columns.ONLY, String.class));
+        i.setBucketSize(row.getLong(Columns.BUCKET_SIZE));
+        List<String> fields = row.getList(Columns.FIELDS, String.class);
+        List<String> types = row.getList(Columns.FIELDS_TYPE, String.class);        
+        ArrayList<IndexField> indexFields = new ArrayList<>(fields.size());
+        for(int j = 0; j < fields.size(); j++){
+            indexFields.add(new IndexField(fields.get(j), FieldDataType.valueOf(types.get(j))));
+        }
+        i.setFields(indexFields);
+        i.setIncludeOnly(row.getList(Columns.ONLY, String.class));
         i.setActive(row.getBool(Columns.IS_ACTIVE));
         i.setCreatedAt(row.getDate(Columns.CREATED_AT));
         i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
