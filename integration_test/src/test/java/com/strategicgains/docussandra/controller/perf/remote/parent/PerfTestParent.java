@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Performs a perf test using the overridden data. 1. Creates a DB. 2. Creates a
- setTable. 3. Creates all the indexes. 4. Inserts all the documents. 5. Cleans up
- anything it did. Treat this as a singleton, even though it is not.
+ * setTable. 3. Creates all the indexes. 4. Inserts all the documents. 5. Cleans
+ * up anything it did. Treat this as a singleton, even though it is not.
  *
  * @author udeyoje
  */
@@ -144,7 +144,7 @@ public abstract class PerfTestParent
                 {
                     @Override
                     public void run()
-                    {                        
+                    {
                         for (Document d : queue)
                         {
                             //logger.debug("Processing document: " + d.toString());
@@ -172,7 +172,7 @@ public abstract class PerfTestParent
                         {
                             List<Document> docs = getDocumentsFromFS(chunk);//grab a handful of documents
                             while (docs.size() > 0)
-                            {                                
+                            {
                                 for (Document d : docs)//process the documents we grabbed
                                 {
                                     //logger.debug("Processing document: " + d.toString());
@@ -225,7 +225,7 @@ public abstract class PerfTestParent
                 Thread.sleep(5000);
             }
         }
-        
+
         long miliseconds = sw.getTime();
         double seconds = (double) miliseconds / 1000d;
         output.info("Doc: Done loading data using: " + NUM_WORKERS + " and URL: " + BASE_URI + ". Took: " + seconds + " seconds");
@@ -269,7 +269,8 @@ public abstract class PerfTestParent
         //act
         given().body(tableStr.toString()).when().post(database.name() + "/" + table.name() + "/indexes/" + index.getName());
         //check
-        expect().statusCode(200).body("name", equalTo(index.getName())).body("fields", notNullValue()).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).get(database.name() + "/" + table.name() + "/indexes/" + index.getName());
+        Response r = expect().statusCode(200).body("name", equalTo(index.getName())).body("fields", notNullValue()).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).get(database.name() + "/" + table.name() + "/indexes/" + index.getName()).andReturn();
+        logger.debug("Index created: \r\n" + r.getBody().prettyPrint());
     }
 
     /**
