@@ -239,7 +239,6 @@ public class PlayersRemote extends PerfTestParent
      * query with a set time (test should always pass; check output for stats.)
      */
     @Test
-    @Ignore
     public void directQueryTest() throws Exception
     {
         int numQueries = 50;
