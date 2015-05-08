@@ -28,11 +28,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.time.StopWatch;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import org.json.simple.parser.ParseException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
