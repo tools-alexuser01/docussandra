@@ -177,7 +177,7 @@ public class IndexField implements Validatable, Serializable
     @Override
     public String toString()
     {
-        return "IndexField{" + "field=" + field + ", isAscending=" + isAscending + ", type=" + type + '}';
+        return field + "/" + type; //IndexField{" + "field=" + field + ", isAscending=" + isAscending + ", type=" + type + '}';
     }
 
 }
