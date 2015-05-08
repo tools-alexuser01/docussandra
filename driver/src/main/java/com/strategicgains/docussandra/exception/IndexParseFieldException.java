@@ -49,7 +49,7 @@ public class IndexParseFieldException extends Exception
      */
     protected IndexParseFieldException(String message, String fieldValue, Throwable e)
     {
-        super(message + " Could not parse field with value: \"" + fieldValue + "\"", e);
+        super(message + " Could not parse field with value: '" + fieldValue + "'", e);
         this.fieldValue = fieldValue;
     }   
 
@@ -60,7 +60,7 @@ public class IndexParseFieldException extends Exception
      */
     public IndexParseFieldException(String fieldValue)
     {
-        super("Could not parse field with value: \"" + fieldValue + "\"");
+        super("Could not parse field with value: '" + fieldValue + "'");
         this.fieldValue = fieldValue;
     }
 
@@ -72,7 +72,7 @@ public class IndexParseFieldException extends Exception
      */
     public IndexParseFieldException(String fieldValue, Exception e)
     {
-        super("Could not parse field. \"" + fieldValue + "\"", e);
+        super("Could not parse field. '" + fieldValue + "'", e);
         this.fieldValue = fieldValue;
     }
 
