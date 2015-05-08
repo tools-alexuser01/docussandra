@@ -20,6 +20,7 @@ import static com.jayway.restassured.RestAssured.expect;
 import com.strategicgains.docussandra.controller.perf.remote.parent.PerfTestParent;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
@@ -150,7 +151,7 @@ public class SingleOperationPerfRemote extends PerfTestParent
         Index rookie = new Index("rookieyear");
         rookie.isUnique(false);
         fields = new ArrayList<>(1);
-        fields.add(new IndexField("ROOKIEYEAR"));
+        fields.add(new IndexField("ROOKIEYEAR", FieldDataType.INTEGER));
         rookie.setFields(fields);
         rookie.setTable(getTb());
 
