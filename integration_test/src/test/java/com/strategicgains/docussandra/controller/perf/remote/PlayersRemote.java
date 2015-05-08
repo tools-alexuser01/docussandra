@@ -196,7 +196,7 @@ public class PlayersRemote extends PerfTestParent
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
-                    .when().post(getDb().name() + "/" + getTb().name() + "/queries");
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
         }
         Date end = new Date();
         long executionTime = end.getTime() - start.getTime();
@@ -223,7 +223,7 @@ public class PlayersRemote extends PerfTestParent
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
-                    .when().post(getDb().name() + "/" + getTb().name() + "/queries");
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
         }
         Date end = new Date();
 
@@ -242,7 +242,7 @@ public class PlayersRemote extends PerfTestParent
     public void directQueryTest() throws Exception
     {
         int numQueries = 50;
-        Fixtures f = Fixtures.getInstance("10.199.0.23,10.199.8.47,10.199.4.248,10.199.24.172,10.199.28.84,10.199.23.113", false);
+        Fixtures f = Fixtures.getInstance("10.199.26.75,10.199.26.6,10.199.24.5,10.199.28.137,10.199.30.205,10.199.28.199", false);
         QueryService qs = new QueryService(new QueryRepository(f.getSession()));
         Query q = new Query();
         q.setWhere("NAMELAST = 'Manning'");

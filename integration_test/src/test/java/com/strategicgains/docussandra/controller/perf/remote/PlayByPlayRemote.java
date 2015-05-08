@@ -273,7 +273,7 @@ public class PlayByPlayRemote extends PerfTestParent
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
-                    .when().post(getDb().name() + "/" + getTb().name() + "/queries");
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
         }
         Date end = new Date();
         long executionTime = end.getTime() - start.getTime();
@@ -299,7 +299,7 @@ public class PlayByPlayRemote extends PerfTestParent
                     //.header("Location", startsWith(RestAssured.basePath + "/"))
                     .body("", notNullValue())
                     .body("id", notNullValue())
-                    .when().post(getDb().name() + "/" + getTb().name() + "/queries");
+                    .when().log().ifError().post(getDb().name() + "/" + getTb().name() + "/queries");
         }
         Date end = new Date();
 
