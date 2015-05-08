@@ -159,7 +159,7 @@ public class IndexMaintainerHelper
                     break;//TODO: i am unsure about this ^^, consider logging this; i think this may only be happening in tests -- issue #100
                 }
                 String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) bucketField));//note, could have parse problems here with non-string types
-                logger.debug("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
+                logger.trace("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
                 bs.setString(2, bucketId);
                 for (int i = 0; i < fields.size(); i++)
                 {
