@@ -194,6 +194,7 @@ public class SingleOperationPerfRemote extends PerfTestParent
             RestAssured.basePath = "/" + d.name() + "/" + t.name();
             expect().statusCode(200)
                     .body("id", equalTo(id))
+                    .log().ifError()
                     .get("/" + id);
             sw.stop();
             output.info("Time to fetch a single doc: " + sw.getTime() + " miliseconds");
