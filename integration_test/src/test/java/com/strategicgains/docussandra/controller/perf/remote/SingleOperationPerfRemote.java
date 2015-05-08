@@ -177,6 +177,8 @@ public class SingleOperationPerfRemote extends PerfTestParent
     public void testInsertAndFetchOneDocTime() throws IOException, ParseException
     {
         Document doc = getDocumentsFromFS().get(0);
+        String object = doc.object().replaceAll("\\Q\"ROOKIEYEAR\":\"\"\\E", "");
+        doc.object(object);
         StopWatch sw = new StopWatch();
         Database d = getDb();
         Table t = getTb();
