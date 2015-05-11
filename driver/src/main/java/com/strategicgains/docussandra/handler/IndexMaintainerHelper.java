@@ -138,7 +138,7 @@ public class IndexMaintainerHelper
                     statementList.add(bs);
                 }
                 //2b. after creating the new index entry, we must delete the old one
-                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
+                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));//bug #100 is this line
             } else
             {//3. if an indexed field has not changed, do a normal CQL update
                 String finalCQL = getCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
@@ -273,7 +273,7 @@ public class IndexMaintainerHelper
      */
     public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity)
     {
-        DocumentRepository docRepo = new DocumentRepository(session);//TODO: if we do any sycronization on doc repo, this could be a problem
+        DocumentRepository docRepo = new DocumentRepository(session);
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
         BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
         for (IndexField indexField : index.getFields())
