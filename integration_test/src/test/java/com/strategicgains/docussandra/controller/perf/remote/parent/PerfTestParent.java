@@ -226,7 +226,7 @@ public abstract class PerfTestParent
             } else
             {
                 logger.info("We still have workers running...");
-                Thread.sleep(500);
+                Thread.sleep(5000);
             }
         }
 
