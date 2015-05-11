@@ -65,7 +65,6 @@ public class IndexMaintainerHelper
         return statementList;
     }
 
-
     public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
     {
         //determine which getFields need to write as PKs
@@ -126,10 +125,11 @@ public class IndexMaintainerHelper
             //determine which getFields need to use as PKs
             List<IndexField> fields = index.getFields();
 
-            //issue #35: we need to be able to update indexed getFields as well,
+            //we need to be able to update indexed fields as well,
             //which will require us to:
             //1. determine if an indexed field has changed
-            if (hasIndexedFieldChanged(session, index, entity))
+            BSONObject oldObject = getOldObjectForUpdate(session, entity);
+            if (hasIndexedFieldChanged(oldObject, index, entity))
             {
                 //2a. if the field has changed, create a new index entry
                 BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
@@ -138,7 +138,7 @@ public class IndexMaintainerHelper
                     statementList.add(bs);
                 }
                 //2b. after creating the new index entry, we must delete the old one
-                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));//bug #100 is this line
+                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, oldObject.toString(), bucketLocator));//bug #100 is this line
             } else
             {//3. if an indexed field has not changed, do a normal CQL update
                 String finalCQL = getCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
@@ -195,7 +195,7 @@ public class IndexMaintainerHelper
         //for each index
         for (Index index : indices)
         {
-            BoundStatement bs = generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator);
+            BoundStatement bs = generateDocumentDeleteIndexEntryStatement(session, index, entity.object(), bucketLocator);
             if (bs != null)
             {
                 statementList.add(bs);
@@ -204,8 +204,7 @@ public class IndexMaintainerHelper
         return statementList;
     }
 
-
-    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
+    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, String docToDeleteJson, IndexBucketLocator bucketLocator) throws IndexParseException
     {
         //determine which getFields need to write as PKs
         List<IndexField> fields = index.getFields();
@@ -213,20 +212,19 @@ public class IndexMaintainerHelper
         PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
         BoundStatement bs = new BoundStatement(ps);
         //pull the index getFields out of the document for binding
-        String documentJSON = entity.object();
-        DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
+        DBObject jsonObject = (DBObject) JSON.parse(docToDeleteJson);
         Object fieldToBucketOnObject = jsonObject.get(fields.get(0).getField());
         if (fieldToBucketOnObject == null)
         {
             // we do not have an indexable field in our document -- therefore, it shouldn't need to be removed an index! (right?) -- is this right Todd?
-            logger.trace("Warning: document: " + entity.toString() + " does not have an indexed field for index: " + index.toString());
+            logger.trace("Warning: document: " + docToDeleteJson + " does not have an indexed field for index: " + index.toString());
             return null;
         }
         //set the bucket
         String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID(fieldToBucketOnObject.toString()));//note, could have parse problems here with non-string types
         if (logger.isTraceEnabled())
         {
-            logger.trace("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
+            logger.trace("Bucket ID for entity: " + docToDeleteJson + " for index: " + index.toString() + " is: " + bucketId);
         }
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)
@@ -265,17 +263,17 @@ public class IndexMaintainerHelper
      * Determines if an indexed field has changed as part of an update. This
      * would be private but keeping public for ease of testing.
      *
-     * @param session DB session.
+     * @param oldObject the old BSON object.
      * @param index Index containing the getFields to check for changes.
      * @param entity New version of a document.
      * @return True if an indexed field has changed. False if there is no change
      * of indexed getFields.
      */
-    public static boolean hasIndexedFieldChanged(Session session, Index index, Document entity)
+    public static boolean hasIndexedFieldChanged(BSONObject oldObject, Index index, Document entity)
     {
-        DocumentRepository docRepo = new DocumentRepository(session);
+        //DocumentRepository docRepo = new DocumentRepository(session);
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
-        BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
+        //BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
         for (IndexField indexField : index.getFields())
         {
             String field = indexField.getField();
@@ -292,6 +290,13 @@ public class IndexMaintainerHelper
             }
         }
         return false;
+    }
+
+    //only public for testing
+    public static BSONObject getOldObjectForUpdate(Session session, Document entity)
+    {
+        DocumentRepository docRepo = new DocumentRepository(session);
+        return (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
     }
 
     /**

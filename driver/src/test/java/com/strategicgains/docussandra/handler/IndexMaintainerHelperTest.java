@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,7 +205,7 @@ public class IndexMaintainerHelperTest
             expectedExceptionThrown = true;
         }
         assertTrue("Expected exception was not thrown.", expectedExceptionThrown);
-        
+
     }
 
     /**
@@ -317,6 +318,50 @@ public class IndexMaintainerHelperTest
         assertEquals("docussandra", three.getKeyspace());
         assertEquals("UPDATE mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", three.preparedStatement().getQueryString());
     }
+
+//    /**
+//     * Test of generateDocumentUpdateIndexEntriesStatements method, of class
+//     * IndexMaintainerHelper. This test includes functionality for when an
+//     * indexed field has changed.
+//     */
+//    @Test
+//    @Ignore //TODO: left off here; finish
+//    public void testGenerateDocumentUpdateIndexEntriesStatementsIndexChangedIndex() throws IndexParseException
+//    {
+//        System.out.println("generateDocumentUpdateIndexEntriesStatementsIndexChangedNewIndexNull");
+//        Document entity = Fixtures.createTestDocument2();
+//        tableRepo.create(table);//create the table so we have a place to store the test data
+//        docRepo.doCreate(entity);//insert a document so we have something to reference
+//        entity.object("{'greeting':'hello', 'myindexedfield': null, 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
+//        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
+//        assertEquals(3, result.size());//one for the create, one for the delete, one for the second index
+//
+//        //create
+//        BoundStatement one = result.get(0);
+//        assertNotNull(one);
+//        for (int i = 0; i < 5; i++)
+//        {
+//            assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
+//        }
+//        assertEquals("docussandra", one.getKeyspace());
+//        assertEquals("INSERT INTO mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
+//        //delete
+//        BoundStatement two = result.get(1);
+//        assertNotNull(one);
+//        assertTrue(two.isSet(0));//the UUID
+//        assertEquals("docussandra", two.getKeyspace());
+//        assertEquals("DELETE FROM mydb_mytable_myindexwithonefield WHERE bucket = ? AND myindexedfield = ?;", two.preparedStatement().getQueryString());
+//
+//        //the index update should proceed like a normal update
+//        BoundStatement three = result.get(2);
+//        assertNotNull(three);
+//        for (int i = 0; i < 4; i++)
+//        {
+//            assertTrue(three.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
+//        }
+//        assertEquals("docussandra", three.getKeyspace());
+//        assertEquals("UPDATE mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", three.preparedStatement().getQueryString());
+//    }
 
     /**
      * Test of generateDocumentDeleteIndexEntriesStatements method, of class
@@ -471,10 +516,11 @@ public class IndexMaintainerHelperTest
         Document entity = Fixtures.createTestDocument2();
         docRepo.doCreate(entity);//insert
         entity.object("{'greeting':'hola', 'myindexedfield': 'this is my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change a non-index field        
-        boolean result = IndexMaintainerHelper.hasIndexedFieldChanged(f.getSession(), index1, entity);
+
+        boolean result = IndexMaintainerHelper.hasIndexedFieldChanged(IndexMaintainerHelper.getOldObjectForUpdate(f.getSession(), entity), index1, entity);
         assertEquals(false, result);
         entity.object("{'greeting':'hello', 'myindexedfield': 'this is NOT my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
-        result = IndexMaintainerHelper.hasIndexedFieldChanged(f.getSession(), index1, entity);
+        result = IndexMaintainerHelper.hasIndexedFieldChanged(IndexMaintainerHelper.getOldObjectForUpdate(f.getSession(), entity), index1, entity);
         assertEquals(true, result);
     }
 
