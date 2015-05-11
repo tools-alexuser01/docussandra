@@ -478,36 +478,4 @@ public class IndexMaintainerHelperTest
         assertEquals(true, result);
     }
 
-//    /**
-//     * Creates at test index with one field.
-//     *
-//     * @return
-//     */
-//    private static Index createTestIndexOneField()
-//    {
-//        Index index = new Index("myIndexWithOneField");
-//        index.table("mydb", "mytable");
-//        ArrayList<IndexField> fields = new ArrayList<>();
-//        fields.add(new IndexField("myindexedfield"));
-//        index.fields(fields);
-//        index.isUnique(false);
-//        return index;
-//    }
-//
-//    /**
-//     * Creates at test index with two fields.
-//     *
-//     * @return
-//     */
-//    private static Index createTestIndexTwoField()
-//    {
-//        Index index = new Index("myIndexWithTwoFields");
-//        index.table("mydb", "mytable");
-//        ArrayList<IndexField> fields = new ArrayList<>();
-//        fields.add(new IndexField("myindexedfield1"));
-//        fields.add(new IndexField("myindexedfield2"));
-//        index.fields(fields);
-//        index.isUnique(true);
-//        return index;
-//    }
 }
