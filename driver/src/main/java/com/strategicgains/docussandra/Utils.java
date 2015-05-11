@@ -236,6 +236,7 @@ public class Utils
             throw new IndexParseException(fieldData, new IndexParseFieldException(jsonValue));
         } else
         {
+            //nothing odd here; set the field
             setField(jsonValue, fieldData, bs, index);
         }
     }
