@@ -1,7 +1,12 @@
 package com.strategicgains.docussandra;
 
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.BoundStatement;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.exception.IndexParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -215,5 +220,33 @@ public class UtilsTest
         expResult = "one, two";
         result = Utils.listToString(list);
         assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testSetField() throws Exception
+    {
+        //negative tests only for now
+        System.out.println("setField");
+        DBObject object = new BasicDBObject();
+        BoundStatement bs = null;
+        IndexField fieldData = new IndexField("testField");
+        //(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index)
+        boolean normal = Utils.setField(object, fieldData, bs, 0);
+        assertFalse("Expected exception not thrown.", normal);
+
+        fieldData = new IndexField("testField", FieldDataType.INTEGER);
+        object.put("testField", "thisisnotaninteger");
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            Utils.setField(object, fieldData, bs, 0);
+        } catch (IndexParseException e)
+        {
+            expectedExceptionThrown = true;
+            assertTrue(e.getMessage().contains("thisisnotaninteger"));
+            assertTrue(e.getMessage().contains("testField"));
+        }
+        assertTrue("Expected exception not thrown.", expectedExceptionThrown);
+
     }
 }

@@ -208,7 +208,16 @@ public class Utils
         }
     }
 
-    public static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
+    /**
+     * Sets a field into a BoundStatement.
+     * @param jsonObject Object to pull the value from
+     * @param fieldData Object describing the field to pull the value from.
+     * @param bs BoundStatement to set the field value to.
+     * @param index Index in the BoundStatement to set.
+     * @return false if the field is null and should cause this bound statement not to be entered into the batch, true otherwise (normal)
+     * @throws IndexParseException If there is a problem parsing the field that indicates the entire document should not be indexed.
+     */
+    public static boolean setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
         Object jObject = jsonObject.get(fieldData.getField());
         String jsonValue = null;
@@ -216,12 +225,28 @@ public class Utils
         {
             jsonValue = jObject.toString();
         }
-        if ((jsonValue == null || jsonValue.isEmpty()) && !fieldData.getType().equals(FieldDataType.TEXT))// if we have an empty string for a non-text field
+        if (jsonValue == null)
         {
-            throw new IndexParseException(fieldData, new IndexParseFieldException(jsonValue));//there's nothing we can do to index this document
+            /*
+             we can't index on this field, it is null, so we just won't create
+             an index on THIS FIELD throw an exception indicating this (just 
+             don't add this to the batch)
+             */
+            return false;
+        } else if (jsonValue.isEmpty() && !fieldData.getType().equals(FieldDataType.TEXT))
+        {   /*
+             if we have an empty string for a non-text field by definition, this
+             means that we can't parse it into a useful non-text value so there's
+             nothing we can do to index this document, and we can't ignore it
+             because this indicates that the field isn't in the expected format, 
+             so we need to throw an exception and not index this document AT ALL
+             */
+            throw new IndexParseException(fieldData, new IndexParseFieldException(jsonValue));
         } else
         {
+            //nothing odd here; set the field
             setField(jsonValue, fieldData, bs, index);
+            return true;
         }
     }
 
