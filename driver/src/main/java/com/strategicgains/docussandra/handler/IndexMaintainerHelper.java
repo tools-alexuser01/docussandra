@@ -12,7 +12,6 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.exception.IndexParseException;
-import com.strategicgains.docussandra.exception.NullFieldException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
@@ -56,36 +55,18 @@ public class IndexMaintainerHelper
         for (Index index : indices)
         {
             //add row to the iTable(s)
-            try
+            BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
+            if (bs != null)
             {
-                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
-                if (bs != null)
-                {
-                    statementList.add(bs);
-                }
-            } catch (NullFieldException e)
-            {
-                logger.debug("Unable to create index for null field. For index: " + index.toString(), e);//consider reducing this to trace
-                //take no action: this document has a null value for a field that
-                //was supposed to be indexed, we will simply not create an index
-                //entry for this document (for this index; the other indexes
-                //should still be created)
+                statementList.add(bs);
             }
-
         }
         //return a list of commands to accomplish all of this
         return statementList;
     }
 
-    /**
-     * Helper method for above.
-     *
-     * @param session
-     * @param index
-     * @param entity
-     * @return
-     */
-    public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException, NullFieldException
+
+    public static BoundStatement generateDocumentCreateIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
     {
         //determine which getFields need to write as PKs
         List<IndexField> fieldsData = index.getFields();
@@ -120,7 +101,16 @@ public class IndexMaintainerHelper
         bs.setDate(4, entity.getUpdatedAt());
         for (int i = 0; i < fieldsData.size(); i++)
         {
-            Utils.setField(jsonObject, fieldsData.get(i), bs, i + 5);//offset from the first five non-dynamic getFields
+            boolean normal = Utils.setField(jsonObject, fieldsData.get(i), bs, i + 5);//offset from the first five non-dynamic getFields
+            if (!normal)
+            {
+                logger.debug("Unable to create index for null field. For index: " + index.toString());//consider reducing this to trace
+                //take no action: this document has a null value for a field that
+                //was supposed to be indexed, we will simply not create an index
+                //entry for this document (for this index; the other indexes
+                //should still be created)
+                return null;//don't use this batch statement
+            }
         }
         return bs;
     }
@@ -142,34 +132,13 @@ public class IndexMaintainerHelper
             if (hasIndexedFieldChanged(session, index, entity))
             {
                 //2a. if the field has changed, create a new index entry
-                try
+                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
+                if (bs != null)
                 {
-
-                    BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
-                    if (bs != null)
-                    {
-                        statementList.add(bs);
-                    }
-                } catch (NullFieldException e)
-                {
-                    logger.debug("Unable to update index for null field. For index: " + index.toString(), e);//consider reducing this to trace
-                    //take no action: this document has a null value for a field that
-                    //was supposed to be indexed, we will simply not create an index
-                    //entry for this document (for this index; the other indexes
-                    //should still be updated)
+                    statementList.add(bs);
                 }
-                try
-                {
-                    //2b. after creating the new index entry, we must delete the old one
-                    statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
-                } catch (NullFieldException e)
-                {
-                    logger.debug("Unable to delete (for update) index for null field. For index: " + index.toString(), e);//consider reducing this to trace
-                    //take no action: this document has a null value for a field that
-                    //was supposed to be indexed, we will simply not create an index
-                    //entry for this document (for this index; the other indexes
-                    //should still be deleted)
-                }
+                //2b. after creating the new index entry, we must delete the old one
+                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator));
             } else
             {//3. if an indexed field has not changed, do a normal CQL update
                 String finalCQL = getCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
@@ -196,20 +165,22 @@ public class IndexMaintainerHelper
                     logger.trace("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
                 }
                 bs.setString(2, bucketId);
+                boolean normal = true;
                 for (int i = 0; i < fields.size(); i++)
                 {
-                    try
+                    normal = Utils.setField(jsonObject, fields.get(i), bs, i + 3);//offset from the first three non-dynamic getFields
+                    if (!normal)
                     {
-                        Utils.setField(jsonObject, fields.get(i), bs, i + 3);//offset from the first three non-dynamic getFields
-                    } catch (NullFieldException e)
-                    {
-                        logger.debug("Unable to update index for null field. For index: " + index.toString(), e);//consider reducing this to trace
+                        logger.debug("Unable to update index for null field. For index: " + index.toString());//consider reducing this to trace
                         //take no action; don't try to update this index; just break out of the loop and go onto the next index
                         break;
                     }
                 }
-                //add row to the iTable(s)
-                statementList.add(bs);
+                if (normal)
+                {
+                    //add row to the iTable(s)
+                    statementList.add(bs);
+                }
             }
         }
         //return a list of commands to accomplish all of this
@@ -224,34 +195,17 @@ public class IndexMaintainerHelper
         //for each index
         for (Index index : indices)
         {
-            try
+            BoundStatement bs = generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator);
+            if (bs != null)
             {
-                BoundStatement bs = generateDocumentDeleteIndexEntryStatement(session, index, entity, bucketLocator);
-                if (bs != null)
-                {
-                    statementList.add(bs);
-                }
-            } catch (NullFieldException e)
-            {
-                logger.debug("Unable to delete index for null field. For index: " + index.toString(), e);//consider reducing this to trace
-                //take no action: this document has a null value for a field that
-                //was supposed to be indexed, we will simply not create an index
-                //entry for this document (for this index; the other indexes
-                //should still be deleted)
+                statementList.add(bs);
             }
-
         }
         return statementList;
     }
 
-    /**
-     * Helper method for above.
-     *
-     * @param session
-     * @param entity
-     * @return
-     */
-    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException, NullFieldException
+
+    private static BoundStatement generateDocumentDeleteIndexEntryStatement(Session session, Index index, Document entity, IndexBucketLocator bucketLocator) throws IndexParseException
     {
         //determine which getFields need to write as PKs
         List<IndexField> fields = index.getFields();
@@ -277,7 +231,16 @@ public class IndexMaintainerHelper
         bs.setString(0, bucketId);
         for (int i = 0; i < fields.size(); i++)
         {
-            Utils.setField(jsonObject, fields.get(i), bs, i + 1);
+            boolean normalField = Utils.setField(jsonObject, fields.get(i), bs, i + 1);
+            if (!normalField)
+            {
+                logger.debug("Unable to delete index for null field. For index: " + index.toString());//consider reducing this to trace                
+                //take no action: this document has a null value for a field that
+                //was supposed to be indexed, we will simply not delete an index
+                //entry for this document (for this index; the other indexes
+                //should still be deleted)
+                return null;
+            }
         }
         return bs;
     }

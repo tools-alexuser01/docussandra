@@ -9,7 +9,6 @@ import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.exception.IndexParseFieldException;
-import com.strategicgains.docussandra.exception.NullFieldException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -209,7 +208,16 @@ public class Utils
         }
     }
 
-    public static void setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException, NullFieldException
+    /**
+     * Sets a field into a BoundStatement.
+     * @param jsonObject Object to pull the value from
+     * @param fieldData Object describing the field to pull the value from.
+     * @param bs BoundStatement to set the field value to.
+     * @param index Index in the BoundStatement to set.
+     * @return false if the field is null and should cause this bound statement not to be entered into the batch, true otherwise (normal)
+     * @throws IndexParseException If there is a problem parsing the field that indicates the entire document should not be indexed.
+     */
+    public static boolean setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
         Object jObject = jsonObject.get(fieldData.getField());
         String jsonValue = null;
@@ -224,7 +232,7 @@ public class Utils
              an index on THIS FIELD throw an exception indicating this (just 
              don't add this to the batch)
              */
-            throw new NullFieldException();
+            return false;
         } else if (jsonValue.isEmpty() && !fieldData.getType().equals(FieldDataType.TEXT))
         {   /*
              if we have an empty string for a non-text field by definition, this
@@ -238,6 +246,7 @@ public class Utils
         {
             //nothing odd here; set the field
             setField(jsonValue, fieldData, bs, index);
+            return true;
         }
     }
 

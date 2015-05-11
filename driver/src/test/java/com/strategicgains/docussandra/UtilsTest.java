@@ -1,15 +1,12 @@
 package com.strategicgains.docussandra;
 
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.DefaultPreparedStatement;
-import com.datastax.driver.core.PreparedStatement;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.exception.IndexParseException;
-import com.strategicgains.docussandra.exception.NullFieldException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,28 +25,28 @@ import org.slf4j.LoggerFactory;
  */
 public class UtilsTest
 {
-    
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    
+
     public UtilsTest()
     {
     }
-    
+
     @BeforeClass
     public static void setUpClass()
     {
     }
-    
+
     @AfterClass
     public static void tearDownClass()
     {
     }
-    
+
     @Before
     public void setUp()
     {
     }
-    
+
     @After
     public void tearDown()
     {
@@ -127,7 +124,7 @@ public class UtilsTest
         logger.info(b + ": " + bUUID.toString() + " " + bUUID.getMostSignificantBits());
         logger.info(c + ": " + cUUID.toString() + " " + cUUID.getMostSignificantBits());
         logger.info(z + ": " + zUUID.toString() + " " + zUUID.getMostSignificantBits());
-        
+
         assertTrue(aUUID.getMostSignificantBits() < bUUID.getMostSignificantBits());
         assertTrue(bUUID.getMostSignificantBits() < cUUID.getMostSignificantBits());
         assertTrue(cUUID.getMostSignificantBits() < zUUID.getMostSignificantBits());
@@ -153,7 +150,7 @@ public class UtilsTest
         logger.info(b + ": " + bUUID.toString() + " " + bUUID.getMostSignificantBits());
         logger.info(c + ": " + cUUID.toString() + " " + cUUID.getMostSignificantBits());
         logger.info(z + ": " + zUUID.toString() + " " + zUUID.getMostSignificantBits());
-        
+
         assertTrue(aUUID.getMostSignificantBits() < bUUID.getMostSignificantBits());
         assertTrue(bUUID.getMostSignificantBits() < cUUID.getMostSignificantBits());
         assertTrue(cUUID.getMostSignificantBits() < zUUID.getMostSignificantBits());
@@ -179,7 +176,7 @@ public class UtilsTest
         logger.info(b + ": " + bUUID.toString() + " " + bUUID.getMostSignificantBits());
         logger.info(c + ": " + cUUID.toString() + " " + cUUID.getMostSignificantBits());
         logger.info(z + ": " + zUUID.toString() + " " + zUUID.getMostSignificantBits());
-        
+
         assertTrue(aUUID.getMostSignificantBits() < bUUID.getMostSignificantBits());
         assertTrue(bUUID.getMostSignificantBits() < cUUID.getMostSignificantBits());
         assertTrue(cUUID.getMostSignificantBits() < zUUID.getMostSignificantBits());
@@ -224,7 +221,7 @@ public class UtilsTest
         result = Utils.listToString(list);
         assertEquals(expResult, result);
     }
-    
+
     @Test
     public void testSetField() throws Exception
     {
@@ -234,19 +231,12 @@ public class UtilsTest
         BoundStatement bs = null;
         IndexField fieldData = new IndexField("testField");
         //(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index)
-        boolean expectedExceptionThrown = false;
-        try
-        {
-            Utils.setField(object, fieldData, bs, 0);
-        } catch (NullFieldException e)
-        {
-            expectedExceptionThrown = true;
-        }
-        assertTrue("Expected exception not thrown.", expectedExceptionThrown);
-                
+        boolean normal = Utils.setField(object, fieldData, bs, 0);
+        assertFalse("Expected exception not thrown.", normal);
+
         fieldData = new IndexField("testField", FieldDataType.INTEGER);
         object.put("testField", "thisisnotaninteger");
-        expectedExceptionThrown = false;
+        boolean expectedExceptionThrown = false;
         try
         {
             Utils.setField(object, fieldData, bs, 0);
@@ -257,6 +247,6 @@ public class UtilsTest
             assertTrue(e.getMessage().contains("testField"));
         }
         assertTrue("Expected exception not thrown.", expectedExceptionThrown);
-        
+
     }
 }
