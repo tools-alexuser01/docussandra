@@ -276,6 +276,7 @@ public class Configuration
         public CassandraConfigWithGenericSessionAccess(Properties p)
         {
             super(p);
+            LOGGER.info("Using cassandra ips: " + p.getProperty("cassandra.contactPoints"));
         }
 
         public Session getGenericSession()
