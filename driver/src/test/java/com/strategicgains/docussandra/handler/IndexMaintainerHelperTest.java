@@ -359,7 +359,7 @@ public class IndexMaintainerHelperTest
                 + " \"thisisbase64\":\"VGhpcyBpcyBhIGdvb2RseSB0ZXN0IG1lc3NhZ2Uu\", \"thisisaboolean\":\"f\","
                 + " \"thisisadate\":\"Thu Apr 30 09:52:04 MDT 2015\", \"thisisauudid\":\"3d069a5a-ef51-11e4-90ec-1681e6b88ec1\"}");
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
-        assertEquals(1, result.size());//one for each of our indices (defined in the class setup methods)
+        assertEquals(1, result.size());//one for each of our indices relevent to this document
         BoundStatement one = result.get(0);
         assertNotNull(one);
         assertTrue(one.isSet(0));//the UUID
