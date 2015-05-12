@@ -132,24 +132,28 @@ public class IndexMaintainerHelper
             if (hasIndexedFieldChanged(oldObject, index, entity))
             {
                 //2a. if the field has changed, create a new index entry
-                BoundStatement bs = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
-                if (bs != null)
+                BoundStatement createBS = generateDocumentCreateIndexEntryStatement(session, index, entity, bucketLocator);
+                if (createBS != null)
                 {
-                    statementList.add(bs);
+                    statementList.add(createBS);
                 }
                 //2b. after creating the new index entry, we must delete the old one
-                statementList.add(generateDocumentDeleteIndexEntryStatement(session, index, oldObject.toString(), bucketLocator));//bug #100 is this line
+                BoundStatement deleteBS = generateDocumentDeleteIndexEntryStatement(session, index, oldObject.toString(), bucketLocator);
+                if (deleteBS != null)
+                {
+                    statementList.add(deleteBS);
+                }
             } else
             {//3. if an indexed field has not changed, do a normal CQL update
                 String finalCQL = getCQLStatementForWhereClauses(ITABLE_UPDATE_CQL, index);
                 PreparedStatement ps = PreparedStatementFactory.getPreparedStatement(finalCQL, session);
-                BoundStatement bs = new BoundStatement(ps);
+                BoundStatement updateBS = new BoundStatement(ps);
 
                 //set the blob
                 BSONObject bson = (BSONObject) JSON.parse(entity.object());
-                bs.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
+                updateBS.setBytes(0, ByteBuffer.wrap(BSON.encode(bson)));
                 //set the date
-                bs.setDate(1, entity.getUpdatedAt());
+                updateBS.setDate(1, entity.getUpdatedAt());
                 //pull the index getFields out of the document for binding
                 String documentJSON = entity.object();
                 DBObject jsonObject = (DBObject) JSON.parse(documentJSON);
@@ -164,11 +168,11 @@ public class IndexMaintainerHelper
                 {
                     logger.trace("Bucket ID for entity: " + entity.toString() + " for index: " + index.toString() + " is: " + bucketId);
                 }
-                bs.setString(2, bucketId);
+                updateBS.setString(2, bucketId);
                 boolean normal = true;
                 for (int i = 0; i < fields.size(); i++)
                 {
-                    normal = Utils.setField(jsonObject, fields.get(i), bs, i + 3);//offset from the first three non-dynamic getFields
+                    normal = Utils.setField(jsonObject, fields.get(i), updateBS, i + 3);//offset from the first three non-dynamic getFields
                     if (!normal)
                     {
                         logger.debug("Unable to update index for null field. For index: " + index.toString());//consider reducing this to trace
@@ -179,7 +183,7 @@ public class IndexMaintainerHelper
                 if (normal)
                 {
                     //add row to the iTable(s)
-                    statementList.add(bs);
+                    statementList.add(updateBS);
                 }
             }
         }
