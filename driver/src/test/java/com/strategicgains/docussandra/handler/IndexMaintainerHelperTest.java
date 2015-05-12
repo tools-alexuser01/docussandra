@@ -292,7 +292,7 @@ public class IndexMaintainerHelperTest
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
         assertEquals(3, result.size());//one for the create, one for the delete, one for the second index
 
-        //create
+        //create statement
         BoundStatement one = result.get(0);
         assertNotNull(one);
         for (int i = 0; i < 5; i++)
@@ -301,7 +301,7 @@ public class IndexMaintainerHelperTest
         }
         assertEquals("docussandra", one.getKeyspace());
         assertEquals("INSERT INTO mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
-        //delete
+        //delete statement
         BoundStatement two = result.get(1);
         assertNotNull(one);
         assertTrue(two.isSet(0));//the UUID
