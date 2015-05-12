@@ -47,13 +47,14 @@ public class IndexRepository
      */
     private class Columns
     {
+
         static final String DATABASE = "db_name";
         static final String TABLE = "tbl_name";
         static final String NAME = "name";
         static final String IS_UNIQUE = "is_unique";
         static final String BUCKET_SIZE = "bucket_sz";
         static final String FIELDS = "fields";
-        static final String FIELDS_TYPE = "fields_type";        
+        static final String FIELDS_TYPE = "fields_type";
         static final String ONLY = "only";
         static final String CREATED_AT = "created_at";
         static final String UPDATED_AT = "updated_at";
@@ -231,7 +232,8 @@ public class IndexRepository
             {
                 e = new Element(key, all);
                 c.put(e);
-            } else {
+            } else
+            {
                 return all;//it's empty or null; just return it now and not mess with the cache
             }
         } else
@@ -297,9 +299,10 @@ public class IndexRepository
         i.isUnique(row.getBool(Columns.IS_UNIQUE));
         i.setBucketSize(row.getLong(Columns.BUCKET_SIZE));
         List<String> fields = row.getList(Columns.FIELDS, String.class);
-        List<String> types = row.getList(Columns.FIELDS_TYPE, String.class);        
+        List<String> types = row.getList(Columns.FIELDS_TYPE, String.class);
         ArrayList<IndexField> indexFields = new ArrayList<>(fields.size());
-        for(int j = 0; j < fields.size(); j++){
+        for (int j = 0; j < fields.size(); j++)
+        {
             indexFields.add(new IndexField(fields.get(j), FieldDataType.valueOf(types.get(j))));
         }
         i.setFields(indexFields);
