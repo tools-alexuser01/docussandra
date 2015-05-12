@@ -42,7 +42,7 @@ public class TableDeleteHandler
         IndexRepository ir = new IndexRepository(dbSession);
         List<Index> indexes = ir.readAll(event.data.databaseName(), event.data.name());//get all indexes
         for(Index i : indexes){
-            ir.doDelete(i);// then delete them
+            ir.delete(i);// then delete them
         }
     }
 

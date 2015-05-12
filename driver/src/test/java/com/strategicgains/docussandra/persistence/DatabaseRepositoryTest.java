@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -31,31 +33,33 @@ import static org.junit.Assert.*;
  */
 public class DatabaseRepositoryTest
 {
-
+    
     private static Fixtures f;
-
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseRepositoryTest.class);
+    
     public DatabaseRepositoryTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
-
+    
     @BeforeClass
     public static void setUpClass()
     {
     }
-
+    
     @AfterClass
     public static void tearDownClass()
     {
         f.clearTestTables();// clear anything that might be there already
     }
-
+    
     @Before
     public void setUp()
     {
         f.clearTestTables();// clear anything that might be there already
     }
-
+    
     @After
     public void tearDown()
     {
@@ -112,6 +116,51 @@ public class DatabaseRepositoryTest
     }
 
     /**
+     * Test of deleteEntity method, of class DatabaseRepository.
+     */
+    @Test
+    public void testDeleteEntityWithDeleteCascade() throws InterruptedException
+    {
+        System.out.println("deleteEntityWithDeleteCascade");
+        //setup
+        final Database entity = Fixtures.createTestDatabase();
+        f.insertDatabase(entity);
+        f.insertTable(Fixtures.createTestTable());
+        f.insertIndex(Fixtures.createTestIndexOneField());
+        f.insertDocument(Fixtures.createTestDocument());
+        //act
+        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        instance.delete(entity);
+        Thread.sleep(15000);
+        //check DB deletion
+        DatabaseRepository checker = new DatabaseRepository(f.getSession());
+        List<Database> allRows = checker.readAll();
+        assertFalse(allRows.contains(entity));
+        //check table deletion
+        TableRepository tableRepo = new TableRepository(f.getSession());
+        assertFalse(tableRepo.exists(Fixtures.createTestTable().getId()));
+        //check index deletion
+        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
+        //check iTable deletion
+        ITableRepository iTableRepo = new ITableRepository(f.getSession());
+        assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
+        //check document deletion
+        DocumentRepository docRepo = new DocumentRepository(f.getSession());
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            docRepo.exists(Fixtures.createTestDocument().getId());
+        } catch (Exception e)//should error because the entire table should no longer exist
+        {
+            assertTrue(e.getMessage().contains("unconfigured columnfamily"));
+            assertTrue(e.getMessage().contains(Fixtures.createTestTable().toDbTable()));
+            expectedExceptionThrown = true;
+        }
+        assertTrue(expectedExceptionThrown);
+    }
+
+    /**
      * Test of readAll method, of class DatabaseRepository.
      */
     @Test
@@ -128,5 +177,5 @@ public class DatabaseRepositoryTest
         assertFalse(result.isEmpty());
         assertTrue(result.contains(entity));
     }
-
+    
 }
