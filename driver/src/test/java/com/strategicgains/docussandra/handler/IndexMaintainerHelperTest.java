@@ -288,7 +288,8 @@ public class IndexMaintainerHelperTest
         Document entity = Fixtures.createTestDocument2();
         tableRepo.create(table);//create the table so we have a place to store the test data
         docRepo.doCreate(entity);//insert a document so we have something to reference
-        entity.object("{'greeting':'hello', 'myindexedfield': 'this is NOT my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
+        String changedMyindexedfield = "this is NOT my field";
+        entity.object("{'greeting':'hello', 'myindexedfield': '" + changedMyindexedfield + "', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
         assertEquals(3, result.size());//one for the create, one for the delete, one for the second index
 
@@ -299,11 +300,12 @@ public class IndexMaintainerHelperTest
         {
             assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
         }
+
         assertEquals("docussandra", one.getKeyspace());
         assertEquals("INSERT INTO mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
         //delete statement
         BoundStatement two = result.get(1);
-        assertNotNull(one);
+        assertNotNull(two);
         assertTrue(two.isSet(0));//the UUID
         assertEquals("docussandra", two.getKeyspace());
         assertEquals("DELETE FROM mydb_mytable_myindexwithonefield WHERE bucket = ? AND myindexedfield = ?;", two.preparedStatement().getQueryString());
@@ -315,6 +317,7 @@ public class IndexMaintainerHelperTest
         {
             assertTrue(three.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
         }
+
         assertEquals("docussandra", three.getKeyspace());
         assertEquals("UPDATE mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", three.preparedStatement().getQueryString());
     }
@@ -362,7 +365,6 @@ public class IndexMaintainerHelperTest
 //        assertEquals("docussandra", three.getKeyspace());
 //        assertEquals("UPDATE mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", three.preparedStatement().getQueryString());
 //    }
-
     /**
      * Test of generateDocumentDeleteIndexEntriesStatements method, of class
      * IndexMaintainerHelper.
