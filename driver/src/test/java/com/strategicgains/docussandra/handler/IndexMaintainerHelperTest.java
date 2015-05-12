@@ -16,6 +16,7 @@
 package com.strategicgains.docussandra.handler;
 
 import com.datastax.driver.core.BoundStatement;
+import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
@@ -30,12 +31,15 @@ import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.List;
+import org.bson.BSON;
+import org.bson.BSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,7 +208,7 @@ public class IndexMaintainerHelperTest
             expectedExceptionThrown = true;
         }
         assertTrue("Expected exception was not thrown.", expectedExceptionThrown);
-        
+
     }
 
     /**
@@ -287,35 +291,144 @@ public class IndexMaintainerHelperTest
         Document entity = Fixtures.createTestDocument2();
         tableRepo.create(table);//create the table so we have a place to store the test data
         docRepo.doCreate(entity);//insert a document so we have something to reference
-        entity.object("{'greeting':'hello', 'myindexedfield': 'this is NOT my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
+        String changedMyindexedfield = "this is NOT my field";
+        entity.object("{'greeting':'hello', 'myindexedfield': '" + changedMyindexedfield + "', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
         assertEquals(3, result.size());//one for the create, one for the delete, one for the second index
 
-        //create
+        //create statement (the first bound statement)
         BoundStatement one = result.get(0);
         assertNotNull(one);
-        for (int i = 0; i < 5; i++)
+        //check that all fields are set on the statement
+        for (int i = 0; i < 6; i++)
         {
-            assertTrue(one.isSet(i));// 0 is the id, 1 is the blob, 2 and 3 are dates, 3 is the single index field for index1
+            assertTrue(one.isSet(i));// 0 is the bucket, 1 is the id, 2 is the blob, 3 and 4 are dates, 5 is the single index field for index1
         }
+        //check the specific fields are set correctly
+        assertEquals(((BSONObject) JSON.parse(entity.object())).toString(), BSON.decode(one.getBytes(2).array()).toString());//make sure the object is set correctly
+        assertEquals(changedMyindexedfield, one.getString(5));//make sure that the new indexed field is set
+        //check keyspace and CQL
         assertEquals("docussandra", one.getKeyspace());
         assertEquals("INSERT INTO mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
-        //delete
+
+        //delete statement (the second bound statement)
         BoundStatement two = result.get(1);
-        assertNotNull(one);
+        assertNotNull(two);
         assertTrue(two.isSet(0));//the UUID
+        assertTrue(two.isSet(1));//the indexed field
+        assertEquals("this is my field", two.getString(1));//check that the delete statement is looking for the OLD index value (real test for issue #100)
+        //check keyspace and CQL
         assertEquals("docussandra", two.getKeyspace());
         assertEquals("DELETE FROM mydb_mytable_myindexwithonefield WHERE bucket = ? AND myindexedfield = ?;", two.preparedStatement().getQueryString());
 
-        //the index update should proceed like a normal update
+        //the second index update should proceed like a normal update (the indexed field has not changed for this index) (the third bound statement)
         BoundStatement three = result.get(2);
         assertNotNull(three);
-        for (int i = 0; i < 4; i++)
+        //check that all fields are set on the statement
+        for (int i = 0; i < 5; i++)
         {
-            assertTrue(three.isSet(i));// 0 is the blob, 1 is the date, 2 and 3 are indexed fields 
+            assertTrue(three.isSet(i));// 0 is the blob, 1 is the date, 2 is the bucket, 3 and 4 are indexed fields 
         }
+        //check that the fields are accurate
+        assertEquals(((BSONObject) JSON.parse(entity.object())).toString(), BSON.decode(three.getBytes(0).array()).toString());//make sure the object is set correctly
+        assertEquals("my second field", three.getString(3));
+        assertEquals("my third field", three.getString(4));
+        //check keyspace and CQL
         assertEquals("docussandra", three.getKeyspace());
         assertEquals("UPDATE mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", three.preparedStatement().getQueryString());
+    }
+
+    /**
+     * Test of generateDocumentUpdateIndexEntriesStatements method, of class
+     * IndexMaintainerHelper. This test includes functionality for when an
+     * indexed field has changed.
+     */
+    @Test
+    public void testGenerateDocumentUpdateIndexEntriesStatementsIndexChangedNewIndexNull() throws IndexParseException
+    {
+        System.out.println("generateDocumentUpdateIndexEntriesStatementsIndexChangedNewIndexNull");
+        Document entity = Fixtures.createTestDocument2();
+        tableRepo.create(table);//create the table so we have a place to store the test data
+        docRepo.doCreate(entity);//insert a document so we have something to reference
+        entity.object("{'greeting':'hello', 'myindexedfield': null, 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
+        assertEquals(2, result.size());//NONE for the create (the first index now has a null value), one for the delete, one for the second index
+
+        //delete (the first bound statement)
+        BoundStatement one = result.get(0);
+        assertNotNull(one);
+        assertTrue(one.isSet(0));//the UUID
+        assertTrue(one.isSet(1));//the indexed field
+        assertEquals("this is my field", one.getString(1));//check that the delete statement is looking for the OLD index value (real test for issue #100)
+        //check keyspace and CQL
+        assertEquals("docussandra", one.getKeyspace());
+        assertEquals("DELETE FROM mydb_mytable_myindexwithonefield WHERE bucket = ? AND myindexedfield = ?;", one.preparedStatement().getQueryString());
+
+        //the second index update should proceed like a normal update (the indexed field has not changed for this index) (the second bound statement)
+        BoundStatement two = result.get(1);
+        assertNotNull(two);
+        //check that all fields are set on the statement
+        for (int i = 0; i < 5; i++)
+        {
+            assertTrue(two.isSet(i));// 0 is the blob, 1 is the date, 2 is the bucket, 3 and 4 are indexed fields 
+        }
+        //check that the fields are accurate
+        assertEquals(((BSONObject) JSON.parse(entity.object())).toString(), BSON.decode(two.getBytes(0).array()).toString());//make sure the object is set correctly
+        assertEquals("my second field", two.getString(3));
+        assertEquals("my third field", two.getString(4));
+        //check keyspace and CQL
+        assertEquals("docussandra", two.getKeyspace());
+        assertEquals("UPDATE mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", two.preparedStatement().getQueryString());
+    }
+
+    /**
+     * Test of generateDocumentUpdateIndexEntriesStatements method, of class
+     * IndexMaintainerHelper. This test includes functionality for when an
+     * indexed field has changed.
+     */
+    @Test
+    public void testGenerateDocumentUpdateIndexEntriesStatementsIndexChangedOldIndexNull() throws IndexParseException
+    {
+        System.out.println("generateDocumentUpdateIndexEntriesStatementsIndexChangedOldIndexNull");
+        Document entity = Fixtures.createTestDocument2();
+        entity.object("{'greeting':'hello', 'myindexedfield': null, 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
+        tableRepo.create(table);//create the table so we have a place to store the test data
+        docRepo.doCreate(entity);//insert a document so we have something to reference
+        entity = Fixtures.createTestDocument2();//pull the entitiy in from fixtures again
+
+        List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
+        assertEquals(2, result.size());//one for the create, NONE for the delete, one for the second index
+
+        //create statement (the first bound statement)
+        BoundStatement one = result.get(0);
+        assertNotNull(one);
+        //check that all fields are set on the statement
+        for (int i = 0; i < 6; i++)
+        {
+            assertTrue(one.isSet(i));// 0 is the bucket, 1 is the id, 2 is the blob, 3 and 4 are dates, 5 is the single index field for index1
+        }
+        //check the specific fields are set correctly
+        assertEquals(((BSONObject) JSON.parse(entity.object())).toString(), BSON.decode(one.getBytes(2).array()).toString());//make sure the object is set correctly
+        assertEquals("this is my field", one.getString(5));//make sure that the new indexed field is set
+        //check keyspace and CQL
+        assertEquals("docussandra", one.getKeyspace());
+        assertEquals("INSERT INTO mydb_mytable_myindexwithonefield (bucket, id, object, created_at, updated_at, myindexedfield) VALUES (?, ?, ?, ?, ?, ?);", one.preparedStatement().getQueryString());
+
+        //the second index update should proceed like a normal update (the indexed field has not changed for this index) (the second bound statement)
+        BoundStatement two = result.get(1);
+        assertNotNull(two);
+        //check that all fields are set on the statement
+        for (int i = 0; i < 5; i++)
+        {
+            assertTrue(two.isSet(i));// 0 is the blob, 1 is the date, 2 is the bucket, 3 and 4 are indexed fields 
+        }
+        //check that the fields are accurate
+        assertEquals(((BSONObject) JSON.parse(entity.object())).toString(), BSON.decode(two.getBytes(0).array()).toString());//make sure the object is set correctly
+        assertEquals("my second field", two.getString(3));
+        assertEquals("my third field", two.getString(4));
+        //check keyspace and CQL
+        assertEquals("docussandra", two.getKeyspace());
+        assertEquals("UPDATE mydb_mytable_myindexwithtwofields SET object = ?, updated_at = ? WHERE bucket = ? AND myindexedfield1 = ? AND myindexedfield2 = ?;", two.preparedStatement().getQueryString());
     }
 
     /**
@@ -471,10 +584,11 @@ public class IndexMaintainerHelperTest
         Document entity = Fixtures.createTestDocument2();
         docRepo.doCreate(entity);//insert
         entity.object("{'greeting':'hola', 'myindexedfield': 'this is my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change a non-index field        
-        boolean result = IndexMaintainerHelper.hasIndexedFieldChanged(f.getSession(), index1, entity);
+
+        boolean result = IndexMaintainerHelper.hasIndexedFieldChanged(IndexMaintainerHelper.getOldObjectForUpdate(f.getSession(), entity), index1, entity);
         assertEquals(false, result);
         entity.object("{'greeting':'hello', 'myindexedfield': 'this is NOT my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
-        result = IndexMaintainerHelper.hasIndexedFieldChanged(f.getSession(), index1, entity);
+        result = IndexMaintainerHelper.hasIndexedFieldChanged(IndexMaintainerHelper.getOldObjectForUpdate(f.getSession(), entity), index1, entity);
         assertEquals(true, result);
     }
 
