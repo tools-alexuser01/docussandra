@@ -3,7 +3,6 @@ package com.strategicgains.docussandra.handler;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.event.DatabaseDeletedEvent;
-import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.eventing.EventHandler;
 import java.util.List;
@@ -43,7 +42,7 @@ public class DatabaseDeletedHandler
         List<Table> tables = tr.readAll(event.data.name());//get all tables
         for (Table t : tables)
         {
-            tr.doDelete(t);// then delete them
+            tr.delete(t);// then delete them
         }
     }
 

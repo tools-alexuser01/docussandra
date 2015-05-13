@@ -36,10 +36,10 @@ public class IndexDeletedHandler
         LOGGER.info("Cleaning up ITables for index: " + event.data.getDatabaseName() + "/" + event.data.getTableName() + "/" + event.data.getName());
         ITableRepository itr = new ITableRepository(dbSession);
         Index toDelete = event.data;
-        if(itr.iTableExists(toDelete)){
+        if (itr.iTableExists(toDelete))
+        {
             itr.deleteITable(toDelete);
         }
-        
     }
 
     @Override

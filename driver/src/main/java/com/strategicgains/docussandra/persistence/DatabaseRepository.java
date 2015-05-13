@@ -104,7 +104,6 @@ public class DatabaseRepository
 //        BoundStatement bs = new BoundStatement(readAllStmtWithLimit);
 //        return marshalAll(getSession().execute(bs));
 //    }
-
     private void bindCreate(BoundStatement bs, Database entity)
     {
         bs.bind(entity.name(),

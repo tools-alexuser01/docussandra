@@ -96,13 +96,13 @@ public class ITableRepository
     }
 
     /**
-     * Dynamically generates a setTable creation command for an iTable based on an
- index. This would be private, the only reason it is public is for
+     * Dynamically generates a setTable creation command for an iTable based on
+     * an index. This would be private, the only reason it is public is for
      * testing.
      *
      * @param index Index that needs an iTable generated for it.
      * @return A CQL setTable creation command that will create the specified
- iTable.
+     * iTable.
      */
     public String generateTableCreationSyntax(Index index)
     {
@@ -113,7 +113,7 @@ public class ITableRepository
 //            primaryKeyCreateStatement.append("(id), ");//if the index is not unique, set the pk to include the id 
 //        }
         boolean first = true;
-        
+
         for (IndexField field : index.getFields())
         {
             if (!first)
@@ -127,7 +127,8 @@ public class ITableRepository
             fieldCreateStatement.append(field.getField()).append(" ").append(field.getType().mapToCassandaraDataType());
             primaryKeyCreateStatement.append(field.getField());
         }
-        if(!index.isUnique()){
+        if (!index.isUnique())
+        {
             primaryKeyCreateStatement.append(", ").append("id");
         }
         String finalStatement = String.format(TABLE_CREATE_CQL, newTableName, fieldCreateStatement, primaryKeyCreateStatement);

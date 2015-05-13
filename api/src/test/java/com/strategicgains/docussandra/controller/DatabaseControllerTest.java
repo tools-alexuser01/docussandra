@@ -15,19 +15,25 @@ package com.strategicgains.docussandra.controller;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.persistence.DatabaseRepository;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.ITableRepository;
+import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.TableRepository;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
+import java.util.List;
 import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import testhelper.RestExpressManager;
@@ -36,15 +42,17 @@ import testhelper.RestExpressManager;
  *
  * @author udeyoje
  */
-public class DatabaseControllerTest {
+public class DatabaseControllerTest
+{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private static Fixtures f;
 
-    public DatabaseControllerTest() throws Exception{
-        
+    public DatabaseControllerTest() throws Exception
+    {
+
     }
 
     /**
@@ -54,7 +62,8 @@ public class DatabaseControllerTest {
      * @throws Exception
      */
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() throws Exception
+    {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
         RestAssured.basePath = "/";
@@ -68,7 +77,8 @@ public class DatabaseControllerTest {
     }
 
     @Before
-    public void beforeTest(){
+    public void beforeTest()
+    {
         f.clearTestTables();
     }
 
@@ -77,7 +87,8 @@ public class DatabaseControllerTest {
      * executed.
      */
     @AfterClass
-    public static void afterClass() {
+    public static void afterClass()
+    {
         f.clearTestTables();
     }
 
@@ -85,8 +96,9 @@ public class DatabaseControllerTest {
      * Cleanup that is performed after each test is executed.
      */
     @After
-    public void afterTest() {
-        
+    public void afterTest()
+    {
+
     }
 
 //    /**
@@ -106,7 +118,8 @@ public class DatabaseControllerTest {
      * Tests that the GET /{databases} properly retrieves an existing database.
      */
     @Test
-    public void getDatabaseTest() {
+    public void getDatabaseTest()
+    {
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         expect().statusCode(200)
@@ -121,7 +134,8 @@ public class DatabaseControllerTest {
      * Tests that the POST /{databases} endpoint properly creates a database.
      */
     @Test
-    public void postDatabaseTest() {
+    public void postDatabaseTest()
+    {
         Database testDb = Fixtures.createTestDatabase();
         String dbStr = "{" + "\"description\" : \"" + testDb.description()
                 + "\"," + "\"name\" : \"" + testDb.name() + "\"}";
@@ -146,7 +160,8 @@ public class DatabaseControllerTest {
      * Tests that the PUT /{databases} endpoint properly updates a database.
      */
     @Test
-    public void putDatabaseTest() {
+    public void putDatabaseTest()
+    {
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         String newDesciption = "this is a new description";
@@ -169,7 +184,8 @@ public class DatabaseControllerTest {
      * Tests that the DELETE /{databases} endpoint properly deletes a database.
      */
     @Test
-    public void deleteDatabaseTest() {
+    public void deleteDatabaseTest()
+    {
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
         //act
@@ -178,5 +194,50 @@ public class DatabaseControllerTest {
         //check
         expect().statusCode(404).when()
                 .get(testDb.name());
+    }
+
+    /**
+     * Tests that the DELETE /{databases} endpoint properly deletes a database
+     * and then cascades that delete to any child tables.
+     */
+    @Test
+    public void deleteDatabaseTestWithDeleteCascade() throws InterruptedException
+    {
+        System.out.println("deleteEntityWithDeleteCascade");
+        //setup
+        final Database testDb = Fixtures.createTestDatabase();
+        f.insertDatabase(testDb);
+        f.insertTable(Fixtures.createTestTable());
+        f.insertIndex(Fixtures.createTestIndexOneField());
+        f.insertDocument(Fixtures.createTestDocument());
+        //act
+        given().expect().statusCode(204)
+                .when().delete(testDb.name());
+        Thread.sleep(5000);
+        //check DB deletion
+        expect().statusCode(404).when()
+                .get(testDb.name());
+        //check table deletion (using direct db calls instead of REST-- being slightly lazy here)
+        TableRepository tableRepo = new TableRepository(f.getSession());
+        assertFalse(tableRepo.exists(Fixtures.createTestTable().getId()));
+        //check index deletion (using direct db calls instead of REST-- being slightly lazy here)
+        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
+        //check iTable deletion (using direct db calls instead of REST-- being slightly lazy here)
+        ITableRepository iTableRepo = new ITableRepository(f.getSession());
+        assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
+        //check document deletion (using direct db calls instead of REST-- being slightly lazy here)
+        DocumentRepository docRepo = new DocumentRepository(f.getSession());
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            docRepo.exists(Fixtures.createTestDocument().getId());
+        } catch (Exception e)//should error because the entire table should no longer exist
+        {
+            assertTrue(e.getMessage().contains("unconfigured columnfamily"));
+            assertTrue(e.getMessage().contains(Fixtures.createTestTable().toDbTable()));
+            expectedExceptionThrown = true;
+        }
+        assertTrue(expectedExceptionThrown);
     }
 }
