@@ -166,6 +166,26 @@ public class IndexRepositoryTest
     }
 
     /**
+     * Test of deleteEntity method, of class IndexRepository.
+     */
+    @Test
+    public void testDeleteEntityWithDeleteCascade() throws InterruptedException
+    {
+        System.out.println("deleteEntityWithDeleteCascade");
+        //setup
+        f.insertIndex(Fixtures.createTestIndexOneField());
+        //act
+        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        indexRepo.delete(Fixtures.createTestIndexOneField());
+        Thread.sleep(5000);
+        //check index deletion        
+        assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
+        //check iTable deletion
+        ITableRepository iTableRepo = new ITableRepository(f.getSession());
+        assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
+    }
+
+    /**
      * Test of readAll method, of class IndexRepository.
      */
     @Test
