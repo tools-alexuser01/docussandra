@@ -10,9 +10,9 @@
 	<packaging>pom</packaging>
 	
 	<modules>
-		<module>driver</module>
+		<module>cassandra</module>
 		<module>cli</module>
-		<module>api</module>
+		<module>rest</module>
 		<module>integration_test</module>
 	</modules>
 
