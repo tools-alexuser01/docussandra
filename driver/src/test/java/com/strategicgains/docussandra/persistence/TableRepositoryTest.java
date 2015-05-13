@@ -160,6 +160,45 @@ public class TableRepositoryTest
     }
 
     /**
+     * Test of deleteEntity method, of class TableRepository.
+     */
+    @Test
+    public void testDeleteEntityWithDeleteCascade() throws InterruptedException
+    {
+        System.out.println("deleteEntityWithDeleteCascade");
+        //setup
+        f.insertTable(Fixtures.createTestTable());
+        f.insertIndex(Fixtures.createTestIndexOneField());
+        f.insertDocument(Fixtures.createTestDocument());
+        //act
+        TableRepository tableRepo = new TableRepository(f.getSession());
+        tableRepo.delete(Fixtures.createTestTable());
+        Thread.sleep(5000);
+
+        //check table deletion
+        assertFalse(tableRepo.exists(Fixtures.createTestTable().getId()));
+        //check index deletion
+        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
+        //check iTable deletion
+        ITableRepository iTableRepo = new ITableRepository(f.getSession());
+        assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
+        //check document deletion
+        DocumentRepository docRepo = new DocumentRepository(f.getSession());
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            docRepo.exists(Fixtures.createTestDocument().getId());
+        } catch (Exception e)//should error because the entire table should no longer exist
+        {
+            assertTrue(e.getMessage().contains("unconfigured columnfamily"));
+            assertTrue(e.getMessage().contains(Fixtures.createTestTable().toDbTable()));
+            expectedExceptionThrown = true;
+        }
+        assertTrue(expectedExceptionThrown);
+    }
+    
+    /**
      * Test of readAll method, of class TableRepository.
      */
     @Test
