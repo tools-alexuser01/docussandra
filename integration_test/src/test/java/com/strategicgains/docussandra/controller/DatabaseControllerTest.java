@@ -209,7 +209,7 @@ public class DatabaseControllerTest
         //act
         given().expect().statusCode(204)
                 .when().delete(testDb.name());
-        Thread.sleep(5000);
+        //Thread.sleep(5000);
         //check DB deletion
         expect().statusCode(404).when()
                 .get(testDb.name());
