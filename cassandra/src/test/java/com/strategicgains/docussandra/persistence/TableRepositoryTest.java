@@ -173,7 +173,7 @@ public class TableRepositoryTest
         //act
         TableRepository tableRepo = new TableRepository(f.getSession());
         tableRepo.deleteEntity(Fixtures.createTestTable());
-        Thread.sleep(5000);
+        //Thread.sleep(5000);
 
         //check table deletion
         assertFalse(tableRepo.exists(Fixtures.createTestTable().getId()));
