@@ -23,7 +23,6 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import org.junit.BeforeClass;
@@ -366,7 +365,7 @@ public class IndexControllerTest
                 {
                     fail("Index took too long to create");
                 }
-                Thread.sleep(5000);
+                Thread.sleep(2000);
             }
             LOGGER.info("It took: " + (sw.getTime() / 1000) + " seconds to create the index.");
 
@@ -478,7 +477,7 @@ public class IndexControllerTest
                 {
                     fail("Index took too long to create: " + sw.getTime());
                 }
-                Thread.sleep(5000);
+                Thread.sleep(2000);
             }
             LOGGER.info("It took: " + (sw.getTime() / 1000) + " seconds to create the index.");
 
@@ -594,7 +593,7 @@ public class IndexControllerTest
                 {
                     fail("Index took too long to create");
                 }
-                Thread.sleep(5000);
+                Thread.sleep(2000);
             }
             LOGGER.info("It took: " + (sw.getTime() / 1000) + " seconds to create the index.");
 
