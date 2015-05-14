@@ -80,7 +80,7 @@ public abstract class AbstractCassandraEntityRepository<T extends Identifiable> 
         }
 
         BoundStatement bs = new BoundStatement(existStmt);
-        bs.bind(identifier.primaryKey());
+        bs.bind(identifier.getComponentAsString(0));
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
@@ -93,7 +93,7 @@ public abstract class AbstractCassandraEntityRepository<T extends Identifiable> 
         }
 
         BoundStatement bs = new BoundStatement(readStmt);
-        bs.bind(identifier.primaryKey());
+        bs.bind(identifier.getComponentAsString(0));
         return marshalRow(getSession().execute(bs).one());
     }
 

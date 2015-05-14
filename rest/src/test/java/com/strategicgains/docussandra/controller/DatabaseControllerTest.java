@@ -125,7 +125,7 @@ public class DatabaseControllerTest
                 .body("description", equalTo(testDb.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
+                .get("/" + testDb.name());
     }
 
     /**
@@ -151,7 +151,7 @@ public class DatabaseControllerTest
                 .body("description", equalTo(testDb.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
+                .get("/" + testDb.name());
     }
 
     /**
@@ -174,7 +174,7 @@ public class DatabaseControllerTest
                 .body("description", equalTo(newDesciption))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
+                .get("/" + testDb.name());
 
     }
 

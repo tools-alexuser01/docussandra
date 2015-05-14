@@ -99,7 +99,7 @@ public class DatabaseRepository extends AbstractCassandraEntityRepository<Databa
     public void deleteEntityById(Identifier identifier)
     {
         super.deleteEntityById(identifier);
-        cascadeDelete(identifier.components().get(0).toString());
+        cascadeDelete(identifier.getComponentAsString(0));
     }
 
     private void cascadeDelete(String dbName)

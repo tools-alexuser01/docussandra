@@ -38,26 +38,6 @@ public class Identifier
     private List<Object> components = new ArrayList<Object>();
 
     /**
-     * Create an empty identifier.
-     */
-    public Identifier()
-    {
-        super();
-    }
-
-    public Identifier(Identifier that)
-    {
-        this();
-
-        if (that == null || that.isEmpty())
-        {
-            return;
-        }
-
-        add(that.components.toArray());
-    }
-
-    /**
      * Create an identifier with the given components. Duplicate instances are
      * not added--only one instance of a component will exist in the identifier.
      *
@@ -65,7 +45,7 @@ public class Identifier
      */
     public Identifier(Object... components)
     {
-        this();
+        super();
         add(components);
     }
 
@@ -114,6 +94,30 @@ public class Identifier
     public List<Object> components()
     {
         return Collections.unmodifiableList(components);
+    }
+
+    /**
+     * Get an item out of this identifier.
+     *
+     * @param index Index of the component to fetch.
+     *
+     * @return an unmodifiable list of components.
+     */
+    public String getComponentAsString(int index)
+    {
+        return components.get(index).toString();
+    }
+
+    /**
+     * Get an item out of this identifier.
+     *
+     * @param index Index of the component to fetch.
+     *
+     * @return an unmodifiable list of components.
+     */
+    public Object getComponent(int index)
+    {
+        return components.get(index);
     }
 
     /**
@@ -169,9 +173,9 @@ public class Identifier
      * respectively.
      */
     @SuppressWarnings(
-    {
-        "unchecked", "rawtypes"
-    })
+            {
+                "unchecked", "rawtypes"
+            })
     @Override
     public int compareTo(Identifier that)
     {
@@ -222,21 +226,20 @@ public class Identifier
         {
             return "";
         }
-
-        return (components.size() == 1 ? primaryKey().toString() : "(" + Utils.join(SEPARATOR, components) + ")");
+        return "(" + Utils.join(SEPARATOR, components) + ")";
     }
 
-    /**
-     * Returns the first component of the identifier. Return null if the
-     * identifier is empty. Equivalent to components().get(0).
-     *
-     * @return the first component or null.
-     */
-    public Object primaryKey()
-    {
-        return (isEmpty() ? null : components.get(0));
-    }
-
+//    /**
+//     * Returns the first component of the identifier. Return null if the
+//     * identifier is empty. Equivalent to components().get(0).
+//     *
+//     * @return the first component or null.
+//     */
+//    @Deprecated
+//    public Object primaryKey()
+//    {
+//        return (isEmpty() ? null : components.get(0));
+//    }
     /**
      * Return true if the identifier has no components.
      *
@@ -247,8 +250,8 @@ public class Identifier
         return components.isEmpty();
     }
 
-        //below this line is an ugly copy + paste: TODO: fix
-        //stolen from the restexpress object utils
+    //below this line is an ugly copy + paste: TODO: fix
+    //stolen from the restexpress object utils
     /**
      * Determines is two objects are comparable to each other, in that they
      * implement Comparable and are of the same type. If either object is null,

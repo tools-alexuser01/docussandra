@@ -196,8 +196,8 @@ public class IndexRepository extends AbstractCassandraRepository
         BoundStatement bs = new BoundStatement(deleteStmt);
         bindIdentifier(bs, id);
         getSession().execute(bs);
-        String dbName = id.components().get(0).toString();//TODO: create helper methods
-        String tableName = id.components().get(1).toString();
+        String dbName = id.getComponentAsString(0);//TODO: create helper methods -- kinda half done now
+        String tableName = id.getComponentAsString(1);
         //maintain cache
         try//we do this in a try/catch because we don't want to cause an app error if this fails
         {
@@ -235,7 +235,7 @@ public class IndexRepository extends AbstractCassandraRepository
         //-----warn the user -- probably not
         //-----throw an exception -- probably not even more
         //-----do nothing -- probably
-        logger.info("Cleaning up ITables for index: " + id.components().get(0).toString() + "/" + id.components().get(1).toString() + "/" + id.components().get(2).toString());
+        logger.info("Cleaning up ITables for index: " + id.getComponentAsString(0) + "/" + id.getComponentAsString(1) + "/" + id.getComponentAsString(2));
 
         if (iTableRepo.iTableExists(id))
         {

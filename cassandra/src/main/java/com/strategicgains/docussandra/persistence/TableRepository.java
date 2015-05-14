@@ -165,7 +165,7 @@ public class TableRepository extends AbstractCassandraRepository
     public void deleteEntity(Identifier id)
     {
         // Delete the actual table for the documents.
-        Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, id.components().get(0) + "_" + id.components().get(1)));
+        Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, id.getComponentAsString(0) + "_" + id.getComponentAsString(1)));
         getSession().execute(s);
 
         BoundStatement bs = new BoundStatement(deleteStmt);
@@ -177,8 +177,8 @@ public class TableRepository extends AbstractCassandraRepository
     //TODO: fix tests for cascade
     private void cascadeDelete(Identifier id)
     {
-        String dbName = id.components().get(0).toString();
-        String tableName = id.components().get(1).toString();
+        String dbName = id.getComponentAsString(0);
+        String tableName = id.getComponentAsString(1);
         logger.info("Cleaning up Indexes for table: " + dbName + "/" + tableName);
         //remove all the collections and all the documents in that table.
         //TODO: version instead of delete

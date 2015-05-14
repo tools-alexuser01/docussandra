@@ -278,7 +278,7 @@ public class DocumentRepository extends AbstractCassandraRepository
     @Override
     protected void bindIdentifier(BoundStatement bs, Identifier identifier)
     {
-        bs.bind(identifier.primaryKey());
+        bs.bind(identifier.getComponent(0));
     }
 
     private void bindCreate(BoundStatement bs, Document entity)

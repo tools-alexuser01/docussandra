@@ -99,7 +99,7 @@ public class Utils
     //TODO: write test for this
     public static String calculateITableName(Identifier indexId)
     {
-        return calculateITableName(indexId.components().get(0).toString(), indexId.components().get(1).toString(), indexId.components().get(2).toString());
+        return calculateITableName(indexId.getComponentAsString(0), indexId.getComponentAsString(1), indexId.getComponentAsString(2));
     }
 
     //TODO: ditch the UUID type; we are misusing it here and another type (probably a string or long) would be more approprate 
