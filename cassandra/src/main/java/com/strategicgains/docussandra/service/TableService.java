@@ -29,13 +29,13 @@ public class TableService
 		}
 
 		ValidationEngine.validateAndThrow(entity);
-		return tables.createEntity(entity);
+		return tables.create(entity);
 	}
 
 	public Table read(String database, String table)
 	{
 		Identifier id = new Identifier(database, table);
-		Table t = tables.readEntityById(id);
+		Table t = tables.read(id);
 
 		if (t == null) throw new ItemNotFoundException("Table not found: " + id.toString());
 
@@ -52,11 +52,11 @@ public class TableService
 	public void update(Table entity)
     {
 		ValidationEngine.validateAndThrow(entity);
-		tables.updateEntity(entity);
+		tables.update(entity);
     }
 
 	public void delete(Identifier id)
     {
-		tables.deleteEntity(id);
+		tables.delete(id);
     }
 }

@@ -122,7 +122,7 @@ public class IndexRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Index readEntityById(Identifier identifier)
+    public Index read(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
         {
@@ -140,7 +140,7 @@ public class IndexRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Index createEntity(Index entity)
+    public Index create(Index entity)
     {
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
@@ -185,13 +185,13 @@ public class IndexRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Index updateEntity(Index entity)
+    public Index update(Index entity)
     {
         throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
     }
 
     //@Override
-    public void deleteEntity(Identifier id)
+    public void delete(Identifier id)
     {
         BoundStatement bs = new BoundStatement(deleteStmt);
         bindIdentifier(bs, id);
@@ -223,9 +223,9 @@ public class IndexRepository extends AbstractCassandraRepository
         //TODO: delete the index status (or at least mark it permantly inactive/disabled with a new timestamp, ensuring that /index_status won't return it) and halt any active indexing to save processor time
     }
 
-    public void deleteEntity(Index entity)
+    public void delete(Index entity)
     {
-        deleteEntity(entity.getId());
+        delete(entity.getId());
     }
 
     private void cascadeDelete(Identifier id)

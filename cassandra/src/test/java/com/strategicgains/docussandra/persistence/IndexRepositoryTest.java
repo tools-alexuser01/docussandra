@@ -83,7 +83,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of readEntityById method, of class IndexRepository.
+     * Test of read method, of class IndexRepository.
      */
     @Test
     public void testReadEntityById()
@@ -95,19 +95,19 @@ public class IndexRepositoryTest
         boolean expectedExceptionThrown = false;
         try
         {
-            instance.readEntityById(identifier);
+            instance.read(identifier);
         } catch (ItemNotFoundException e)
         {
             expectedExceptionThrown = true;
         }
         assertTrue("Expected exception not thrown", expectedExceptionThrown);
         f.insertIndex(testIndex);
-        Index result = instance.readEntityById(identifier);
+        Index result = instance.read(identifier);
         assertEquals(testIndex, result);
     }
 
     /**
-     * Test of createEntity method, of class IndexRepository.
+     * Test of create method, of class IndexRepository.
      */
     @Test
     public void testCreateEntity()
@@ -116,9 +116,9 @@ public class IndexRepositoryTest
         Index entity = Fixtures.createTestIndexOneField();
         IndexRepository instance = new IndexRepository(f.getSession());
         Index expResult = entity;
-        Index result = instance.createEntity(entity);
+        Index result = instance.create(entity);
         assertEquals(expResult, result);
-        result = instance.readEntityById(result.getId());
+        result = instance.read(result.getId());
         assertEquals(expResult, result);
     }
 
@@ -132,15 +132,15 @@ public class IndexRepositoryTest
         Index entity = Fixtures.createTestIndexOneField();
         f.insertIndex(entity);
         IndexRepository instance = new IndexRepository(f.getSession());
-        Index result = instance.readEntityById(entity.getId());
+        Index result = instance.read(entity.getId());
         assertFalse(result.isActive());
         instance.markActive(entity);
-        result = instance.readEntityById(entity.getId());
+        result = instance.read(entity.getId());
         assertTrue(result.isActive());
     }
 
     /**
-     * Test of updateEntity method, of class IndexRepository.
+     * Test of update method, of class IndexRepository.
      */
     @Test
     public void testUpdateEntity()
@@ -150,7 +150,7 @@ public class IndexRepositoryTest
         boolean expectedExceptionThrown = false;
         try
         {
-            Index result = instance.updateEntity(Fixtures.createTestIndexOneField());
+            Index result = instance.update(Fixtures.createTestIndexOneField());
         } catch (UnsupportedOperationException e)
         {
             expectedExceptionThrown = true;
@@ -159,7 +159,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of deleteEntity method, of class IndexRepository.
+     * Test of delete method, of class IndexRepository.
      */
     @Test
     public void testDeleteEntity()
@@ -168,11 +168,11 @@ public class IndexRepositoryTest
         Index entity = Fixtures.createTestIndexOneField();
         f.insertIndex(entity);
         IndexRepository instance = new IndexRepository(f.getSession());
-        instance.deleteEntity(entity);
+        instance.delete(entity);
         boolean expectedExceptionThrown = false;
         try
         {
-            instance.readEntityById(entity.getId());
+            instance.read(entity.getId());
         } catch (ItemNotFoundException e)
         {
             expectedExceptionThrown = true;
@@ -181,7 +181,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of deleteEntity method, of class IndexRepository.
+     * Test of delete method, of class IndexRepository.
      */
     @Test
     public void testDeleteEntityWithDeleteCascade() throws InterruptedException
@@ -191,7 +191,7 @@ public class IndexRepositoryTest
         f.insertIndex(Fixtures.createTestIndexOneField());
         //act
         IndexRepository indexRepo = new IndexRepository(f.getSession());
-        indexRepo.deleteEntity(Fixtures.createTestIndexOneField());
+        indexRepo.delete(Fixtures.createTestIndexOneField());
         //Thread.sleep(5000);
         //check index deletion        
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));

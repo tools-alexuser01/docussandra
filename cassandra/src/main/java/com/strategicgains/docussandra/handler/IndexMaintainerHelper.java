@@ -276,7 +276,7 @@ public class IndexMaintainerHelper
     {
         //DocumentRepository docRepo = new DocumentRepository(session);
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
-        //BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
+        //BSONObject oldObject = (BSONObject) JSON.parse(docRepo.read(entity.getId()).object());
         for (IndexField indexField : index.getFields())
         {
             String field = indexField.getField();
@@ -299,7 +299,7 @@ public class IndexMaintainerHelper
     public static BSONObject getOldObjectForUpdate(Session session, Document entity)
     {
         DocumentRepository docRepo = new DocumentRepository(session);
-        return (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
+        return (BSONObject) JSON.parse(docRepo.read(entity.getId()).object());
     }
 
     /**

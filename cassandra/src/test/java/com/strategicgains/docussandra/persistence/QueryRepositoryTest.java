@@ -72,20 +72,20 @@ public class QueryRepositoryTest
     }
 
     /**
-     * Test of doQuery method, of class QueryDao.
+     * Test of query method, of class QueryDao.
      */
     @Test
     public void testDoQueryNoResults() throws IndexParseException
     {
         System.out.println("testDoQueryNoResults");
         QueryRepository instance = new QueryRepository(f.getSession());
-        QueryResponseWrapper result = instance.doQuery(Fixtures.createTestParsedQuery());
+        QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(result.isEmpty());//no data yet, should get an empty set
     }
 
     /**
-     * Test of doQuery method, of class QueryDao.
+     * Test of query method, of class QueryDao.
      */
     @Test
     public void testDoQueryWithResults() throws IndexParseException
@@ -94,9 +94,9 @@ public class QueryRepositoryTest
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
-        docRepo.doCreate(doc);
+        docRepo.create(doc);
         QueryRepository instance = new QueryRepository(f.getSession());
-        QueryResponseWrapper result = instance.doQuery(Fixtures.createTestParsedQuery());
+        QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 1);
@@ -113,7 +113,7 @@ public class QueryRepositoryTest
     }
 
     /**
-     * Test of doQuery method, of class QueryDao.
+     * Test of query method, of class QueryDao.
      */
     @Test
     public void testDoQueryWithDataButNoResults() throws IndexParseException
@@ -122,16 +122,16 @@ public class QueryRepositoryTest
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
-        docRepo.doCreate(doc);
+        docRepo.create(doc);
         QueryRepository instance = new QueryRepository(f.getSession());
-        QueryResponseWrapper result = instance.doQuery(Fixtures.createTestParsedQuery2());
+        QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery2());
         assertNotNull(result);
         assertTrue(result.isEmpty());
         assertTrue(result.getNumAdditionalResults() == 0);
     }
 
     /**
-     * Test of doQuery method, of class QueryDao.
+     * Test of query method, of class QueryDao.
      */
     @Test
     public void testDoQueryWithLotsOfResults() throws Exception
@@ -143,7 +143,7 @@ public class QueryRepositoryTest
         //put a bunch of test docs in
         f.insertDocuments(docs);
         QueryRepository instance = new QueryRepository(f.getSession());
-        QueryResponseWrapper result = instance.doQuery(Fixtures.createTestParsedQueryBulkData());
+        QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQueryBulkData());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 34);
@@ -151,7 +151,7 @@ public class QueryRepositoryTest
     }
 
     /**
-     * Test of doQuery method, of class QueryDao.
+     * Test of query method, of class QueryDao.
      */
     @Test
     public void testDoQueryWithPaging() throws Exception
@@ -166,7 +166,7 @@ public class QueryRepositoryTest
         QueryRepository instance = new QueryRepository(f.getSession());
         ParsedQuery query = Fixtures.createTestParsedQueryBulkData();
         //let's get the first 5
-        QueryResponseWrapper result = instance.doQuery(query, 5, 0);
+        QueryResponseWrapper result = instance.query(query, 5, 0);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 5);
@@ -178,7 +178,7 @@ public class QueryRepositoryTest
         assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the second 5
-        result = instance.doQuery(query, 5, 5);
+        result = instance.query(query, 5, 5);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 5);
@@ -190,7 +190,7 @@ public class QueryRepositoryTest
         assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the third 5
-        result = instance.doQuery(query, 5, 10);
+        result = instance.query(query, 5, 10);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 5);
@@ -202,7 +202,7 @@ public class QueryRepositoryTest
         assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the last 4
-        result = instance.doQuery(query, 5, 30);
+        result = instance.query(query, 5, 30);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 4);

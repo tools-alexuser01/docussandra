@@ -91,7 +91,7 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of readEntityById method, of class TableRepository.
+     * Test of read method, of class TableRepository.
      */
     @Test
     public void testReadEntityById()
@@ -101,13 +101,13 @@ public class TableRepositoryTest
         Identifier identifier = testTable.getId();
         TableRepository instance = new TableRepository(f.getSession());
         f.insertTable(testTable);
-        Table result = instance.readEntityById(identifier);
+        Table result = instance.read(identifier);
         assertNotNull(result);
         assertEquals(testTable, result);
     }
 
     /**
-     * Test of createEntity method, of class TableRepository.
+     * Test of create method, of class TableRepository.
      */
     @Test
     public void testCreateEntity()
@@ -115,13 +115,13 @@ public class TableRepositoryTest
         System.out.println("createEntity");
         Table entity = Fixtures.createTestTable();
         TableRepository instance = new TableRepository(f.getSession());
-        Table result = instance.createEntity(entity);
+        Table result = instance.create(entity);
         assertEquals(entity, result);
 
     }
 
     /**
-     * Test of updateEntity method, of class TableRepository.
+     * Test of update method, of class TableRepository.
      */
     @Test
     public void testUpdateEntity()
@@ -129,20 +129,20 @@ public class TableRepositoryTest
         System.out.println("updateEntity");
         Table entity = Fixtures.createTestTable();
         TableRepository instance = new TableRepository(f.getSession());
-        Table created = instance.createEntity(entity);
+        Table created = instance.create(entity);
         assertEquals(entity, created);
         String newDesciption = "this is a new description";
         created.description(newDesciption);
-        Table result = instance.updateEntity(entity);
+        Table result = instance.update(entity);
         assertEquals(created, result);
         result.name("new_name1");
-        Table resultNew = instance.updateEntity(entity);
+        Table resultNew = instance.update(entity);
         assertEquals(result, resultNew);
-        instance.deleteEntity(resultNew.getId());
+        instance.delete(resultNew.getId());
     }
 
     /**
-     * Test of deleteEntity method, of class TableRepository.
+     * Test of delete method, of class TableRepository.
      */
     @Test
     public void testDeleteEntity()
@@ -154,13 +154,13 @@ public class TableRepositoryTest
         TableRepository instance = new TableRepository(f.getSession());
         boolean result = instance.exists(identifier);
         assertEquals(true, result);
-        instance.deleteEntity(identifier);
+        instance.delete(identifier);
         result = instance.exists(identifier);
         assertEquals(false, result);
     }
 
     /**
-     * Test of deleteEntity method, of class TableRepository.
+     * Test of delete method, of class TableRepository.
      */
     @Test
     public void testDeleteEntityWithDeleteCascade() throws InterruptedException
@@ -172,7 +172,7 @@ public class TableRepositoryTest
         f.insertDocument(Fixtures.createTestDocument());
         //act
         TableRepository tableRepo = new TableRepository(f.getSession());
-        tableRepo.deleteEntity(Fixtures.createTestTable());
+        tableRepo.delete(Fixtures.createTestTable());
         //Thread.sleep(5000);
 
         //check table deletion

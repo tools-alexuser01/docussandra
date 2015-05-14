@@ -92,8 +92,8 @@ public class IndexMaintainerHelperTest
         index1 = Fixtures.createTestIndexOneField();
         index2 = Fixtures.createTestIndexTwoField();
         index3 = Fixtures.createTestIndexAllFieldTypes();
-        indexRepo.createEntity(index1);
-        indexRepo.createEntity(index2);
+        indexRepo.create(index1);
+        indexRepo.create(index2);
     }
 
     @After
@@ -217,8 +217,8 @@ public class IndexMaintainerHelperTest
     {
         System.out.println("generateDocumentUpdateIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument2();
-        tableRepo.createEntity(table);//create the table so we have a place to store the test data
-        docRepo.doCreate(entity);//insert a document so we have something to reference
+        tableRepo.create(table);//create the table so we have a place to store the test data
+        docRepo.create(entity);//insert a document so we have something to reference
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
         assertEquals(2, result.size());//one for each of our indices
         BoundStatement one = result.get(0);
@@ -248,9 +248,9 @@ public class IndexMaintainerHelperTest
     {
         System.out.println("generateDocumentUpdateIndexEntriesStatements");
         Document entity = Fixtures.createTestDocument3();
-        tableRepo.createEntity(table);//create the table so we have a place to store the test data
+        tableRepo.create(table);//create the table so we have a place to store the test data
         f.insertIndex(index3);
-        docRepo.doCreate(entity);//insert a document so we have something to reference
+        docRepo.create(entity);//insert a document so we have something to reference
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
         assertEquals(1, result.size());//one for each of our indices
         BoundStatement one = result.get(0);
@@ -286,8 +286,8 @@ public class IndexMaintainerHelperTest
     {
         System.out.println("generateDocumentUpdateIndexEntriesStatementsIndexChanged");
         Document entity = Fixtures.createTestDocument2();
-        tableRepo.createEntity(table);//create the table so we have a place to store the test data
-        docRepo.doCreate(entity);//insert a document so we have something to reference
+        tableRepo.create(table);//create the table so we have a place to store the test data
+        docRepo.create(entity);//insert a document so we have something to reference
         String changedMyindexedfield = "this is NOT my field";
         entity.object("{'greeting':'hello', 'myindexedfield': '" + changedMyindexedfield + "', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
@@ -345,8 +345,8 @@ public class IndexMaintainerHelperTest
     {
         System.out.println("generateDocumentUpdateIndexEntriesStatementsIndexChangedNewIndexNull");
         Document entity = Fixtures.createTestDocument2();
-        tableRepo.createEntity(table);//create the table so we have a place to store the test data
-        docRepo.doCreate(entity);//insert a document so we have something to reference
+        tableRepo.create(table);//create the table so we have a place to store the test data
+        docRepo.create(entity);//insert a document so we have something to reference
         entity.object("{'greeting':'hello', 'myindexedfield': null, 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
         assertEquals(2, result.size());//NONE for the create (the first index now has a null value), one for the delete, one for the second index
@@ -389,8 +389,8 @@ public class IndexMaintainerHelperTest
         System.out.println("generateDocumentUpdateIndexEntriesStatementsIndexChangedOldIndexNull");
         Document entity = Fixtures.createTestDocument2();
         entity.object("{'greeting':'hello', 'myindexedfield': null, 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change an indexed field
-        tableRepo.createEntity(table);//create the table so we have a place to store the test data
-        docRepo.doCreate(entity);//insert a document so we have something to reference
+        tableRepo.create(table);//create the table so we have a place to store the test data
+        docRepo.create(entity);//insert a document so we have something to reference
         entity = Fixtures.createTestDocument2();//pull the entitiy in from fixtures again
 
         List<BoundStatement> result = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(f.getSession(), entity, new SimpleIndexBucketLocatorImpl());
@@ -577,9 +577,9 @@ public class IndexMaintainerHelperTest
     public void testHasIndexedFieldChanged()
     {
         System.out.println("hasIndexedFieldChanged");
-        tableRepo.createEntity(table);//create the table so we have a place to store the test data
+        tableRepo.create(table);//create the table so we have a place to store the test data
         Document entity = Fixtures.createTestDocument2();
-        docRepo.doCreate(entity);//insert
+        docRepo.create(entity);//insert
         entity.object("{'greeting':'hola', 'myindexedfield': 'this is my field', 'myindexedfield1':'my second field', 'myindexedfield2':'my third field'}");//change a non-index field        
 
         boolean result = IndexMaintainerHelper.hasIndexedFieldChanged(IndexMaintainerHelper.getOldObjectForUpdate(f.getSession(), entity), index1, entity);

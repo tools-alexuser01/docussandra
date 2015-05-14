@@ -71,7 +71,7 @@ public class DatabaseRepository extends AbstractCassandraEntityRepository<Databa
     }
 
     //@Override
-    public Database createEntity(Database entity)
+    public Database create(Database entity)
     {
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
@@ -80,7 +80,7 @@ public class DatabaseRepository extends AbstractCassandraEntityRepository<Databa
     }
 
     //@Override
-    public Database updateEntity(Database entity)
+    public Database update(Database entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
@@ -112,7 +112,7 @@ public class DatabaseRepository extends AbstractCassandraEntityRepository<Databa
         List<Table> tables = tableRepo.readAll(dbName);//get all tables
         for (Table t : tables)
         {
-            tableRepo.deleteEntity(t);// then delete them
+            tableRepo.delete(t);// then delete them
         }
     }
 

@@ -109,7 +109,7 @@ public class TableRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Table readEntityById(Identifier identifier)
+    public Table read(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
         {
@@ -127,7 +127,7 @@ public class TableRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Table createEntity(Table entity)
+    public Table create(Table entity)
     {
         // Create the actual table for the documents.
         Statement s = new SimpleStatement(String.format(CREATE_DOC_TABLE_CQL, entity.toDbTable()));
@@ -141,7 +141,7 @@ public class TableRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Table updateEntity(Table entity)
+    public Table update(Table entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
@@ -150,7 +150,7 @@ public class TableRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public void deleteEntity(Table entity)
+    public void delete(Table entity)
     {
         // Delete the actual table for the documents.
         Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, entity.toDbTable()));
@@ -162,7 +162,7 @@ public class TableRepository extends AbstractCassandraRepository
         cascadeDelete(entity.getId());
     }
 
-    public void deleteEntity(Identifier id)
+    public void delete(Identifier id)
     {
         // Delete the actual table for the documents.
         Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, id.getComponentAsString(0) + "_" + id.getComponentAsString(1)));
@@ -174,7 +174,6 @@ public class TableRepository extends AbstractCassandraRepository
         cascadeDelete(id);
     }
 
-    //TODO: fix tests for cascade
     private void cascadeDelete(Identifier id)
     {
         String dbName = id.getComponentAsString(0);
@@ -187,7 +186,7 @@ public class TableRepository extends AbstractCassandraRepository
         List<Index> indexes = indexRepo.readAll(dbName, tableName);//get all indexes
         for (Index i : indexes)
         {
-            indexRepo.deleteEntity(i);// then delete them
+            indexRepo.delete(i);// then delete them
         }
     }
 
@@ -353,7 +352,7 @@ public class TableRepository extends AbstractCassandraRepository
      return (getSession().execute(bs).one().getLong(0) > 0);
      }
 
-     protected Table readEntityById(Identifier identifier)
+     protected Table read(Identifier identifier)
      {
      if (identifier == null || identifier.isEmpty())
      {
@@ -366,7 +365,7 @@ public class TableRepository extends AbstractCassandraRepository
      }
 
      @Override
-     protected Table createEntity(Table entity)
+     protected Table create(Table entity)
      {
      // Create the actual table for the documents.
      Statement s = new SimpleStatement(String.format(CREATE_DOC_TABLE_CQL, entity.toDbTable()));
@@ -380,7 +379,7 @@ public class TableRepository extends AbstractCassandraRepository
      }
 
      @Override
-     protected Table updateEntity(Table entity)
+     protected Table update(Table entity)
      {
      BoundStatement bs = new BoundStatement(updateStmt);
      bindUpdate(bs, entity);
@@ -389,7 +388,7 @@ public class TableRepository extends AbstractCassandraRepository
      }
 
      @Override
-     protected void deleteEntity(Table entity)
+     protected void delete(Table entity)
      {
      // Delete the actual table for the documents.
      Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, entity.toDbTable()));

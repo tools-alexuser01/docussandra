@@ -336,7 +336,7 @@ public class IndexStatusRepository
         Index toUse;
         try
         {
-            toUse = indexRepo.readEntityById(index.getId());
+            toUse = indexRepo.read(index.getId());
         } catch (ItemNotFoundException e)//this should only happen in tests that do not have full test data established; errors will be evident if this happens in the actual app
         {
             toUse = index;

@@ -67,7 +67,7 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of createEntity method, of class DatabaseRepository.
+     * Test of create method, of class DatabaseRepository.
      */
     @Test
     public void testCreateEntity()
@@ -75,12 +75,12 @@ public class DatabaseRepositoryTest
         System.out.println("createEntity");
         Database entity = Fixtures.createTestDatabase();
         DatabaseRepository instance = new DatabaseRepository(f.getSession());
-        Database result = instance.createEntity(entity);
+        Database result = instance.create(entity);
         assertEquals(entity, result);
     }
 
     /**
-     * Test of updateEntity method, of class DatabaseRepository.
+     * Test of update method, of class DatabaseRepository.
      */
     @Test
     public void testUpdateEntity()
@@ -92,13 +92,13 @@ public class DatabaseRepositoryTest
         //act
         DatabaseRepository instance = new DatabaseRepository(f.getSession());
         entity.description("This is a new description!");
-        Database result = instance.updateEntity(entity);
+        Database result = instance.update(entity);
         //assert
         assertEquals(entity, result);
     }
 
     /**
-     * Test of deleteEntity method, of class DatabaseRepository.
+     * Test of delete method, of class DatabaseRepository.
      */
     @Test
     public void testDeleteEntity()
@@ -116,7 +116,7 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of deleteEntity method, of class DatabaseRepository.
+     * Test of delete method, of class DatabaseRepository.
      */
     @Test
     public void testDeleteEntityWithDeleteCascade() throws InterruptedException

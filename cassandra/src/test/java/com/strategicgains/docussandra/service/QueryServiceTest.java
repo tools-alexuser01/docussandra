@@ -55,7 +55,7 @@ public class QueryServiceTest
         f.createTestITables();
         instance = new QueryService(new QueryRepository(f.getSession()));
         IndexRepository indexRepo = new IndexRepository(f.getSession());
-        indexRepo.createEntity(Fixtures.createTestIndexTwoField());
+        indexRepo.create(Fixtures.createTestIndexTwoField());
     }
 
     @AfterClass
@@ -74,7 +74,7 @@ public class QueryServiceTest
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
-        docRepo.doCreate(doc);
+        docRepo.create(doc);
         List<Document> result = instance.query(Fixtures.DB, Fixtures.createTestQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());

@@ -26,7 +26,7 @@ public class DatabaseService
     {
         logger.info("Attempting to create database: " + entity);
         ValidationEngine.validateAndThrow(entity);
-        return databases.createEntity(entity);
+        return databases.create(entity);
     }
 
     public Database read(String name)
@@ -50,7 +50,7 @@ public class DatabaseService
     {
         logger.info("Attempting to update database: " + entity.name());
         ValidationEngine.validateAndThrow(entity);
-        databases.updateEntity(entity);
+        databases.update(entity);
     }
 
     public void delete(String name)

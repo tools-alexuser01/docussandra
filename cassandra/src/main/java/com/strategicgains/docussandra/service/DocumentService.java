@@ -37,7 +37,7 @@ public class DocumentService
         ValidationEngine.validateAndThrow(doc);
         try
         {
-            return docs.doCreate(doc);
+            return docs.create(doc);
         } catch (RuntimeException e)//the framework does not allow us to throw the IndexParseException directly from the repository layer
         {
             if (e.getCause() != null && e.getCause() instanceof IndexParseException)
@@ -53,7 +53,7 @@ public class DocumentService
     public Document read(String database, String table, Identifier id)
     {
         verifyTable(database, table);
-        return docs.doRead(id);
+        return docs.read(id);
     }
 
 //	public List<Document> readAll(String database, String table)
@@ -69,13 +69,13 @@ public class DocumentService
     public void update(Document entity)
     {
         ValidationEngine.validateAndThrow(entity);
-        docs.doUpdate(entity);
+        docs.update(entity);
     }
 
     public void delete(String database, String table, Identifier id)
     {
         verifyTable(database, table);
-        docs.doDelete(id);
+        docs.delete(id);
     }
 
     private void verifyTable(String database, String table)

@@ -46,7 +46,7 @@ public class QueryService
     public QueryResponseWrapper query(String db, Query toQuery) throws IndexParseException, FieldNotIndexedException
     {
         ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());
-        return queries.doQuery(parsedQuery);
+        return queries.query(parsedQuery);
     }
 
     /**
@@ -66,6 +66,6 @@ public class QueryService
     public QueryResponseWrapper query(String db, Query toQuery, int limit, long offset) throws IndexParseException, FieldNotIndexedException
     {
         ParsedQuery parsedQuery = ParsedQueryFactory.getParsedQuery(db, toQuery, queries.getSession());
-        return queries.doQuery(parsedQuery, limit, offset);
+        return queries.query(parsedQuery, limit, offset);
     }
 }

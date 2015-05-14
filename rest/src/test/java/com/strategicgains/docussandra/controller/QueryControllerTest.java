@@ -323,7 +323,7 @@ public class QueryControllerTest
             {
                 try
                 {
-                    docrepo.doDelete(d);
+                    docrepo.delete(d);
                 } catch (Exception e)
                 {
                     ;//eh -- the doc probably never got created
@@ -380,7 +380,7 @@ public class QueryControllerTest
             {
                 try
                 {
-                    docrepo.doDelete(d);
+                    docrepo.delete(d);
                 } catch (Exception e)
                 {
                     ;//eh -- the doc probably never got created
@@ -448,7 +448,7 @@ public class QueryControllerTest
             {
                 try
                 {
-                    docrepo.doDelete(d);
+                    docrepo.delete(d);
                 } catch (Exception e)
                 {
                     ;//eh -- the doc probably never got created

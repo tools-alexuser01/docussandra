@@ -70,10 +70,10 @@ public class IndexCreatedHandler implements EventHandler
         try
         {
             status = (IndexCreatedEvent) event;
-            Index index = indexRepo.readEntityById(status.getIndex().getId());
+            Index index = indexRepo.read(status.getIndex().getId());
             long offset = 0;
             long recordsCompleted = 0;
-            QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
+            QueryResponseWrapper responseWrapper = docRepo.readAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
             boolean hasMore;
             if (responseWrapper.isEmpty())
             {
@@ -109,7 +109,7 @@ public class IndexCreatedHandler implements EventHandler
                         errors.add(e.toString() + " In document: " + toIndex.toString());//may want to reduce the verbosity here eventually -- or break some meta-data out into columns
                         status.setErrors(errors);
                         status.setStatusLastUpdatedAt(new Date());
-                        //indexStatusRepo.updateEntity(status);//lets not save every time for now
+                        //indexStatusRepo.update(status);//lets not save every time for now
                     }
                 }
                 offset = offset + CHUNK;
@@ -118,7 +118,7 @@ public class IndexCreatedHandler implements EventHandler
                 status.setStatusLastUpdatedAt(new Date());
                 indexStatusRepo.updateEntity(status);
                 //get the next chunk
-                responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
+                responseWrapper = docRepo.readAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
                 if (responseWrapper.isEmpty())
                 {
                     hasMore = false;

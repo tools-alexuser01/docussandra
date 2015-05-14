@@ -62,7 +62,7 @@ public class QueryRepository
         return bs;
     }
 
-    public QueryResponseWrapper doQuery(ParsedQuery query) throws IndexParseException
+    public QueryResponseWrapper query(ParsedQuery query) throws IndexParseException
     {
         //run the query
         ResultSet results = session.execute(generateQueryStatement(query, -1));
@@ -77,7 +77,7 @@ public class QueryRepository
         return new QueryResponseWrapper(toReturn, 0l);
     }
 
-    public QueryResponseWrapper doQuery(ParsedQuery query, int limit, long offset) throws IndexParseException
+    public QueryResponseWrapper query(ParsedQuery query, int limit, long offset) throws IndexParseException
     {        
         //run the query
         long maxIndex = offset + limit;

@@ -86,7 +86,7 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of doCreate method, of class DocumentRepository.
+     * Test of create method, of class DocumentRepository.
      */
     @Test
     public void testDoCreate()
@@ -94,7 +94,7 @@ public class DocumentRepositoryTest
         System.out.println("doCreate");
         Document entity = Fixtures.createTestDocument();
         DocumentRepository instance = new DocumentRepository(f.getSession());
-        Document result = instance.doCreate(entity);
+        Document result = instance.create(entity);
         assertNotNull(result);
         assertEquals(entity.databaseName(), result.databaseName());
         assertEquals(entity.tableName(), result.tableName());
@@ -105,7 +105,7 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of doRead method, of class DocumentRepository.
+     * Test of read method, of class DocumentRepository.
      */
     @Test
     public void testDoRead()
@@ -118,14 +118,14 @@ public class DocumentRepositoryTest
         Identifier identifier = testDocument.getId();
         DocumentRepository instance = new DocumentRepository(f.getSession());
         Document expResult = testDocument;
-        Document result = instance.doRead(identifier);
+        Document result = instance.read(identifier);
         assertEquals(expResult, result);
         //cleanup the random uuid'ed doc
         f.deleteDocument(testDocument);
     }
 
     /**
-     * Test of doReadAll method, of class DocumentRepository.
+     * Test of readAll method, of class DocumentRepository.
      */
     @Test
     public void testDoReadAll() throws IOException, ParseException
@@ -136,22 +136,22 @@ public class DocumentRepositoryTest
 
         DocumentRepository instance = new DocumentRepository(f.getSession());
 
-        List<Document> result = instance.doReadAll(testDb.name(), testTable.name(), 10, 0);
+        List<Document> result = instance.readAll(testDb.name(), testTable.name(), 10, 0);
         assertTrue(result.size() == 10);
         assertNotNull(result.get(0).getId());
         assertNotNull(result.get(0).getUuid());
         assertNotNull(result.get(0).getUpdatedAt());
-        result = instance.doReadAll(testDb.name(), testTable.name(), 10, 10);
+        result = instance.readAll(testDb.name(), testTable.name(), 10, 10);
         assertTrue(result.size() == 10);
         assertNotNull(result.get(0).getId());
         assertNotNull(result.get(0).getUuid());
         assertNotNull(result.get(0).getUpdatedAt());
-        result = instance.doReadAll(testDb.name(), testTable.name(), 100, 20);
+        result = instance.readAll(testDb.name(), testTable.name(), 100, 20);
         assertTrue(result.size() == 14);
     }
 
     /*
-     * Test of doReadAll method, of class DocumentRepository.
+     * Test of readAll method, of class DocumentRepository.
      */
     @Test
     public void testDoReadAll2() throws IOException, ParseException
@@ -163,28 +163,28 @@ public class DocumentRepositoryTest
         DocumentRepository instance = new DocumentRepository(f.getSession());
         
         //let's get the first 5
-        QueryResponseWrapper result = instance.doReadAll(testDb.name(), testTable.name(), 5, 0);
+        QueryResponseWrapper result = instance.readAll(testDb.name(), testTable.name(), 5, 0);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 5);
         assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the second 5
-        result = instance.doReadAll(testDb.name(), testTable.name(), 5, 5);
+        result = instance.readAll(testDb.name(), testTable.name(), 5, 5);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 5);
         assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the third 5
-        result = instance.doReadAll(testDb.name(), testTable.name(), 5, 10);
+        result = instance.readAll(testDb.name(), testTable.name(), 5, 10);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 5);
         assertTrue(result.getNumAdditionalResults() == null);
 
         //now lets get the last 4
-        result = instance.doReadAll(testDb.name(), testTable.name(), 5, 30);
+        result = instance.readAll(testDb.name(), testTable.name(), 5, 30);
         assertNotNull(result);
         assertTrue(!result.isEmpty());
         assertTrue(result.size() == 4);
@@ -192,7 +192,7 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of doUpdate method, of class DocumentRepository.
+     * Test of update method, of class DocumentRepository.
      */
     @Test
     public void testDoUpdate()
@@ -203,14 +203,14 @@ public class DocumentRepositoryTest
         DocumentRepository instance = new DocumentRepository(f.getSession());
         String newObject = "{\"newjson\": \"object\"}";
         testDocument.object(newObject);
-        Document result = instance.doUpdate(testDocument);
+        Document result = instance.update(testDocument);
         assertEquals(testDocument, result);
         //cleanup the random uuid'ed doc
         f.deleteDocument(testDocument);
     }
 
     /**
-     * Test of doDelete method, of class DocumentRepository.
+     * Test of delete method, of class DocumentRepository.
      */
     @Test
     public void testDoDelete()
@@ -219,11 +219,11 @@ public class DocumentRepositoryTest
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
         DocumentRepository instance = new DocumentRepository(f.getSession());
-        instance.doDelete(testDocument);
+        instance.delete(testDocument);
         boolean exceptionThrown = false;
         try
         {
-            instance.doRead(testDocument.getId());
+            instance.read(testDocument.getId());
         } catch (ItemNotFoundException e)
         {
             exceptionThrown = true;
@@ -243,20 +243,20 @@ public class DocumentRepositoryTest
         DocumentRepository instance = new DocumentRepository(f.getSession());
         //create
         Document testDocument = Fixtures.createTestDocument();
-        Document createResult = instance.doCreate(testDocument);
+        Document createResult = instance.create(testDocument);
         assertNotNull(createResult);
         //read create
-        Document readResult = instance.doRead(createResult.getId());
+        Document readResult = instance.read(createResult.getId());
         assertEquals(createResult, readResult);
 
         //update
         String newObject = "{\"newjson\": \"object\"}";
         testDocument.object(newObject);
-        Document updateResult = instance.doUpdate(testDocument);
+        Document updateResult = instance.update(testDocument);
         assertEquals(testDocument, updateResult);
 
         //read update
-        readResult = instance.doRead(createResult.getId());
+        readResult = instance.read(createResult.getId());
         assertEquals(updateResult, readResult);
 
         //delete
@@ -265,7 +265,7 @@ public class DocumentRepositoryTest
         boolean exceptionThrown = false;
         try
         {
-            instance.doRead(testDocument.getId());
+            instance.read(testDocument.getId());
         } catch (ItemNotFoundException e)
         {
             exceptionThrown = true;
@@ -274,20 +274,20 @@ public class DocumentRepositoryTest
 
         //create again
         testDocument = Fixtures.createTestDocument();
-        createResult = instance.doCreate(testDocument);
+        createResult = instance.create(testDocument);
         assertNotNull(createResult);
         //read create again
-        readResult = instance.doRead(createResult.getId());
+        readResult = instance.read(createResult.getId());
         assertEquals(createResult, readResult);
 
         //update again
         newObject = "{\"newjson\": \"objectNew\"}";
         testDocument.object(newObject);
-        updateResult = instance.doUpdate(testDocument);
+        updateResult = instance.update(testDocument);
         assertEquals(testDocument, updateResult);
 
         //read update again
-        readResult = instance.doRead(createResult.getId());
+        readResult = instance.read(createResult.getId());
         assertEquals(updateResult, readResult);
 
         //delete again
@@ -296,7 +296,7 @@ public class DocumentRepositoryTest
         exceptionThrown = false;
         try
         {
-            instance.doRead(testDocument.getId());
+            instance.read(testDocument.getId());
         } catch (ItemNotFoundException e)
         {
             exceptionThrown = true;

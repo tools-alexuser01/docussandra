@@ -72,7 +72,7 @@ public class DocumentRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Document doCreate(Document entity)
+    public Document create(Document entity)
     {
         if (exists(entity.getId()))
         {
@@ -102,7 +102,7 @@ public class DocumentRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Document doRead(Identifier identifier)
+    public Document read(Identifier identifier)
     {
         Table table = extractTable(identifier);
         Identifier id = extractId(identifier);
@@ -121,7 +121,7 @@ public class DocumentRepository extends AbstractCassandraRepository
         return item;
     }
 
-    public QueryResponseWrapper doReadAll(String database, String tableString, int limit, long offset)
+    public QueryResponseWrapper readAll(String database, String tableString, int limit, long offset)
     {
         Table table = new Table();
         table.database(database);
@@ -167,9 +167,9 @@ public class DocumentRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public Document doUpdate(Document entity)
+    public Document update(Document entity)
     {
-        Document old = doRead(entity.getId()); //will throw exception of doc is not found
+        Document old = read(entity.getId()); //will throw exception of doc is not found
         entity.setCreatedAt(old.getCreatedAt());//copy over the original create date
         Table table = entity.table();
         PreparedStatement updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), session());
@@ -195,7 +195,7 @@ public class DocumentRepository extends AbstractCassandraRepository
     }
 
     //@Override
-    public void doDelete(Document entity)
+    public void delete(Document entity)
     {
         try
         {
@@ -225,12 +225,12 @@ public class DocumentRepository extends AbstractCassandraRepository
         }
     }
 
-    public void doDelete(Identifier id)
+    public void delete(Identifier id)
     {
         //ok, this is kinda messed up; we actually need to FETCH the document in
         //order to delete it, otherwise we can't determine what iTables need to
         //be updated
-        Document entity = this.doRead(id);
+        Document entity = this.read(id);
         try
         {
             Table table = entity.table();

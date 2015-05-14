@@ -79,7 +79,7 @@ public class IndexService
         
         index.setActive(false);//we default to not active when being created; we don't allow the user to change this; only the app can change this
         logger.debug("Creating index: " + index.toString());
-        Index created = indexesRepo.createEntity(index);
+        Index created = indexesRepo.create(index);
         long dataSize = tablesRepo.countTableSize(index.getDatabaseName(), index.getTableName());
         Date now = new Date();
         UUID uuid = UUID.randomUUID();//TODO: is this right?
@@ -127,7 +127,7 @@ public class IndexService
      */
     public Index read(Identifier identifier)
     {
-        return indexesRepo.readEntityById(identifier);
+        return indexesRepo.read(identifier);
     }
 
     /**
@@ -138,7 +138,7 @@ public class IndexService
     public void delete(Identifier identifier)
     {
         logger.debug("Deleting index: " + identifier.toString());
-        indexesRepo.deleteEntity(identifier);
+        indexesRepo.delete(identifier);
     }
 
     /**
@@ -149,7 +149,7 @@ public class IndexService
     public void delete(Index index)
     {
         logger.debug("Deleting index: " + index.toString());
-        indexesRepo.deleteEntity(index);
+        indexesRepo.delete(index);
     }
 
     /**
