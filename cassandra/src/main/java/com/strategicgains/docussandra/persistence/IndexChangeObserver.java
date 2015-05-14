@@ -2,8 +2,7 @@ package com.strategicgains.docussandra.persistence;
 
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.repoexpress.domain.Identifiable;
-import com.strategicgains.repoexpress.event.AbstractRepositoryObserver;
+import com.sun.corba.se.spi.ior.Identifiable;
 
 /**
  * Observer of any changes to the index table (sys_idx). Propagates any needed
@@ -12,8 +11,8 @@ import com.strategicgains.repoexpress.event.AbstractRepositoryObserver;
  * @author udeyoje
  * @since Feb 12, 2015
  */
+@Deprecated
 public class IndexChangeObserver<T extends Identifiable>
-        extends AbstractRepositoryObserver<T>
 {
 
     /**
@@ -45,7 +44,7 @@ public class IndexChangeObserver<T extends Identifiable>
 
     }
 
-    @Override
+    //@Override
     public void afterCreate(T object)
     {
         //create the iTable
@@ -63,7 +62,7 @@ public class IndexChangeObserver<T extends Identifiable>
         //note: index population will be called from the service layer
     }
 
-    @Override
+    //@Override
     public void afterDelete(T object)
     {
         //drop the iTable

@@ -6,6 +6,7 @@ import com.strategicgains.docussandra.domain.Table;
  * @author toddf
  * @since Nov 19, 2014
  */
+@Deprecated
 public class TableDeletedEvent
 extends AbstractEvent<Table>
 {

@@ -135,7 +135,7 @@ public class IndexCreatedHandlerTest
         assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
         assertTrue(statusRepo.readAllCurrentlyIndexing().isEmpty());
         assertNotNull(storedStatus.getIndex());
-        Index readIndex = indexRepo.read(testIndex.getId());
+        Index readIndex = indexRepo.readEntityById(testIndex.getId());
         assertNotNull(readIndex);
         assertTrue(readIndex.isActive());
     }
@@ -218,7 +218,7 @@ public class IndexCreatedHandlerTest
         assertNotEquals(storedStatus.getDateStarted(), storedStatus.getStatusLastUpdatedAt());
         assertTrue(statusRepo.readAllCurrentlyIndexing().isEmpty());
         assertNotNull(storedStatus.getIndex());
-        Index readIndex = indexRepo.read(lastname.getId());
+        Index readIndex = indexRepo.readEntityById(lastname.getId());
         assertNotNull(readIndex);
         assertTrue(readIndex.isActive());
     }

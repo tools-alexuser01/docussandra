@@ -1,48 +1,39 @@
 package com.strategicgains.docussandra.domain;
 
-import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
-import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
 
-public class Metadata
-extends AbstractTimestampedIdentifiable
+public class Metadata extends Timestamped
 {
-	private String id = "system";
-	private String version;
+    private String id = "system";
+    private String version;
 
-	@Override
     public Identifier getId()
     {
-		return (hasId() ? new Identifier(id, getUpdatedAt()) : null);
+        return (hasId() ? new Identifier(id, getUpdatedAt()) : null);
     }
 
-	@Override
-    public void setId(Identifier id)
+    public boolean hasId()
     {
-		// Do nothing.
+        return (id != null);
     }
 
-	public boolean hasId()
-	{
-		return (id != null);
-	}
+    public void id(String value)
+    {
+        this.id = value;
+    }
 
-	public void id(String value)
-	{
-		this.id = value;
-	}
+    public String id()
+    {
+        return id;
+    }
 
-	public String id()
-	{
-		return id;
-	}
+    public String version()
+    {
+        return version;
+    }
 
-	public String version()
-	{
-		return version;
-	}
-
-	public void version(String version)
-	{
-		this.version = version;
-	}
+    public void version(String version)
+    {
+        this.version = version;
+    }
 }

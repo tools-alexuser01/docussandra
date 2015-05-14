@@ -70,6 +70,10 @@ public class IndexStatusRepositoryTest
         CacheFactory.clearAllCaches();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
+        //it was passing before with out the next lines; HOW?
+        f.insertTable(Fixtures.createTestTable());
+        f.insertIndex(Fixtures.createTestIndexAllFieldTypes());
+        f.insertIndex(Fixtures.createTestIndexOneField());
     }
 
     @After

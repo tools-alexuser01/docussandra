@@ -5,6 +5,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.Utils;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
@@ -69,9 +70,28 @@ public class ITableRepository
     public boolean iTableExists(Index index)
     {
         logger.info("Checking for existance of iTable for index: " + index.toString());
+        return iTableExists(Utils.calculateITableName(index));
+    }
+
+    /**
+     * Checks to see if an iTable exists for the specified index.
+     *
+     * @param indexId Index Id that you want to check if it has a corresponding
+     * iTable.
+     * @return True if the iTable exists for the index, false otherwise.
+     */
+    public boolean iTableExists(Identifier indexId)
+    {
+        String iTableName = Utils.calculateITableName(indexId);
+        logger.info("Checking for existance of iTable: " + iTableName);
+        return iTableExists(iTableName);
+    }
+
+    private boolean iTableExists(String iTableName)
+    {
         PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(TABLE_EXISTENCE_CQL, session);
         BoundStatement bs = new BoundStatement(createStmt);
-        bs.bind(Utils.calculateITableName(index));
+        bs.bind(iTableName);
         ResultSet rs = session.execute(bs);
         Iterator ite = rs.iterator();
         while (ite.hasNext())
@@ -144,6 +164,17 @@ public class ITableRepository
     public void deleteITable(Index index)
     {
         String tableToDelete = Utils.calculateITableName(index);
+        deleteITable(tableToDelete);
+    }
+
+    /**
+     * Deletes an iTable
+     *
+     * @param indexId index id whose iTable should be deleted
+     */
+    public void deleteITable(Identifier indexId)
+    {
+        String tableToDelete = Utils.calculateITableName(indexId);
         deleteITable(tableToDelete);
     }
 

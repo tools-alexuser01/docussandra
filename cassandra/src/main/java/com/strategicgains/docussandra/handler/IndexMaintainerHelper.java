@@ -22,7 +22,6 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.bson.BSON;
 import org.bson.BSONObject;
-import org.restexpress.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -344,7 +343,7 @@ public class IndexMaintainerHelper
         String iTableToUpdate = Utils.calculateITableName(index);
         //determine which getFields need to write as PKs
         List<String> fields = index.getFieldsValues();
-        String fieldNamesInsertSyntax = StringUtils.join(", ", fields);
+        String fieldNamesInsertSyntax = Utils.join(", ", fields);
         //calculate the number of '?'s we need to append on the values clause
         StringBuilder fieldValueInsertSyntax = new StringBuilder();
         for (int i = 0; i < fields.size(); i++)
@@ -426,5 +425,5 @@ public class IndexMaintainerHelper
         }
         return setValues.toString();
     }
-
+    
 }

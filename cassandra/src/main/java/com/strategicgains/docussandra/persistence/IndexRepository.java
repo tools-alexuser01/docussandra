@@ -12,20 +12,19 @@ import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.cache.CacheSynchronizer;
 import com.strategicgains.docussandra.domain.FieldDataType;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
+import com.strategicgains.docussandra.persistence.abstractparent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IndexRepository
-        extends AbstractCassandraRepository<Index>
+public class IndexRepository extends AbstractCassandraRepository
 {
 
     /**
@@ -78,6 +77,8 @@ public class IndexRepository
     private PreparedStatement readAllStmt;
     private PreparedStatement readAllCountStmt;
 
+    private ITableRepository iTableRepo;
+
     /**
      * Constructor.
      *
@@ -86,10 +87,11 @@ public class IndexRepository
     public IndexRepository(Session session)
     {
         super(session, Tables.BY_ID);
-        addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Index>());
-        //addObserver(new StateChangeEventingObserver<>(new IndexEventFactory()));
-        addObserver(new IndexChangeObserver(session));
+//        addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Index>());
+//        //addObserver(new StateChangeEventingObserver<>(new IndexEventFactory()));
+//        addObserver(new IndexChangeObserver(session));
         initialize();
+        iTableRepo = new ITableRepository(session);
     }
 
     /**
@@ -106,7 +108,7 @@ public class IndexRepository
         readAllCountStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_COUNT_CQL, getTable()), getSession());
     }
 
-    @Override
+    //@Override
     public boolean exists(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -119,8 +121,8 @@ public class IndexRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
-    @Override
-    protected Index readEntityById(Identifier identifier)
+    //@Override
+    public Index readEntityById(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
         {
@@ -129,11 +131,16 @@ public class IndexRepository
 
         BoundStatement bs = new BoundStatement(readStmt);
         bindIdentifier(bs, identifier);
-        return marshalRow(getSession().execute(bs).one());
+        Index response = marshalRow(getSession().execute(bs).one());
+        if (response == null)
+        {
+            throw new ItemNotFoundException("ID not found: " + identifier.toString());
+        }
+        return response;
     }
 
-    @Override
-    protected Index createEntity(Index entity)
+    //@Override
+    public Index createEntity(Index entity)
     {
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
@@ -153,6 +160,15 @@ public class IndexRepository
         {
             logger.error("Could not update index cache upon index create.", e);
         }
+        //create itable
+        if (!iTableRepo.iTableExists(entity))
+        {
+            iTableRepo.createITable(entity);
+        }
+        //-----check to see if it is correct, suggest the user delete and try again if it's not -- probably
+        //-----automatically re-index; hard to actually do, it would need a different name if the index was in use -- probably not
+        //-----do nothing -- maybe?
+        //TODO: add test for iTable creation
         return entity;
     }
 
@@ -168,26 +184,28 @@ public class IndexRepository
         getSession().execute(bs);
     }
 
-    @Override
-    protected Index updateEntity(Index entity)
+    //@Override
+    public Index updateEntity(Index entity)
     {
         throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
     }
 
-    @Override
-    protected void deleteEntity(Index entity)
+    //@Override
+    public void deleteEntity(Identifier id)
     {
         BoundStatement bs = new BoundStatement(deleteStmt);
-        bindIdentifier(bs, entity.getId());
+        bindIdentifier(bs, id);
         getSession().execute(bs);
+        String dbName = id.components().get(0).toString();//TODO: create helper methods
+        String tableName = id.components().get(1).toString();
         //maintain cache
         try//we do this in a try/catch because we don't want to cause an app error if this fails
         {
             Cache c = CacheFactory.getCache("index");
-            String key = entity.getDatabaseName() + ":" + entity.getTableName();
+            String key = dbName + ":" + tableName;
             synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
             {
-                List<Index> currentIndex = this.readAll(entity.getDatabaseName(), entity.getTableName());
+                List<Index> currentIndex = this.readAll(dbName, tableName);
                 if (!currentIndex.isEmpty())
                 {
                     Element e = new Element(key, currentIndex);
@@ -200,6 +218,28 @@ public class IndexRepository
         } catch (Exception e)
         {
             logger.error("Could not update index cache upon index delete.", e);
+        }
+        cascadeDelete(id);
+        //TODO: delete the index status (or at least mark it permantly inactive/disabled with a new timestamp, ensuring that /index_status won't return it) and halt any active indexing to save processor time
+    }
+
+    public void deleteEntity(Index entity)
+    {
+        deleteEntity(entity.getId());
+    }
+
+    private void cascadeDelete(Identifier id)
+    {
+        //TODO: what if it doesn't exist?
+        //options:
+        //-----warn the user -- probably not
+        //-----throw an exception -- probably not even more
+        //-----do nothing -- probably
+        logger.info("Cleaning up ITables for index: " + id.components().get(0).toString() + "/" + id.components().get(1).toString() + "/" + id.components().get(2).toString());
+
+        if (iTableRepo.iTableExists(id))
+        {
+            iTableRepo.deleteITable(id);
         }
     }
 
@@ -312,28 +352,4 @@ public class IndexRepository
         i.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
         return i;
     }
-//
-    //we can add this back in if needed, but i perfer to do this logic explicitly at the service layer for now
-//    private class IndexEventFactory
-//            implements EventFactory<Index>
-//    {
-//
-//        @Override
-//        public Object newCreatedEvent(Index object)
-//        {
-//            return new IndexCreatedEvent(object);
-//        }
-//
-//        @Override
-//        public Object newUpdatedEvent(Index object)
-//        {
-//            throw new UnsupportedOperationException("This is not a valid call. Updates of indexes are not supported.");
-//        }
-//
-//        @Override
-//        public Object newDeletedEvent(Index object)
-//        {
-//            return new IndexDeletedEvent(object);
-//        }
-//    }
 }

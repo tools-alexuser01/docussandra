@@ -1,15 +1,15 @@
 package com.strategicgains.docussandra.service;
 
+import com.strategicgains.docussandra.domain.Identifier;
 import java.util.List;
 
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.eventing.DomainEvents;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
 import java.util.Date;
 import java.util.UUID;
@@ -76,9 +76,10 @@ public class IndexService
     {
         verifyTable(index.getDatabaseName(), index.getTableName());
         ValidationEngine.validateAndThrow(index);
+        
         index.setActive(false);//we default to not active when being created; we don't allow the user to change this; only the app can change this
         logger.debug("Creating index: " + index.toString());
-        Index created = indexesRepo.create(index);
+        Index created = indexesRepo.createEntity(index);
         long dataSize = tablesRepo.countTableSize(index.getDatabaseName(), index.getTableName());
         Date now = new Date();
         UUID uuid = UUID.randomUUID();//TODO: is this right?
@@ -126,7 +127,7 @@ public class IndexService
      */
     public Index read(Identifier identifier)
     {
-        return indexesRepo.read(identifier);
+        return indexesRepo.readEntityById(identifier);
     }
 
     /**
@@ -137,7 +138,7 @@ public class IndexService
     public void delete(Identifier identifier)
     {
         logger.debug("Deleting index: " + identifier.toString());
-        indexesRepo.delete(identifier);
+        indexesRepo.deleteEntity(identifier);
     }
 
     /**
@@ -147,9 +148,8 @@ public class IndexService
      */
     public void delete(Index index)
     {
-        Identifier identifier = index.getId();
-        logger.debug("Deleting index: " + identifier.toString());
-        indexesRepo.delete(identifier);
+        logger.debug("Deleting index: " + index.toString());
+        indexesRepo.deleteEntity(index);
     }
 
     /**

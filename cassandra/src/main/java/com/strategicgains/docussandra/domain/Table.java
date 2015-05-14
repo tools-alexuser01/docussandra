@@ -1,10 +1,9 @@
 package com.strategicgains.docussandra.domain;
 
-import java.util.Iterator;
 
+import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
-import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.docussandra.domain.abstractparent.Identifiable;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;
@@ -12,7 +11,7 @@ import java.util.Objects;
 import org.restexpress.plugin.hyperexpress.Linkable;
 
 public class Table
-        extends AbstractTimestampedIdentifiable implements Linkable
+        extends Timestamped implements Linkable, Identifiable
 {
 
     @Required("Database")
@@ -96,32 +95,9 @@ public class Table
         return (hasDatabase() & hasName() ? new Identifier(database.name(), name) : null);
     }
 
-    @Override
-    public void setId(Identifier id)
-    {
-        // do nothing.
-    }
-
     public String toDbTable()
     {
-        StringBuilder sb = new StringBuilder();
-        Iterator<Object> iter = getId().iterator();
-        boolean isFirst = true;
-
-        while (iter.hasNext())
-        {
-            if (!isFirst)
-            {
-                sb.append('_');
-            } else
-            {
-                isFirst = false;
-            }
-
-            sb.append(iter.next().toString());
-        }
-
-        return sb.toString();
+        return database.name() + "_" + name;
     }
 
     @Override

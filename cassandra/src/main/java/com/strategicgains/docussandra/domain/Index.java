@@ -1,13 +1,13 @@
 package com.strategicgains.docussandra.domain;
 
+import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
-import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.docussandra.domain.abstractparent.Identifiable;
 import com.strategicgains.syntaxe.Validatable;
 import com.strategicgains.syntaxe.ValidationException;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
@@ -18,8 +18,8 @@ import java.util.Objects;
 import org.restexpress.plugin.hyperexpress.Linkable;
 
 public class Index
-        extends AbstractTimestampedIdentifiable
-        implements Validatable, Serializable, Linkable
+        extends Timestamped
+        implements Validatable, Serializable, Linkable, Identifiable
 {
 
     @Required("Table")
@@ -184,12 +184,6 @@ public class Index
         return new Identifier(getDatabaseName(), getTableName(), name);
     }
 
-    @Override
-    public void setId(Identifier id)
-    {
-        // intentionally left blank.
-    }
-
     public long getBucketSize()
     {
         return bucketSize;
@@ -235,9 +229,12 @@ public class Index
         if (fields == null || fields.isEmpty())
         {
             errors.add("Fields is required.");
-        } else {
-            for(IndexField i : fields){
-                if(i.getField() == null){
+        } else
+        {
+            for (IndexField i : fields)
+            {
+                if (i.getField() == null)
+                {
                     errors.add("Field name is required.");
                 }
             }

@@ -2,12 +2,13 @@ package com.strategicgains.docussandra.service;
 
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
+import java.util.UUID;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
@@ -32,10 +33,11 @@ public class DocumentService
         Document doc = new Document();
         doc.table(database, table);
         doc.object(json);
+        doc.setUuid(UUID.randomUUID());//TODO: is this right?
         ValidationEngine.validateAndThrow(doc);
         try
         {
-            return docs.create(doc);
+            return docs.doCreate(doc);
         } catch (RuntimeException e)//the framework does not allow us to throw the IndexParseException directly from the repository layer
         {
             if (e.getCause() != null && e.getCause() instanceof IndexParseException)
@@ -51,7 +53,7 @@ public class DocumentService
     public Document read(String database, String table, Identifier id)
     {
         verifyTable(database, table);
-        return docs.read(id);
+        return docs.doRead(id);
     }
 
 //	public List<Document> readAll(String database, String table)
@@ -67,13 +69,13 @@ public class DocumentService
     public void update(Document entity)
     {
         ValidationEngine.validateAndThrow(entity);
-        docs.update(entity);
+        docs.doUpdate(entity);
     }
 
     public void delete(String database, String table, Identifier id)
     {
         verifyTable(database, table);
-        docs.delete(id);
+        docs.doDelete(id);
     }
 
     private void verifyTable(String database, String table)

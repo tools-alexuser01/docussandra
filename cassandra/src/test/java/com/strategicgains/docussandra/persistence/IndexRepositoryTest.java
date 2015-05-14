@@ -15,14 +15,14 @@
  */
 package com.strategicgains.docussandra.persistence;
 
-import com.datastax.driver.core.Row;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import com.strategicgains.repoexpress.domain.Identifier;
 import java.io.IOException;
 import java.util.List;
 import org.junit.AfterClass;
@@ -92,10 +92,17 @@ public class IndexRepositoryTest
         Index testIndex = Fixtures.createTestIndexOneField();
         Identifier identifier = testIndex.getId();
         IndexRepository instance = new IndexRepository(f.getSession());
-        Index result = instance.readEntityById(identifier);
-        assertNull(result);
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            instance.readEntityById(identifier);
+        } catch (ItemNotFoundException e)
+        {
+            expectedExceptionThrown = true;
+        }
+        assertTrue("Expected exception not thrown", expectedExceptionThrown);
         f.insertIndex(testIndex);
-        result = instance.readEntityById(identifier);
+        Index result = instance.readEntityById(identifier);
         assertEquals(testIndex, result);
     }
 
@@ -162,7 +169,15 @@ public class IndexRepositoryTest
         f.insertIndex(entity);
         IndexRepository instance = new IndexRepository(f.getSession());
         instance.deleteEntity(entity);
-        assertNull(instance.readEntityById(entity.getId()));
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            instance.readEntityById(entity.getId());
+        } catch (ItemNotFoundException e)
+        {
+            expectedExceptionThrown = true;
+        }
+        assertTrue("Expected exception not thrown", expectedExceptionThrown);
     }
 
     /**
@@ -176,7 +191,7 @@ public class IndexRepositoryTest
         f.insertIndex(Fixtures.createTestIndexOneField());
         //act
         IndexRepository indexRepo = new IndexRepository(f.getSession());
-        indexRepo.delete(Fixtures.createTestIndexOneField());
+        indexRepo.deleteEntity(Fixtures.createTestIndexOneField());
         Thread.sleep(5000);
         //check index deletion        
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));

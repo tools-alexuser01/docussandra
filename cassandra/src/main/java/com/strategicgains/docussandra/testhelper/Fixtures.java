@@ -5,7 +5,6 @@ import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.strategicgains.docussandra.Utils;
-import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.FieldDataType;
@@ -17,7 +16,6 @@ import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.exception.IndexParseException;
-import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.handler.IndexDeletedHandler;
@@ -423,7 +421,7 @@ public class Fixtures
 
     public void insertIndex(Index index)
     {
-        indexRepo.create(index);
+        indexRepo.createEntity(index);
     }
 
     public void clearTestTables()
@@ -468,9 +466,9 @@ public class Fixtures
         }
         try
         {
-            docRepo.delete(Fixtures.createTestDocument());
-            docRepo.delete(Fixtures.createTestDocument2());
-            docRepo.delete(Fixtures.createTestDocument3());
+            docRepo.doDelete(Fixtures.createTestDocument());
+            docRepo.doDelete(Fixtures.createTestDocument2());
+            docRepo.doDelete(Fixtures.createTestDocument3());
         } catch (DriverException e)
         {
             //logger.debug("Not dropping document, probably doesn't exist.");
@@ -482,7 +480,7 @@ public class Fixtures
             {
                 try
                 {
-                    docRepo.delete(d);
+                    docRepo.doDelete(d);
                 } catch (DriverException e)
                 {
                     //logger.debug("Not dropping bulk document, probably doesn't exist.");
@@ -513,7 +511,7 @@ public class Fixtures
         try
         {
 
-            tableRepo.delete(Fixtures.createTestTable());
+            tableRepo.deleteEntity(Fixtures.createTestTable());
         } catch (DriverException e)
         {
             //logger.debug("Not dropping setTable, probably doesn't exist.");
@@ -521,84 +519,84 @@ public class Fixtures
         try
         {
 
-            tableRepo.delete(Fixtures.createTestPlayersTable());
+            tableRepo.deleteEntity(Fixtures.createTestPlayersTable());
         } catch (DriverException e)
         {
             //logger.debug("Not dropping setTable, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestIndexOneField());
+            indexRepo.deleteEntity(Fixtures.createTestIndexOneField());
         } catch (DriverException e)
         {
             //logger.debug("Not dropping setTable, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestIndexTwoField());
+            indexRepo.deleteEntity(Fixtures.createTestIndexTwoField());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestIndexAllFieldTypes());
+            indexRepo.deleteEntity(Fixtures.createTestIndexAllFieldTypes());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestIndexNumericField());
+            indexRepo.deleteEntity(Fixtures.createTestIndexNumericField());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestIndexUUIDField());
+            indexRepo.deleteEntity(Fixtures.createTestIndexUUIDField());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestIndexWithBulkDataHit());
+            indexRepo.deleteEntity(Fixtures.createTestIndexWithBulkDataHit());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting index, probably doesn't exist.");
         }
         try
         {
-            databaseRepo.delete(Fixtures.createTestDatabase());
+            databaseRepo.deleteEntity(Fixtures.createTestDatabase());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
         try
         {
-            databaseRepo.delete(Fixtures.createTestPlayersDatabase());
+            databaseRepo.deleteEntity(Fixtures.createTestPlayersDatabase());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestPlayersIndexLastName());
+            indexRepo.deleteEntity(Fixtures.createTestPlayersIndexLastName());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestPlayersIndexCreatedOn());
+            indexRepo.deleteEntity(Fixtures.createTestPlayersIndexCreatedOn());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
         try
         {
-            indexRepo.delete(Fixtures.createTestPlayersIndexRookieYear());
+            indexRepo.deleteEntity(Fixtures.createTestPlayersIndexRookieYear());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
@@ -613,11 +611,11 @@ public class Fixtures
         Index index = Fixtures.createTestIndexOneField();
         Index index2 = Fixtures.createTestIndexTwoField();
         Index index3 = Fixtures.createTestIndexWithBulkDataHit();
-        indexRepo.create(index);
+        indexRepo.createEntity(index);
         //indexRepo.create(index2);
         iTableDao.createITable(index2);
         iTableDao.createITable(index3);
-        tableRepo.create(Fixtures.createTestTable());
+        tableRepo.createEntity(Fixtures.createTestTable());
     }
 
     public static final Document createTestDocument()
@@ -668,7 +666,7 @@ public class Fixtures
     public void insertDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
-        documentRepo.create(document);
+        documentRepo.doCreate(document);
     }
 
     public void insertDocuments(List<Document> documents)
@@ -678,7 +676,7 @@ public class Fixtures
         {
             try
             {
-                documentRepo.create(document);
+                documentRepo.doCreate(document);
             } catch (RuntimeException e)
             {
                 if (e.getCause() != null && e.getCause() instanceof IndexParseException)
@@ -713,7 +711,7 @@ public class Fixtures
     public void deleteDocument(Document document)
     {
         DocumentRepository documentRepo = new DocumentRepository(getSession());
-        documentRepo.delete(document);
+        documentRepo.doDelete(document);
     }
 
     /**
@@ -822,7 +820,7 @@ public class Fixtures
 
     public void insertTable(Table table)
     {
-        tableRepo.create(table);
+        tableRepo.createEntity(table);
     }
 
     public static Database createTestDatabase()
@@ -834,7 +832,7 @@ public class Fixtures
 
     public void insertDatabase(Database database)
     {
-        databaseRepo.create(database);
+        databaseRepo.createEntity(database);
     }
 
     /**

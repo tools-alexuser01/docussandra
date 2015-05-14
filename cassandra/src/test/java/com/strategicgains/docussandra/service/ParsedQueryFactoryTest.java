@@ -65,7 +65,7 @@ public class ParsedQueryFactoryTest
         f.clearTestTables();
         f.createTestITables();
         IndexRepository indexRepo = new IndexRepository(f.getSession());
-        indexRepo.create(Fixtures.createTestIndexTwoField());
+        indexRepo.createEntity(Fixtures.createTestIndexTwoField());
     }
 
     @After

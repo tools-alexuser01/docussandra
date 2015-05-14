@@ -10,16 +10,17 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Database;
-import com.strategicgains.docussandra.event.DatabaseCreatedEvent;
-import com.strategicgains.docussandra.event.DatabaseDeletedEvent;
-import com.strategicgains.docussandra.event.DatabaseUpdatedEvent;
-import com.strategicgains.docussandra.event.EventFactory;
+import com.strategicgains.docussandra.domain.Identifier;
+import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.domain.abstractparent.AbstractCassandraEntityRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.repoexpress.cassandra.CassandraTimestampedEntityRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DatabaseRepository
-        extends CassandraTimestampedEntityRepository<Database>
+public class DatabaseRepository extends AbstractCassandraEntityRepository<Database>
 {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private class Tables
     {
@@ -39,25 +40,29 @@ public class DatabaseRepository
     private static final String CREATE_CQL = "insert into %s (%s, description, created_at, updated_at) values (?, ?, ?, ?)";
     private static final String UPDATE_CQL = "update %s set description = ?, updated_at = ? where %s = ?";
     private static final String READ_ALL_CQL = "select * from %s";
+    //private static final String DELETE_CQL = "delete from %s where %s = ?";
     //private static final String READ_ALL_CQL_WITH_LIMIT = "select * from %s LIMIT %s";
 
     private PreparedStatement createStmt;
     private PreparedStatement updateStmt;
     private PreparedStatement readAllStmt;
+    //protected PreparedStatement deleteStmt;
+
+    private TableRepository tableRepo;
 
     public DatabaseRepository(Session session)
     {
         super(session, Tables.BY_ID, Columns.NAME);
         initializeStatements();
+        tableRepo = new TableRepository(getSession());
     }
 
-    @Override
-    protected void initializeObservers()
-    {
-        super.initializeObservers();
-        addObserver(new StateChangeEventingObserver<Database>(new NamespaceEventFactory()));
-    }
-
+//    @Override
+//    protected void initializeObservers()
+//    {
+//        super.initializeObservers();
+//        addObserver(new StateChangeEventingObserver<Database>(new NamespaceEventFactory()));
+//    }
     protected void initializeStatements()
     {
         createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), getIdentifierColumn()), getSession());
@@ -65,8 +70,8 @@ public class DatabaseRepository
         readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
     }
 
-    @Override
-    protected Database createEntity(Database entity)
+    //@Override
+    public Database createEntity(Database entity)
     {
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
@@ -74,8 +79,8 @@ public class DatabaseRepository
         return entity;
     }
 
-    @Override
-    protected Database updateEntity(Database entity)
+    //@Override
+    public Database updateEntity(Database entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
@@ -84,11 +89,31 @@ public class DatabaseRepository
     }
 
     @Override
-    protected void deleteEntity(Database entity)
+    public void deleteEntity(Database entity)
     {
-        BoundStatement bs = new BoundStatement(deleteStmt);
-        bindIdentifier(bs, entity.getId());
-        getSession().execute(bs);
+        super.deleteEntity(entity);
+        cascadeDelete(entity.name());
+    }
+
+    @Override
+    public void deleteEntityById(Identifier identifier)
+    {
+        super.deleteEntityById(identifier);
+        cascadeDelete(identifier.components().get(0).toString());
+    }
+
+    private void cascadeDelete(String dbName)
+    {
+        //remove all the collections and all the documents in that database.
+        //TODO: version instead of delete
+        //tables
+        logger.info("Cleaning up tables for database: " + dbName);
+
+        List<Table> tables = tableRepo.readAll(dbName);//get all tables
+        for (Table t : tables)
+        {
+            tableRepo.deleteEntity(t);// then delete them
+        }
     }
 
     public List<Database> readAll()
@@ -132,7 +157,7 @@ public class DatabaseRepository
         return namespaces;
     }
 
-    @Override
+    //@Override
     protected Database marshalRow(Row row)
     {
         if (row == null)
@@ -148,26 +173,26 @@ public class DatabaseRepository
         return n;
     }
 
-    private class NamespaceEventFactory
-            implements EventFactory<Database>
-    {
-
-        @Override
-        public Object newCreatedEvent(Database object)
-        {
-            return new DatabaseCreatedEvent(object);
-        }
-
-        @Override
-        public Object newUpdatedEvent(Database object)
-        {
-            return new DatabaseUpdatedEvent(object);
-        }
-
-        @Override
-        public Object newDeletedEvent(Database object)
-        {
-            return new DatabaseDeletedEvent(object);
-        }
-    }
+//    private class NamespaceEventFactory
+//            implements EventFactory<Database>
+//    {
+//
+//        @Override
+//        public Object newCreatedEvent(Database object)
+//        {
+//            return new DatabaseCreatedEvent(object);
+//        }
+//
+//        @Override
+//        public Object newUpdatedEvent(Database object)
+//        {
+//            return new DatabaseUpdatedEvent(object);
+//        }
+//
+//        @Override
+//        public Object newDeletedEvent(Database object)
+//        {
+//            return new DatabaseDeletedEvent(object);
+//        }
+//    }
 }

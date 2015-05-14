@@ -2,11 +2,8 @@ package com.strategicgains.docussandra.domain;
 
 import java.util.List;
 
-import com.strategicgains.repoexpress.domain.AbstractUuidEntity;
-import com.strategicgains.syntaxe.annotation.Required;
 
 public class Query
-        extends AbstractUuidEntity
 {
 
     private static int DEFAULT_LIMIT = 100;

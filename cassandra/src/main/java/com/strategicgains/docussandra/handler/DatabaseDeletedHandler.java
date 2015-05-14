@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * @author toddf
  * @since Nov 19, 2014
  */
+@Deprecated
 public class DatabaseDeletedHandler
         implements EventHandler
 {
@@ -42,7 +43,7 @@ public class DatabaseDeletedHandler
         List<Table> tables = tr.readAll(event.data.name());//get all tables
         for (Table t : tables)
         {
-            tr.delete(t);// then delete them
+            tr.deleteEntity(t);// then delete them
         }
     }
 

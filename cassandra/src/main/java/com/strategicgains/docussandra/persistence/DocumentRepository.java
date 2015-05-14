@@ -16,29 +16,22 @@ import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.event.DocumentCreatedEvent;
-import com.strategicgains.docussandra.event.DocumentDeletedEvent;
-import com.strategicgains.docussandra.event.DocumentUpdatedEvent;
-import com.strategicgains.docussandra.event.EventFactory;
+import com.strategicgains.docussandra.exception.DuplicateItemException;
 import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.exception.InvalidObjectIdException;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.handler.IndexMaintainerHelper;
+import com.strategicgains.docussandra.persistence.abstractparent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.repoexpress.AbstractObservableRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
-import com.strategicgains.repoexpress.event.UuidIdentityRepositoryObserver;
-import com.strategicgains.repoexpress.exception.DuplicateItemException;
-import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
-import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DocumentRepository
-        extends AbstractObservableRepository<Document>
+public class DocumentRepository extends AbstractCassandraRepository
 {
 
     private Session session;
@@ -68,9 +61,9 @@ public class DocumentRepository
         super();
         this.session = session;
         this.bucketLocator = new SimpleIndexBucketLocatorImpl(200);//TODO: maybe we do actually want to let users set this
-        addObserver(new UuidIdentityRepositoryObserver<Document>());
-        addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Document>());
-        addObserver(new StateChangeEventingObserver<>(new DocumentEventFactory()));
+//        addObserver(new UuidIdentityRepositoryObserver<Document>());
+//        addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Document>());
+//        addObserver(new StateChangeEventingObserver<>(new DocumentEventFactory()));
     }
 
     protected Session session()
@@ -78,7 +71,7 @@ public class DocumentRepository
         return session;
     }
 
-    @Override
+    //@Override
     public Document doCreate(Document entity)
     {
         if (exists(entity.getId()))
@@ -108,7 +101,7 @@ public class DocumentRepository
         }
     }
 
-    @Override
+    //@Override
     public Document doRead(Identifier identifier)
     {
         Table table = extractTable(identifier);
@@ -173,7 +166,7 @@ public class DocumentRepository
         return new QueryResponseWrapper(toReturn, additionalResults);
     }
 
-    @Override
+    //@Override
     public Document doUpdate(Document entity)
     {
         Document old = doRead(entity.getId()); //will throw exception of doc is not found
@@ -201,7 +194,7 @@ public class DocumentRepository
         }
     }
 
-    @Override
+    //@Override
     public void doDelete(Document entity)
     {
         try
@@ -230,10 +223,42 @@ public class DocumentRepository
         {
             throw new ItemNotFoundException("ID not found: " + entity.getId().toString());
         }
-
     }
 
-    @Override
+    public void doDelete(Identifier id)
+    {
+        //ok, this is kinda messed up; we actually need to FETCH the document in
+        //order to delete it, otherwise we can't determine what iTables need to
+        //be updated
+        Document entity = this.doRead(id);
+        try
+        {
+            Table table = entity.table();
+            PreparedStatement deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, table.toDbTable(), Columns.ID), session());
+
+            BoundStatement bs = new BoundStatement(deleteStmt);
+            bindIdentifier(bs, extractId(id));
+            BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
+            batch.add(bs);//the actual delete
+            try
+            {
+                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
+                for (BoundStatement boundIndexStatement : indexStatements)
+                {
+                    batch.add(boundIndexStatement);//the index deletes
+                }
+                session().execute(batch);
+            } catch (IndexParseException e)
+            {
+                throw new RuntimeException(e);//this shouldn't actually happen outside of tests
+            }
+        } catch (InvalidObjectIdException e)
+        {
+            throw new ItemNotFoundException("ID not found: " + entity.getId().toString());
+        }
+    }
+
+    //@Override
     public boolean exists(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -250,7 +275,8 @@ public class DocumentRepository
         return (session().execute(bs).one().getLong(0) > 0);
     }
 
-    private void bindIdentifier(BoundStatement bs, Identifier identifier)
+    @Override
+    protected void bindIdentifier(BoundStatement bs, Identifier identifier)
     {
         bs.bind(identifier.primaryKey());
     }
@@ -308,26 +334,26 @@ public class DocumentRepository
 
     }
 
-    private class DocumentEventFactory
-            implements EventFactory<Document>
-    {
-
-        @Override
-        public Object newCreatedEvent(Document object)
-        {
-            return new DocumentCreatedEvent(object);
-        }
-
-        @Override
-        public Object newUpdatedEvent(Document object)
-        {
-            return new DocumentUpdatedEvent(object);
-        }
-
-        @Override
-        public Object newDeletedEvent(Document object)
-        {
-            return new DocumentDeletedEvent(object);
-        }
-    }
+//    private class DocumentEventFactory
+//            implements EventFactory<Document>
+//    {
+//
+//        @Override
+//        public Object newCreatedEvent(Document object)
+//        {
+//            return new DocumentCreatedEvent(object);
+//        }
+//
+//        @Override
+//        public Object newUpdatedEvent(Document object)
+//        {
+//            return new DocumentUpdatedEvent(object);
+//        }
+//
+//        @Override
+//        public Object newDeletedEvent(Document object)
+//        {
+//            return new DocumentDeletedEvent(object);
+//        }
+//    }
 }

@@ -1,14 +1,14 @@
 package com.strategicgains.docussandra.domain;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.repoexpress.domain.AbstractTimestampedIdentifiable;
-import com.strategicgains.repoexpress.domain.Identifier;
+import com.strategicgains.docussandra.domain.abstractparent.Identifiable;
+import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import java.util.Objects;
 import org.restexpress.plugin.hyperexpress.Linkable;
 
 public class Database
-        extends AbstractTimestampedIdentifiable implements Linkable
+        extends Timestamped implements Linkable, Identifiable
 {
 
     @RegexValidation(name = "Namespace Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
@@ -41,12 +41,6 @@ public class Database
     public Identifier getId()
     {
         return new Identifier(name);
-    }
-
-    @Override
-    public void setId(Identifier id)
-    {
-        // do nothing.
     }
 
     public boolean hasDescription()

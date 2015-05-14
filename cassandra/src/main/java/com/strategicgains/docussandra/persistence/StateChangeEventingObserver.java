@@ -2,15 +2,14 @@ package com.strategicgains.docussandra.persistence;
 
 import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.eventing.DomainEvents;
-import com.strategicgains.repoexpress.domain.Identifiable;
-import com.strategicgains.repoexpress.event.AbstractRepositoryObserver;
 
 /**
  * @author toddf
  * @since Aug 1, 2014
  */
-public class StateChangeEventingObserver<T extends Identifiable>
-        extends AbstractRepositoryObserver<T>
+@Deprecated
+public class StateChangeEventingObserver<T extends Object>
+        //extends AbstractRepositoryObserver<T>
 {
 
     private EventFactory<T> factory;
@@ -21,7 +20,7 @@ public class StateChangeEventingObserver<T extends Identifiable>
         this.factory = eventFactory;
     }
 
-    @Override
+    //@Override
     public void afterCreate(T object)
     {
         if (factory != null)
@@ -30,7 +29,7 @@ public class StateChangeEventingObserver<T extends Identifiable>
         }
     }
 
-    @Override
+    //@Override
     public void afterDelete(T object)
     {
         if (factory != null)
@@ -39,7 +38,7 @@ public class StateChangeEventingObserver<T extends Identifiable>
         }
     }
 
-    @Override
+    //@Override
     public void afterUpdate(T object)
     {
         if (factory != null)

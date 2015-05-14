@@ -1,12 +1,12 @@
 package com.strategicgains.docussandra.service;
 
+import com.strategicgains.docussandra.domain.Identifier;
 import java.util.List;
 
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
 
 public class TableService
@@ -29,13 +29,13 @@ public class TableService
 		}
 
 		ValidationEngine.validateAndThrow(entity);
-		return tables.create(entity);
+		return tables.createEntity(entity);
 	}
 
 	public Table read(String database, String table)
 	{
 		Identifier id = new Identifier(database, table);
-		Table t = tables.read(id);
+		Table t = tables.readEntityById(id);
 
 		if (t == null) throw new ItemNotFoundException("Table not found: " + id.toString());
 
@@ -52,11 +52,11 @@ public class TableService
 	public void update(Table entity)
     {
 		ValidationEngine.validateAndThrow(entity);
-		tables.update(entity);
+		tables.updateEntity(entity);
     }
 
 	public void delete(Identifier id)
     {
-		tables.delete(id);
+		tables.deleteEntity(id);
     }
 }

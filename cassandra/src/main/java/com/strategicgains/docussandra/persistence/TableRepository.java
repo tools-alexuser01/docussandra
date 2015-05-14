@@ -11,19 +11,27 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
+import com.strategicgains.docussandra.domain.Identifier;
+import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.event.EventFactory;
 import com.strategicgains.docussandra.event.TableCreatedEvent;
 import com.strategicgains.docussandra.event.TableDeletedEvent;
 import com.strategicgains.docussandra.event.TableUpdatedEvent;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
+import com.strategicgains.docussandra.persistence.abstractparent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.repoexpress.cassandra.AbstractCassandraRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class TableRepository
-        extends AbstractCassandraRepository<Table>
+public class TableRepository extends AbstractCassandraRepository
+        //extends AbstractCassandraRepository<Table>
 {
+
+    /**
+     * Logger for this class.
+     */
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private class Tables
     {
@@ -65,12 +73,15 @@ public class TableRepository
     private PreparedStatement readAllStmt;
     private PreparedStatement readAllCountStmt;
 
+    private IndexRepository indexRepo;
+
     public TableRepository(Session session)
     {
         super(session, Tables.BY_ID);
-        addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Table>());
-        addObserver(new StateChangeEventingObserver<Table>(new CollectionEventFactory()));
+//        addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Table>());
+//        addObserver(new StateChangeEventingObserver<Table>(new CollectionEventFactory()));
         initialize();
+        indexRepo = new IndexRepository(session);
     }
 
     protected void initialize()
@@ -84,7 +95,7 @@ public class TableRepository
         readAllCountStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_COUNT_CQL, getTable()), getSession());
     }
 
-    @Override
+    //@Override
     public boolean exists(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -97,8 +108,8 @@ public class TableRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
-    @Override
-    protected Table readEntityById(Identifier identifier)
+    //@Override
+    public Table readEntityById(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
         {
@@ -107,11 +118,16 @@ public class TableRepository
 
         BoundStatement bs = new BoundStatement(readStmt);
         bindIdentifier(bs, identifier);
-        return marshalRow(getSession().execute(bs).one());
+        Table response = marshalRow(getSession().execute(bs).one());
+        if (response == null)
+        {
+            throw new ItemNotFoundException("ID not found: " + identifier.toString());
+        }
+        return response;
     }
 
-    @Override
-    protected Table createEntity(Table entity)
+    //@Override
+    public Table createEntity(Table entity)
     {
         // Create the actual table for the documents.
         Statement s = new SimpleStatement(String.format(CREATE_DOC_TABLE_CQL, entity.toDbTable()));
@@ -124,8 +140,8 @@ public class TableRepository
         return entity;
     }
 
-    @Override
-    protected Table updateEntity(Table entity)
+    //@Override
+    public Table updateEntity(Table entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
@@ -133,8 +149,8 @@ public class TableRepository
         return entity;
     }
 
-    @Override
-    protected void deleteEntity(Table entity)
+    //@Override
+    public void deleteEntity(Table entity)
     {
         // Delete the actual table for the documents.
         Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, entity.toDbTable()));
@@ -143,6 +159,36 @@ public class TableRepository
         BoundStatement bs = new BoundStatement(deleteStmt);
         bindIdentifier(bs, entity.getId());
         getSession().execute(bs);
+        cascadeDelete(entity.getId());
+    }
+
+    public void deleteEntity(Identifier id)
+    {
+        // Delete the actual table for the documents.
+        Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, id.components().get(0) + "_" + id.components().get(1)));
+        getSession().execute(s);
+
+        BoundStatement bs = new BoundStatement(deleteStmt);
+        bindIdentifier(bs, id);
+        getSession().execute(bs);
+        cascadeDelete(id);
+    }
+
+    //TODO: fix tests for cascade
+    private void cascadeDelete(Identifier id)
+    {
+        String dbName = id.components().get(0).toString();
+        String tableName = id.components().get(1).toString();
+        logger.info("Cleaning up Indexes for table: " + dbName + "/" + tableName);
+        //remove all the collections and all the documents in that table.
+        //TODO: version instead of delete
+        //Delete all indexes
+
+        List<Index> indexes = indexRepo.readAll(dbName, tableName);//get all indexes
+        for (Index i : indexes)
+        {
+            indexRepo.deleteEntity(i);// then delete them
+        }
     }
 
     public List<Table> readAll(String namespace)

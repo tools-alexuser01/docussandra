@@ -17,9 +17,9 @@ package com.strategicgains.docussandra.persistence;
 
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import com.strategicgains.repoexpress.domain.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
@@ -101,7 +101,7 @@ public class TableRepositoryTest
         Identifier identifier = testTable.getId();
         TableRepository instance = new TableRepository(f.getSession());
         f.insertTable(testTable);
-        Table result = instance.read(identifier);
+        Table result = instance.readEntityById(identifier);
         assertNotNull(result);
         assertEquals(testTable, result);
     }
@@ -138,7 +138,7 @@ public class TableRepositoryTest
         result.name("new_name1");
         Table resultNew = instance.updateEntity(entity);
         assertEquals(result, resultNew);
-        instance.delete(resultNew.getId());
+        instance.deleteEntity(resultNew.getId());
     }
 
     /**
@@ -154,7 +154,7 @@ public class TableRepositoryTest
         TableRepository instance = new TableRepository(f.getSession());
         boolean result = instance.exists(identifier);
         assertEquals(true, result);
-        instance.delete(identifier);
+        instance.deleteEntity(identifier);
         result = instance.exists(identifier);
         assertEquals(false, result);
     }
@@ -172,7 +172,7 @@ public class TableRepositoryTest
         f.insertDocument(Fixtures.createTestDocument());
         //act
         TableRepository tableRepo = new TableRepository(f.getSession());
-        tableRepo.delete(Fixtures.createTestTable());
+        tableRepo.deleteEntity(Fixtures.createTestTable());
         Thread.sleep(5000);
 
         //check table deletion

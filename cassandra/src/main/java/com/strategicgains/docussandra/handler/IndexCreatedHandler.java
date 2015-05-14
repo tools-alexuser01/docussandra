@@ -70,7 +70,7 @@ public class IndexCreatedHandler implements EventHandler
         try
         {
             status = (IndexCreatedEvent) event;
-            Index index = indexRepo.read(status.getIndex().getId());
+            Index index = indexRepo.readEntityById(status.getIndex().getId());
             long offset = 0;
             long recordsCompleted = 0;
             QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);

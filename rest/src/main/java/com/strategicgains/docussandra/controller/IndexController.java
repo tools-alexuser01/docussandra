@@ -1,6 +1,5 @@
 package com.strategicgains.docussandra.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.codec.http.HttpMethod;
 
 import java.util.List;
@@ -9,6 +8,7 @@ import org.restexpress.Request;
 import org.restexpress.Response;
 
 import com.strategicgains.docussandra.Constants;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.domain.Table;
@@ -17,7 +17,6 @@ import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenBinder;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
-import com.strategicgains.repoexpress.domain.Identifier;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

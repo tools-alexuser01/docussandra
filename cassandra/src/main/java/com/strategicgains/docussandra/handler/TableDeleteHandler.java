@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * @author udeyoje
  * @since Nov 19, 2014
  */
+@Deprecated
 public class TableDeleteHandler
         implements EventHandler
 {
@@ -42,7 +43,7 @@ public class TableDeleteHandler
         IndexRepository ir = new IndexRepository(dbSession);
         List<Index> indexes = ir.readAll(event.data.databaseName(), event.data.name());//get all indexes
         for(Index i : indexes){
-            ir.delete(i);// then delete them
+            ir.deleteEntity(i);// then delete them
         }
     }
 

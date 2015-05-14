@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
  * @author toddf
  * @since Nov 19, 2014
  */
+@Deprecated
 public class IndexDeletedHandler
         implements EventHandler
 {

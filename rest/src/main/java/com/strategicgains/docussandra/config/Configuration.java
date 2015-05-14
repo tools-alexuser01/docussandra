@@ -37,7 +37,6 @@ import com.strategicgains.docussandra.service.TableService;
 import com.strategicgains.eventing.DomainEvents;
 import com.strategicgains.eventing.EventBus;
 import com.strategicgains.eventing.local.LocalEventBusBuilder;
-import com.strategicgains.repoexpress.cassandra.CassandraConfig;
 import com.strategicgains.restexpress.plugin.metrics.MetricsConfig;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

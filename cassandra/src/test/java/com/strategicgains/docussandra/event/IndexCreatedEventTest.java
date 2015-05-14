@@ -15,9 +15,9 @@
  */
 package com.strategicgains.docussandra.event;
 
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import com.strategicgains.repoexpress.domain.Identifier;
 import java.util.Date;
 import java.util.UUID;
 import org.junit.After;
@@ -113,25 +113,25 @@ public class IndexCreatedEventTest
         assertEquals(expResult, result);
     }
 
-    /**
-     * Test of setId method, of class IndexCreatedEvent.
-     */
-    @Test
-    public void testSetId()
-    {
-        System.out.println("setId");
-        Identifier id = new Identifier();
-        IndexCreatedEvent instance = Fixtures.createTestIndexCreationStatus();
-        boolean expectedExceptionThrown = false;
-        try
-        {
-            instance.setId(id);
-        } catch (UnsupportedOperationException e)
-        {
-            expectedExceptionThrown = true;
-        }
-        assertTrue("Expected exception not thrown", expectedExceptionThrown);
-    }
+//    /**
+//     * Test of setId method, of class IndexCreatedEvent.
+//     */
+//    @Test
+//    public void testSetId()
+//    {
+//        System.out.println("setId");
+//        Identifier id = new Identifier();
+//        IndexCreatedEvent instance = Fixtures.createTestIndexCreationStatus();
+//        boolean expectedExceptionThrown = false;
+//        try
+//        {
+//            instance.setId(id);
+//        } catch (UnsupportedOperationException e)
+//        {
+//            expectedExceptionThrown = true;
+//        }
+//        assertTrue("Expected exception not thrown", expectedExceptionThrown);
+//    }
 
     /**
      * Test of getDateStarted method, of class IndexCreatedEvent.

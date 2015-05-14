@@ -12,8 +12,8 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,12 +173,13 @@ public class IndexStatusRepository
 
     /**
      * Updates the status for an IndexCreatedEvent in the database. Take note:
- only a few getFields are updatable: numberOfRecordsCompleted,
- statusLastUpdatedAt, and error. This is a logical decision; there should
- not be a reason to update any other getFields. This will also mark the
- record as done indexing or not as appropriate.
+     * only a few getFields are updatable: numberOfRecordsCompleted,
+     * statusLastUpdatedAt, and error. This is a logical decision; there should
+     * not be a reason to update any other getFields. This will also mark the
+     * record as done indexing or not as appropriate.
      *
-     * @param entity The IndexCreatedEvent to update with the proper getFields set.
+     * @param entity The IndexCreatedEvent to update with the proper getFields
+     * set.
      * @return The updated IndexCreatedEvent.
      */
     public IndexCreatedEvent updateEntity(IndexCreatedEvent entity)
@@ -252,9 +253,11 @@ public class IndexStatusRepository
     }
 
     /**
-     * Determines if a index is currently indexing or not. Not presently used, but the method should work.
+     * Determines if a index is currently indexing or not. Not presently used,
+     * but the method should work.
+     *
      * @param id
-     * @return 
+     * @return
      */
     private boolean isCurrentlyIndexing(UUID id)
     {
@@ -333,7 +336,7 @@ public class IndexStatusRepository
         Index toUse;
         try
         {
-            toUse = indexRepo.doRead(index.getId());
+            toUse = indexRepo.readEntityById(index.getId());
         } catch (ItemNotFoundException e)//this should only happen in tests that do not have full test data established; errors will be evident if this happens in the actual app
         {
             toUse = index;
