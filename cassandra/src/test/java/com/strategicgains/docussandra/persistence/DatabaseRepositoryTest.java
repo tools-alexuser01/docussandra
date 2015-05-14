@@ -131,7 +131,7 @@ public class DatabaseRepositoryTest
         //act
         DatabaseRepository instance = new DatabaseRepository(f.getSession());
         instance.deleteEntity(entity);
-        Thread.sleep(5000);
+        //Thread.sleep(5000);
         //check DB deletion
         List<Database> allRows = instance.readAll();
         assertFalse(allRows.contains(entity));
