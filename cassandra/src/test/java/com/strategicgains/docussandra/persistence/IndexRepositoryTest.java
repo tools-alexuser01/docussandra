@@ -192,7 +192,7 @@ public class IndexRepositoryTest
         //act
         IndexRepository indexRepo = new IndexRepository(f.getSession());
         indexRepo.deleteEntity(Fixtures.createTestIndexOneField());
-        Thread.sleep(5000);
+        //Thread.sleep(5000);
         //check index deletion        
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
         //check iTable deletion
