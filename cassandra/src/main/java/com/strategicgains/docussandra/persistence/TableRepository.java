@@ -195,8 +195,8 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
     @Override
     public List<Table> readAll()
     {
-        throw new UnsupportedOperationException("Not valid for this class."); 
-    }       
+        throw new UnsupportedOperationException("Not valid for this class.");
+    }
 
     public long countAllTables(String namespace)
     {
