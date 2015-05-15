@@ -153,27 +153,27 @@ public class IndexService
     }
 
     /**
-     * Reads all indexes for the given namespace and collection.
+     * Reads all indexes for the given database and table.
      *
-     * @param namespace
-     * @param collection
+     * @param database
+     * @param table
      * @return
      */
-    public List<Index> readAll(String namespace, String collection)
+    public List<Index> readAll(String database, String table)
     {
-        return indexesRepo.readAllCached(new Identifier(namespace, collection));
+        return indexesRepo.readAllCached(new Identifier(database, table));
     }
 
     /**
-     * Counts the number of indexes for this namespace and collection.
+     * Counts the number of indexes for this database and table.
      *
-     * @param namespace
-     * @param collection
+     * @param database
+     * @param table
      * @return
      */
-    public long count(String namespace, String collection)
+    public long count(String database, String table)
     {
-        return indexesRepo.countAll(new Identifier(namespace, collection));
+        return indexesRepo.countAll(new Identifier(database, table));
     }
 
     /**

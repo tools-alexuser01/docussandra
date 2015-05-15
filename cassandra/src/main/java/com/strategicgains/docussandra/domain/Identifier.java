@@ -40,7 +40,9 @@ public class Identifier
     /**
      * Create an identifier with the given components. Duplicate instances are
      * not added--only one instance of a component will exist in the identifier.
-     * Components should be passed in the order of significance: Database -> Table -> Index -> Document
+     * Components should be passed in the order of significance: Database ->
+     * Table -> Index -> Document
+     *
      * @param components
      */
     public Identifier(Object... components)
@@ -96,6 +98,33 @@ public class Identifier
         return Collections.unmodifiableList(components);
     }
 
+    public String getDatabaseName()
+    {
+        if (size() >= 1)
+        {
+            return getComponentAsString(0);
+        }
+        return null;
+    }
+
+    public String getTableName()
+    {
+        if (size() >= 2)
+        {
+            return getComponentAsString(1);
+        }
+        return null;
+    }
+
+    public String getIndexName()
+    {
+        if (size() >= 3)
+        {
+            return getComponentAsString(2);
+        }
+        return null;
+    }
+
     /**
      * Get an item out of this identifier.
      *
@@ -103,6 +132,7 @@ public class Identifier
      *
      * @return an unmodifiable list of components.
      */
+    @Deprecated//make private
     public String getComponentAsString(int index)
     {
         return components.get(index).toString();
@@ -115,6 +145,7 @@ public class Identifier
      *
      * @return an unmodifiable list of components.
      */
+    @Deprecated
     public Object getComponent(int index)
     {
         return components.get(index);

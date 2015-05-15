@@ -37,7 +37,7 @@ public class TableDeleteHandler
     public void handle(TableDeletedEvent event)
     {
         LOGGER.info("Cleaning up Indexes for table: " + event.data.databaseName() + "/" + event.data.name());
-        //remove all the collections and all the documents in that table.
+        //remove all the tables and all the documents in that table.
         //TODO: version instead of delete
         //Delete all indexes
         IndexRepository ir = new IndexRepository(dbSession);

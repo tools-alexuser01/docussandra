@@ -35,7 +35,7 @@ public class DatabaseDeletedHandler
 
     public void handle(DatabaseDeletedEvent event)
     {
-        //remove all the collections and all the documents in that database.
+        //remove all the tables and all the documents in that database.
         //TODO: version instead of delete
         //tables
         LOGGER.info("Cleaning up tables for database: " + event.data.name());

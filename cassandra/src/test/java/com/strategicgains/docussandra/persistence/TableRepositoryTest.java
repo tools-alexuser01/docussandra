@@ -226,11 +226,11 @@ public class TableRepositoryTest
         System.out.println("readAll");
         Table testTable = Fixtures.createTestTable();
         f.insertTable(testTable);
-        String namespace = testTable.databaseName();
+        String database = testTable.databaseName();
         TableRepository instance = new TableRepository(f.getSession());
         List<Table> expResult = new ArrayList<>();
         expResult.add(testTable);
-        List<Table> result = instance.readAll(new Identifier(namespace));
+        List<Table> result = instance.readAll(new Identifier(database));
         assertEquals(expResult, result);
     }
 
@@ -243,13 +243,13 @@ public class TableRepositoryTest
         System.out.println("countAllTables");
         TableRepository instance = new TableRepository(f.getSession());
         Table testTable = Fixtures.createTestTable();
-        String namespace = testTable.databaseName();
-        long result = instance.countAllTables(namespace);
+        String database = testTable.databaseName();
+        long result = instance.countAllTables(database);
         long expResult = 0L;
         assertEquals(expResult, result);
         f.insertTable(testTable);
         expResult = 1L;
-        result = instance.countAllTables(namespace);
+        result = instance.countAllTables(database);
         assertEquals(expResult, result);
     }
 
@@ -262,21 +262,21 @@ public class TableRepositoryTest
         System.out.println("countTableSize");
         TableRepository instance = new TableRepository(f.getSession());
         Table testTable = Fixtures.createTestTable();
-        String namespace = testTable.databaseName();
+        String database = testTable.databaseName();
         String tableName = testTable.name();
         f.insertTable(testTable);
         long expResult = 0L;
-        long result = instance.countTableSize(namespace, tableName);
+        long result = instance.countTableSize(database, tableName);
         assertEquals(expResult, result);
 
         f.insertDocument(Fixtures.createTestDocument());
         expResult = 1L;
-        result = instance.countTableSize(namespace, tableName);
+        result = instance.countTableSize(database, tableName);
         assertEquals(expResult, result);
 
         f.insertDocument(Fixtures.createTestDocument2());
         expResult = 2L;
-        result = instance.countTableSize(namespace, tableName);
+        result = instance.countTableSize(database, tableName);
         assertEquals(expResult, result);
     }
 

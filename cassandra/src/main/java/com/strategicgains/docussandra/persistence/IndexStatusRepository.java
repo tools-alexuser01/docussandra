@@ -266,10 +266,10 @@ public class IndexStatusRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
-//    public long countAll(String namespace, String collection)
+//    public long countAll(String database, String table)
 //    {
 //        BoundStatement bs = new BoundStatement(readAllCountStmt);
-//        bs.bind(namespace, collection);
+//        bs.bind(database, table);
 //        return (getSession().execute(bs).one().getLong(0));
 //    }
     private void bindCreate(BoundStatement bs, IndexCreatedEvent entity)

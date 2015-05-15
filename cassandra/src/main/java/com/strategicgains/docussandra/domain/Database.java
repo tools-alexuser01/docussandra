@@ -11,7 +11,7 @@ public class Database
         extends Timestamped implements Linkable, Identifiable
 {
 
-    @RegexValidation(name = "Namespace Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
+    @RegexValidation(name = "Database Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
     private String name;
     private String description;
 

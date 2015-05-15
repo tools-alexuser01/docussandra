@@ -273,7 +273,7 @@ public class IndexRepository extends AbstractCassandraRepository implements Repo
         }
         return (List<Index>) e.getObjectValue();
         //}
-        //return readAll(namespace, collection);
+        //return readAll(database, table);
     }
 
     public long countAll(Identifier id)

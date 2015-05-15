@@ -183,16 +183,16 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
         throw new UnsupportedOperationException("Not valid for this class.");
     }
 
-    public long countAllTables(String namespace)
+    public long countAllTables(String database)
     {
         BoundStatement bs = new BoundStatement(readAllCountStmt);
-        bs.bind(namespace);
+        bs.bind(database);
         return (getSession().execute(bs).one().getLong(0));
     }
 
-    public long countTableSize(String namespace, String tableName)
+    public long countTableSize(String database, String tableName)
     {
-        PreparedStatement readCountTableSizeStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_COUNT_TABLE_SIZE_CQL, namespace + "_" + tableName), getSession());
+        PreparedStatement readCountTableSizeStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_COUNT_TABLE_SIZE_CQL, database + "_" + tableName), getSession());
         BoundStatement bs = new BoundStatement(readCountTableSizeStmt);
         return (getSession().execute(bs).one().getLong(0));
     }
@@ -202,7 +202,7 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
         String dbName = id.getComponentAsString(0);
         String tableName = id.getComponentAsString(1);
         logger.info("Cleaning up Indexes for table: " + dbName + "/" + tableName);
-        //remove all the collections and all the documents in that table.
+        //remove all the tables and all the documents in that table.
         //TODO: version instead of delete
         //Delete all indexes
         List<Index> indexes = indexRepo.readAll(id);//get all indexes
@@ -231,15 +231,15 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
 
     private List<Table> marshalAll(ResultSet rs)
     {
-        List<Table> collections = new ArrayList<>();
+        List<Table> tables = new ArrayList<>();
         Iterator<Row> i = rs.iterator();
 
         while (i.hasNext())
         {
-            collections.add(marshalRow(i.next()));
+            tables.add(marshalRow(i.next()));
         }
 
-        return collections;
+        return tables;
     }
 
     protected Table marshalRow(Row row)

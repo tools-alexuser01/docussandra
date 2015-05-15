@@ -269,11 +269,11 @@ public class IndexStatusRepositoryTest
 //    public void testCountAll()
 //    {
 //        System.out.println("countAll");
-//        String namespace = "";
-//        String collection = "";
+//        String database = "";
+//        String table = "";
 //        IndexStatusRepository instance = null;
 //        long expResult = 0L;
-//        long result = instance.countAll(namespace, collection);
+//        long result = instance.countAll(database, collection);
 //        assertEquals(expResult, result);
 //        fail("The test case is a prototype.");
 //    }

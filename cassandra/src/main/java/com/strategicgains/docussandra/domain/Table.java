@@ -18,7 +18,7 @@ public class Table
     @ChildValidation
     private DatabaseReference database;
 
-    @RegexValidation(name = "Collection Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
+    @RegexValidation(name = "Table Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
     private String name;
     private String description;
 

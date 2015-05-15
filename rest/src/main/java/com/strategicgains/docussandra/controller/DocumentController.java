@@ -80,7 +80,7 @@ public class DocumentController
 
 //	public List<Document> readAll(Request request, Response response)
 //	{
-//		String namespace = request.getHeader(Constants.Url.DATABASE, "No namespace provided");
+//		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
 //		String collection = request.getHeader(Constants.Url.TABLE, "No collection provided");
 //
 //		HyperExpress.tokenBinder(new TokenBinder<Document>()
@@ -92,7 +92,7 @@ public class DocumentController
 //            }
 //		});
 //
-//		return service.readAll(namespace, collection);
+//		return service.readAll(database, collection);
 //	}
     public void update(Request request, Response response)
     {

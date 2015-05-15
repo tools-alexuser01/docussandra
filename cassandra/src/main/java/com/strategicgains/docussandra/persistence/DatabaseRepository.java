@@ -156,7 +156,7 @@ public class DatabaseRepository extends AbstractCassandraRepository implements R
 
     private void cascadeDelete(Identifier id)
     {
-        //remove all the collections and all the documents in that database.
+        //remove all the tables and all the documents in that database.
         //TODO: version instead of delete
         //tables
         logger.info("Cleaning up tables for database: " + id.getComponentAsString(0));
@@ -185,15 +185,15 @@ public class DatabaseRepository extends AbstractCassandraRepository implements R
 
     private List<Database> marshalAll(ResultSet rs)
     {
-        List<Database> namespaces = new ArrayList<>();
+        List<Database> databases = new ArrayList<>();
         Iterator<Row> i = rs.iterator();
 
         while (i.hasNext())
         {
-            namespaces.add(marshalRow(i.next()));
+            databases.add(marshalRow(i.next()));
         }
 
-        return namespaces;
+        return databases;
     }
 
     //@Override

@@ -233,10 +233,10 @@ public class IndexRepositoryTest
         Index testIndex2 = Fixtures.createTestIndexTwoField();
         f.insertIndex(testIndex);
         f.insertIndex(testIndex2);
-        String namespace = testIndex.getDatabaseName();
-        String collection = testIndex.getTableName();
+        String database = testIndex.getDatabaseName();
+        String table = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
-        List<Index> result = instance.readAll(new Identifier(namespace, collection));
+        List<Index> result = instance.readAll(new Identifier(database, table));
         assertEquals(2, result.size());
         assertEquals(result.get(0), testIndex);
         assertEquals(result.get(1), testIndex2);
@@ -254,10 +254,10 @@ public class IndexRepositoryTest
         Index testIndex2 = Fixtures.createTestIndexTwoField();
         f.insertIndex(testIndex);
         f.insertIndex(testIndex2);
-        String namespace = testIndex.getDatabaseName();
-        String collection = testIndex.getTableName();
+        String database = testIndex.getDatabaseName();
+        String table = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
-        List<Index> result = instance.readAllCached(new Identifier(namespace, collection));
+        List<Index> result = instance.readAllCached(new Identifier(database, table));
         assertEquals(2, result.size());
         assertEquals(result.get(0), testIndex);
         assertEquals(result.get(1), testIndex2);
@@ -274,11 +274,11 @@ public class IndexRepositoryTest
         Index testIndex2 = Fixtures.createTestIndexTwoField();
         f.insertIndex(testIndex);
         f.insertIndex(testIndex2);
-        String namespace = testIndex.getDatabaseName();
-        String collection = testIndex.getTableName();
+        String database = testIndex.getDatabaseName();
+        String table = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
         long expResult = 2L;
-        long result = instance.countAll(new Identifier(namespace, collection));
+        long result = instance.countAll(new Identifier(database, table));
         assertEquals(expResult, result);
     }
 

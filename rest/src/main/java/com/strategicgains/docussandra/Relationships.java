@@ -54,17 +54,17 @@ public class Relationships
 			.rel(SELF, routes.get(DATABASE))
 			.rel(UP, routes.get(DATABASES))
 			.rel("collections", routes.get(TABLES))
-				.title("The collections in this namespace")
+				.title("The tables in this database")
 
 		.forCollectionOf(Table.class)
 			.rel(SELF, routes.get(TABLES))
 			.rel(UP, routes.get(DATABASE))
-				.title("The namespace containing this collection")
+				.title("The database containing this table")
 
 		.forClass(Table.class)
 			.rel(SELF, routes.get(TABLE))
 			.rel(UP, routes.get(TABLES))
-				.title("The entire list of collections in this namespace")
+				.title("The entire list of tables in this database")
 
                 .forCollectionOf(Index.class)
 			.rel(SELF, routes.get(INDEXES))
@@ -74,7 +74,7 @@ public class Relationships
                 .forClass(Index.class)
 			.rel(SELF, routes.get(INDEX))
 			.rel(UP, routes.get(INDEXES))
-				.title("The list of indexes for this collection.")
+				.title("The list of indexes for this table.")
                 
                    //N/A -- this is a global status of all current indexing operations
 //                .forCollectionOf(IndexCreatedEvent.class)
