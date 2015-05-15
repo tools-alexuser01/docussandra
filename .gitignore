@@ -2,4 +2,4 @@
 .classpath
 .settings/
 target/
-api/src/main/resources/git.properties
+rest/src/main/resources/git.properties
