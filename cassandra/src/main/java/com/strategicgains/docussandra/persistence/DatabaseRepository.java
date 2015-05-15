@@ -112,7 +112,7 @@ public class DatabaseRepository extends AbstractCassandraRepository implements R
         }
 
         BoundStatement bs = new BoundStatement(existStmt);
-        bs.bind(identifier.getComponentAsString(0));
+        bs.bind(identifier.getDatabaseName());
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
@@ -125,7 +125,7 @@ public class DatabaseRepository extends AbstractCassandraRepository implements R
         }
 
         BoundStatement bs = new BoundStatement(readStmt);
-        bs.bind(identifier.getComponentAsString(0));
+        bs.bind(identifier.getDatabaseName());
         return marshalRow(getSession().execute(bs).one());
     }
 
@@ -159,7 +159,7 @@ public class DatabaseRepository extends AbstractCassandraRepository implements R
         //remove all the tables and all the documents in that database.
         //TODO: version instead of delete
         //tables
-        logger.info("Cleaning up tables for database: " + id.getComponentAsString(0));
+        logger.info("Cleaning up tables for database: " + id.getDatabaseName());
 
         List<Table> tables = tableRepo.readAll(id);//get all tables
         for (Table t : tables)

@@ -132,8 +132,7 @@ public class Identifier
      *
      * @return an unmodifiable list of components.
      */
-    @Deprecated//make private
-    public String getComponentAsString(int index)
+    private String getComponentAsString(int index)
     {
         return components.get(index).toString();
     }

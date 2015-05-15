@@ -160,7 +160,7 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
     public void delete(Identifier id)
     {
         // Delete the actual table for the documents.
-        Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, id.getComponentAsString(0) + "_" + id.getComponentAsString(1)));
+        Statement s = new SimpleStatement(String.format(DROP_DOC_TABLE_CQL, id.getDatabaseName() + "_" + id.getTableName()));
         getSession().execute(s);
 
         BoundStatement bs = new BoundStatement(deleteStmt);
@@ -173,7 +173,7 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
     public List<Table> readAll(Identifier id)
     {
         BoundStatement bs = new BoundStatement(readAllStmt);
-        bs.bind(id.getComponentAsString(0));
+        bs.bind(id.getDatabaseName());
         return (marshalAll(getSession().execute(bs)));
     }
 
@@ -199,8 +199,8 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
 
     private void cascadeDelete(Identifier id)
     {
-        String dbName = id.getComponentAsString(0);
-        String tableName = id.getComponentAsString(1);
+        String dbName = id.getDatabaseName();
+        String tableName = id.getTableName();
         logger.info("Cleaning up Indexes for table: " + dbName + "/" + tableName);
         //remove all the tables and all the documents in that table.
         //TODO: version instead of delete

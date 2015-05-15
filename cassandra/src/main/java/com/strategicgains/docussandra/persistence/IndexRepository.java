@@ -193,8 +193,8 @@ public class IndexRepository extends AbstractCassandraRepository implements Repo
         BoundStatement bs = new BoundStatement(deleteStmt);
         bindIdentifier(bs, id);
         getSession().execute(bs);
-        String dbName = id.getComponentAsString(0);//TODO: create helper methods -- kinda half done now
-        String tableName = id.getComponentAsString(1);
+        String dbName = id.getDatabaseName();//TODO: create helper methods -- kinda half done now
+        String tableName = id.getTableName();
         //maintain cache
         try//we do this in a try/catch because we don't want to cause an app error if this fails
         {
@@ -230,7 +230,7 @@ public class IndexRepository extends AbstractCassandraRepository implements Repo
     public List<Index> readAll(Identifier id)
     {
         BoundStatement bs = new BoundStatement(readAllStmt);
-        bs.bind(id.getComponentAsString(0), id.getComponentAsString(1));
+        bs.bind(id.getDatabaseName(), id.getTableName());
         return (marshalAll(getSession().execute(bs)));
     }
 
@@ -247,7 +247,7 @@ public class IndexRepository extends AbstractCassandraRepository implements Repo
      */
     public List<Index> readAllCached(Identifier id)
     {
-        String key = id.getComponentAsString(0) + ":" + id.getComponentAsString(1);
+        String key = id.getDatabaseName() + ":" + id.getTableName();
         //logger.info("Reading all indexes from cache for " + key);
         Cache c = CacheFactory.getCache("index");
 //        synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
@@ -279,7 +279,7 @@ public class IndexRepository extends AbstractCassandraRepository implements Repo
     public long countAll(Identifier id)
     {
         BoundStatement bs = new BoundStatement(readAllCountStmt);
-        bs.bind(id.getComponentAsString(0), id.getComponentAsString(1));
+        bs.bind(id.getDatabaseName(), id.getTableName());
         return (getSession().execute(bs).one().getLong(0));
     }
 
@@ -290,7 +290,7 @@ public class IndexRepository extends AbstractCassandraRepository implements Repo
         //-----warn the user -- probably not
         //-----throw an exception -- probably not even more
         //-----do nothing -- probably
-        logger.info("Cleaning up ITables for index: " + id.getComponentAsString(0) + "/" + id.getComponentAsString(1) + "/" + id.getComponentAsString(2));
+        logger.info("Cleaning up ITables for index: " + id.getDatabaseName() + "/" + id.getTableName() + "/" + id.getIndexName());
 
         if (iTableRepo.iTableExists(id))
         {

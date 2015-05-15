@@ -48,7 +48,7 @@ public class TableController
 		response.setResponseCreated();
 
 		// enrich the resource with links, etc. here...
-		TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, saved.getId().getComponentAsString(1));
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, saved.getId().getTableName());
 
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.TABLE);
@@ -66,7 +66,7 @@ public class TableController
 		Table table = service.read(databaseName, tableName);
 
 		// enrich the entity with links, etc. here...
-		HyperExpress.bind(Constants.Url.TABLE, table.getId().getComponentAsString(1));
+		HyperExpress.bind(Constants.Url.TABLE, table.getId().getTableName());
 
 		return table;
 	}
@@ -80,7 +80,7 @@ public class TableController
 			@Override
             public void bind(Table object, TokenResolver resolver)
             {
-				resolver.bind(Constants.Url.TABLE, object.getId().getComponentAsString(1));
+				resolver.bind(Constants.Url.TABLE, object.getId().getTableName());
 			}
 		});
 		return service.readAll(databaseName);
