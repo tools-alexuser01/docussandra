@@ -1,13 +1,13 @@
 package com.strategicgains.docussandra.domain;
 
-import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
+import com.strategicgains.docussandra.domain.parent.Timestamped;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.abstractparent.Identifiable;
+import com.strategicgains.docussandra.domain.parent.Identifiable;
 import com.strategicgains.syntaxe.Validatable;
 import com.strategicgains.syntaxe.ValidationException;
 import com.strategicgains.syntaxe.annotation.ChildValidation;

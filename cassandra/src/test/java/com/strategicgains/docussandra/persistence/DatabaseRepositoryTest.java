@@ -109,7 +109,7 @@ public class DatabaseRepositoryTest
         f.insertDatabase(entity);
         //act
         DatabaseRepository instance = new DatabaseRepository(f.getSession());
-        instance.deleteEntity(entity);
+        instance.delete(entity);
         //check
         List<Database> allRows = instance.readAll();
         assertFalse(allRows.contains(entity));
@@ -130,7 +130,7 @@ public class DatabaseRepositoryTest
         f.insertDocument(Fixtures.createTestDocument());
         //act
         DatabaseRepository instance = new DatabaseRepository(f.getSession());
-        instance.deleteEntity(entity);
+        instance.delete(entity);
         //Thread.sleep(5000);
         //check DB deletion
         List<Database> allRows = instance.readAll();

@@ -35,6 +35,8 @@ public class PreparedStatementFactory
 
     private static final Logger logger = LoggerFactory.getLogger(PreparedStatementFactory.class);
 
+    private static final Object LOCK = new Object();
+
 //    /**
 //     * Establishes the cache if it doesn't exist.
 //     */
@@ -72,23 +74,28 @@ public class PreparedStatementFactory
         }
         query = query.trim();
         Cache c = CacheFactory.getCache("preparedStatements");
-        Element e = c.get(query);
-        if (e == null || e.getObjectValue() == null)
+        Element e = null;
+        synchronized (LOCK)
         {
-            logger.debug("Creating new Prepared Statement for: " + query);
-            e = new Element(query, session.prepare(query));
-            c.put(e);
-        } else
-        {
-            if (logger.isTraceEnabled())
+            e = c.get(query);
+            if (e == null || e.getObjectValue() == null)
             {
-                PreparedStatement ps = (PreparedStatement) e.getObjectValue();
-                logger.trace("Pulling PreparedStatement from Cache: " + ps.getQueryString());
+                logger.debug("Creating new Prepared Statement for: " + query);
+                e = new Element(query, session.prepare(query));
+                c.put(e);
+            } else
+            {
+                if (logger.isTraceEnabled())
+                {
+                    PreparedStatement ps = (PreparedStatement) e.getObjectValue();
+                    logger.trace("Pulling PreparedStatement from Cache: " + ps.getQueryString());
+                }
             }
         }
         //sw.stop();
         //logger.debug("Time to fetch prepared statement (" + query + "): " + sw.getTime());
         return (PreparedStatement) e.getObjectValue();
+
     }
 
 }

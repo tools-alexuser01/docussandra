@@ -12,12 +12,12 @@ import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.domain.abstractparent.AbstractCassandraEntityRepository;
+import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatabaseRepository extends AbstractCassandraEntityRepository<Database>
+public class DatabaseRepository extends AbstractCassandraRepository
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -40,13 +40,17 @@ public class DatabaseRepository extends AbstractCassandraEntityRepository<Databa
     private static final String CREATE_CQL = "insert into %s (%s, description, created_at, updated_at) values (?, ?, ?, ?)";
     private static final String UPDATE_CQL = "update %s set description = ?, updated_at = ? where %s = ?";
     private static final String READ_ALL_CQL = "select * from %s";
-    //private static final String DELETE_CQL = "delete from %s where %s = ?";
+    private static final String EXISTENCE_CQL = "select count(*) from %s where %s = ?";
+    private static final String READ_CQL = "select * from %s where %s = ?";
+    private static final String DELETE_CQL = "delete from %s where %s = ?";
     //private static final String READ_ALL_CQL_WITH_LIMIT = "select * from %s LIMIT %s";
 
     private PreparedStatement createStmt;
     private PreparedStatement updateStmt;
     private PreparedStatement readAllStmt;
-    //protected PreparedStatement deleteStmt;
+    private PreparedStatement existStmt;
+    private PreparedStatement readStmt;
+    protected PreparedStatement deleteStmt;
 
     private TableRepository tableRepo;
 
@@ -65,9 +69,12 @@ public class DatabaseRepository extends AbstractCassandraEntityRepository<Databa
 //    }
     protected void initializeStatements()
     {
-        createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), getIdentifierColumn()), getSession());
-        updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable(), getIdentifierColumn()), getSession());
+        createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), Columns.NAME), getSession());
+        updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(UPDATE_CQL, getTable(), Columns.NAME), getSession());
         readAllStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, getTable()), getSession());
+        existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, getTable(), Columns.NAME), getSession());
+        readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, getTable(), Columns.NAME), getSession());
+        deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, getTable(), Columns.NAME), getSession());
     }
 
     //@Override
@@ -88,20 +95,6 @@ public class DatabaseRepository extends AbstractCassandraEntityRepository<Databa
         return entity;
     }
 
-    @Override
-    public void deleteEntity(Database entity)
-    {
-        super.deleteEntity(entity);
-        cascadeDelete(entity.name());
-    }
-
-    @Override
-    public void deleteEntityById(Identifier identifier)
-    {
-        super.deleteEntityById(identifier);
-        cascadeDelete(identifier.getComponentAsString(0));
-    }
-
     private void cascadeDelete(String dbName)
     {
         //remove all the collections and all the documents in that database.
@@ -120,6 +113,55 @@ public class DatabaseRepository extends AbstractCassandraEntityRepository<Databa
     {
         BoundStatement bs = new BoundStatement(readAllStmt);
         return marshalAll(getSession().execute(bs));
+    }
+
+    public boolean exists(Identifier identifier)
+    {
+        if (identifier == null || identifier.isEmpty())
+        {
+            return false;
+        }
+
+        BoundStatement bs = new BoundStatement(existStmt);
+        bs.bind(identifier.getComponentAsString(0));
+        return (getSession().execute(bs).one().getLong(0) > 0);
+    }
+
+    //@Override
+    public Database read(Identifier identifier)
+    {
+        if (identifier == null || identifier.isEmpty())
+        {
+            return null;
+        }
+
+        BoundStatement bs = new BoundStatement(readStmt);
+        bs.bind(identifier.getComponentAsString(0));
+        return marshalRow(getSession().execute(bs).one());
+    }
+
+    //@Override
+    public void delete(Database entity)
+    {
+        if (entity == null)
+        {
+            return;
+        }
+        delete(entity.getId());
+        cascadeDelete(entity.name());
+    }
+
+    public void delete(Identifier identifier)
+    {
+        if (identifier == null)
+        {
+            return;
+        }
+
+        BoundStatement bs = new BoundStatement(deleteStmt);
+        bindIdentifier(bs, identifier);
+        getSession().execute(bs);
+        cascadeDelete(identifier.getComponentAsString(0));
     }
 
 //    public List<Database> readAll(int limit, int offset)

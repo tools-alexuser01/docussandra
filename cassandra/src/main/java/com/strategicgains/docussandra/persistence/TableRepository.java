@@ -19,7 +19,7 @@ import com.strategicgains.docussandra.event.TableCreatedEvent;
 import com.strategicgains.docussandra.event.TableDeletedEvent;
 import com.strategicgains.docussandra.event.TableUpdatedEvent;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
-import com.strategicgains.docussandra.persistence.abstractparent.AbstractCassandraRepository;
+import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

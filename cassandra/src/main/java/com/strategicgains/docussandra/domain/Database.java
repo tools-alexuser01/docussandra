@@ -1,8 +1,8 @@
 package com.strategicgains.docussandra.domain;
 
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.abstractparent.Identifiable;
-import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
+import com.strategicgains.docussandra.domain.parent.Identifiable;
+import com.strategicgains.docussandra.domain.parent.Timestamped;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import java.util.Objects;
 import org.restexpress.plugin.hyperexpress.Linkable;

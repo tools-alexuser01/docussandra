@@ -1,6 +1,6 @@
 package com.strategicgains.docussandra.domain;
 
-import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
+import com.strategicgains.docussandra.domain.parent.Timestamped;
 
 public class Metadata extends Timestamped
 {

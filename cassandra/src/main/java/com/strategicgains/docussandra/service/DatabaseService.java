@@ -31,7 +31,7 @@ public class DatabaseService
 
     public Database read(String name)
     {
-        Database n = databases.readEntityById(new Identifier(name));
+        Database n = databases.read(new Identifier(name));
 
         if (n == null)
         {
@@ -56,6 +56,6 @@ public class DatabaseService
     public void delete(String name)
     {
         logger.info("Attempting to delete database: " + name);
-        databases.deleteEntityById(new Identifier(name));
+        databases.delete(new Identifier(name));
     }
 }

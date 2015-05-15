@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.persistence.abstractparent;
+package com.strategicgains.docussandra.persistence.parent;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.Session;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.domain.abstractparent;
+package com.strategicgains.docussandra.domain.parent;
 
 import com.strategicgains.docussandra.domain.Identifier;
 

@@ -568,14 +568,14 @@ public class Fixtures
         }
         try
         {
-            databaseRepo.deleteEntity(Fixtures.createTestDatabase());
+            databaseRepo.delete(Fixtures.createTestDatabase());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");
         }
         try
         {
-            databaseRepo.deleteEntity(Fixtures.createTestPlayersDatabase());
+            databaseRepo.delete(Fixtures.createTestPlayersDatabase());
         } catch (DriverException e)
         {
             //logger.debug("Not deleting database, probably doesn't exist.");

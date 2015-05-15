@@ -1,9 +1,9 @@
 package com.strategicgains.docussandra.domain;
 
 
-import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
+import com.strategicgains.docussandra.domain.parent.Timestamped;
 import com.strategicgains.docussandra.Constants;
-import com.strategicgains.docussandra.domain.abstractparent.Identifiable;
+import com.strategicgains.docussandra.domain.parent.Identifiable;
 import com.strategicgains.syntaxe.annotation.ChildValidation;
 import com.strategicgains.syntaxe.annotation.RegexValidation;
 import com.strategicgains.syntaxe.annotation.Required;

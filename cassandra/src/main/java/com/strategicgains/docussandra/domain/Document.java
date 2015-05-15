@@ -1,8 +1,8 @@
 package com.strategicgains.docussandra.domain;
 
-import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
+import com.strategicgains.docussandra.domain.parent.Timestamped;
 import com.mongodb.util.JSON;
-import com.strategicgains.docussandra.domain.abstractparent.Identifiable;
+import com.strategicgains.docussandra.domain.parent.Identifiable;
 import java.util.UUID;
 
 import com.strategicgains.syntaxe.annotation.ChildValidation;

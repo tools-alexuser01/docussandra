@@ -24,7 +24,7 @@ import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.exception.InvalidObjectIdException;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.handler.IndexMaintainerHelper;
-import com.strategicgains.docussandra.persistence.abstractparent.AbstractCassandraRepository;
+import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.ArrayList;
 import java.util.Iterator;

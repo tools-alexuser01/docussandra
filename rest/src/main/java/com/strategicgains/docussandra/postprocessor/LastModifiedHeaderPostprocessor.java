@@ -1,6 +1,6 @@
 package com.strategicgains.docussandra.postprocessor;
 
-import com.strategicgains.docussandra.domain.abstractparent.Timestamped;
+import com.strategicgains.docussandra.domain.parent.Timestamped;
 import static io.netty.handler.codec.http.HttpHeaders.Names.LAST_MODIFIED;
 
 import org.restexpress.Request;

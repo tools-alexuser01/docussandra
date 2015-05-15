@@ -17,7 +17,7 @@ import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
-import com.strategicgains.docussandra.persistence.abstractparent.AbstractCassandraRepository;
+import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
