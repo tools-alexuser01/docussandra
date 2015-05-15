@@ -169,21 +169,6 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
         cascadeDelete(id);
     }
 
-    private void cascadeDelete(Identifier id)
-    {
-        String dbName = id.getComponentAsString(0);
-        String tableName = id.getComponentAsString(1);
-        logger.info("Cleaning up Indexes for table: " + dbName + "/" + tableName);
-        //remove all the collections and all the documents in that table.
-        //TODO: version instead of delete
-        //Delete all indexes
-        List<Index> indexes = indexRepo.readAll(id);//get all indexes
-        for (Index i : indexes)
-        {
-            indexRepo.delete(i);// then delete them
-        }
-    }
-
     @Override
     public List<Table> readAll(Identifier id)
     {
@@ -210,6 +195,21 @@ public class TableRepository extends AbstractCassandraRepository implements Repo
         PreparedStatement readCountTableSizeStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_COUNT_TABLE_SIZE_CQL, namespace + "_" + tableName), getSession());
         BoundStatement bs = new BoundStatement(readCountTableSizeStmt);
         return (getSession().execute(bs).one().getLong(0));
+    }
+
+    private void cascadeDelete(Identifier id)
+    {
+        String dbName = id.getComponentAsString(0);
+        String tableName = id.getComponentAsString(1);
+        logger.info("Cleaning up Indexes for table: " + dbName + "/" + tableName);
+        //remove all the collections and all the documents in that table.
+        //TODO: version instead of delete
+        //Delete all indexes
+        List<Index> indexes = indexRepo.readAll(id);//get all indexes
+        for (Index i : indexes)
+        {
+            indexRepo.delete(i);// then delete them
+        }
     }
 
     private void bindCreate(BoundStatement bs, Table entity)
