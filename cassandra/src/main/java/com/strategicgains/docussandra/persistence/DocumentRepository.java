@@ -16,7 +16,9 @@ import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
 import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorImpl;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.DocumentIdentifier;
 import com.strategicgains.docussandra.domain.Identifier;
+import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.DuplicateItemException;
@@ -104,12 +106,11 @@ public class DocumentRepository extends AbstractCassandraRepository
     //@Override
     public Document read(Identifier identifier)
     {
-        Table table = extractTable(identifier);
-        Identifier id = extractId(identifier);
+        Table table = identifier.getTable();
         PreparedStatement readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, table.toDbTable(), Columns.ID), session());
 
         BoundStatement bs = new BoundStatement(readStmt);
-        bindIdentifier(bs, id);
+        bindIdentifier(bs, identifier);
         Document item = marshalRow(session().execute(bs).one());
 
         if (item == null)
@@ -200,11 +201,10 @@ public class DocumentRepository extends AbstractCassandraRepository
         try
         {
             Table table = entity.table();
-            Identifier id = extractId(entity.getId());
             PreparedStatement deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, table.toDbTable(), Columns.ID), session());
 
             BoundStatement bs = new BoundStatement(deleteStmt);
-            bindIdentifier(bs, id);
+            bindIdentifier(bs, entity.getId());
             BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
             batch.add(bs);//the actual delete
             try
@@ -237,7 +237,7 @@ public class DocumentRepository extends AbstractCassandraRepository
             PreparedStatement deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, table.toDbTable(), Columns.ID), session());
 
             BoundStatement bs = new BoundStatement(deleteStmt);
-            bindIdentifier(bs, extractId(id));
+            bindIdentifier(bs, id);
             BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
             batch.add(bs);//the actual delete
             try
@@ -266,19 +266,20 @@ public class DocumentRepository extends AbstractCassandraRepository
             return false;
         }
 
-        Table table = extractTable(identifier);
-        Identifier id = extractId(identifier);
+        Table table = identifier.getTable();
+        //Identifier id = extractId(identifier);
         PreparedStatement existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID), session());
 
         BoundStatement bs = new BoundStatement(existStmt);
-        bindIdentifier(bs, id);
+        bindIdentifier(bs, identifier);
         return (session().execute(bs).one().getLong(0) > 0);
     }
 
     @Override
     protected void bindIdentifier(BoundStatement bs, Identifier identifier)
     {
-        bs.bind(identifier.getComponent(0));
+        DocumentIdentifier docId = new DocumentIdentifier(identifier);
+        bs.bind(docId.getUUID());
     }
 
     private void bindCreate(BoundStatement bs, Document entity)
@@ -290,25 +291,23 @@ public class DocumentRepository extends AbstractCassandraRepository
                 entity.getUpdatedAt());
     }
 
-    private Identifier extractId(Identifier identifier)
-    {
-		// This includes the date/version on the end...
-//		List<Object> l = identifier.components().subList(2, 4);
-
-        //TODO: determine what to do with version here.
-        List<Object> l = identifier.components().subList(2, 3);
-        return new Identifier(l.toArray());
-    }
-
-    private Table extractTable(Identifier identifier)
-    {
-        Table t = new Table();
-        List<Object> l = identifier.components().subList(0, 2);//NOTE/TODO: frequent IndexOutOfBounds here
-        t.database((String) l.get(0));
-        t.name((String) l.get(1));
-        return t;
-    }
-
+//    private Identifier extractId(Identifier identifier)
+//    {
+//		// This includes the date/version on the end...
+////		List<Object> l = identifier.components().subList(2, 4);
+//
+//        //TODO: determine what to do with version here.
+//        List<Object> l = identifier.components().subList(2, 3);
+//        return new Identifier(l.toArray());
+//    }
+//    private Table extractTable(Identifier identifier)
+//    {
+//        Table t = new Table();
+//        List<Object> l = identifier.components().subList(0, 2);//NOTE/TODO: frequent IndexOutOfBounds here
+//        t.database((String) l.get(0));
+//        t.name((String) l.get(1));
+//        return t;
+//    }
     public static Document marshalRow(Row row)
     {
         if (row == null)
@@ -333,27 +332,4 @@ public class DocumentRepository extends AbstractCassandraRepository
         return d;
 
     }
-
-//    private class DocumentEventFactory
-//            implements EventFactory<Document>
-//    {
-//
-//        @Override
-//        public Object newCreatedEvent(Document object)
-//        {
-//            return new DocumentCreatedEvent(object);
-//        }
-//
-//        @Override
-//        public Object newUpdatedEvent(Document object)
-//        {
-//            return new DocumentUpdatedEvent(object);
-//        }
-//
-//        @Override
-//        public Object newDeletedEvent(Document object)
-//        {
-//            return new DocumentDeletedEvent(object);
-//        }
-//    }
 }

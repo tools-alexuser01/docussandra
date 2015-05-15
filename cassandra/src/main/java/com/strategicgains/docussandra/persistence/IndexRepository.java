@@ -15,6 +15,7 @@ import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
@@ -216,7 +217,7 @@ public class IndexRepository extends AbstractCassandraRepository implements Repo
         {
             logger.error("Could not update index cache upon index delete.", e);
         }
-        cascadeDelete(id);
+        cascadeDelete(new IndexIdentifier(id));
         //TODO: delete the index status (or at least mark it permantly inactive/disabled with a new timestamp, ensuring that /index_status won't return it) and halt any active indexing to save processor time
     }
 
@@ -283,7 +284,7 @@ public class IndexRepository extends AbstractCassandraRepository implements Repo
         return (getSession().execute(bs).one().getLong(0));
     }
 
-    private void cascadeDelete(Identifier id)
+    private void cascadeDelete(IndexIdentifier id)
     {
         //TODO: what if it doesn't exist?
         //options:

@@ -50,6 +50,10 @@ public class Identifier
         super();
         add(components);
     }
+    
+    public Identifier(Identifier id){
+        //this = id;
+    }
 
     /**
      * Add the given components, in order, to the identifier. Duplicate
@@ -58,7 +62,7 @@ public class Identifier
      *
      * @param components
      */
-    private void add(Object... components)
+    protected void add(Object... components)
     {
         if (components == null)
         {
@@ -78,7 +82,7 @@ public class Identifier
      *
      * @param component
      */
-    private void add(Object component)
+    protected void add(Object component)
     {
         if (component == null)
         {
@@ -116,13 +120,12 @@ public class Identifier
         return null;
     }
 
-    public String getIndexName()
+    public Table getTable()
     {
-        if (size() >= 3)
-        {
-            return getComponentAsString(2);
-        }
-        return null;
+        Table t = new Table();
+        t.database(new Database(getDatabaseName()));
+        t.name(getTableName());
+        return t;
     }
 
     /**
@@ -132,7 +135,7 @@ public class Identifier
      *
      * @return an unmodifiable list of components.
      */
-    private String getComponentAsString(int index)
+    protected String getComponentAsString(int index)
     {
         return components.get(index).toString();
     }
@@ -144,8 +147,7 @@ public class Identifier
      *
      * @return an unmodifiable list of components.
      */
-    @Deprecated
-    public Object getComponent(int index)
+    protected Object getComponent(int index)
     {
         return components.get(index);
     }

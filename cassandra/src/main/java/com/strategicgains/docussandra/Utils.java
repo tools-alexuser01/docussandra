@@ -8,6 +8,7 @@ import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import java.io.IOException;
@@ -97,7 +98,7 @@ public class Utils
      * @return The getIndexName of the iTable for that index.
      */
     //TODO: write test for this
-    public static String calculateITableName(Identifier indexId)
+    public static String calculateITableName(IndexIdentifier indexId)
     {
         return calculateITableName(indexId.getDatabaseName(), indexId.getTableName(), indexId.getIndexName());
     }

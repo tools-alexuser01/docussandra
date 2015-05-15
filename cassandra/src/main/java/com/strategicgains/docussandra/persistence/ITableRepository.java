@@ -8,6 +8,7 @@ import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.Iterator;
 import org.slf4j.Logger;
@@ -80,7 +81,7 @@ public class ITableRepository
      * iTable.
      * @return True if the iTable exists for the index, false otherwise.
      */
-    public boolean iTableExists(Identifier indexId)
+    public boolean iTableExists(IndexIdentifier indexId)
     {
         String iTableName = Utils.calculateITableName(indexId);
         logger.info("Checking for existance of iTable: " + iTableName);
@@ -172,7 +173,7 @@ public class ITableRepository
      *
      * @param indexId index id whose iTable should be deleted
      */
-    public void deleteITable(Identifier indexId)
+    public void deleteITable(IndexIdentifier indexId)
     {
         String tableToDelete = Utils.calculateITableName(indexId);
         deleteITable(tableToDelete);
