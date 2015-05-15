@@ -44,9 +44,10 @@ public class TableService
 
 	public List<Table> readAll(String database)
 	{
-		if (!databases.exists(new Identifier(database))) throw new ItemNotFoundException("Database not found: " + database);
+            Identifier id = new Identifier(database);
+		if (!databases.exists(id)) throw new ItemNotFoundException("Database not found: " + database);
 
-		return tables.readAll(database);
+		return tables.readAll(id);
 	}
 
 	public void update(Table entity)

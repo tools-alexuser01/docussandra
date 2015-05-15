@@ -161,7 +161,7 @@ public class IndexService
      */
     public List<Index> readAll(String namespace, String collection)
     {
-        return indexesRepo.readAllCached(namespace, collection);
+        return indexesRepo.readAllCached(new Identifier(namespace, collection));
     }
 
     /**
@@ -173,7 +173,7 @@ public class IndexService
      */
     public long count(String namespace, String collection)
     {
-        return indexesRepo.countAll(namespace, collection);
+        return indexesRepo.countAll(new Identifier(namespace, collection));
     }
 
     /**

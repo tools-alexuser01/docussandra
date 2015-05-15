@@ -211,7 +211,7 @@ public class TableRepositoryTest
         TableRepository instance = new TableRepository(f.getSession());
         List<Table> expResult = new ArrayList<>();
         expResult.add(testTable);
-        List<Table> result = instance.readAll(namespace);
+        List<Table> result = instance.readAll(new Identifier(namespace));
         assertEquals(expResult, result);
     }
 

@@ -14,10 +14,11 @@ import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
+import com.strategicgains.docussandra.persistence.parent.RepositoryInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatabaseRepository extends AbstractCassandraRepository
+public class DatabaseRepository extends AbstractCassandraRepository implements RepositoryInterface<Database>
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -56,17 +57,11 @@ public class DatabaseRepository extends AbstractCassandraRepository
 
     public DatabaseRepository(Session session)
     {
-        super(session, Tables.BY_ID, Columns.NAME);
+        super(session, Tables.BY_ID);
         initializeStatements();
         tableRepo = new TableRepository(getSession());
     }
 
-//    @Override
-//    protected void initializeObservers()
-//    {
-//        super.initializeObservers();
-//        addObserver(new StateChangeEventingObserver<Database>(new NamespaceEventFactory()));
-//    }
     protected void initializeStatements()
     {
         createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, getTable(), Columns.NAME), getSession());
@@ -77,7 +72,7 @@ public class DatabaseRepository extends AbstractCassandraRepository
         deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, getTable(), Columns.NAME), getSession());
     }
 
-    //@Override
+    @Override
     public Database create(Database entity)
     {
         BoundStatement bs = new BoundStatement(createStmt);
@@ -86,7 +81,7 @@ public class DatabaseRepository extends AbstractCassandraRepository
         return entity;
     }
 
-    //@Override
+    @Override
     public Database update(Database entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
@@ -95,26 +90,20 @@ public class DatabaseRepository extends AbstractCassandraRepository
         return entity;
     }
 
-    private void cascadeDelete(String dbName)
-    {
-        //remove all the collections and all the documents in that database.
-        //TODO: version instead of delete
-        //tables
-        logger.info("Cleaning up tables for database: " + dbName);
-
-        List<Table> tables = tableRepo.readAll(dbName);//get all tables
-        for (Table t : tables)
-        {
-            tableRepo.delete(t);// then delete them
-        }
-    }
-
+    @Override
     public List<Database> readAll()
     {
         BoundStatement bs = new BoundStatement(readAllStmt);
         return marshalAll(getSession().execute(bs));
     }
 
+    @Override
+    public List<Database> readAll(Identifier id)
+    {
+        throw new UnsupportedOperationException("Call not valid for this class.");
+    }
+
+    @Override
     public boolean exists(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -127,7 +116,7 @@ public class DatabaseRepository extends AbstractCassandraRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
-    //@Override
+    @Override
     public Database read(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -140,7 +129,7 @@ public class DatabaseRepository extends AbstractCassandraRepository
         return marshalRow(getSession().execute(bs).one());
     }
 
-    //@Override
+    @Override
     public void delete(Database entity)
     {
         if (entity == null)
@@ -148,9 +137,10 @@ public class DatabaseRepository extends AbstractCassandraRepository
             return;
         }
         delete(entity.getId());
-        cascadeDelete(entity.name());
+        cascadeDelete(entity.getId());
     }
 
+    @Override
     public void delete(Identifier identifier)
     {
         if (identifier == null)
@@ -161,16 +151,23 @@ public class DatabaseRepository extends AbstractCassandraRepository
         BoundStatement bs = new BoundStatement(deleteStmt);
         bindIdentifier(bs, identifier);
         getSession().execute(bs);
-        cascadeDelete(identifier.getComponentAsString(0));
+        cascadeDelete(identifier);
     }
 
-//    public List<Database> readAll(int limit, int offset)
-//    {
-//        PreparedStatement readAllStmtWithLimit = getSession().prepare(String.format(READ_ALL_CQL_WITH_LIMIT, getTable(), limit));    
-//        //^^TODO: EhCache this!
-//        BoundStatement bs = new BoundStatement(readAllStmtWithLimit);
-//        return marshalAll(getSession().execute(bs));
-//    }
+    private void cascadeDelete(Identifier id)
+    {
+        //remove all the collections and all the documents in that database.
+        //TODO: version instead of delete
+        //tables
+        logger.info("Cleaning up tables for database: " + id.getComponentAsString(0));
+
+        List<Table> tables = tableRepo.readAll(id);//get all tables
+        for (Table t : tables)
+        {
+            tableRepo.delete(t);// then delete them
+        }
+    }
+
     private void bindCreate(BoundStatement bs, Database entity)
     {
         bs.bind(entity.name(),
@@ -188,7 +185,7 @@ public class DatabaseRepository extends AbstractCassandraRepository
 
     private List<Database> marshalAll(ResultSet rs)
     {
-        List<Database> namespaces = new ArrayList<Database>();
+        List<Database> namespaces = new ArrayList<>();
         Iterator<Row> i = rs.iterator();
 
         while (i.hasNext())
@@ -214,27 +211,4 @@ public class DatabaseRepository extends AbstractCassandraRepository
         n.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
         return n;
     }
-
-//    private class NamespaceEventFactory
-//            implements EventFactory<Database>
-//    {
-//
-//        @Override
-//        public Object newCreatedEvent(Database object)
-//        {
-//            return new DatabaseCreatedEvent(object);
-//        }
-//
-//        @Override
-//        public Object newUpdatedEvent(Database object)
-//        {
-//            return new DatabaseUpdatedEvent(object);
-//        }
-//
-//        @Override
-//        public Object newDeletedEvent(Database object)
-//        {
-//            return new DatabaseDeletedEvent(object);
-//        }
-//    }
 }

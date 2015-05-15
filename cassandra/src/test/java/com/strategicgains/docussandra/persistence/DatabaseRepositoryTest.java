@@ -70,9 +70,9 @@ public class DatabaseRepositoryTest
      * Test of create method, of class DatabaseRepository.
      */
     @Test
-    public void testCreateEntity()
+    public void testCreate()
     {
-        System.out.println("createEntity");
+        System.out.println("create");
         Database entity = Fixtures.createTestDatabase();
         DatabaseRepository instance = new DatabaseRepository(f.getSession());
         Database result = instance.create(entity);
@@ -83,9 +83,9 @@ public class DatabaseRepositoryTest
      * Test of update method, of class DatabaseRepository.
      */
     @Test
-    public void testUpdateEntity()
+    public void testUpdate()
     {
-        System.out.println("updateEntity");
+        System.out.println("update");
         //setup
         Database entity = Fixtures.createTestDatabase();
         f.insertDatabase(entity);
@@ -101,9 +101,9 @@ public class DatabaseRepositoryTest
      * Test of delete method, of class DatabaseRepository.
      */
     @Test
-    public void testDeleteEntity()
+    public void testDelete()
     {
-        System.out.println("deleteEntity");
+        System.out.println("delete");
         //setup
         Database entity = Fixtures.createTestDatabase();
         f.insertDatabase(entity);
@@ -114,14 +114,28 @@ public class DatabaseRepositoryTest
         List<Database> allRows = instance.readAll();
         assertFalse(allRows.contains(entity));
     }
+    
+//    /**
+//     * Test of delete method, of class DatabaseRepository.
+//     */
+//    @Test
+//    public void testDelete_Identifier()
+//    {
+//        System.out.println("delete");
+//        Identifier identifier = null;
+//        DatabaseRepository instance = null;
+//        instance.delete(identifier);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
 
     /**
      * Test of delete method, of class DatabaseRepository.
      */
     @Test
-    public void testDeleteEntityWithDeleteCascade() throws InterruptedException
+    public void testDeleteWithDeleteCascade() throws InterruptedException
     {
-        System.out.println("deleteEntityWithDeleteCascade");
+        System.out.println("deleteWithDeleteCascade");
         //setup
         final Database entity = Fixtures.createTestDatabase();
         f.insertDatabase(entity);
@@ -176,5 +190,54 @@ public class DatabaseRepositoryTest
         assertFalse(result.isEmpty());
         assertTrue(result.contains(entity));
     }
+
+//
+//    /**
+//     * Test of readAll method, of class DatabaseRepository.
+//     */
+//    @Test
+//    public void testReadAll_Identifier()
+//    {
+//        System.out.println("readAll");
+//        Identifier id = null;
+//        DatabaseRepository instance = null;
+//        List<Database> expResult = null;
+//        List<Database> result = instance.readAll(id);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of exists method, of class DatabaseRepository.
+//     */
+//    @Test
+//    public void testExists()
+//    {
+//        System.out.println("exists");
+//        Identifier identifier = null;
+//        DatabaseRepository instance = null;
+//        boolean expResult = false;
+//        boolean result = instance.exists(identifier);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of read method, of class DatabaseRepository.
+//     */
+//    @Test
+//    public void testRead()
+//    {
+//        System.out.println("read");
+//        Identifier identifier = null;
+//        DatabaseRepository instance = null;
+//        Database expResult = null;
+//        Database result = instance.read(identifier);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
     
 }

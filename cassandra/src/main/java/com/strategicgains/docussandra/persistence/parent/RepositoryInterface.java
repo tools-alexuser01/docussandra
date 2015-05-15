@@ -15,11 +15,33 @@
  */
 package com.strategicgains.docussandra.persistence.parent;
 
+import com.strategicgains.docussandra.domain.Identifier;
+import com.strategicgains.docussandra.domain.parent.Identifiable;
+import java.util.List;
+
 /**
+ * Interface for our repositories. Mainly just to enforce naming conventions for
+ * right now.
  *
  * @author udeyoje
+ * @param <T> Object type for this repo.
  */
-public class RepositoryInterface
+public interface RepositoryInterface<T extends Identifiable>
 {
-    
+
+    public T create(T entity);
+
+    public T update(T entity);
+
+    public List<T> readAll();
+
+    public List<T> readAll(Identifier id);
+
+    public boolean exists(Identifier id);
+
+    public T read(Identifier id);
+
+    public void delete(T entity);
+
+    public void delete(Identifier id);
 }

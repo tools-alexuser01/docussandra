@@ -41,7 +41,7 @@ public class TableDeleteHandler
         //TODO: version instead of delete
         //Delete all indexes
         IndexRepository ir = new IndexRepository(dbSession);
-        List<Index> indexes = ir.readAll(event.data.databaseName(), event.data.name());//get all indexes
+        List<Index> indexes = ir.readAll(event.data.getId());//get all indexes
         for(Index i : indexes){
             ir.delete(i);// then delete them
         }

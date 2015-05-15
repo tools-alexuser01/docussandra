@@ -40,7 +40,7 @@ public class DatabaseDeletedHandler
         //tables
         LOGGER.info("Cleaning up tables for database: " + event.data.name());
         TableRepository tr = new TableRepository(dbSession);
-        List<Table> tables = tr.readAll(event.data.name());//get all tables
+        List<Table> tables = tr.readAll(event.data.getId());//get all tables
         for (Table t : tables)
         {
             tr.delete(t);// then delete them

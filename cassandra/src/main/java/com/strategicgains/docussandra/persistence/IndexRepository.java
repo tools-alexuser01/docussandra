@@ -19,14 +19,14 @@ import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
+import com.strategicgains.docussandra.persistence.parent.RepositoryInterface;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IndexRepository extends AbstractCassandraRepository
+public class IndexRepository extends AbstractCassandraRepository implements RepositoryInterface<Index>
 {
-
     /**
      * Logger for this class.
      */
@@ -87,9 +87,6 @@ public class IndexRepository extends AbstractCassandraRepository
     public IndexRepository(Session session)
     {
         super(session, Tables.BY_ID);
-//        addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Index>());
-//        //addObserver(new StateChangeEventingObserver<>(new IndexEventFactory()));
-//        addObserver(new IndexChangeObserver(session));
         initialize();
         iTableRepo = new ITableRepository(session);
     }
@@ -108,7 +105,7 @@ public class IndexRepository extends AbstractCassandraRepository
         readAllCountStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_COUNT_CQL, getTable()), getSession());
     }
 
-    //@Override
+    @Override
     public boolean exists(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -121,7 +118,7 @@ public class IndexRepository extends AbstractCassandraRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
-    //@Override
+    @Override
     public Index read(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -139,7 +136,7 @@ public class IndexRepository extends AbstractCassandraRepository
         return response;
     }
 
-    //@Override
+    @Override
     public Index create(Index entity)
     {
         BoundStatement bs = new BoundStatement(createStmt);
@@ -152,7 +149,7 @@ public class IndexRepository extends AbstractCassandraRepository
             String key = entity.getDatabaseName() + ":" + entity.getTableName();
             synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
             {
-                List<Index> currentIndex = this.readAll(entity.getDatabaseName(), entity.getTableName());
+                List<Index> currentIndex = this.readAll(entity.getId());
                 Element e = new Element(key, currentIndex);
                 c.put(e);
             }
@@ -184,13 +181,13 @@ public class IndexRepository extends AbstractCassandraRepository
         getSession().execute(bs);
     }
 
-    //@Override
+    @Override
     public Index update(Index entity)
     {
         throw new UnsupportedOperationException("Updates are not supported on indices; create a new one and delete the old one if you would like this functionality.");
     }
 
-    //@Override
+    @Override
     public void delete(Identifier id)
     {
         BoundStatement bs = new BoundStatement(deleteStmt);
@@ -205,7 +202,7 @@ public class IndexRepository extends AbstractCassandraRepository
             String key = dbName + ":" + tableName;
             synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
             {
-                List<Index> currentIndex = this.readAll(dbName, tableName);
+                List<Index> currentIndex = this.readAll(id);
                 if (!currentIndex.isEmpty())
                 {
                     Element e = new Element(key, currentIndex);
@@ -223,43 +220,34 @@ public class IndexRepository extends AbstractCassandraRepository
         //TODO: delete the index status (or at least mark it permantly inactive/disabled with a new timestamp, ensuring that /index_status won't return it) and halt any active indexing to save processor time
     }
 
+    @Override
     public void delete(Index entity)
     {
         delete(entity.getId());
     }
 
-    private void cascadeDelete(Identifier id)
-    {
-        //TODO: what if it doesn't exist?
-        //options:
-        //-----warn the user -- probably not
-        //-----throw an exception -- probably not even more
-        //-----do nothing -- probably
-        logger.info("Cleaning up ITables for index: " + id.getComponentAsString(0) + "/" + id.getComponentAsString(1) + "/" + id.getComponentAsString(2));
-
-        if (iTableRepo.iTableExists(id))
-        {
-            iTableRepo.deleteITable(id);
-        }
-    }
-
-    public List<Index> readAll(String namespace, String collection)
+    @Override
+    public List<Index> readAll(Identifier id)
     {
         BoundStatement bs = new BoundStatement(readAllStmt);
-        bs.bind(namespace, collection);
+        bs.bind(id.getComponentAsString(0), id.getComponentAsString(1));
         return (marshalAll(getSession().execute(bs)));
+    }
+
+    @Override
+    public List<Index> readAll()
+    {
+        throw new UnsupportedOperationException("Call not valid for this class.");
     }
 
     /**
      * Same as readAll, but will read from the cache if available.
      *
-     * @param namespace
-     * @param collection
      * @return
      */
-    public List<Index> readAllCached(String namespace, String collection)
+    public List<Index> readAllCached(Identifier id)
     {
-        String key = namespace + ":" + collection;
+        String key = id.getComponentAsString(0) + ":" + id.getComponentAsString(1);
         //logger.info("Reading all indexes from cache for " + key);
         Cache c = CacheFactory.getCache("index");
 //        synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
@@ -267,7 +255,7 @@ public class IndexRepository extends AbstractCassandraRepository
         Element e = c.get(key);
         if (e == null || e.getObjectValue() == null)//if its not set, or set, but null, re-read
         {
-            List<Index> all = readAll(namespace, collection);
+            List<Index> all = readAll(id);
             if (all != null && !all.isEmpty())//don't store empty or null index lists; could cause problems if an index gets created and we are not treating it as created
             {
                 e = new Element(key, all);
@@ -288,11 +276,26 @@ public class IndexRepository extends AbstractCassandraRepository
         //return readAll(namespace, collection);
     }
 
-    public long countAll(String namespace, String collection)
+    public long countAll(Identifier id)
     {
         BoundStatement bs = new BoundStatement(readAllCountStmt);
-        bs.bind(namespace, collection);
+        bs.bind(id.getComponentAsString(0), id.getComponentAsString(1));
         return (getSession().execute(bs).one().getLong(0));
+    }
+
+    private void cascadeDelete(Identifier id)
+    {
+        //TODO: what if it doesn't exist?
+        //options:
+        //-----warn the user -- probably not
+        //-----throw an exception -- probably not even more
+        //-----do nothing -- probably
+        logger.info("Cleaning up ITables for index: " + id.getComponentAsString(0) + "/" + id.getComponentAsString(1) + "/" + id.getComponentAsString(2));
+
+        if (iTableRepo.iTableExists(id))
+        {
+            iTableRepo.deleteITable(id);
+        }
     }
 
     private void bindCreate(BoundStatement bs, Index entity)

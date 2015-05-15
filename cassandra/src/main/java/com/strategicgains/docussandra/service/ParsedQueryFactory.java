@@ -17,6 +17,7 @@ package com.strategicgains.docussandra.service;
 
 import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.cache.CacheFactory;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
@@ -108,7 +109,7 @@ public class ParsedQueryFactory
         //determine if the query is valid; in other words is it searching on valid getFields that we have indexed
         List<String> fieldsToQueryOn = where.getFields();
         IndexRepository indexRepo = new IndexRepository(session);
-        List<Index> indices = indexRepo.readAllCached(db, toParse.getTable());
+        List<Index> indices = indexRepo.readAllCached(new Identifier(db, toParse.getTable()));
         Index indexToUse = null;
         for (Index index : indices)
         {

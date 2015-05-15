@@ -214,7 +214,7 @@ public class IndexRepositoryTest
         String namespace = testIndex.getDatabaseName();
         String collection = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
-        List<Index> result = instance.readAll(namespace, collection);
+        List<Index> result = instance.readAll(new Identifier(namespace, collection));
         assertEquals(2, result.size());
         assertEquals(result.get(0), testIndex);
         assertEquals(result.get(1), testIndex2);
@@ -235,7 +235,7 @@ public class IndexRepositoryTest
         String namespace = testIndex.getDatabaseName();
         String collection = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
-        List<Index> result = instance.readAllCached(namespace, collection);
+        List<Index> result = instance.readAllCached(new Identifier(namespace, collection));
         assertEquals(2, result.size());
         assertEquals(result.get(0), testIndex);
         assertEquals(result.get(1), testIndex2);
@@ -256,7 +256,7 @@ public class IndexRepositoryTest
         String collection = testIndex.getTableName();
         IndexRepository instance = new IndexRepository(f.getSession());
         long expResult = 2L;
-        long result = instance.countAll(namespace, collection);
+        long result = instance.countAll(new Identifier(namespace, collection));
         assertEquals(expResult, result);
     }
 
