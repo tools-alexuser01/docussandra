@@ -94,9 +94,9 @@ public class TableRepositoryTest
      * Test of read method, of class TableRepository.
      */
     @Test
-    public void testReadEntityById()
+    public void testReadById()
     {
-        System.out.println("readEntityById");
+        System.out.println("readById");
         Table testTable = Fixtures.createTestTable();
         Identifier identifier = testTable.getId();
         TableRepository instance = new TableRepository(f.getSession());
@@ -110,9 +110,9 @@ public class TableRepositoryTest
      * Test of create method, of class TableRepository.
      */
     @Test
-    public void testCreateEntity()
+    public void testCreate()
     {
-        System.out.println("createEntity");
+        System.out.println("create");
         Table entity = Fixtures.createTestTable();
         TableRepository instance = new TableRepository(f.getSession());
         Table result = instance.create(entity);
@@ -124,9 +124,9 @@ public class TableRepositoryTest
      * Test of update method, of class TableRepository.
      */
     @Test
-    public void testUpdateEntity()
+    public void testUpdate()
     {
-        System.out.println("updateEntity");
+        System.out.println("update");
         Table entity = Fixtures.createTestTable();
         TableRepository instance = new TableRepository(f.getSession());
         Table created = instance.create(entity);
@@ -145,9 +145,9 @@ public class TableRepositoryTest
      * Test of delete method, of class TableRepository.
      */
     @Test
-    public void testDeleteEntity()
+    public void testDelete()
     {
-        System.out.println("deleteEntity");
+        System.out.println("delete");
         Table testTable = Fixtures.createTestTable();
         Identifier identifier = testTable.getId();
         f.insertTable(testTable);
@@ -163,9 +163,9 @@ public class TableRepositoryTest
      * Test of delete method, of class TableRepository.
      */
     @Test
-    public void testDeleteEntityWithDeleteCascade() throws InterruptedException
+    public void testDeleteWithDeleteCascade() throws InterruptedException
     {
-        System.out.println("deleteEntityWithDeleteCascade");
+        System.out.println("deleteWithDeleteCascade");
         //setup
         f.insertTable(Fixtures.createTestTable());
         f.insertIndex(Fixtures.createTestIndexOneField());
