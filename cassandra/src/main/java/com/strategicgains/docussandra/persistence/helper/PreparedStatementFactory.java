@@ -75,8 +75,8 @@ public class PreparedStatementFactory
         query = query.trim();
         Cache c = CacheFactory.getCache("preparedStatements");
         Element e = null;
-        synchronized (LOCK)
-        {
+//        synchronized (LOCK)
+        //{
             e = c.get(query);
             if (e == null || e.getObjectValue() == null)
             {
@@ -91,7 +91,7 @@ public class PreparedStatementFactory
                     logger.trace("Pulling PreparedStatement from Cache: " + ps.getQueryString());
                 }
             }
-        }
+        //}
         //sw.stop();
         //logger.debug("Time to fetch prepared statement (" + query + "): " + sw.getTime());
         return (PreparedStatement) e.getObjectValue();

@@ -40,7 +40,7 @@ public class Identifier
     /**
      * Create an identifier with the given components. Duplicate instances are
      * not added--only one instance of a component will exist in the identifier.
-     *
+     * Components should be passed in the order of significance: Database -> Table -> Index -> Document
      * @param components
      */
     public Identifier(Object... components)
@@ -56,7 +56,7 @@ public class Identifier
      *
      * @param components
      */
-    public void add(Object... components)
+    private void add(Object... components)
     {
         if (components == null)
         {
@@ -76,7 +76,7 @@ public class Identifier
      *
      * @param component
      */
-    public void add(Object component)
+    private void add(Object component)
     {
         if (component == null)
         {
