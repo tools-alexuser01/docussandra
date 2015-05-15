@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.persistence;
 
+import com.datastax.driver.core.Row;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Identifier;
@@ -70,7 +71,7 @@ public class TableRepositoryTest
     @After
     public void tearDown()
     {
-        
+
     }
 
     /**
@@ -163,6 +164,24 @@ public class TableRepositoryTest
      * Test of delete method, of class TableRepository.
      */
     @Test
+    public void testDeleteByTable()
+    {
+        System.out.println("deleteByTable");
+        Table testTable = Fixtures.createTestTable();
+        Identifier identifier = testTable.getId();
+        f.insertTable(testTable);
+        TableRepository instance = new TableRepository(f.getSession());
+        boolean result = instance.exists(identifier);
+        assertEquals(true, result);
+        instance.delete(testTable);
+        result = instance.exists(identifier);
+        assertEquals(false, result);
+    }
+
+    /**
+     * Test of delete method, of class TableRepository.
+     */
+    @Test
     public void testDeleteWithDeleteCascade() throws InterruptedException
     {
         System.out.println("deleteWithDeleteCascade");
@@ -197,7 +216,7 @@ public class TableRepositoryTest
         }
         assertTrue(expectedExceptionThrown);
     }
-    
+
     /**
      * Test of readAll method, of class TableRepository.
      */

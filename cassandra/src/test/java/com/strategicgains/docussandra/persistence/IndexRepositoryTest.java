@@ -58,7 +58,7 @@ public class IndexRepositoryTest
     public void setUp() throws IOException, InterruptedException
     {
         Utils.initDatabase("/docussandra.cql", f.getSession());//hard clear of the test tables
-        Thread.sleep(5000);
+        //Thread.sleep(5000);
         CacheFactory.clearAllCaches();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
@@ -86,9 +86,9 @@ public class IndexRepositoryTest
      * Test of read method, of class IndexRepository.
      */
     @Test
-    public void testReadEntityById()
+    public void testReadById()
     {
-        System.out.println("readEntityById");
+        System.out.println("readById");
         Index testIndex = Fixtures.createTestIndexOneField();
         Identifier identifier = testIndex.getId();
         IndexRepository instance = new IndexRepository(f.getSession());
@@ -112,7 +112,7 @@ public class IndexRepositoryTest
     @Test
     public void testCreateEntity()
     {
-        System.out.println("createEntity");
+        System.out.println("create");
         Index entity = Fixtures.createTestIndexOneField();
         IndexRepository instance = new IndexRepository(f.getSession());
         Index expResult = entity;
@@ -143,9 +143,9 @@ public class IndexRepositoryTest
      * Test of update method, of class IndexRepository.
      */
     @Test
-    public void testUpdateEntity()
+    public void testUpdate()
     {
-        System.out.println("updateEntity");
+        System.out.println("update");
         IndexRepository instance = new IndexRepository(f.getSession());
         boolean expectedExceptionThrown = false;
         try
@@ -162,9 +162,9 @@ public class IndexRepositoryTest
      * Test of delete method, of class IndexRepository.
      */
     @Test
-    public void testDeleteEntity()
+    public void testDelete()
     {
-        System.out.println("deleteEntity");
+        System.out.println("delete");
         Index entity = Fixtures.createTestIndexOneField();
         f.insertIndex(entity);
         IndexRepository instance = new IndexRepository(f.getSession());
@@ -184,9 +184,31 @@ public class IndexRepositoryTest
      * Test of delete method, of class IndexRepository.
      */
     @Test
-    public void testDeleteEntityWithDeleteCascade() throws InterruptedException
+    public void testDeleteById()
     {
-        System.out.println("deleteEntityWithDeleteCascade");
+        System.out.println("deleteById");
+        Index entity = Fixtures.createTestIndexOneField();
+        f.insertIndex(entity);
+        IndexRepository instance = new IndexRepository(f.getSession());
+        instance.delete(entity.getId());
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            instance.read(entity.getId());
+        } catch (ItemNotFoundException e)
+        {
+            expectedExceptionThrown = true;
+        }
+        assertTrue("Expected exception not thrown", expectedExceptionThrown);
+    }
+
+    /**
+     * Test of delete method, of class IndexRepository.
+     */
+    @Test
+    public void testDeleteWithDeleteCascade() throws InterruptedException
+    {
+        System.out.println("deleteWithDeleteCascade");
         //setup
         f.insertIndex(Fixtures.createTestIndexOneField());
         //act
