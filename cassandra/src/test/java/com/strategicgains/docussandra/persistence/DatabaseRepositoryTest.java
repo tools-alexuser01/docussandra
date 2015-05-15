@@ -16,6 +16,7 @@
 package com.strategicgains.docussandra.persistence;
 
 import com.strategicgains.docussandra.domain.Database;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
 import org.junit.After;
@@ -33,37 +34,37 @@ import org.slf4j.LoggerFactory;
  */
 public class DatabaseRepositoryTest
 {
-    
+
     private static Fixtures f;
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseRepositoryTest.class);
-    
+
     public DatabaseRepositoryTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
-    
+
     @BeforeClass
     public static void setUpClass()
     {
     }
-    
+
     @AfterClass
     public static void tearDownClass()
     {
         f.clearTestTables();// clear anything that might be there already
     }
-    
+
     @Before
     public void setUp()
     {
         f.clearTestTables();// clear anything that might be there already
     }
-    
+
     @After
     public void tearDown()
     {
-        
+
     }
 
     /**
@@ -114,20 +115,24 @@ public class DatabaseRepositoryTest
         List<Database> allRows = instance.readAll();
         assertFalse(allRows.contains(entity));
     }
-    
-//    /**
-//     * Test of delete method, of class DatabaseRepository.
-//     */
-//    @Test
-//    public void testDelete_Identifier()
-//    {
-//        System.out.println("delete");
-//        Identifier identifier = null;
-//        DatabaseRepository instance = null;
-//        instance.delete(identifier);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
+
+    /**
+     * Test of delete method, of class DatabaseRepository.
+     */
+    @Test
+    public void testDelete_Identifier()
+    {
+        System.out.println("delete");
+        Database entity = Fixtures.createTestDatabase();
+        Identifier identifier = entity.getId();
+        f.insertDatabase(entity);
+        //act
+        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        instance.delete(identifier);
+        //check
+        List<Database> allRows = instance.readAll();
+        assertFalse(allRows.contains(entity));
+    }
 
     /**
      * Test of delete method, of class DatabaseRepository.
@@ -191,53 +196,34 @@ public class DatabaseRepositoryTest
         assertTrue(result.contains(entity));
     }
 
-//
-//    /**
-//     * Test of readAll method, of class DatabaseRepository.
-//     */
-//    @Test
-//    public void testReadAll_Identifier()
-//    {
-//        System.out.println("readAll");
-//        Identifier id = null;
-//        DatabaseRepository instance = null;
-//        List<Database> expResult = null;
-//        List<Database> result = instance.readAll(id);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of exists method, of class DatabaseRepository.
-//     */
-//    @Test
-//    public void testExists()
-//    {
-//        System.out.println("exists");
-//        Identifier identifier = null;
-//        DatabaseRepository instance = null;
-//        boolean expResult = false;
-//        boolean result = instance.exists(identifier);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of read method, of class DatabaseRepository.
-//     */
-//    @Test
-//    public void testRead()
-//    {
-//        System.out.println("read");
-//        Identifier identifier = null;
-//        DatabaseRepository instance = null;
-//        Database expResult = null;
-//        Database result = instance.read(identifier);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-    
+    /**
+     * Test of exists method, of class DatabaseRepository.
+     */
+    @Test
+    public void testExists()
+    {
+        System.out.println("exists");
+        Database entity = Fixtures.createTestDatabase();
+        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        boolean result = instance.exists(entity.getId());
+        assertEquals(false, result);
+        instance.create(entity);
+        result = instance.exists(entity.getId());
+        assertEquals(true, result);
+    }
+
+    /**
+     * Test of read method, of class DatabaseRepository.
+     */
+    @Test
+    public void testRead()
+    {
+        System.out.println("read");
+        Database entity = Fixtures.createTestDatabase();
+        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        assertNull(instance.read(entity.getId()));
+        instance.create(entity);
+        assertEquals(entity, instance.read(entity.getId()));
+    }
+
 }
