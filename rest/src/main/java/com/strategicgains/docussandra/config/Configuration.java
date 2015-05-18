@@ -131,9 +131,9 @@ public class Configuration
         // TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
         EventBus bus = new LocalEventBusBuilder()
-                .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
-                .subscribe(new TableDeleteHandler(dbConfig.getSession()))
-                .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
+//                .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
+//                .subscribe(new TableDeleteHandler(dbConfig.getSession()))
+//                .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
                 .subscribe(new IndexCreatedHandler(indexRepository, indexStatusRepository, documentRepository))
                 .build();
         DomainEvents.addBus("local", bus);
