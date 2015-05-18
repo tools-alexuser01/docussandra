@@ -63,13 +63,13 @@ public class PlayersRemote extends PerfTestParent
     {
         logger.info("Setup called!");
         beforeClass();
-        deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this setTable
+        //deleteData(getDb(), getTb(), getIndexes()); //should delete everything related to this setTable
         postDB(getDb());
         postTable(getDb(), getTb());
-        for (Index i : getIndexes())
-        {
-            postIndex(getDb(), getTb(), i);
-        }
+//        for (Index i : getIndexes())
+//        {
+//            postIndex(getDb(), getTb(), i);
+//        }
         loadData();//actual test here, however it is better to call it here for ordering sake
     }
 
@@ -266,6 +266,7 @@ public class PlayersRemote extends PerfTestParent
      * query with a set time (test should always pass; check output for stats.)
      */
     @Test
+    @Ignore
     public void directQueryTest() throws Exception
     {
         int numQueries = 50;
