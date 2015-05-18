@@ -18,7 +18,6 @@ import com.strategicgains.docussandra.bucketmanagement.SimpleIndexBucketLocatorI
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.DocumentIdentifier;
 import com.strategicgains.docussandra.domain.Identifier;
-import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.DuplicateItemException;
