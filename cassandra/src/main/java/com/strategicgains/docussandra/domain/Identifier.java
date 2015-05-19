@@ -52,7 +52,7 @@ public class Identifier
     }
     
     public Identifier(Identifier id){
-        //this = id;
+        this.components = id.components();
     }
 
     /**
