@@ -177,7 +177,6 @@ public class DocumentRepository extends AbstractCassandraRepository
         batch.add(bs);//the actual update
         try
         {
-            //TODO: bug! we need to make sure we delete the old indexes as well, if that record doesn't have the field anymore, what do we do?
             List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
             for (BoundStatement boundIndexStatement : indexStatements)
             {
