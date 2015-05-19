@@ -36,26 +36,23 @@ public abstract class AbstractCassandraRepository
      */
     private String table;
 
-//    /**
-//     * The column name that holds the row key or unique identifier.
-//     */
-//    private String identifierColumn;
-    
+    /**
+     * Default constructor.
+     */
     public AbstractCassandraRepository(){
     
     }
 
     /**
+     * Constructor.
      * @param session a pre-configured Session instance.
      * @param tableName the name of the Cassandra table entities are stored in.
      */
     public AbstractCassandraRepository(Session session, String tableName)
     {
-        //super();
         this.session = session;
         this.table = tableName;
     }
-
 
     /**
      * Gets the database session.
@@ -76,11 +73,6 @@ public abstract class AbstractCassandraRepository
     {
         return table;
     }
-
-//    public String getIdentifierColumn()
-//    {
-//        return identifierColumn;
-//    }
 
     /**
      * Binds an identifier object.
