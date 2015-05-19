@@ -157,7 +157,7 @@ public class DatabaseRepositoryImpl extends AbstractCRUDRepository<Database> imp
     private void cascadeDelete(Identifier id)
     {
         //remove all the tables and all the documents in that database.
-        //TODO: version instead of delete
+        //TODO: version instead of delete -- is this applicable here? I don't thinks so
         //tables
         logger.info("Cleaning up tables for database: " + id.getDatabaseName());
 
