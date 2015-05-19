@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 public class DocumentRepository extends AbstractCRUDRepository<Document>
 {
 
-    private Session session;
 
     public class Columns
     {
@@ -66,7 +65,6 @@ public class DocumentRepository extends AbstractCRUDRepository<Document>
     public DocumentRepository(Session session)
     {
         super(session);
-        this.session = session;
         this.bucketLocator = new SimpleIndexBucketLocatorImpl(200);//TODO: maybe we do actually want to let users set this
     }
 
@@ -87,7 +85,7 @@ public class DocumentRepository extends AbstractCRUDRepository<Document>
             bindCreate(bs, entity);
             BatchStatement batch = new BatchStatement(BatchStatement.Type.LOGGED);
             batch.add(bs);//the actual create
-            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(session, entity, bucketLocator);
+            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentCreateIndexEntriesStatements(getSession(), entity, bucketLocator);
             for (BoundStatement boundIndexStatement : indexStatements)
             {
                 batch.add(boundIndexStatement);//the index creates
@@ -128,7 +126,7 @@ public class DocumentRepository extends AbstractCRUDRepository<Document>
         PreparedStatement readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, table.toDbTable(), maxIndex + 1), getSession());//we do one plus here so we know if there are additional results
         BoundStatement bs = new BoundStatement(readStmt);
         //run the query
-        ResultSet results = session.execute(bs);
+        ResultSet results = getSession().execute(bs);
 
         return DocumentPersistanceUtils.parseResultSetWithLimitAndOffset(results, limit, offset);
     }
@@ -147,7 +145,7 @@ public class DocumentRepository extends AbstractCRUDRepository<Document>
         batch.add(bs);//the actual update
         try
         {
-            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(session, entity, bucketLocator);
+            List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentUpdateIndexEntriesStatements(getSession(), entity, bucketLocator);
             for (BoundStatement boundIndexStatement : indexStatements)
             {
                 batch.add(boundIndexStatement);//the index updates
@@ -174,7 +172,7 @@ public class DocumentRepository extends AbstractCRUDRepository<Document>
             batch.add(bs);//the actual delete
             try
             {
-                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
+                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(getSession(), entity, bucketLocator);
                 for (BoundStatement boundIndexStatement : indexStatements)
                 {
                     batch.add(boundIndexStatement);//the index deletes
@@ -208,7 +206,7 @@ public class DocumentRepository extends AbstractCRUDRepository<Document>
             batch.add(bs);//the actual delete
             try
             {
-                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(session, entity, bucketLocator);
+                List<BoundStatement> indexStatements = IndexMaintainerHelper.generateDocumentDeleteIndexEntriesStatements(getSession(), entity, bucketLocator);
                 for (BoundStatement boundIndexStatement : indexStatements)
                 {
                     batch.add(boundIndexStatement);//the index deletes
@@ -233,7 +231,6 @@ public class DocumentRepository extends AbstractCRUDRepository<Document>
         }
 
         Table table = identifier.getTable();
-        //Identifier id = extractId(identifier);
         PreparedStatement existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID), getSession());
 
         BoundStatement bs = new BoundStatement(existStmt);
