@@ -90,8 +90,6 @@ public class IndexStatusRepository extends AbstractCRUDRepository<IndexCreatedEv
     private PreparedStatement deleteFromNotDoneStmt;
     private PreparedStatement isCurrentlyIndexingStmt;
 
-    private Session session;
-
     /**
      * Constructor.
      *
@@ -100,7 +98,6 @@ public class IndexStatusRepository extends AbstractCRUDRepository<IndexCreatedEv
     public IndexStatusRepository(Session session)
     {
         super(session, Tables.BY_ID);
-        this.session = session;
         initialize();
         indexRepo = new IndexRepository(session);
     }
@@ -387,11 +384,6 @@ public class IndexStatusRepository extends AbstractCRUDRepository<IndexCreatedEv
         i.setErrors(row.getList(Columns.ERRORS, String.class));
         i.calculateValues();
         return i;
-    }
-
-    public Session getSession()
-    {
-        return session;
     }
 
 }
