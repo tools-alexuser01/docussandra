@@ -269,8 +269,6 @@ public class IndexStatusRepository extends AbstractCRUDRepository<IndexCreatedEv
         throw new UnsupportedOperationException("Not valid for this class.");
     }
 
-    
-    
     /**
      * Gets all IndexCreatedEvents that are currently indexing. This method is
      * preferred to readAll(). This provides a sense of the indexing load on the
@@ -384,6 +382,12 @@ public class IndexStatusRepository extends AbstractCRUDRepository<IndexCreatedEv
         i.setErrors(row.getList(Columns.ERRORS, String.class));
         i.calculateValues();
         return i;
+    }
+
+    @Override
+    public Session getSession()
+    {
+        return super.getSession();
     }
 
 }
