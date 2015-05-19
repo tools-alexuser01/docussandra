@@ -9,6 +9,7 @@ import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -84,6 +85,19 @@ public class UtilsTest
         index.setTable(databaseName, tableName);
         String expResult = "mydb_mytable_yoindex";
         String result = Utils.calculateITableName(index);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of calculateITableName method, of class Utils.
+     */
+    @Test
+    public void testCalculateITableName_IndexIdentifier()
+    {
+        System.out.println("calculateITableName");
+        IndexIdentifier indexId = new IndexIdentifier(Fixtures.createTestIndexOneField().getId());
+        String expResult = "mydb_mytable_myindexwithonefield";
+        String result = Utils.calculateITableName(indexId);
         assertEquals(expResult, result);
     }
 
@@ -253,20 +267,6 @@ public class UtilsTest
 
     }
 
-//    /**
-//     * Test of calculateITableName method, of class Utils.
-//     */
-//    @Test
-//    public void testCalculateITableName_IndexIdentifier()
-//    {
-//        System.out.println("calculateITableName");
-//        IndexIdentifier indexId = new IndexIdentifier(null);
-//        String expResult = "";
-//        String result = Utils.calculateITableName(indexId);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
 //
 //    /**
 //     * Test of join method, of class Utils.
