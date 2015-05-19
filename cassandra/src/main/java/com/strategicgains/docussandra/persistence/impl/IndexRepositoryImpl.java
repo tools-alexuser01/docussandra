@@ -145,7 +145,7 @@ public class IndexRepositoryImpl extends AbstractCRUDRepository<Index> implement
         BoundStatement bs = new BoundStatement(createStmt);
         bindCreate(bs, entity);
         getSession().execute(bs);
-        //maintain cache -- TODO: break into seperate method; probably a new thread        
+        //maintain cache  
         try//we do this in a try/catch because we don't want to cause an app error if this fails
         {
             Cache c = CacheFactory.getCache("index");
