@@ -20,6 +20,7 @@ import com.strategicgains.docussandra.handler.IndexCreatedHandler;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.ITableRepository;
+import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
@@ -67,7 +68,7 @@ public class Fixtures
     private static Logger logger = LoggerFactory.getLogger(Fixtures.class);
 
     private static IndexRepository indexRepo;
-    private static ITableRepository cleanUpInstance;
+    private static ITableRepositoryImpl cleanUpInstance;
     private static DatabaseRepository databaseRepo;
     private static DocumentRepository docRepo;
     private static TableRepository tableRepo;
@@ -114,7 +115,7 @@ public class Fixtures
         }
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
         indexRepo = new IndexRepository(session);
-        cleanUpInstance = new ITableRepository(getSession());
+        cleanUpInstance = new ITableRepositoryImpl(getSession());
         databaseRepo = new DatabaseRepository(getSession());
         docRepo = new DocumentRepository(getSession());
         tableRepo = new TableRepository(getSession());
@@ -601,7 +602,7 @@ public class Fixtures
     public void createTestITables()
     {
         System.out.println("createTestITables");
-        ITableRepository iTableDao = new ITableRepository(getSession());
+        ITableRepository iTableDao = new ITableRepositoryImpl(getSession());
         Index index = Fixtures.createTestIndexOneField();
         Index index2 = Fixtures.createTestIndexTwoField();
         Index index3 = Fixtures.createTestIndexWithBulkDataHit();

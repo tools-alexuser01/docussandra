@@ -1,7 +1,9 @@
-package com.strategicgains.docussandra.persistence;
+package com.strategicgains.docussandra.persistence.impl;
 
+import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.persistence.ITableRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -17,14 +19,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class ITableRepositoryTest
+public class ITableRepositoryImplTest
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static Fixtures f;
 
-    public ITableRepositoryTest() throws Exception
+    public ITableRepositoryImplTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
@@ -60,7 +62,7 @@ public class ITableRepositoryTest
     {
         System.out.println("iTableExists");
         Index index = Fixtures.createTestIndexOneField();
-        ITableRepository cleanUpInstance = new ITableRepository(f.getSession());
+        ITableRepository cleanUpInstance = new ITableRepositoryImpl(f.getSession());
         boolean expResult = false;//Note: Negative Test Only
         boolean result = cleanUpInstance.iTableExists(index);
         assertEquals(expResult, result);
@@ -74,7 +76,7 @@ public class ITableRepositoryTest
     {
         System.out.println("createITable");
         Index index = Fixtures.createTestIndexOneField();
-        ITableRepository instance = new ITableRepository(f.getSession());
+        ITableRepository instance = new ITableRepositoryImpl(f.getSession());
         boolean result = instance.iTableExists(index);
         assertEquals(false, result);//make sure it doesn't exist yet
 
@@ -98,7 +100,7 @@ public class ITableRepositoryTest
     public void testGenerateTableCreationSyntax()
     {
         System.out.println("generateTableCreationSyntax");
-        ITableRepository instance = new ITableRepository(f.getSession());
+        ITableRepositoryImpl instance = new ITableRepositoryImpl(f.getSession());
         String response = instance.generateTableCreationSyntax(Fixtures.createTestIndexOneField());
         Assert.assertNotNull(response);
         assertEquals("CREATE TABLE mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield, id));", response);
@@ -114,7 +116,7 @@ public class ITableRepositoryTest
     public void testGenerateTableCreationSyntaxUnique()
     {
         System.out.println("testGenerateTableCreationSyntaxUnique");
-        ITableRepository instance = new ITableRepository(f.getSession());
+        ITableRepositoryImpl instance = new ITableRepositoryImpl(f.getSession());
         Index one = Fixtures.createTestIndexOneField();
         one.isUnique(true);
         String response = instance.generateTableCreationSyntax(one);
@@ -134,7 +136,7 @@ public class ITableRepositoryTest
     public void testGenerateTableCreationSyntaxWithDataTypes()
     {
         System.out.println("generateTableCreationSyntax");
-        ITableRepository instance = new ITableRepository(f.getSession());
+        ITableRepositoryImpl instance = new ITableRepositoryImpl(f.getSession());
         String response = instance.generateTableCreationSyntax(Fixtures.createTestIndexNumericField());
         Assert.assertNotNull(response);
         assertEquals("CREATE TABLE mydb_mytable_myindexnumericfield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield3 int, PRIMARY KEY ((bucket), myindexedfield3, id));", response);
@@ -150,7 +152,7 @@ public class ITableRepositoryTest
     public void testDeleteITable()
     {
         System.out.println("deleteITable");
-        ITableRepository instance = new ITableRepository(f.getSession());
+        ITableRepository instance = new ITableRepositoryImpl(f.getSession());
         Index index = Fixtures.createTestIndexOneField();
         boolean result = instance.iTableExists(index);
         assertEquals(false, result);//not here        
@@ -169,7 +171,7 @@ public class ITableRepositoryTest
     public void testDeleteITable_String()
     {
         System.out.println("deleteITable");
-        ITableRepository instance = new ITableRepository(f.getSession());
+        ITableRepository instance = new ITableRepositoryImpl(f.getSession());
         Index index = Fixtures.createTestIndexOneField();
         boolean result = instance.iTableExists(index);
         assertEquals(false, result);//not here        

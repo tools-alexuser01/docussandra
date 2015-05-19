@@ -26,7 +26,7 @@ import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.persistence.QueryRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
 import com.strategicgains.docussandra.service.QueryService;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;

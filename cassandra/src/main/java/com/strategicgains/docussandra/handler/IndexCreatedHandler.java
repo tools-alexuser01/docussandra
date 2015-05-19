@@ -24,7 +24,7 @@ import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
-import com.strategicgains.docussandra.persistence.QueryRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
 import com.strategicgains.eventing.EventHandler;
 import java.util.ArrayList;
 import java.util.Date;

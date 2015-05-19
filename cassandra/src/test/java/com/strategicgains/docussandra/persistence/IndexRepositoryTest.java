@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.persistence;
 
+import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
@@ -218,7 +219,7 @@ public class IndexRepositoryTest
         //check index deletion        
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
         //check iTable deletion
-        ITableRepository iTableRepo = new ITableRepository(f.getSession());
+        ITableRepository iTableRepo = new ITableRepositoryImpl(f.getSession());
         assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
     }
 

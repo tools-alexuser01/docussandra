@@ -1,5 +1,6 @@
 package com.strategicgains.docussandra.persistence;
 
+import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -88,7 +89,7 @@ public class IndexRepository extends AbstractCRUDRepository<Index>
     {
         super(session, Tables.BY_ID);
         initialize();
-        iTableRepo = new ITableRepository(session);
+        iTableRepo = new ITableRepositoryImpl(session);
     }
 
     /**

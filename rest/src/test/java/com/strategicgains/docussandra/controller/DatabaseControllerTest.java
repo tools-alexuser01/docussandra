@@ -21,6 +21,7 @@ import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.ITableRepository;
+import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import org.junit.BeforeClass;
@@ -222,7 +223,7 @@ public class DatabaseControllerTest
         IndexRepository indexRepo = new IndexRepository(f.getSession());
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
         //check iTable deletion (using direct db calls instead of REST-- being slightly lazy here)
-        ITableRepository iTableRepo = new ITableRepository(f.getSession());
+        ITableRepository iTableRepo = new ITableRepositoryImpl(f.getSession());
         assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
         //check document deletion (using direct db calls instead of REST-- being slightly lazy here)
         DocumentRepository docRepo = new DocumentRepository(f.getSession());

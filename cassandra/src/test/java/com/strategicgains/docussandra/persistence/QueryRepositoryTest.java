@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.persistence;
 
+import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;

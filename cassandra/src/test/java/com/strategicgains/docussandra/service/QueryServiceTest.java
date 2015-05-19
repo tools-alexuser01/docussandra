@@ -21,7 +21,7 @@ import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.QueryRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
 import org.bson.BSONObject;

@@ -1,4 +1,4 @@
-package com.strategicgains.docussandra.persistence;
+package com.strategicgains.docussandra.persistence.impl;
 
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
@@ -12,6 +12,7 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.persistence.helper.DocumentPersistanceUtils;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.ArrayList;
