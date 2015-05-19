@@ -1,13 +1,16 @@
 package com.strategicgains.docussandra;
 
 import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.Session;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.strategicgains.docussandra.domain.FieldDataType;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.junit.After;
@@ -249,4 +252,67 @@ public class UtilsTest
         assertTrue("Expected exception not thrown.", expectedExceptionThrown);
 
     }
+
+//    /**
+//     * Test of calculateITableName method, of class Utils.
+//     */
+//    @Test
+//    public void testCalculateITableName_IndexIdentifier()
+//    {
+//        System.out.println("calculateITableName");
+//        IndexIdentifier indexId = new IndexIdentifier(null);
+//        String expResult = "";
+//        String result = Utils.calculateITableName(indexId);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of join method, of class Utils.
+//     */
+//    @Test
+//    public void testJoin_String_ObjectArr()
+//    {
+//        System.out.println("join");
+//        String delimiter = "";
+//        Object[] objects = null;
+//        String expResult = "";
+//        String result = Utils.join(delimiter, objects);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of join method, of class Utils.
+//     */
+//    @Test
+//    public void testJoin_String_Collection()
+//    {
+//        System.out.println("join");
+//        String delimiter = "";
+//        Collection<? extends Object> objects = null;
+//        String expResult = "";
+//        String result = Utils.join(delimiter, objects);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of equalLists method, of class Utils.
+//     */
+//    @Test
+//    public void testEqualLists()
+//    {
+//        System.out.println("equalLists");
+//        List<String> one = null;
+//        List<String> two = null;
+//        boolean expResult = false;
+//        boolean result = Utils.equalLists(one, two);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
 }
