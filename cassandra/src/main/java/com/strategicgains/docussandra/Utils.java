@@ -38,7 +38,7 @@ public class Utils
 {
 
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
-    //TODO: ugly copy and paste; fix
+    
     public static final String EMPTY_STRING = "";
 
     /**
