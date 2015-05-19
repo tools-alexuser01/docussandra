@@ -170,30 +170,6 @@ public class Utils
         }
     }
 
-    /**
-     * Converts a list to a human readable string.
-     *
-     * @param list List to convert to a String
-     * @return A String that represents the passed in list.
-     */
-    public static String listToString(List<String> list)//TODO: consider moving to a common lib
-    {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (String s : list)
-        {
-            if (!first)
-            {
-                sb.append(", ");
-            } else
-            {
-                first = false;
-            }
-            sb.append(s);
-        }
-        return sb.toString();
-    }
-
     public static void setField(String value, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
         try

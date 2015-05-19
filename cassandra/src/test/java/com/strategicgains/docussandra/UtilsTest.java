@@ -218,26 +218,6 @@ public class UtilsTest
         assertEquals("e38193e3-81ae-e382-0000-000000000000", result.toString());
     }
 
-    /**
-     * Test of listToString method, of class Utils.
-     */
-    @Test
-    public void testListToString()
-    {
-        System.out.println("listToString");
-        List<String> list = new ArrayList<>();
-        String expResult = "";
-        String result = Utils.listToString(list);
-        assertEquals(expResult, result);
-        list.add("one");
-        expResult = "one";
-        result = Utils.listToString(list);
-        assertEquals(expResult, result);
-        list.add("two");
-        expResult = "one, two";
-        result = Utils.listToString(list);
-        assertEquals(expResult, result);
-    }
 
     @Test
     public void testSetField() throws Exception
@@ -267,52 +247,70 @@ public class UtilsTest
 
     }
 
-//
-//    /**
-//     * Test of join method, of class Utils.
-//     */
-//    @Test
-//    public void testJoin_String_ObjectArr()
-//    {
-//        System.out.println("join");
-//        String delimiter = "";
-//        Object[] objects = null;
-//        String expResult = "";
-//        String result = Utils.join(delimiter, objects);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of join method, of class Utils.
-//     */
-//    @Test
-//    public void testJoin_String_Collection()
-//    {
-//        System.out.println("join");
-//        String delimiter = "";
-//        Collection<? extends Object> objects = null;
-//        String expResult = "";
-//        String result = Utils.join(delimiter, objects);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of equalLists method, of class Utils.
-//     */
-//    @Test
-//    public void testEqualLists()
-//    {
-//        System.out.println("equalLists");
-//        List<String> one = null;
-//        List<String> two = null;
-//        boolean expResult = false;
-//        boolean result = Utils.equalLists(one, two);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
+    /**
+     * Test of join method, of class Utils.
+     */
+    @Test
+    public void testJoin_String_ObjectArr()
+    {
+        System.out.println("join");
+        String expResult = "one";
+        String result = Utils.join(", ", "one");
+        assertEquals(expResult, result);
+        expResult = "one, two";
+        result = Utils.join(", ", "one", "two");
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of join method, of class Utils.
+     */
+    @Test
+    public void testJoin_String_Collection()
+    {
+        System.out.println("join");
+        List<String> list = new ArrayList<>();
+        String expResult = "";
+        String result = Utils.join(", ", list);
+        assertEquals(expResult, result);
+        list.add("one");
+        expResult = "one";
+        result = Utils.join(", ", list);
+        assertEquals(expResult, result);
+        list.add("two");
+        expResult = "one, two";
+        result = Utils.join(", ", list);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of equalLists method, of class Utils.
+     */
+    @Test
+    public void testEqualLists()
+    {
+        System.out.println("equalLists");
+        List<String> one = null;
+        List<String> two = null;
+        boolean result = Utils.equalLists(one, two);
+        assertEquals(true, result);
+        
+        one = new ArrayList<>();
+        two = new ArrayList<>();
+        result = Utils.equalLists(one, two);
+        assertEquals(true, result);
+                
+        one.add("test");
+        two.add("test");
+        result = Utils.equalLists(one, two);
+        assertEquals(true, result);
+        
+        two.add("testtest");
+        result = Utils.equalLists(one, two);
+        assertEquals(false, result);
+        
+        two = new ArrayList<>();
+        result = Utils.equalLists(one, two);
+        assertEquals(false, result);
+    }
 }
