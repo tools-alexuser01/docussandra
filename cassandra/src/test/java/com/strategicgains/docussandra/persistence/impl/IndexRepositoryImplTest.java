@@ -187,7 +187,7 @@ public class IndexRepositoryImplTest
         }
         assertTrue("Expected exception not thrown", expectedExceptionThrown);
         //check to make sure that the iTable got deleted
-        assertTrue("ITable was not deleted.", iTableRepo.iTableExists(entity));
+        assertFalse("ITable was not deleted.", iTableRepo.iTableExists(entity));
     }
 
     /**
@@ -211,8 +211,8 @@ public class IndexRepositoryImplTest
         }
         assertTrue("Expected exception not thrown", expectedExceptionThrown);
         //check to make sure that the iTable got deleted
-        assertTrue("ITable was not deleted.", iTableRepo.iTableExists((IndexIdentifier)entity.getId()));//for the heck of it, we check by ID here too
-        assertTrue("ITable was not deleted.", iTableRepo.iTableExists(entity));
+        assertFalse("ITable was not deleted.", iTableRepo.iTableExists(new IndexIdentifier(entity.getId())));//for the heck of it, we check by ID here too
+        assertFalse("ITable was not deleted.", iTableRepo.iTableExists(entity));
     }
 
     /**
