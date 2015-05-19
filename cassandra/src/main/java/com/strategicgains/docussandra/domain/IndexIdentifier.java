@@ -19,6 +19,8 @@ package com.strategicgains.docussandra.domain;
  * Supports the concept of a compound identifier. An Identifier is made up of
  * components, which are Object instances. The components are kept in order of
  * which they are added.
+ * 
+ * For index identification only.
  *
  * @author toddf
  * @since Aug 29, 2013
@@ -28,7 +30,7 @@ public class IndexIdentifier extends Identifier
 
     public IndexIdentifier(Identifier id)
     {
-        super(id.components().toArray());
+        super(id);
     }
     
 //TODO: javadoc
