@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.persistence;
+package com.strategicgains.docussandra.persistence.impl;
 
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
@@ -22,6 +22,7 @@ import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.List;
@@ -40,15 +41,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class DocumentRepositoryTest
+public class DocumentRepositoryImplTest
 {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentRepositoryTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentRepositoryImplTest.class);
     private static Fixtures f;
     private Database testDb;
     private Table testTable;
 
-    public DocumentRepositoryTest()
+    public DocumentRepositoryImplTest()
     {
     }
 
@@ -86,14 +87,14 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of create method, of class DocumentRepository.
+     * Test of create method, of class DocumentRepositoryImpl.
      */
     @Test
     public void testDoCreate()
     {
         System.out.println("doCreate");
         Document entity = Fixtures.createTestDocument();
-        DocumentRepository instance = new DocumentRepository(f.getSession());
+        DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
         Document result = instance.create(entity);
         assertNotNull(result);
         assertEquals(entity.databaseName(), result.databaseName());
@@ -105,7 +106,7 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of read method, of class DocumentRepository.
+     * Test of read method, of class DocumentRepositoryImpl.
      */
     @Test
     public void testDoRead()
@@ -116,7 +117,7 @@ public class DocumentRepositoryTest
         f.insertDocument(testDocument);
 
         Identifier identifier = testDocument.getId();
-        DocumentRepository instance = new DocumentRepository(f.getSession());
+        DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
         Document expResult = testDocument;
         Document result = instance.read(identifier);
         assertEquals(expResult, result);
@@ -125,7 +126,7 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of readAll method, of class DocumentRepository.
+     * Test of readAll method, of class DocumentRepositoryImpl.
      */
     @Test
     public void testDoReadAll() throws IOException, ParseException
@@ -134,7 +135,7 @@ public class DocumentRepositoryTest
         //setup        
         f.insertDocuments(Fixtures.getBulkDocuments());
 
-        DocumentRepository instance = new DocumentRepository(f.getSession());
+        DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
 
         List<Document> result = instance.readAll(testDb.name(), testTable.name(), 10, 0);
         assertTrue(result.size() == 10);
@@ -151,7 +152,7 @@ public class DocumentRepositoryTest
     }
 
     /*
-     * Test of readAll method, of class DocumentRepository.
+     * Test of readAll method, of class DocumentRepositoryImpl.
      */
     @Test
     public void testDoReadAll2() throws IOException, ParseException
@@ -160,7 +161,7 @@ public class DocumentRepositoryTest
         //setup        
         f.insertDocuments(Fixtures.getBulkDocuments());
 
-        DocumentRepository instance = new DocumentRepository(f.getSession());
+        DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
         
         //let's get the first 5
         QueryResponseWrapper result = instance.readAll(testDb.name(), testTable.name(), 5, 0);
@@ -192,7 +193,7 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of update method, of class DocumentRepository.
+     * Test of update method, of class DocumentRepositoryImpl.
      */
     @Test
     public void testDoUpdate()
@@ -200,7 +201,7 @@ public class DocumentRepositoryTest
         System.out.println("doUpdate");
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
-        DocumentRepository instance = new DocumentRepository(f.getSession());
+        DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
         String newObject = "{\"newjson\": \"object\"}";
         testDocument.object(newObject);
         Document result = instance.update(testDocument);
@@ -210,7 +211,7 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of delete method, of class DocumentRepository.
+     * Test of delete method, of class DocumentRepositoryImpl.
      */
     @Test
     public void testDoDelete()
@@ -218,7 +219,7 @@ public class DocumentRepositoryTest
         System.out.println("doDelete");
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
-        DocumentRepository instance = new DocumentRepository(f.getSession());
+        DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
         instance.delete(testDocument);
         boolean exceptionThrown = false;
         try
@@ -233,14 +234,14 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of several methods, of class DocumentRepository. Basically makes
+     * Test of several methods, of class DocumentRepositoryImpl. Basically makes
      * sure our versioning doesn't screw up something unexpected.
      */
     @Test
     public void testVersioningLogic()
     {
         System.out.println("testVersioningLogic");
-        DocumentRepository instance = new DocumentRepository(f.getSession());
+        DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
         //create
         Document testDocument = Fixtures.createTestDocument();
         Document createResult = instance.create(testDocument);
@@ -305,7 +306,7 @@ public class DocumentRepositoryTest
     }
 
     /**
-     * Test of exists method, of class DocumentRepository.
+     * Test of exists method, of class DocumentRepositoryImpl.
      */
     @Test
     public void testExists()
@@ -313,7 +314,7 @@ public class DocumentRepositoryTest
         System.out.println("exists");
         Document testDocument = Fixtures.createTestDocument();
         f.insertDocument(testDocument);
-        DocumentRepository instance = new DocumentRepository(f.getSession());
+        DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
         Identifier identifier = testDocument.getId();
         boolean result = instance.exists(identifier);
         assertEquals(true, result);

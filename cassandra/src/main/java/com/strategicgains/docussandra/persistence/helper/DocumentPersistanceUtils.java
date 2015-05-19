@@ -20,7 +20,7 @@ import com.datastax.driver.core.Row;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,8 +53,8 @@ public class DocumentPersistanceUtils
             return null;
         }
         Document d = new Document();
-        d.setUuid(row.getUUID(DocumentRepository.Columns.ID));
-        ByteBuffer b = row.getBytes(DocumentRepository.Columns.OBJECT);
+        d.setUuid(row.getUUID(DocumentRepositoryImpl.Columns.ID));
+        ByteBuffer b = row.getBytes(DocumentRepositoryImpl.Columns.OBJECT);
         if (b != null && b.hasArray())
         {
             byte[] result = new byte[b.remaining()];
@@ -62,8 +62,8 @@ public class DocumentPersistanceUtils
             BSONObject o = BSON.decode(result);
             d.object(JSON.serialize(o));
         }
-        d.setCreatedAt(row.getDate(DocumentRepository.Columns.CREATED_AT));
-        d.setUpdatedAt(row.getDate(DocumentRepository.Columns.UPDATED_AT));
+        d.setCreatedAt(row.getDate(DocumentRepositoryImpl.Columns.CREATED_AT));
+        d.setUpdatedAt(row.getDate(DocumentRepositoryImpl.Columns.UPDATED_AT));
         return d;
     }
 

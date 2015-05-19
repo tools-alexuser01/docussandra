@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.persistence;
+package com.strategicgains.docussandra.persistence.impl;
 
-import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
 import org.bson.BSONObject;
@@ -37,13 +38,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class QueryRepositoryTest
+public class QueryRepositoryImplTest
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private static Fixtures f;
 
-    public QueryRepositoryTest() throws Exception
+    public QueryRepositoryImplTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
@@ -79,7 +80,7 @@ public class QueryRepositoryTest
     public void testDoQueryNoResults() throws IndexParseException
     {
         System.out.println("testDoQueryNoResults");
-        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
+        QueryRepository instance = new QueryRepositoryImpl(f.getSession());
         QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(result.isEmpty());//no data yet, should get an empty set
@@ -94,7 +95,7 @@ public class QueryRepositoryTest
         System.out.println("testDoQueryWithResults");
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
-        DocumentRepository docRepo = new DocumentRepository(f.getSession());
+        DocumentRepository docRepo = new DocumentRepositoryImpl(f.getSession());
         docRepo.create(doc);
         QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
         QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery());
@@ -122,9 +123,9 @@ public class QueryRepositoryTest
         System.out.println("testDoQueryWithDataButNoResults");
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
-        DocumentRepository docRepo = new DocumentRepository(f.getSession());
+        DocumentRepository docRepo = new DocumentRepositoryImpl(f.getSession());
         docRepo.create(doc);
-        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
+        QueryRepository instance = new QueryRepositoryImpl(f.getSession());
         QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery2());
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -143,7 +144,7 @@ public class QueryRepositoryTest
         List<Document> docs = Fixtures.getBulkDocuments();
         //put a bunch of test docs in
         f.insertDocuments(docs);
-        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
+        QueryRepository instance = new QueryRepositoryImpl(f.getSession());
         QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQueryBulkData());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
@@ -164,7 +165,7 @@ public class QueryRepositoryTest
         //put a bunch of test docs in
         f.insertDocuments(docs);
         //setup
-        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
+        QueryRepository instance = new QueryRepositoryImpl(f.getSession());
         ParsedQuery query = Fixtures.createTestParsedQueryBulkData();
         //let's get the first 5
         QueryResponseWrapper result = instance.query(query, 5, 0);
@@ -215,17 +216,4 @@ public class QueryRepositoryTest
 
     }
 
-//    private void assertDocumentListContainsObjectWithSubString(List<Document> toCheck, String subString)
-//    {
-//        boolean stringFound = false;
-//        for (Document d : toCheck)
-//        {
-//            if (d.object().contains(subString))
-//            {
-//                stringFound = true;
-//                break;
-//            }
-//        }
-//        assertTrue("String " + subString + " was not found in document list.", stringFound);
-//    }
 }

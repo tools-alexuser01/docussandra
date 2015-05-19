@@ -23,9 +23,9 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.IndexParseException;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
-import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.TableRepository;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.TableRepositoryImpl;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +48,9 @@ public class IndexMaintainerHelperTest
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private IndexRepository indexRepo;
-    private DocumentRepository docRepo;
-    private TableRepository tableRepo;
+    private IndexRepositoryImpl indexRepo;
+    private DocumentRepositoryImpl docRepo;
+    private TableRepositoryImpl tableRepo;
     //some test records
     private Index index1;
     private Index index2;
@@ -80,9 +80,9 @@ public class IndexMaintainerHelperTest
     public void setUp()
     {
         //IndexChangeObserver ico = new IndexChangeObserver(f.getSession());
-        indexRepo = new IndexRepository(f.getSession());
-        docRepo = new DocumentRepository(f.getSession());
-        tableRepo = new TableRepository(f.getSession());
+        indexRepo = new IndexRepositoryImpl(f.getSession());
+        docRepo = new DocumentRepositoryImpl(f.getSession());
+        tableRepo = new TableRepositoryImpl(f.getSession());
         CacheFactory.clearAllCaches();//clear the caches so we don't grab an old record that is no longer present
         table = Fixtures.createTestTable();// new Table();
         f.clearTestTables();// clear anything that might be there already

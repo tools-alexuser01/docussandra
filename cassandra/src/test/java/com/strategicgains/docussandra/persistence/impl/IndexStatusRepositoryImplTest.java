@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.persistence;
+package com.strategicgains.docussandra.persistence.impl;
 
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
+import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,13 +41,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class IndexStatusRepositoryTest
+public class IndexStatusRepositoryImplTest
 {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IndexStatusRepositoryTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexStatusRepositoryImplTest.class);
     private static Fixtures f;
 
-    public IndexStatusRepositoryTest() throws Exception
+    public IndexStatusRepositoryImplTest() throws Exception
     {
         f = Fixtures.getInstance(true);
     }
@@ -82,14 +83,14 @@ public class IndexStatusRepositoryTest
     }
 
     /**
-     * Test of exists method, of class IndexStatusRepository.
+     * Test of exists method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testExists_UUID()
     {
         System.out.println("exists");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         UUID id = entity.getUuid();
         boolean result = instance.exists(id);
         assertEquals(false, result);
@@ -99,27 +100,27 @@ public class IndexStatusRepositoryTest
     }
 
     /**
-     * Test of create method, of class IndexStatusRepository.
+     * Test of create method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testCreateEntity()
     {
         System.out.println("createEntity");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         IndexCreatedEvent result = instance.create(entity);
         assertEquals(entity, result);
     }
 
     /**
-     * Test of update method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testUpdateEntity()
     {
         System.out.println("updateEntity");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         //create
         instance.create(entity);
         //update
@@ -133,14 +134,14 @@ public class IndexStatusRepositoryTest
     }
 
     /**
-     * Test of update method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testUpdateEntityWithFatalErrorField()
     {
         System.out.println("updateEntityWithFatalErrorField");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         //create
         instance.create(entity);
         //update
@@ -155,14 +156,14 @@ public class IndexStatusRepositoryTest
     }
 
     /**
-     * Test of update method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testUpdateEntityWithNullFatalErrorField()
     {
         System.out.println("updateEntityWithNullFatalErrorField");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         //create
         instance.create(entity);
         //update
@@ -177,14 +178,14 @@ public class IndexStatusRepositoryTest
     }
 
     /**
-     * Test of update method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testUpdateEntityWithErrorsField()
     {
         System.out.println("updateEntityWithErrorsField");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         //create
         instance.create(entity);
         //update
@@ -201,14 +202,14 @@ public class IndexStatusRepositoryTest
     }
 
     /**
-     * Test of update method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testUpdateEntityWithNullErrorsField()
     {
         System.out.println("updateEntityWithNullErrorsField");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         //create
         instance.create(entity);
         //update
@@ -224,26 +225,26 @@ public class IndexStatusRepositoryTest
 
 //not implemented
 //    /**
-//     * Test of deleteEntity method, of class IndexStatusRepository.
+//     * Test of deleteEntity method, of class IndexStatusRepositoryImpl.
 //     */
 //    @Test
 //    public void testDeleteEntity()
 //    {
 //        System.out.println("deleteEntity");
 //        IndexCreatedEvent id = null;
-//        IndexStatusRepository instance = null;
+//        IndexStatusRepositoryImpl instance = null;
 //        instance.deleteEntity(id);
 //        fail("The test case is a prototype.");
 //    }
     /**
-     * Test of readAll method, of class IndexStatusRepository.
+     * Test of readAll method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testReadAll()
     {
         System.out.println("readAll");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
 
         List<IndexCreatedEvent> result = instance.readAll();
         assertTrue(result.isEmpty());
@@ -263,7 +264,7 @@ public class IndexStatusRepositoryTest
 
 //not implemented    
 //    /**
-//     * Test of countAll method, of class IndexStatusRepository.
+//     * Test of countAll method, of class IndexStatusRepositoryImpl.
 //     */
 //    @Test
 //    public void testCountAll()
@@ -271,21 +272,21 @@ public class IndexStatusRepositoryTest
 //        System.out.println("countAll");
 //        String database = "";
 //        String table = "";
-//        IndexStatusRepository instance = null;
+//        IndexStatusRepositoryImpl instance = null;
 //        long expResult = 0L;
 //        long result = instance.countAll(database, collection);
 //        assertEquals(expResult, result);
 //        fail("The test case is a prototype.");
 //    }
     /**
-     * Test of read method, of class IndexStatusRepository.
+     * Test of read method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testReadEntityByUUID()
     {
         System.out.println("readEntityByUUID");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         UUID id = entity.getUuid();
         IndexCreatedEvent result = instance.read(id);
         assertNull(result);
@@ -295,14 +296,14 @@ public class IndexStatusRepositoryTest
     }
 
     /**
-     * Test of readAllCurrentlyIndexing method, of class IndexStatusRepository.
+     * Test of readAllCurrentlyIndexing method, of class IndexStatusRepositoryImpl.
      */
     @Test
     public void testReadAllActive()
     {
         System.out.println("readAllActive");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
-        IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
+        IndexStatusRepository instance = new IndexStatusRepositoryImpl(f.getSession());
         instance.create(entity);
         List<IndexCreatedEvent> result = instance.readAllCurrentlyIndexing();
         assertEquals(entity.getDateStarted(), result.get(0).getDateStarted());
@@ -318,25 +319,25 @@ public class IndexStatusRepositoryTest
     }
 
 //    /**
-//     * Test of initialize method, of class IndexStatusRepository.
+//     * Test of initialize method, of class IndexStatusRepositoryImpl.
 //     */
 //    @Test
 //    public void testInitialize()
 //    {
 //        System.out.println("initialize");
-//        IndexStatusRepository instance = null;
+//        IndexStatusRepositoryImpl instance = null;
 //        instance.initialize();
 //        fail("The test case is a prototype.");
 //    }
 //    /**
-//     * Test of updateEntityPkChange method, of class IndexStatusRepository.
+//     * Test of updateEntityPkChange method, of class IndexStatusRepositoryImpl.
 //     */
 //    @Test
 //    public void testUpdateEntityPkChange()
 //    {
 //        System.out.println("updateEntityPkChange");
 //        IndexCreatedEvent entity = null;
-//        IndexStatusRepository instance = null;
+//        IndexStatusRepositoryImpl instance = null;
 //        IndexCreatedEvent expResult = null;
 //        IndexCreatedEvent result = instance.updateEntityPkChange(entity);
 //        assertEquals(expResult, result);
@@ -344,7 +345,7 @@ public class IndexStatusRepositoryTest
 //    }
 //
 //    /**
-//     * Test of bindUUIDWhere method, of class IndexStatusRepository.
+//     * Test of bindUUIDWhere method, of class IndexStatusRepositoryImpl.
 //     */
 //    @Test
 //    public void testBindUUIDWhere()
@@ -352,34 +353,34 @@ public class IndexStatusRepositoryTest
 //        System.out.println("bindUUIDWhere");
 //        BoundStatement bs = null;
 //        UUID uuid = null;
-//        IndexStatusRepository instance = null;
+//        IndexStatusRepositoryImpl instance = null;
 //        instance.bindUUIDWhere(bs, uuid);
 //        fail("The test case is a prototype.");
 //    }
 //
 //    /**
-//     * Test of marshalRow method, of class IndexStatusRepository.
+//     * Test of marshalRow method, of class IndexStatusRepositoryImpl.
 //     */
 //    @Test
 //    public void testMarshalRow()
 //    {
 //        System.out.println("marshalRow");
 //        Row row = null;
-//        IndexStatusRepository instance = null;
+//        IndexStatusRepositoryImpl instance = null;
 //        IndexCreatedEvent expResult = null;
 //        IndexCreatedEvent result = instance.marshalRow(row);
 //        assertEquals(expResult, result);
 //        fail("The test case is a prototype.");
 //    }
 //    /**
-//     * Test of markDone method, of class IndexStatusRepository.
+//     * Test of markDone method, of class IndexStatusRepositoryImpl.
 //     */
 //    @Test
 //    public void testMarkDone()
 //    {
 //        System.out.println("markDone");
 //        UUID id = null;
-//        IndexStatusRepository instance = null;
+//        IndexStatusRepositoryImpl instance = null;
 //        instance.markDone(id);
 //        fail("The test case is a prototype.");
 //    }

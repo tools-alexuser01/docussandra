@@ -17,13 +17,13 @@ import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
-import com.strategicgains.docussandra.persistence.DatabaseRepository;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.impl.DatabaseRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
 import com.strategicgains.docussandra.persistence.ITableRepository;
 import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
-import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.IndexStatusRepository;
-import com.strategicgains.docussandra.persistence.TableRepository;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.IndexStatusRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.TableRepositoryImpl;
 import com.strategicgains.eventing.DomainEvents;
 import com.strategicgains.eventing.EventBus;
 import com.strategicgains.eventing.local.LocalEventBusBuilder;
@@ -67,12 +67,12 @@ public class Fixtures
 
     private static Logger logger = LoggerFactory.getLogger(Fixtures.class);
 
-    private static IndexRepository indexRepo;
+    private static IndexRepositoryImpl indexRepo;
     private static ITableRepositoryImpl cleanUpInstance;
-    private static DatabaseRepository databaseRepo;
-    private static DocumentRepository docRepo;
-    private static TableRepository tableRepo;
-    private static IndexStatusRepository indexStatusRepo;
+    private static DatabaseRepositoryImpl databaseRepo;
+    private static DocumentRepositoryImpl docRepo;
+    private static TableRepositoryImpl tableRepo;
+    private static IndexStatusRepositoryImpl indexStatusRepo;
 
     /**
      * Private constructor as this is a singleton object
@@ -114,12 +114,12 @@ public class Fixtures
             session = cluster.connect(this.getCassandraKeyspace());
         }
         logger.info("Connected to cluster: " + metadata.getClusterName() + '\n');
-        indexRepo = new IndexRepository(session);
+        indexRepo = new IndexRepositoryImpl(session);
         cleanUpInstance = new ITableRepositoryImpl(getSession());
-        databaseRepo = new DatabaseRepository(getSession());
-        docRepo = new DocumentRepository(getSession());
-        tableRepo = new TableRepository(getSession());
-        indexStatusRepo = new IndexStatusRepository(getSession());
+        databaseRepo = new DatabaseRepositoryImpl(getSession());
+        docRepo = new DocumentRepositoryImpl(getSession());
+        tableRepo = new TableRepositoryImpl(getSession());
+        indexStatusRepo = new IndexStatusRepositoryImpl(getSession());
 
         //set up bus just like rest express would
         EventBus bus = new LocalEventBusBuilder()
@@ -660,13 +660,13 @@ public class Fixtures
 
     public void insertDocument(Document document)
     {
-        DocumentRepository documentRepo = new DocumentRepository(getSession());
+        DocumentRepositoryImpl documentRepo = new DocumentRepositoryImpl(getSession());
         documentRepo.create(document);
     }
 
     public void insertDocuments(List<Document> documents)
     {
-        DocumentRepository documentRepo = new DocumentRepository(getSession());
+        DocumentRepositoryImpl documentRepo = new DocumentRepositoryImpl(getSession());
         for (Document document : documents)
         {
             try
@@ -689,7 +689,7 @@ public class Fixtures
 //    public void insertDocumentsTemp(List<Document> documents) throws Exception
 //    {
 //        EmbeddedCassandraServerHelper.startEmbeddedCassandra(15000);
-//        DocumentRepository documentRepo = new DocumentRepository(getSession());
+//        DocumentRepositoryImpl documentRepo = new DocumentRepositoryImpl(getSession());
 //        int i = 0;
 //        for (Document document : documents)
 //        {
@@ -705,7 +705,7 @@ public class Fixtures
 //    }
     public void deleteDocument(Document document)
     {
-        DocumentRepository documentRepo = new DocumentRepository(getSession());
+        DocumentRepositoryImpl documentRepo = new DocumentRepositoryImpl(getSession());
         documentRepo.delete(document);
     }
 

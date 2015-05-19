@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.persistence;
+package com.strategicgains.docussandra.persistence.impl;
 
-import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
-import com.datastax.driver.core.Row;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.persistence.ITableRepository;
+import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,13 +39,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class TableRepositoryTest
+public class TableRepositoryImplTest
 {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TableRepositoryTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableRepositoryImplTest.class);
     private static Fixtures f;
 
-    public TableRepositoryTest() throws Exception
+    public TableRepositoryImplTest() throws Exception
     {
         f = Fixtures.getInstance(true);
     }
@@ -76,7 +77,7 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of exists method, of class TableRepository.
+     * Test of exists method, of class TableRepositoryImpl.
      */
     @Test
     public void testExists()
@@ -84,7 +85,7 @@ public class TableRepositoryTest
         System.out.println("exists");
         Table testTable = Fixtures.createTestTable();
         Identifier identifier = testTable.getId();
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         boolean result = instance.exists(identifier);
         assertEquals(false, result);
         f.insertTable(testTable);
@@ -93,7 +94,7 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of read method, of class TableRepository.
+     * Test of read method, of class TableRepositoryImpl.
      */
     @Test
     public void testReadById()
@@ -101,7 +102,7 @@ public class TableRepositoryTest
         System.out.println("readById");
         Table testTable = Fixtures.createTestTable();
         Identifier identifier = testTable.getId();
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         f.insertTable(testTable);
         Table result = instance.read(identifier);
         assertNotNull(result);
@@ -109,28 +110,28 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of create method, of class TableRepository.
+     * Test of create method, of class TableRepositoryImpl.
      */
     @Test
     public void testCreate()
     {
         System.out.println("create");
         Table entity = Fixtures.createTestTable();
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         Table result = instance.create(entity);
         assertEquals(entity, result);
 
     }
 
     /**
-     * Test of update method, of class TableRepository.
+     * Test of update method, of class TableRepositoryImpl.
      */
     @Test
     public void testUpdate()
     {
         System.out.println("update");
         Table entity = Fixtures.createTestTable();
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         Table created = instance.create(entity);
         assertEquals(entity, created);
         String newDesciption = "this is a new description";
@@ -144,7 +145,7 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of delete method, of class TableRepository.
+     * Test of delete method, of class TableRepositoryImpl.
      */
     @Test
     public void testDelete()
@@ -153,7 +154,7 @@ public class TableRepositoryTest
         Table testTable = Fixtures.createTestTable();
         Identifier identifier = testTable.getId();
         f.insertTable(testTable);
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         boolean result = instance.exists(identifier);
         assertEquals(true, result);
         instance.delete(identifier);
@@ -162,7 +163,7 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of delete method, of class TableRepository.
+     * Test of delete method, of class TableRepositoryImpl.
      */
     @Test
     public void testDeleteByTable()
@@ -171,7 +172,7 @@ public class TableRepositoryTest
         Table testTable = Fixtures.createTestTable();
         Identifier identifier = testTable.getId();
         f.insertTable(testTable);
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         boolean result = instance.exists(identifier);
         assertEquals(true, result);
         instance.delete(testTable);
@@ -180,7 +181,7 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of delete method, of class TableRepository.
+     * Test of delete method, of class TableRepositoryImpl.
      */
     @Test
     public void testDeleteWithDeleteCascade() throws InterruptedException
@@ -191,20 +192,20 @@ public class TableRepositoryTest
         f.insertIndex(Fixtures.createTestIndexOneField());
         f.insertDocument(Fixtures.createTestDocument());
         //act
-        TableRepository tableRepo = new TableRepository(f.getSession());
+        TableRepository tableRepo = new TableRepositoryImpl(f.getSession());
         tableRepo.delete(Fixtures.createTestTable());
         //Thread.sleep(5000);
 
         //check table deletion
         assertFalse(tableRepo.exists(Fixtures.createTestTable().getId()));
         //check index deletion
-        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        IndexRepository indexRepo = new IndexRepositoryImpl(f.getSession());
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
         //check iTable deletion
         ITableRepository iTableRepo = new ITableRepositoryImpl(f.getSession());
         assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
         //check document deletion
-        DocumentRepository docRepo = new DocumentRepository(f.getSession());
+        DocumentRepositoryImpl docRepo = new DocumentRepositoryImpl(f.getSession());
         boolean expectedExceptionThrown = false;
         try
         {
@@ -219,7 +220,7 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of readAll method, of class TableRepository.
+     * Test of readAll method, of class TableRepositoryImpl.
      */
     @Test
     public void testReadAll()
@@ -228,7 +229,7 @@ public class TableRepositoryTest
         Table testTable = Fixtures.createTestTable();
         f.insertTable(testTable);
         String database = testTable.databaseName();
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         List<Table> expResult = new ArrayList<>();
         expResult.add(testTable);
         List<Table> result = instance.readAll(new Identifier(database));
@@ -236,13 +237,13 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of countAllTables method, of class TableRepository.
+     * Test of countAllTables method, of class TableRepositoryImpl.
      */
     @Test
     public void testCountAllTables()
     {
         System.out.println("countAllTables");
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         Table testTable = Fixtures.createTestTable();
         String database = testTable.databaseName();
         long result = instance.countAllTables(database);
@@ -255,13 +256,13 @@ public class TableRepositoryTest
     }
 
     /**
-     * Test of countTableSize method, of class TableRepository.
+     * Test of countTableSize method, of class TableRepositoryImpl.
      */
     @Test
     public void testCountTableSize()
     {
         System.out.println("countTableSize");
-        TableRepository instance = new TableRepository(f.getSession());
+        TableRepository instance = new TableRepositoryImpl(f.getSession());
         Table testTable = Fixtures.createTestTable();
         String database = testTable.databaseName();
         String tableName = testTable.name();

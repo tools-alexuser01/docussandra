@@ -12,8 +12,8 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.exception.IndexParseException;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
-import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -258,7 +258,7 @@ public class IndexMaintainerHelper
      */
     public static List<Index> getIndexForDocument(Session session, Document entity)
     {
-        IndexRepository indexRepo = new IndexRepository(session);
+        IndexRepositoryImpl indexRepo = new IndexRepositoryImpl(session);
         return indexRepo.readAllCached(entity.getId());
     }
 
@@ -274,7 +274,7 @@ public class IndexMaintainerHelper
      */
     public static boolean hasIndexedFieldChanged(BSONObject oldObject, Index index, Document entity)
     {
-        //DocumentRepository docRepo = new DocumentRepository(session);
+        //DocumentRepository docRepo = new DocumentRepositoryImpl(session);
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
         //BSONObject oldObject = (BSONObject) JSON.parse(docRepo.read(entity.getId()).object());
         for (IndexField indexField : index.getFields())
@@ -298,7 +298,7 @@ public class IndexMaintainerHelper
     //only public for testing
     public static BSONObject getOldObjectForUpdate(Session session, Document entity)
     {
-        DocumentRepository docRepo = new DocumentRepository(session);
+        DocumentRepositoryImpl docRepo = new DocumentRepositoryImpl(session);
         return (BSONObject) JSON.parse(docRepo.read(entity.getId()).object());
     }
 

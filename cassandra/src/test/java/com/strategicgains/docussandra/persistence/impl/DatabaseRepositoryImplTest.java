@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.persistence;
+package com.strategicgains.docussandra.persistence.impl;
 
-import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Identifier;
+import com.strategicgains.docussandra.persistence.DatabaseRepository;
+import com.strategicgains.docussandra.persistence.ITableRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
 import org.junit.After;
@@ -33,14 +34,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class DatabaseRepositoryTest
+public class DatabaseRepositoryImplTest
 {
 
     private static Fixtures f;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseRepositoryTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseRepositoryImplTest.class);
 
-    public DatabaseRepositoryTest() throws Exception
+    public DatabaseRepositoryImplTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
@@ -69,20 +70,20 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of create method, of class DatabaseRepository.
+     * Test of create method, of class DatabaseRepositoryImpl.
      */
     @Test
     public void testCreate()
     {
         System.out.println("create");
         Database entity = Fixtures.createTestDatabase();
-        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        DatabaseRepository instance = new DatabaseRepositoryImpl(f.getSession());
         Database result = instance.create(entity);
         assertEquals(entity, result);
     }
 
     /**
-     * Test of update method, of class DatabaseRepository.
+     * Test of update method, of class DatabaseRepositoryImpl.
      */
     @Test
     public void testUpdate()
@@ -92,7 +93,7 @@ public class DatabaseRepositoryTest
         Database entity = Fixtures.createTestDatabase();
         f.insertDatabase(entity);
         //act
-        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        DatabaseRepository instance = new DatabaseRepositoryImpl(f.getSession());
         entity.description("This is a new description!");
         Database result = instance.update(entity);
         //assert
@@ -100,7 +101,7 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of delete method, of class DatabaseRepository.
+     * Test of delete method, of class DatabaseRepositoryImpl.
      */
     @Test
     public void testDelete()
@@ -110,7 +111,7 @@ public class DatabaseRepositoryTest
         Database entity = Fixtures.createTestDatabase();
         f.insertDatabase(entity);
         //act
-        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        DatabaseRepository instance = new DatabaseRepositoryImpl(f.getSession());
         instance.delete(entity);
         //check
         List<Database> allRows = instance.readAll();
@@ -118,7 +119,7 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of delete method, of class DatabaseRepository.
+     * Test of delete method, of class DatabaseRepositoryImpl.
      */
     @Test
     public void testDelete_Identifier()
@@ -128,7 +129,7 @@ public class DatabaseRepositoryTest
         Identifier identifier = entity.getId();
         f.insertDatabase(entity);
         //act
-        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        DatabaseRepository instance = new DatabaseRepositoryImpl(f.getSession());
         instance.delete(identifier);
         //check
         List<Database> allRows = instance.readAll();
@@ -136,7 +137,7 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of delete method, of class DatabaseRepository.
+     * Test of delete method, of class DatabaseRepositoryImpl.
      */
     @Test
     public void testDeleteWithDeleteCascade() throws InterruptedException
@@ -149,23 +150,23 @@ public class DatabaseRepositoryTest
         f.insertIndex(Fixtures.createTestIndexOneField());
         f.insertDocument(Fixtures.createTestDocument());
         //act
-        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        DatabaseRepository instance = new DatabaseRepositoryImpl(f.getSession());
         instance.delete(entity);
         //Thread.sleep(5000);
         //check DB deletion
         List<Database> allRows = instance.readAll();
         assertFalse(allRows.contains(entity));
         //check table deletion
-        TableRepository tableRepo = new TableRepository(f.getSession());
+        TableRepositoryImpl tableRepo = new TableRepositoryImpl(f.getSession());
         assertFalse(tableRepo.exists(Fixtures.createTestTable().getId()));
         //check index deletion
-        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        IndexRepositoryImpl indexRepo = new IndexRepositoryImpl(f.getSession());
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
         //check iTable deletion
         ITableRepository iTableRepo = new ITableRepositoryImpl(f.getSession());
         assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
         //check document deletion
-        DocumentRepository docRepo = new DocumentRepository(f.getSession());
+        DocumentRepositoryImpl docRepo = new DocumentRepositoryImpl(f.getSession());
         boolean expectedExceptionThrown = false;
         try
         {
@@ -180,7 +181,7 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of readAll method, of class DatabaseRepository.
+     * Test of readAll method, of class DatabaseRepositoryImpl.
      */
     @Test
     public void testReadAll()
@@ -190,7 +191,7 @@ public class DatabaseRepositoryTest
         Database entity = Fixtures.createTestDatabase();
         f.insertDatabase(entity);
         //act
-        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        DatabaseRepository instance = new DatabaseRepositoryImpl(f.getSession());
         List<Database> result = instance.readAll();
         //check
         assertFalse(result.isEmpty());
@@ -198,14 +199,14 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of exists method, of class DatabaseRepository.
+     * Test of exists method, of class DatabaseRepositoryImpl.
      */
     @Test
     public void testExists()
     {
         System.out.println("exists");
         Database entity = Fixtures.createTestDatabase();
-        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        DatabaseRepository instance = new DatabaseRepositoryImpl(f.getSession());
         boolean result = instance.exists(entity.getId());
         assertEquals(false, result);
         instance.create(entity);
@@ -214,14 +215,14 @@ public class DatabaseRepositoryTest
     }
 
     /**
-     * Test of read method, of class DatabaseRepository.
+     * Test of read method, of class DatabaseRepositoryImpl.
      */
     @Test
     public void testRead()
     {
         System.out.println("read");
         Database entity = Fixtures.createTestDatabase();
-        DatabaseRepository instance = new DatabaseRepository(f.getSession());
+        DatabaseRepository instance = new DatabaseRepositoryImpl(f.getSession());
         assertNull(instance.read(entity.getId()));
         instance.create(entity);
         assertEquals(entity, instance.read(entity.getId()));

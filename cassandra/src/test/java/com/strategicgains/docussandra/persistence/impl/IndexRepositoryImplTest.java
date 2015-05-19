@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.docussandra.persistence;
+package com.strategicgains.docussandra.persistence.impl;
 
-import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
@@ -23,6 +22,8 @@ import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
+import com.strategicgains.docussandra.persistence.ITableRepository;
+import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
 import java.util.List;
@@ -37,14 +38,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class IndexRepositoryTest
+public class IndexRepositoryImplTest
 {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IndexRepositoryTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexRepositoryImplTest.class);
     private static Fixtures f;
     private Table testTable = Fixtures.createTestTable();
 
-    public IndexRepositoryTest() throws Exception
+    public IndexRepositoryImplTest() throws Exception
     {
         f = Fixtures.getInstance(true);
     }
@@ -67,7 +68,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of exists method, of class IndexRepository.
+     * Test of exists method, of class IndexRepositoryImpl.
      */
     @Test
     public void testExists()
@@ -75,7 +76,7 @@ public class IndexRepositoryTest
         System.out.println("exists");
         Index testIndex = Fixtures.createTestIndexOneField();
         Identifier identifier = testIndex.getId();
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepositoryImpl instance = new IndexRepositoryImpl(f.getSession());
         boolean result = instance.exists(identifier);
         assertEquals(false, result);
         f.insertIndex(testIndex);
@@ -84,7 +85,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of read method, of class IndexRepository.
+     * Test of read method, of class IndexRepositoryImpl.
      */
     @Test
     public void testReadById()
@@ -92,7 +93,7 @@ public class IndexRepositoryTest
         System.out.println("readById");
         Index testIndex = Fixtures.createTestIndexOneField();
         Identifier identifier = testIndex.getId();
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepositoryImpl instance = new IndexRepositoryImpl(f.getSession());
         boolean expectedExceptionThrown = false;
         try
         {
@@ -108,14 +109,14 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of create method, of class IndexRepository.
+     * Test of create method, of class IndexRepositoryImpl.
      */
     @Test
     public void testCreateEntity()
     {
         System.out.println("create");
         Index entity = Fixtures.createTestIndexOneField();
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepositoryImpl instance = new IndexRepositoryImpl(f.getSession());
         Index expResult = entity;
         Index result = instance.create(entity);
         assertEquals(expResult, result);
@@ -124,7 +125,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of markActive method, of class IndexRepository.
+     * Test of markActive method, of class IndexRepositoryImpl.
      */
     @Test
     public void testMarkActive()
@@ -132,7 +133,7 @@ public class IndexRepositoryTest
         System.out.println("markActive");
         Index entity = Fixtures.createTestIndexOneField();
         f.insertIndex(entity);
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepositoryImpl instance = new IndexRepositoryImpl(f.getSession());
         Index result = instance.read(entity.getId());
         assertFalse(result.isActive());
         instance.markActive(entity);
@@ -141,13 +142,13 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of update method, of class IndexRepository.
+     * Test of update method, of class IndexRepositoryImpl.
      */
     @Test
     public void testUpdate()
     {
         System.out.println("update");
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepositoryImpl instance = new IndexRepositoryImpl(f.getSession());
         boolean expectedExceptionThrown = false;
         try
         {
@@ -160,7 +161,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of delete method, of class IndexRepository.
+     * Test of delete method, of class IndexRepositoryImpl.
      */
     @Test
     public void testDelete()
@@ -168,7 +169,7 @@ public class IndexRepositoryTest
         System.out.println("delete");
         Index entity = Fixtures.createTestIndexOneField();
         f.insertIndex(entity);
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepositoryImpl instance = new IndexRepositoryImpl(f.getSession());
         instance.delete(entity);
         boolean expectedExceptionThrown = false;
         try
@@ -182,7 +183,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of delete method, of class IndexRepository.
+     * Test of delete method, of class IndexRepositoryImpl.
      */
     @Test
     public void testDeleteById()
@@ -190,7 +191,7 @@ public class IndexRepositoryTest
         System.out.println("deleteById");
         Index entity = Fixtures.createTestIndexOneField();
         f.insertIndex(entity);
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepositoryImpl instance = new IndexRepositoryImpl(f.getSession());
         instance.delete(entity.getId());
         boolean expectedExceptionThrown = false;
         try
@@ -204,7 +205,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of delete method, of class IndexRepository.
+     * Test of delete method, of class IndexRepositoryImpl.
      */
     @Test
     public void testDeleteWithDeleteCascade() throws InterruptedException
@@ -213,7 +214,7 @@ public class IndexRepositoryTest
         //setup
         f.insertIndex(Fixtures.createTestIndexOneField());
         //act
-        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        IndexRepository indexRepo = new IndexRepositoryImpl(f.getSession());
         indexRepo.delete(Fixtures.createTestIndexOneField());
         //Thread.sleep(5000);
         //check index deletion        
@@ -224,7 +225,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of readAll method, of class IndexRepository.
+     * Test of readAll method, of class IndexRepositoryImpl.
      */
     @Test
     public void testReadAll()
@@ -236,7 +237,7 @@ public class IndexRepositoryTest
         f.insertIndex(testIndex2);
         String database = testIndex.getDatabaseName();
         String table = testIndex.getTableName();
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepository instance = new IndexRepositoryImpl(f.getSession());
         List<Index> result = instance.readAll(new Identifier(database, table));
         assertEquals(2, result.size());
         assertEquals(result.get(0), testIndex);
@@ -245,7 +246,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of readAllCached method, of class IndexRepository.
+     * Test of readAllCached method, of class IndexRepositoryImpl.
      */
     @Test
     public void testReadAllCached()
@@ -257,7 +258,7 @@ public class IndexRepositoryTest
         f.insertIndex(testIndex2);
         String database = testIndex.getDatabaseName();
         String table = testIndex.getTableName();
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepository instance = new IndexRepositoryImpl(f.getSession());
         List<Index> result = instance.readAllCached(new Identifier(database, table));
         assertEquals(2, result.size());
         assertEquals(result.get(0), testIndex);
@@ -265,7 +266,7 @@ public class IndexRepositoryTest
     }
 
     /**
-     * Test of countAll method, of class IndexRepository.
+     * Test of countAll method, of class IndexRepositoryImpl.
      */
     @Test
     public void testCountAll()
@@ -277,7 +278,7 @@ public class IndexRepositoryTest
         f.insertIndex(testIndex2);
         String database = testIndex.getDatabaseName();
         String table = testIndex.getTableName();
-        IndexRepository instance = new IndexRepository(f.getSession());
+        IndexRepository instance = new IndexRepositoryImpl(f.getSession());
         long expResult = 2L;
         long result = instance.countAll(new Identifier(database, table));
         assertEquals(expResult, result);

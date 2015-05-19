@@ -21,7 +21,7 @@ import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.exception.FieldNotIndexedException;
-import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class ParsedQueryFactoryTest
     {
         f.clearTestTables();
         f.createTestITables();
-        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        IndexRepositoryImpl indexRepo = new IndexRepositoryImpl(f.getSession());
         indexRepo.create(Fixtures.createTestIndexTwoField());
     }
 

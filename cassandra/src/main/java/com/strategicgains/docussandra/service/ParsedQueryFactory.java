@@ -25,6 +25,7 @@ import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.WhereClause;
 import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +109,7 @@ public class ParsedQueryFactory
         WhereClause where = new WhereClause(toParse.getWhere());
         //determine if the query is valid; in other words is it searching on valid getFields that we have indexed
         List<String> fieldsToQueryOn = where.getFields();
-        IndexRepository indexRepo = new IndexRepository(session);
+        IndexRepository indexRepo = new IndexRepositoryImpl(session);
         List<Index> indices = indexRepo.readAllCached(new Identifier(db, toParse.getTable()));
         Index indexToUse = null;
         for (Index index : indices)
