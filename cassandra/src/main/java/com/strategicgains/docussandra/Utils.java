@@ -99,7 +99,6 @@ public class Utils
      * @param indexId index id whose iTable getIndexName you would like.
      * @return The getIndexName of the iTable for that index.
      */
-    //TODO: write test for this
     public static String calculateITableName(IndexIdentifier indexId)
     {
         return calculateITableName(indexId.getDatabaseName(), indexId.getTableName(), indexId.getIndexName());
