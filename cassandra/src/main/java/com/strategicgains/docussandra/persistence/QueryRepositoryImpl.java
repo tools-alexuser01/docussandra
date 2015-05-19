@@ -12,6 +12,7 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.persistence.helper.DocumentPersistanceUtils;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -73,7 +74,7 @@ public class QueryRepositoryImpl implements QueryRepository
         while (ite.hasNext())
         {
             Row row = ite.next();
-            toReturn.add(DocumentRepository.marshalRow(row));
+            toReturn.add(DocumentPersistanceUtils.marshalRow(row));
         }
         return new QueryResponseWrapper(toReturn, 0l);
     }
@@ -84,7 +85,7 @@ public class QueryRepositoryImpl implements QueryRepository
         //run the query
         long maxIndex = offset + limit;
         ResultSet results = session.execute(generateQueryStatement(query, maxIndex + 1));//we do one plus here so we know if there are additional results
-        return DocumentRepository.parseResultSetWithLimitAndOffset(results, limit, offset);
+        return DocumentPersistanceUtils.parseResultSetWithLimitAndOffset(results, limit, offset);
     }
 
     /**

@@ -38,20 +38,32 @@ public abstract class AbstractCRUDRepository<T extends Identifiable> extends Abs
     {
         super(session, tableName);
     }
-    
+
+    /**
+     * @param session a pre-configured Session instance.
+     */
+    public AbstractCRUDRepository(Session session)
+    {
+        super(session);
+    }
+
     public abstract T create(T entity);
-    
+
     public abstract T update(T entity);
-    
-    public abstract List<T> readAll();
-    
-    public abstract List<T> readAll(Identifier id);
-    
+
+    public List<T> readAll(){
+        throw new UnsupportedOperationException("Not valid for this class.");
+    }
+
+    public List<T> readAll(Identifier id){
+        throw new UnsupportedOperationException("Not valid for this class.");
+    }
+
     public abstract boolean exists(Identifier id);
-    
+
     public abstract T read(Identifier id);
-    
+
     public abstract void delete(T entity);
-    
+
     public abstract void delete(Identifier id);
 }

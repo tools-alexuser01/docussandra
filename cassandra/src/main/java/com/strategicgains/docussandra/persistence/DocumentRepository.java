@@ -10,7 +10,6 @@ import org.bson.BSONObject;
 import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.bucketmanagement.IndexBucketLocator;
@@ -25,25 +24,28 @@ import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.exception.InvalidObjectIdException;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.handler.IndexMaintainerHelper;
-import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
+import com.strategicgains.docussandra.persistence.helper.DocumentPersistanceUtils;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import java.util.ArrayList;
-import java.util.Iterator;
+import com.strategicgains.docussandra.persistence.parent.AbstractCRUDRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DocumentRepository extends AbstractCassandraRepository
+/**
+ * Repository for interacting with documents.
+ * @author udeyoje
+ */
+public class DocumentRepository extends AbstractCRUDRepository<Document>
 {
 
     private Session session;
 
-    private class Columns
+    public class Columns
     {
 
-        static final String ID = "id";
-        static final String OBJECT = "object";
-        static final String CREATED_AT = "created_at";
-        static final String UPDATED_AT = "updated_at";
+        public static final String ID = "id";
+        public static final String OBJECT = "object";
+        public static final String CREATED_AT = "created_at";
+        public static final String UPDATED_AT = "updated_at";
     }
 
     private static final String EXISTENCE_CQL = "select count(*) from %s where %s = ?";
@@ -57,19 +59,18 @@ public class DocumentRepository extends AbstractCassandraRepository
     private final IndexBucketLocator bucketLocator;
     private static Logger logger = LoggerFactory.getLogger(DocumentRepository.class);
 
+    /**
+     * Constructor.
+     * @param session 
+     */
     public DocumentRepository(Session session)
     {
-        super();
+        super(session);
         this.session = session;
         this.bucketLocator = new SimpleIndexBucketLocatorImpl(200);//TODO: maybe we do actually want to let users set this
     }
 
-    protected Session session()
-    {
-        return session;
-    }
-
-    //@Override
+    @Override
     public Document create(Document entity)
     {
         if (exists(entity.getId()))
@@ -79,7 +80,7 @@ public class DocumentRepository extends AbstractCassandraRepository
         }
 
         Table table = entity.table();
-        PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), session());
+        PreparedStatement createStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), getSession());
         try
         {
             BoundStatement bs = new BoundStatement(createStmt);
@@ -91,23 +92,23 @@ public class DocumentRepository extends AbstractCassandraRepository
             {
                 batch.add(boundIndexStatement);//the index creates
             }
-            session().execute(batch);
+            getSession().execute(batch);
             return entity;
         } catch (IndexParseException e)
         {
             throw new RuntimeException(e);
         }
     }
-
-    //@Override
+    
+    @Override
     public Document read(Identifier identifier)
     {
         Table table = identifier.getTable();
-        PreparedStatement readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, table.toDbTable(), Columns.ID), session());
+        PreparedStatement readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_CQL, table.toDbTable(), Columns.ID), getSession());
 
         BoundStatement bs = new BoundStatement(readStmt);
         bindIdentifier(bs, identifier);
-        Document item = marshalRow(session().execute(bs).one());
+        Document item = DocumentPersistanceUtils.marshalRow(getSession().execute(bs).one());
 
         if (item == null)
         {
@@ -124,52 +125,21 @@ public class DocumentRepository extends AbstractCassandraRepository
         table.database(database);
         table.name(tableString);
         long maxIndex = offset + limit;
-        PreparedStatement readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, table.toDbTable(), maxIndex + 1), session());//we do one plus here so we know if there are additional results
+        PreparedStatement readStmt = PreparedStatementFactory.getPreparedStatement(String.format(READ_ALL_CQL, table.toDbTable(), maxIndex + 1), getSession());//we do one plus here so we know if there are additional results
         BoundStatement bs = new BoundStatement(readStmt);
         //run the query
         ResultSet results = session.execute(bs);
 
-        return parseResultSetWithLimitAndOffset(results, limit, offset);
+        return DocumentPersistanceUtils.parseResultSetWithLimitAndOffset(results, limit, offset);
     }
 
-    public static QueryResponseWrapper parseResultSetWithLimitAndOffset(ResultSet results, int limit, long offset)
-    {
-        //process result(s)
-        long maxIndex = offset + limit;
-        ArrayList<Document> toReturn = new ArrayList<>(limit);
-        Iterator<Row> ite = results.iterator();
-        long offsetCounter = 0;
-        Long additionalResults = 0l;//default to 0, will be set to null if there are additional results (or in a later implementation, the actual number)
-        while (ite.hasNext())//for each item in the result set
-        {
-            Row row = ite.next();
-            if (offsetCounter >= maxIndex)//if we are at a counter less than our max amount to return (offset + limit)
-            {
-                additionalResults = null;//we have additional results for sure (see comment about +1 limit)
-                break;//we are done; don't bother processing anymore, it's not going to be used anyway
-            } else if (offsetCounter >= offset)//if we are at a counter greater than or equal to our offset -- we are in the sweet spot of the result set to return
-            {
-                toReturn.add(DocumentRepository.marshalRow(row));//we can add it to our return list
-            } else
-            {
-                if (logger.isTraceEnabled())
-                {
-                    logger.trace("We are probably wasting processor time by processing a query inefficently");//TODO: obviously, consider improving this (or at least take out the logger if we decide not to)
-                }
-            }
-            offsetCounter++;
-
-        }
-        return new QueryResponseWrapper(toReturn, additionalResults);
-    }
-
-    //@Override
+    @Override
     public Document update(Document entity)
     {
         Document old = read(entity.getId()); //will throw exception of doc is not found
         entity.setCreatedAt(old.getCreatedAt());//copy over the original create date
         Table table = entity.table();
-        PreparedStatement updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), session());
+        PreparedStatement updateStmt = PreparedStatementFactory.getPreparedStatement(String.format(CREATE_CQL, table.toDbTable(), Columns.ID), getSession());
 
         BoundStatement bs = new BoundStatement(updateStmt);
         bindCreate(bs, entity);
@@ -182,7 +152,7 @@ public class DocumentRepository extends AbstractCassandraRepository
             {
                 batch.add(boundIndexStatement);//the index updates
             }
-            session().execute(batch);
+            getSession().execute(batch);
             return entity;
         } catch (IndexParseException e)
         {
@@ -190,13 +160,13 @@ public class DocumentRepository extends AbstractCassandraRepository
         }
     }
 
-    //@Override
+    @Override
     public void delete(Document entity)
     {
         try
         {
             Table table = entity.table();
-            PreparedStatement deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, table.toDbTable(), Columns.ID), session());
+            PreparedStatement deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, table.toDbTable(), Columns.ID), getSession());
 
             BoundStatement bs = new BoundStatement(deleteStmt);
             bindIdentifier(bs, entity.getId());
@@ -209,7 +179,7 @@ public class DocumentRepository extends AbstractCassandraRepository
                 {
                     batch.add(boundIndexStatement);//the index deletes
                 }
-                session().execute(batch);
+                getSession().execute(batch);
             } catch (IndexParseException e)
             {
                 throw new RuntimeException(e);//this shouldn't actually happen outside of tests
@@ -220,6 +190,7 @@ public class DocumentRepository extends AbstractCassandraRepository
         }
     }
 
+    @Override
     public void delete(Identifier id)
     {
         //ok, this is kinda messed up; we actually need to FETCH the document in
@@ -229,7 +200,7 @@ public class DocumentRepository extends AbstractCassandraRepository
         try
         {
             Table table = entity.table();
-            PreparedStatement deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, table.toDbTable(), Columns.ID), session());
+            PreparedStatement deleteStmt = PreparedStatementFactory.getPreparedStatement(String.format(DELETE_CQL, table.toDbTable(), Columns.ID), getSession());
 
             BoundStatement bs = new BoundStatement(deleteStmt);
             bindIdentifier(bs, id);
@@ -242,7 +213,7 @@ public class DocumentRepository extends AbstractCassandraRepository
                 {
                     batch.add(boundIndexStatement);//the index deletes
                 }
-                session().execute(batch);
+                getSession().execute(batch);
             } catch (IndexParseException e)
             {
                 throw new RuntimeException(e);//this shouldn't actually happen outside of tests
@@ -253,7 +224,7 @@ public class DocumentRepository extends AbstractCassandraRepository
         }
     }
 
-    //@Override
+    @Override
     public boolean exists(Identifier identifier)
     {
         if (identifier == null || identifier.isEmpty())
@@ -263,11 +234,11 @@ public class DocumentRepository extends AbstractCassandraRepository
 
         Table table = identifier.getTable();
         //Identifier id = extractId(identifier);
-        PreparedStatement existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID), session());
+        PreparedStatement existStmt = PreparedStatementFactory.getPreparedStatement(String.format(EXISTENCE_CQL, table.toDbTable(), Columns.ID), getSession());
 
         BoundStatement bs = new BoundStatement(existStmt);
         bindIdentifier(bs, identifier);
-        return (session().execute(bs).one().getLong(0) > 0);
+        return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
     @Override
@@ -286,45 +257,4 @@ public class DocumentRepository extends AbstractCassandraRepository
                 entity.getUpdatedAt());
     }
 
-//    private Identifier extractId(Identifier identifier)
-//    {
-//		// This includes the date/version on the end...
-////		List<Object> l = identifier.components().subList(2, 4);
-//
-//        //TODO: determine what to do with version here.
-//        List<Object> l = identifier.components().subList(2, 3);
-//        return new Identifier(l.toArray());
-//    }
-//    private Table extractTable(Identifier identifier)
-//    {
-//        Table t = new Table();
-//        List<Object> l = identifier.components().subList(0, 2);//NOTE/TODO: frequent IndexOutOfBounds here
-//        t.database((String) l.get(0));
-//        t.name((String) l.get(1));
-//        return t;
-//    }
-    public static Document marshalRow(Row row)
-    {
-        if (row == null)
-        {
-            return null;
-        }
-
-        Document d = new Document();
-        d.setUuid(row.getUUID(Columns.ID));
-        ByteBuffer b = row.getBytes(Columns.OBJECT);
-
-        if (b != null && b.hasArray())
-        {
-            byte[] result = new byte[b.remaining()];
-            b.get(result);
-            BSONObject o = BSON.decode(result);
-            d.object(JSON.serialize(o));
-        }
-
-        d.setCreatedAt(row.getDate(Columns.CREATED_AT));
-        d.setUpdatedAt(row.getDate(Columns.UPDATED_AT));
-        return d;
-
-    }
 }

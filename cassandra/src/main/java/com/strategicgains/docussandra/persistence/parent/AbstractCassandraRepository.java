@@ -39,12 +39,14 @@ public abstract class AbstractCassandraRepository
     /**
      * Default constructor.
      */
-    public AbstractCassandraRepository(){
-    
+    public AbstractCassandraRepository()
+    {
+
     }
 
     /**
      * Constructor.
+     *
      * @param session a pre-configured Session instance.
      * @param tableName the name of the Cassandra table entities are stored in.
      */
@@ -52,6 +54,16 @@ public abstract class AbstractCassandraRepository
     {
         this.session = session;
         this.table = tableName;
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param session a pre-configured Session instance.
+     */
+    public AbstractCassandraRepository(Session session)
+    {
+        this.session = session;
     }
 
     /**
