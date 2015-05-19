@@ -105,7 +105,7 @@ public class Utils
         return calculateITableName(indexId.getDatabaseName(), indexId.getTableName(), indexId.getIndexName());
     }
 
-    //TODO: ditch the UUID type; we are misusing it here and another type (probably a string or long) would be more approprate 
+    //TODO: ditch the UUID type; we are misusing it here and another type (probably a string or long) would be more approprate -- DO THIS
     /**
      * Converts a string to a fuzzy UUID. Fuzzy, as in it isn't going to be
      * unique and is only for the first 8 bytes. Should only be used for
