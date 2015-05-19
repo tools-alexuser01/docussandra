@@ -56,7 +56,7 @@ public class ITableRepository
      * @param session Session for interacting with the Cassandra database.
      */
     public ITableRepository(Session session)
-    {;
+    {
         this.session = session;
     }
 
