@@ -28,6 +28,12 @@ package com.strategicgains.docussandra.domain;
 public class IndexIdentifier extends Identifier
 {
 
+    public IndexIdentifier(Object... components)
+    {
+        super(components);
+    }
+    
+
     public IndexIdentifier(Identifier id)
     {
         super(id);
