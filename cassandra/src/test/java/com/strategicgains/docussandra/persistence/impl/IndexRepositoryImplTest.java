@@ -20,6 +20,7 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.ITableRepository;
@@ -44,10 +45,12 @@ public class IndexRepositoryImplTest
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexRepositoryImplTest.class);
     private static Fixtures f;
     private Table testTable = Fixtures.createTestTable();
+    private ITableRepository iTableRepo;
 
     public IndexRepositoryImplTest() throws Exception
     {
         f = Fixtures.getInstance(true);
+        iTableRepo = new ITableRepositoryImpl(f.getSession());
     }
 
     @AfterClass
@@ -122,6 +125,9 @@ public class IndexRepositoryImplTest
         assertEquals(expResult, result);
         result = instance.read(result.getId());
         assertEquals(expResult, result);
+
+        //check to make sure that the iTable got created        
+        assertTrue("ITable was not created.", iTableRepo.iTableExists(entity));
     }
 
     /**
@@ -180,6 +186,8 @@ public class IndexRepositoryImplTest
             expectedExceptionThrown = true;
         }
         assertTrue("Expected exception not thrown", expectedExceptionThrown);
+        //check to make sure that the iTable got deleted
+        assertTrue("ITable was not deleted.", iTableRepo.iTableExists(entity));
     }
 
     /**
@@ -202,6 +210,9 @@ public class IndexRepositoryImplTest
             expectedExceptionThrown = true;
         }
         assertTrue("Expected exception not thrown", expectedExceptionThrown);
+        //check to make sure that the iTable got deleted
+        assertTrue("ITable was not deleted.", iTableRepo.iTableExists((IndexIdentifier)entity.getId()));//for the heck of it, we check by ID here too
+        assertTrue("ITable was not deleted.", iTableRepo.iTableExists(entity));
     }
 
     /**
@@ -220,7 +231,6 @@ public class IndexRepositoryImplTest
         //check index deletion        
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
         //check iTable deletion
-        ITableRepository iTableRepo = new ITableRepositoryImpl(f.getSession());
         assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
     }
 
