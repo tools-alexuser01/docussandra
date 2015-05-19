@@ -298,7 +298,6 @@ public class Identifier
         return components.isEmpty();
     }
 
-    //below this line is an ugly copy + paste: TODO: fix
     //stolen from the restexpress object utils
     /**
      * Determines is two objects are comparable to each other, in that they
