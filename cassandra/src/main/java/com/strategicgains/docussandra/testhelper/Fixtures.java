@@ -80,7 +80,7 @@ public class Fixtures
     private Fixtures(String seeds, boolean mockCassandra) throws Exception
     {
         //try {
-        //Properties properties = loadTestProperties(); //TODO: put this call back in
+        //Properties properties = loadTestProperties(); //TODO: put this call back in ???
         String cassandraSeedsProperty = seeds;//properties.getProperty(
         //CASSANDRA_SEEDS, "localhost");
         cassandraKeyspace = "docussandra";//properties.getProperty(CASSANDRA_KEYSPACE);
