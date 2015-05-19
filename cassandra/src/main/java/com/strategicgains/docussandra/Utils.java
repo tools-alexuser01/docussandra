@@ -299,7 +299,6 @@ public class Utils
         return builder.toString();
     }
 
-    //TODO: move this to common a library
     public static boolean equalLists(List<String> one, List<String> two)
     {
         if (one == null && two == null)
