@@ -15,13 +15,12 @@ import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
-import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.docussandra.persistence.parent.RepositoryInterface;
+import com.strategicgains.docussandra.persistence.parent.AbstractCRUDRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TableRepository extends AbstractCassandraRepository implements RepositoryInterface<Table>
+public class TableRepository extends AbstractCRUDRepository<Table>
 {
 
     /**

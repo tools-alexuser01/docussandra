@@ -24,7 +24,7 @@ import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
-import com.strategicgains.docussandra.persistence.QueryRepository;
+import com.strategicgains.docussandra.persistence.QueryRepositoryImpl;
 import com.strategicgains.docussandra.persistence.TableRepository;
 import com.strategicgains.docussandra.service.DatabaseService;
 import com.strategicgains.docussandra.service.DocumentService;
@@ -108,7 +108,7 @@ public class Configuration
         TableRepository tableRepository = new TableRepository(dbConfig.getSession());
         DocumentRepository documentRepository = new DocumentRepository(dbConfig.getSession());
         IndexRepository indexRepository = new IndexRepository(dbConfig.getSession());
-        QueryRepository queryRepository = new QueryRepository(dbConfig.getSession());
+        QueryRepositoryImpl queryRepository = new QueryRepositoryImpl(dbConfig.getSession());
         IndexStatusRepository indexStatusRepository = new IndexStatusRepository(dbConfig.getSession());
 
         DatabaseService databaseService = new DatabaseService(databaseRepository);

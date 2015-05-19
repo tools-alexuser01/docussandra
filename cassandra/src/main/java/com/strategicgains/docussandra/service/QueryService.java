@@ -23,7 +23,7 @@ public class QueryService
     /**
      * Constructor.
      *
-     * @param queryRepository QueryRepository to use to perform the query.
+     * @param queryRepository QueryRepositoryImpl to use to perform the query.
      */
     public QueryService(QueryRepository queryRepository)
     {

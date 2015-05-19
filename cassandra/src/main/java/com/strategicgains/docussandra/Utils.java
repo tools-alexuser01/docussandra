@@ -14,8 +14,10 @@ import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -295,6 +297,24 @@ public class Utils
             builder.append(delimiter).append(iterator.next());
         }
         return builder.toString();
+    }
+
+    //TODO: move this to common a library
+    public static boolean equalLists(List<String> one, List<String> two)
+    {
+        if (one == null && two == null)
+        {
+            return true;
+        }
+        if ((one == null && two != null) || one != null && two == null || one.size() != two.size())
+        {
+            return false;
+        }
+        ArrayList<String> oneCopy = new ArrayList<>(one);
+        ArrayList<String> twoCopy = new ArrayList<>(two);
+        Collections.sort(oneCopy);
+        Collections.sort(twoCopy);
+        return one.equals(twoCopy);
     }
 
 }

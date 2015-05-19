@@ -16,6 +16,7 @@
 package com.strategicgains.docussandra.service;
 
 import com.datastax.driver.core.Session;
+import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
@@ -26,7 +27,6 @@ import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -115,7 +115,7 @@ public class ParsedQueryFactory
         {
 //            if (index.isActive())//only use active indexes
 //            {
-                if (equalLists(index.getFieldsValues(), fieldsToQueryOn))
+                if (Utils.equalLists(index.getFieldsValues(), fieldsToQueryOn))
                 {
                     indexToUse = index;//we have a perfect match; the index matches the query exactly
                     break;
@@ -151,27 +151,4 @@ public class ParsedQueryFactory
         return toReturn;
     }
 
-    //TODO: move this to common a library
-    public static boolean equalLists(List<String> one, List<String> two)
-    {
-        if (one == null && two == null)
-        {
-            return true;
-        }
-
-        if ((one == null && two != null)
-                || one != null && two == null
-                || one.size() != two.size())
-        {
-            return false;
-        }
-
-        //to avoid messing the order of the lists we will use a copy
-        ArrayList<String> oneCopy = new ArrayList<>(one);
-        ArrayList<String> twoCopy = new ArrayList<>(two);
-
-        Collections.sort(oneCopy);
-        Collections.sort(twoCopy);
-        return one.equals(twoCopy);
-    }
 }

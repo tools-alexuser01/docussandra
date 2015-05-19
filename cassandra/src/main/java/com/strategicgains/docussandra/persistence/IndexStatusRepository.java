@@ -10,10 +10,13 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
+import com.strategicgains.docussandra.domain.UUIDIdentifier;
 import com.strategicgains.docussandra.event.IndexCreatedEvent;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
+import com.strategicgains.docussandra.persistence.parent.AbstractCRUDRepository;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author udeyoje
  */
-public class IndexStatusRepository
+public class IndexStatusRepository extends AbstractCRUDRepository<IndexCreatedEvent>
 {
 
     /**
@@ -96,6 +99,7 @@ public class IndexStatusRepository
      */
     public IndexStatusRepository(Session session)
     {
+        super(session, Tables.BY_ID);
         this.session = session;
         initialize();
         indexRepo = new IndexRepository(session);
@@ -134,13 +138,20 @@ public class IndexStatusRepository
         return (getSession().execute(bs).one().getLong(0) > 0);
     }
 
+    @Override
+    public boolean exists(Identifier id)
+    {
+        UUIDIdentifier uuidId = (UUIDIdentifier) id;
+        return exists(uuidId.getUUID());
+    }
+
     /**
      * Reads an IndexCreatedEvent by UUID.
      *
      * @param uuid UUID to fetch.
      * @return an IndexCreatedEvent for that UUID.
      */
-    public IndexCreatedEvent readEntityByUUID(UUID uuid)
+    public IndexCreatedEvent read(UUID uuid)
     {
         if (uuid == null)
         {
@@ -151,13 +162,21 @@ public class IndexStatusRepository
         return marshalRow(getSession().execute(bs).one());
     }
 
+    @Override
+    public IndexCreatedEvent read(Identifier id)
+    {
+        UUIDIdentifier uuidId = (UUIDIdentifier) id;
+        return read(uuidId.getUUID());
+    }
+
     /**
      * Creates an index status in the db.
      *
      * @param entity IndexCreatedEvent to store as a status in the DB.
      * @return The created IndexCreatedEvent.
      */
-    public IndexCreatedEvent createEntity(IndexCreatedEvent entity)
+    @Override
+    public IndexCreatedEvent create(IndexCreatedEvent entity)
     {
         BoundStatement create = new BoundStatement(createStmt);
         bindCreate(create, entity);
@@ -182,7 +201,8 @@ public class IndexStatusRepository
      * set.
      * @return The updated IndexCreatedEvent.
      */
-    public IndexCreatedEvent updateEntity(IndexCreatedEvent entity)
+    @Override
+    public IndexCreatedEvent update(IndexCreatedEvent entity)
     {
         BoundStatement bs = new BoundStatement(updateStmt);
         bindUpdate(bs, entity);
@@ -195,6 +215,18 @@ public class IndexStatusRepository
         }
         getSession().execute(bs);
         return entity;
+    }
+
+    @Override
+    public void delete(Identifier id)
+    {
+        throw new UnsupportedOperationException("Not a valid call for this class. IndexStatuses cannot be deleted.");
+    }
+
+    @Override
+    public void delete(IndexCreatedEvent entity)
+    {
+        throw new UnsupportedOperationException("Not a valid call for this class. IndexStatuses cannot be deleted.");
     }
 
     /**
@@ -227,12 +259,21 @@ public class IndexStatusRepository
      *
      * @return All IndexCreatedEvents that the database has a record of.
      */
+    @Override
     public List<IndexCreatedEvent> readAll()
     {
         BoundStatement bs = new BoundStatement(readAllStmt);
         return (marshalAll(getSession().execute(bs)));
     }
 
+    @Override
+    public List<IndexCreatedEvent> readAll(Identifier id)
+    {
+        throw new UnsupportedOperationException("Not valid for this class.");
+    }
+
+    
+    
     /**
      * Gets all IndexCreatedEvents that are currently indexing. This method is
      * preferred to readAll(). This provides a sense of the indexing load on the
@@ -247,7 +288,7 @@ public class IndexStatusRepository
         List<IndexCreatedEvent> toReturn = new ArrayList<>(ids.size());
         for (UUID id : ids)
         {
-            toReturn.add(readEntityByUUID(id));
+            toReturn.add(read(id));
         }
         return toReturn;
     }

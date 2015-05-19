@@ -15,6 +15,7 @@
  */
 package com.strategicgains.docussandra.service;
 
+import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.ParsedQuery;
 import com.strategicgains.docussandra.domain.Query;
@@ -148,16 +149,16 @@ public class ParsedQueryFactoryTest
         System.out.println("equalLists");
         List<String> one = new ArrayList<>();
         List<String> two = new ArrayList<>();
-        boolean result = ParsedQueryFactory.equalLists(one, two);
+        boolean result = Utils.equalLists(one, two);
         assertEquals(true, result);
         one.add("one");
         one.add("two");
         two.add("two");
         two.add("one");
-        result = ParsedQueryFactory.equalLists(one, two);
+        result = Utils.equalLists(one, two);
         assertEquals(true, result);
         two.add("three");
-        result = ParsedQueryFactory.equalLists(one, two);
+        result = Utils.equalLists(one, two);
         assertEquals(false, result);
     }
 

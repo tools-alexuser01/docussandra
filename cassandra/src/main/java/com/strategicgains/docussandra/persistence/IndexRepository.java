@@ -18,15 +18,14 @@ import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
-import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.docussandra.persistence.parent.RepositoryInterface;
+import com.strategicgains.docussandra.persistence.parent.AbstractCRUDRepository;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IndexRepository extends AbstractCassandraRepository implements RepositoryInterface<Index>
+public class IndexRepository extends AbstractCRUDRepository<Index>
 {
     /**
      * Logger for this class.

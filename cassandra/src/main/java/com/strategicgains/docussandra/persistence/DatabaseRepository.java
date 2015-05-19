@@ -12,13 +12,12 @@ import com.datastax.driver.core.Session;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.persistence.parent.AbstractCassandraRepository;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
-import com.strategicgains.docussandra.persistence.parent.RepositoryInterface;
+import com.strategicgains.docussandra.persistence.parent.AbstractCRUDRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatabaseRepository extends AbstractCassandraRepository implements RepositoryInterface<Database>
+public class DatabaseRepository extends AbstractCRUDRepository<Database>
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());

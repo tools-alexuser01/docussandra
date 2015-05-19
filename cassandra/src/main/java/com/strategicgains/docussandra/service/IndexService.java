@@ -86,7 +86,7 @@ public class IndexService
         IndexCreatedEvent toReturn = new IndexCreatedEvent(uuid, now, now, created, dataSize, 0l);
         if (!statusRepo.exists(uuid))
         {
-            statusRepo.createEntity(toReturn);
+            statusRepo.create(toReturn);
         }
         toReturn.calculateValues();
         DomainEvents.publish(toReturn);
@@ -103,7 +103,7 @@ public class IndexService
     public IndexCreatedEvent status(UUID id)
     {
         logger.debug("Checking index creation status: " + id.toString());
-        IndexCreatedEvent toReturn = statusRepo.readEntityByUUID(id);
+        IndexCreatedEvent toReturn = statusRepo.read(id);
         return toReturn;
     }
 

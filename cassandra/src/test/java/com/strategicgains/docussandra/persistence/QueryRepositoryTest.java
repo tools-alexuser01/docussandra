@@ -78,7 +78,7 @@ public class QueryRepositoryTest
     public void testDoQueryNoResults() throws IndexParseException
     {
         System.out.println("testDoQueryNoResults");
-        QueryRepository instance = new QueryRepository(f.getSession());
+        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
         QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(result.isEmpty());//no data yet, should get an empty set
@@ -95,7 +95,7 @@ public class QueryRepositoryTest
         //put a test doc in
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.create(doc);
-        QueryRepository instance = new QueryRepository(f.getSession());
+        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
         QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
@@ -123,7 +123,7 @@ public class QueryRepositoryTest
         //put a test doc in
         DocumentRepository docRepo = new DocumentRepository(f.getSession());
         docRepo.create(doc);
-        QueryRepository instance = new QueryRepository(f.getSession());
+        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
         QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQuery2());
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -142,7 +142,7 @@ public class QueryRepositoryTest
         List<Document> docs = Fixtures.getBulkDocuments();
         //put a bunch of test docs in
         f.insertDocuments(docs);
-        QueryRepository instance = new QueryRepository(f.getSession());
+        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
         QueryResponseWrapper result = instance.query(Fixtures.createTestParsedQueryBulkData());
         assertNotNull(result);
         assertTrue(!result.isEmpty());
@@ -163,7 +163,7 @@ public class QueryRepositoryTest
         //put a bunch of test docs in
         f.insertDocuments(docs);
         //setup
-        QueryRepository instance = new QueryRepository(f.getSession());
+        QueryRepositoryImpl instance = new QueryRepositoryImpl(f.getSession());
         ParsedQuery query = Fixtures.createTestParsedQueryBulkData();
         //let's get the first 5
         QueryResponseWrapper result = instance.query(query, 5, 0);

@@ -118,7 +118,7 @@ public class IndexCreatedHandlerTest
         f.insertIndex(testIndex);
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
         entity.setTotalRecords(34);
-        statusRepo.createEntity(entity);
+        statusRepo.create(entity);
         Object event = entity;
         //end data setup
         IndexCreatedHandler instance = new IndexCreatedHandler(indexRepo, statusRepo, docRepo);
@@ -126,7 +126,7 @@ public class IndexCreatedHandlerTest
         instance.handle(event);
         //verify
         assertTrue(statusRepo.exists(entity.getUuid()));
-        IndexCreatedEvent storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent storedStatus = statusRepo.read(entity.getUuid());
         assertNotNull(storedStatus);
         assertTrue(storedStatus.isDoneIndexing());
         assertEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
@@ -152,7 +152,7 @@ public class IndexCreatedHandlerTest
         //f.insertIndex(testIndex);//no index associated with this status; not likley to happen, but easy way to cause an exception
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatusWithBulkDataHit();
         entity.setTotalRecords(34);
-        statusRepo.createEntity(entity);
+        statusRepo.create(entity);
         Object event = entity;
         //end data setup
         IndexCreatedHandler instance = new IndexCreatedHandler(indexRepo, statusRepo, docRepo);
@@ -168,7 +168,7 @@ public class IndexCreatedHandlerTest
         assertTrue("Expected exception not thrown.", expectedExceptionThrown);
         //verify
         assertTrue(statusRepo.exists(entity.getUuid()));
-        IndexCreatedEvent storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent storedStatus = statusRepo.read(entity.getUuid());
         assertNotNull(storedStatus);
         assertFalse(storedStatus.isDoneIndexing());
         assertNotEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());
@@ -201,7 +201,7 @@ public class IndexCreatedHandlerTest
 
         IndexCreatedEvent entity = new IndexCreatedEvent(UUID.randomUUID(), new Date(), new Date(), lastname, docs.size(), 0);
 
-        statusRepo.createEntity(entity);
+        statusRepo.create(entity);
         Object event = entity;
         //end data setup
         IndexCreatedHandler instance = new IndexCreatedHandler(indexRepo, statusRepo, docRepo);
@@ -209,7 +209,7 @@ public class IndexCreatedHandlerTest
         instance.handle(event);
         //verify
         assertTrue(statusRepo.exists(entity.getUuid()));
-        IndexCreatedEvent storedStatus = statusRepo.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent storedStatus = statusRepo.read(entity.getUuid());
         assertNotNull(storedStatus);
         assertTrue(storedStatus.isDoneIndexing());
         assertEquals(storedStatus.getTotalRecords(), storedStatus.getRecordsCompleted());

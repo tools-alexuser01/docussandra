@@ -93,13 +93,13 @@ public class IndexStatusRepositoryTest
         UUID id = entity.getUuid();
         boolean result = instance.exists(id);
         assertEquals(false, result);
-        instance.createEntity(entity);
+        instance.create(entity);
         result = instance.exists(id);
         assertEquals(true, result);
     }
 
     /**
-     * Test of createEntity method, of class IndexStatusRepository.
+     * Test of create method, of class IndexStatusRepository.
      */
     @Test
     public void testCreateEntity()
@@ -107,12 +107,12 @@ public class IndexStatusRepositoryTest
         System.out.println("createEntity");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
-        IndexCreatedEvent result = instance.createEntity(entity);
+        IndexCreatedEvent result = instance.create(entity);
         assertEquals(entity, result);
     }
 
     /**
-     * Test of updateEntity method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepository.
      */
     @Test
     public void testUpdateEntity()
@@ -121,19 +121,19 @@ public class IndexStatusRepositoryTest
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         //create
-        instance.createEntity(entity);
+        instance.create(entity);
         //update
         entity.setRecordsCompleted(10);
         entity.setStatusLastUpdatedAt(new Date());
-        IndexCreatedEvent result = instance.updateEntity(entity);
+        IndexCreatedEvent result = instance.update(entity);
         assertStatusEqualEnough(entity, result);
         //fetch
-        IndexCreatedEvent read = instance.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent read = instance.read(entity.getUuid());
         assertStatusEqualEnough(entity, read);
     }
 
     /**
-     * Test of updateEntity method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepository.
      */
     @Test
     public void testUpdateEntityWithFatalErrorField()
@@ -142,20 +142,20 @@ public class IndexStatusRepositoryTest
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         //create
-        instance.createEntity(entity);
+        instance.create(entity);
         //update
         entity.setRecordsCompleted(10);
         entity.setStatusLastUpdatedAt(new Date());
         entity.setFatalError("Whoops! Something Went Wrong.");
-        IndexCreatedEvent result = instance.updateEntity(entity);
+        IndexCreatedEvent result = instance.update(entity);
         assertStatusEqualEnough(entity, result);
         //fetch
-        IndexCreatedEvent read = instance.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent read = instance.read(entity.getUuid());
         assertStatusEqualEnough(entity, read);
     }
 
     /**
-     * Test of updateEntity method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepository.
      */
     @Test
     public void testUpdateEntityWithNullFatalErrorField()
@@ -164,20 +164,20 @@ public class IndexStatusRepositoryTest
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         //create
-        instance.createEntity(entity);
+        instance.create(entity);
         //update
         entity.setRecordsCompleted(10);
         entity.setStatusLastUpdatedAt(new Date());
         entity.setFatalError(null);
-        IndexCreatedEvent result = instance.updateEntity(entity);
+        IndexCreatedEvent result = instance.update(entity);
         assertStatusEqualEnough(entity, result);
         //fetch
-        IndexCreatedEvent read = instance.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent read = instance.read(entity.getUuid());
         assertStatusEqualEnough(entity, read);
     }
 
     /**
-     * Test of updateEntity method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepository.
      */
     @Test
     public void testUpdateEntityWithErrorsField()
@@ -186,22 +186,22 @@ public class IndexStatusRepositoryTest
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         //create
-        instance.createEntity(entity);
+        instance.create(entity);
         //update
         entity.setRecordsCompleted(10);
         entity.setStatusLastUpdatedAt(new Date());
         ArrayList<String> errors = new ArrayList<>();
         errors.add("Whoops! Something Went Wrong.");
         entity.setErrors(errors);
-        IndexCreatedEvent result = instance.updateEntity(entity);
+        IndexCreatedEvent result = instance.update(entity);
         assertStatusEqualEnough(entity, result);
         //fetch
-        IndexCreatedEvent read = instance.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent read = instance.read(entity.getUuid());
         assertStatusEqualEnough(entity, read);
     }
 
     /**
-     * Test of updateEntity method, of class IndexStatusRepository.
+     * Test of update method, of class IndexStatusRepository.
      */
     @Test
     public void testUpdateEntityWithNullErrorsField()
@@ -210,15 +210,15 @@ public class IndexStatusRepositoryTest
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         //create
-        instance.createEntity(entity);
+        instance.create(entity);
         //update
         entity.setRecordsCompleted(10);
         entity.setStatusLastUpdatedAt(new Date());
         entity.setErrors(null);
-        IndexCreatedEvent result = instance.updateEntity(entity);
+        IndexCreatedEvent result = instance.update(entity);
         assertStatusEqualEnough(entity, result);
         //fetch
-        IndexCreatedEvent read = instance.readEntityByUUID(entity.getUuid());
+        IndexCreatedEvent read = instance.read(entity.getUuid());
         assertStatusEqualEnough(entity, read);
     }
 
@@ -248,14 +248,14 @@ public class IndexStatusRepositoryTest
         List<IndexCreatedEvent> result = instance.readAll();
         assertTrue(result.isEmpty());
         //create        
-        instance.createEntity(entity);
+        instance.create(entity);
         //re-read        
         result = instance.readAll();
         assertStatusEqualEnough(entity, result.get(0));
         //create again  
         IndexCreatedEvent entity2 = Fixtures.createTestIndexCreationStatus();
         entity2.setUuid(UUID.randomUUID());
-        instance.createEntity(entity2);
+        instance.create(entity2);
         //re-read again   
         result = instance.readAll();
         assertTrue(result.size() == 2);
@@ -278,7 +278,7 @@ public class IndexStatusRepositoryTest
 //        fail("The test case is a prototype.");
 //    }
     /**
-     * Test of readEntityByUUID method, of class IndexStatusRepository.
+     * Test of read method, of class IndexStatusRepository.
      */
     @Test
     public void testReadEntityByUUID()
@@ -287,10 +287,10 @@ public class IndexStatusRepositoryTest
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
         UUID id = entity.getUuid();
-        IndexCreatedEvent result = instance.readEntityByUUID(id);
+        IndexCreatedEvent result = instance.read(id);
         assertNull(result);
-        instance.createEntity(entity);
-        result = instance.readEntityByUUID(id);
+        instance.create(entity);
+        result = instance.read(id);
         assertStatusEqualEnough(entity, result);
     }
 
@@ -303,7 +303,7 @@ public class IndexStatusRepositoryTest
         System.out.println("readAllActive");
         IndexCreatedEvent entity = Fixtures.createTestIndexCreationStatus();
         IndexStatusRepository instance = new IndexStatusRepository(f.getSession());
-        instance.createEntity(entity);
+        instance.create(entity);
         List<IndexCreatedEvent> result = instance.readAllCurrentlyIndexing();
         assertEquals(entity.getDateStarted(), result.get(0).getDateStarted());
         assertEquals(entity.getRecordsCompleted(), result.get(0).getRecordsCompleted());
@@ -312,7 +312,7 @@ public class IndexStatusRepositoryTest
         Index entityIndex = entity.getIndex();
         entityIndex.setActive(true);//simulate this index finishing
         entity.setIndex(entityIndex);
-        instance.updateEntity(entity);
+        instance.update(entity);
         result = instance.readAllCurrentlyIndexing();
         assertTrue(result.isEmpty());
     }

@@ -124,7 +124,7 @@ public class ITableRepository
      * @return A CQL setTable creation command that will create the specified
      * iTable.
      */
-    public String generateTableCreationSyntax(Index index)
+    protected String generateTableCreationSyntax(Index index)
     {
         String newTableName = Utils.calculateITableName(index);
         StringBuilder fieldCreateStatement = new StringBuilder();
