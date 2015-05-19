@@ -125,7 +125,7 @@ public class ParsedQueryFactory
         }
         if (indexToUse == null)
         {//whoops, no perfect match, let try for a partial match (ie, the index has more getFields than the query)
-            //TODO: querying on non-primary getFields will lead to us being unable to determine which bucket to search -- give the user an override option?, but for now just throw an exception
+            //querying on non-primary getFields will lead to us being unable to determine which bucket to search
             for (Index index : indices)
             {
 //                if (index.isActive())//only use active indexes
