@@ -196,13 +196,11 @@ public class IndexRepositoryImpl extends AbstractCRUDRepository<Index> implement
         BoundStatement bs = new BoundStatement(deleteStmt);
         bindIdentifier(bs, id);
         getSession().execute(bs);
-        String dbName = id.getDatabaseName();//TODO: create helper methods -- kinda half done now
-        String tableName = id.getTableName();
         //maintain cache
         try//we do this in a try/catch because we don't want to cause an app error if this fails
         {
             Cache c = CacheFactory.getCache("index");
-            String key = dbName + ":" + tableName;
+            String key = id.getDatabaseName() + ":" + id.getTableName();
             synchronized (CacheSynchronizer.getLockingObject(key, Index.class))
             {
                 List<Index> currentIndex = this.readAll(id);
@@ -220,7 +218,7 @@ public class IndexRepositoryImpl extends AbstractCRUDRepository<Index> implement
             logger.error("Could not update index cache upon index delete.", e);
         }
         cascadeDelete(new IndexIdentifier(id));
-        //TODO: delete the index status (or at least mark it permantly inactive/disabled with a new timestamp, ensuring that /index_status won't return it) and halt any active indexing to save processor time
+        //TODO: delete the index status (IndexCreationEvents) (or at least mark it permantly inactive/disabled with a new timestamp, ensuring that /index_status won't return it) and halt any active indexing to save processor time -- issue #883
     }
 
     @Override
