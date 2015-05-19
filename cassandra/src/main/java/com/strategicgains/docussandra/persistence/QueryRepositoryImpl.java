@@ -20,10 +20,16 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Repository for querying for records.
+ *
+ * @author udeyoje
+ */
 public class QueryRepositoryImpl implements QueryRepository
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    
     private static final String QUERY_CQL = "select * from %s where bucket = ? AND %s";
     private static final String QUERY_CQL_LIMIT = "select * from %s where bucket = ? AND %s LIMIT %s";//we use the limit as to not put any more stress on cassandra than we need to (even though our algorithm will discard the data anyway)
 
@@ -57,12 +63,19 @@ public class QueryRepositoryImpl implements QueryRepository
         int i = 1;
         for (String bindValue : query.getWhereClause().getValues())
         {
-            Utils.setField(bindValue, query.getIndex().getFields().get(i - 1), bs, i);            
+            Utils.setField(bindValue, query.getIndex().getFields().get(i - 1), bs, i);
             i++;
         }
         return bs;
     }
 
+    /**
+     * Do a query without limit or offset.
+     *
+     * @param query ParsedQuery to execute.
+     * @return A query response.
+     * @throws IndexParseException If the query is not on a valid index.
+     */
     @Override
     public QueryResponseWrapper query(ParsedQuery query) throws IndexParseException
     {
@@ -79,9 +92,19 @@ public class QueryRepositoryImpl implements QueryRepository
         return new QueryResponseWrapper(toReturn, 0l);
     }
 
+    /**
+     * Do a query with limit and offset.
+     *
+     * @param query ParsedQuery to execute.
+     * @param limit Maximum number of results to return.
+     * @param offset Number of records at the beginning of the results to
+     * discard.
+     * @return A query response.
+     * @throws IndexParseException If the query is not on a valid index.
+     */
     @Override
     public QueryResponseWrapper query(ParsedQuery query, int limit, long offset) throws IndexParseException
-    {        
+    {
         //run the query
         long maxIndex = offset + limit;
         ResultSet results = session.execute(generateQueryStatement(query, maxIndex + 1));//we do one plus here so we know if there are additional results
