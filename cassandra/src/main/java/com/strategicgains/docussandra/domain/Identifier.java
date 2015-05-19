@@ -35,7 +35,7 @@ public class Identifier
 
     private static final String SEPARATOR = ", ";
 
-    private List<Object> components = new ArrayList<Object>();
+    private List<Object> components = new ArrayList<>();
 
     /**
      * Create an identifier with the given components. Duplicate instances are
@@ -51,6 +51,10 @@ public class Identifier
         add(components);
     }
     
+    /**
+     * Creates an Identifier from another Identifier.
+     * @param id 
+     */
     public Identifier(Identifier id){
         this.components = id.components();
     }
@@ -102,6 +106,10 @@ public class Identifier
         return Collections.unmodifiableList(components);
     }
 
+    /**
+     * Gets the database name for this Identifier
+     * @return 
+     */
     public String getDatabaseName()
     {
         if (size() >= 1)
@@ -111,6 +119,10 @@ public class Identifier
         return null;
     }
 
+    /**
+     * Gets the table name for this Identifier.
+     * @return 
+     */
     public String getTableName()
     {
         if (size() >= 2)
@@ -120,6 +132,10 @@ public class Identifier
         return null;
     }
 
+    /**
+     * Gets the Table object for this Identifier.
+     * @return 
+     */
     public Table getTable()
     {
         Table t = new Table();

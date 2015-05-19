@@ -22,17 +22,44 @@ import java.util.UUID;
  * components, which are Object instances. The components are kept in order of
  * which they are added.
  *
+ * For identifying Document types only.
+ *
  * @author toddf
  * @since Aug 29, 2013
  */
 public class DocumentIdentifier extends Identifier
 {
 
+    /**
+     * Create an identifier with the given components. Duplicate instances are
+     * not added--only one instance of a component will exist in the identifier.
+     * Components should be passed in the order of significance: Database ->
+     * Table -> Index -> Document
+     *
+     * @param components
+     */
+    public DocumentIdentifier(Object... components)
+    {
+        super(components);
+    }
+
+    /**
+     * Constructor.
+     *
+     * Creates an Identifier from another Identifier.
+     * 
+     * @param id
+     */
     public DocumentIdentifier(Identifier id)
     {
         super(id.components().toArray());
     }
-//TODO: javadoc
+
+    /**
+     * Gets the UUID for this document.
+     *
+     * @return
+     */
     public UUID getUUID()
     {
         if (super.size() >= 3)
