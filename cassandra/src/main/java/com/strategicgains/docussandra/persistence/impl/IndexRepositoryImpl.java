@@ -1,6 +1,5 @@
 package com.strategicgains.docussandra.persistence.impl;
 
-import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
