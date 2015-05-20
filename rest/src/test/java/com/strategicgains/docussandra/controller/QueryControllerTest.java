@@ -22,7 +22,7 @@ import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,7 +318,7 @@ public class QueryControllerTest
             //clean up
             RestAssured.basePath = restAssuredBasePath;
 
-            DocumentRepository docrepo = new DocumentRepository(f.getSession());
+            DocumentRepositoryImpl docrepo = new DocumentRepositoryImpl(f.getSession());
             for (Document d : docs)
             {
                 try
@@ -375,7 +375,7 @@ public class QueryControllerTest
             //clean up
             RestAssured.basePath = restAssuredBasePath;
 
-            DocumentRepository docrepo = new DocumentRepository(f.getSession());
+            DocumentRepositoryImpl docrepo = new DocumentRepositoryImpl(f.getSession());
             for (Document d : docs)
             {
                 try
@@ -443,7 +443,7 @@ public class QueryControllerTest
             //clean up
             RestAssured.basePath = restAssuredBasePath;
 
-            DocumentRepository docrepo = new DocumentRepository(f.getSession());
+            DocumentRepositoryImpl docrepo = new DocumentRepositoryImpl(f.getSession());
             for (Document d : docs)
             {
                 try

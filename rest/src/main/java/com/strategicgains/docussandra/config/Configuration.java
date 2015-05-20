@@ -20,15 +20,18 @@ import com.strategicgains.docussandra.controller.IndexStatusController;
 import com.strategicgains.docussandra.controller.QueryController;
 import com.strategicgains.docussandra.controller.TableController;
 import com.strategicgains.docussandra.handler.IndexCreatedHandler;
-import com.strategicgains.docussandra.handler.DatabaseDeletedHandler;
-import com.strategicgains.docussandra.handler.IndexDeletedHandler;
-import com.strategicgains.docussandra.handler.TableDeleteHandler;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
 import com.strategicgains.docussandra.persistence.QueryRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
+import com.strategicgains.docussandra.persistence.impl.DatabaseRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.IndexStatusRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.TableRepositoryImpl;
 import com.strategicgains.docussandra.service.DatabaseService;
 import com.strategicgains.docussandra.service.DocumentService;
 import com.strategicgains.docussandra.service.IndexService;
@@ -37,7 +40,6 @@ import com.strategicgains.docussandra.service.TableService;
 import com.strategicgains.eventing.DomainEvents;
 import com.strategicgains.eventing.EventBus;
 import com.strategicgains.eventing.local.LocalEventBusBuilder;
-import com.strategicgains.repoexpress.cassandra.CassandraConfig;
 import com.strategicgains.restexpress.plugin.metrics.MetricsConfig;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -108,12 +110,12 @@ public class Configuration
         {
             LOGGER.error("Could not init database; trying to continue startup anyway (in case DB was manually created).", e);
         }
-        DatabaseRepository databaseRepository = new DatabaseRepository(dbConfig.getSession());
-        TableRepository tableRepository = new TableRepository(dbConfig.getSession());
-        DocumentRepository documentRepository = new DocumentRepository(dbConfig.getSession());
-        IndexRepository indexRepository = new IndexRepository(dbConfig.getSession());
-        QueryRepository queryRepository = new QueryRepository(dbConfig.getSession());
-        IndexStatusRepository indexStatusRepository = new IndexStatusRepository(dbConfig.getSession());
+        DatabaseRepository databaseRepository = new DatabaseRepositoryImpl(dbConfig.getSession());
+        TableRepository tableRepository = new TableRepositoryImpl(dbConfig.getSession());
+        DocumentRepository documentRepository = new DocumentRepositoryImpl(dbConfig.getSession());
+        IndexRepository indexRepository = new IndexRepositoryImpl(dbConfig.getSession());
+        QueryRepository queryRepository = new QueryRepositoryImpl(dbConfig.getSession());
+        IndexStatusRepository indexStatusRepository = new IndexStatusRepositoryImpl(dbConfig.getSession());
 
         DatabaseService databaseService = new DatabaseService(databaseRepository);
         TableService tableService = new TableService(databaseRepository, tableRepository);
@@ -132,9 +134,9 @@ public class Configuration
         // TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
         EventBus bus = new LocalEventBusBuilder()
-                .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
-                .subscribe(new TableDeleteHandler(dbConfig.getSession()))
-                .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
+//                .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
+//                .subscribe(new TableDeleteHandler(dbConfig.getSession()))
+//                .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
                 .subscribe(new IndexCreatedHandler(indexRepository, indexStatusRepository, documentRepository))
                 .build();
         DomainEvents.addBus("local", bus);

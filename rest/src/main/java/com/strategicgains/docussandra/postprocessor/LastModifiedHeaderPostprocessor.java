@@ -1,12 +1,12 @@
 package com.strategicgains.docussandra.postprocessor;
 
+import com.strategicgains.docussandra.domain.parent.Timestamped;
 import static io.netty.handler.codec.http.HttpHeaders.Names.LAST_MODIFIED;
 
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.pipeline.Postprocessor;
 
-import com.strategicgains.repoexpress.domain.Timestamped;
 import com.strategicgains.util.date.DateAdapter;
 import com.strategicgains.util.date.HttpHeaderTimestampAdapter;
 

@@ -5,13 +5,20 @@ import com.datastax.driver.core.Session;
 import com.mongodb.DBObject;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.FieldDataType;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
+import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.exception.IndexParseFieldException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import net.sf.ehcache.Cache;
@@ -31,6 +38,8 @@ public class Utils
 {
 
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
+    
+    public static final String EMPTY_STRING = "";
 
     /**
      * Calculates the getIndexName of an iTable based on the dataBaseName, the
@@ -81,7 +90,21 @@ public class Utils
         return calculateITableName(index.getDatabaseName(), index.getTableName(), index.getName());
     }
 
-    //TODO: ditch the UUID type; we are misusing it here and another type (probably a string or long) would be more approprate 
+    /**
+     * Calculates the getIndexName of an iTable based on the IDENTIFIER of an
+     * index.
+     *
+     * Note: No null checks.
+     *
+     * @param indexId index id whose iTable getIndexName you would like.
+     * @return The getIndexName of the iTable for that index.
+     */
+    public static String calculateITableName(IndexIdentifier indexId)
+    {
+        return calculateITableName(indexId.getDatabaseName(), indexId.getTableName(), indexId.getIndexName());
+    }
+
+    //TODO: ditch the UUID type; we are misusing it here and another type (probably a string or long) would be more approprate -- DO THIS
     /**
      * Converts a string to a fuzzy UUID. Fuzzy, as in it isn't going to be
      * unique and is only for the first 8 bytes. Should only be used for
@@ -146,30 +169,6 @@ public class Utils
         }
     }
 
-    /**
-     * Converts a list to a human readable string.
-     *
-     * @param list List to convert to a String
-     * @return A String that represents the passed in list.
-     */
-    public static String listToString(List<String> list)//TODO: consider moving to a common lib
-    {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (String s : list)
-        {
-            if (!first)
-            {
-                sb.append(", ");
-            } else
-            {
-                first = false;
-            }
-            sb.append(s);
-        }
-        return sb.toString();
-    }
-
     public static void setField(String value, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
         try
@@ -210,12 +209,15 @@ public class Utils
 
     /**
      * Sets a field into a BoundStatement.
+     *
      * @param jsonObject Object to pull the value from
      * @param fieldData Object describing the field to pull the value from.
      * @param bs BoundStatement to set the field value to.
      * @param index Index in the BoundStatement to set.
-     * @return false if the field is null and should cause this bound statement not to be entered into the batch, true otherwise (normal)
-     * @throws IndexParseException If there is a problem parsing the field that indicates the entire document should not be indexed.
+     * @return false if the field is null and should cause this bound statement
+     * not to be entered into the batch, true otherwise (normal)
+     * @throws IndexParseException If there is a problem parsing the field that
+     * indicates the entire document should not be indexed.
      */
     public static boolean setField(DBObject jsonObject, IndexField fieldData, BoundStatement bs, int index) throws IndexParseException
     {
@@ -241,6 +243,7 @@ public class Utils
              because this indicates that the field isn't in the expected format, 
              so we need to throw an exception and not index this document AT ALL
              */
+
             throw new IndexParseException(fieldData, new IndexParseFieldException(jsonValue));
         } else
         {
@@ -248,6 +251,44 @@ public class Utils
             setField(jsonValue, fieldData, bs, index);
             return true;
         }
+    }
+
+    public static String join(String delimiter, Object... objects)
+    {
+        return join(delimiter, Arrays.asList(objects));
+    }
+
+    public static String join(String delimiter, Collection<? extends Object> objects)
+    {
+        if (objects == null || objects.isEmpty())
+        {
+            return EMPTY_STRING;
+        }
+        Iterator<? extends Object> iterator = objects.iterator();
+        StringBuilder builder = new StringBuilder();
+        builder.append(iterator.next());
+        while (iterator.hasNext())
+        {
+            builder.append(delimiter).append(iterator.next());
+        }
+        return builder.toString();
+    }
+
+    public static boolean equalLists(List<String> one, List<String> two)
+    {
+        if (one == null && two == null)
+        {
+            return true;
+        }
+        if ((one == null && two != null) || one != null && two == null || one.size() != two.size())
+        {
+            return false;
+        }
+        ArrayList<String> oneCopy = new ArrayList<>(one);
+        ArrayList<String> twoCopy = new ArrayList<>(two);
+        Collections.sort(oneCopy);
+        Collections.sort(twoCopy);
+        return one.equals(twoCopy);
     }
 
 }

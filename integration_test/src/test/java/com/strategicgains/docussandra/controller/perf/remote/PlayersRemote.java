@@ -26,7 +26,7 @@ import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.persistence.QueryRepository;
+import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
 import com.strategicgains.docussandra.service.QueryService;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.io.IOException;
@@ -266,11 +266,12 @@ public class PlayersRemote extends PerfTestParent
      * query with a set time (test should always pass; check output for stats.)
      */
     @Test
+    @Ignore
     public void directQueryTest() throws Exception
     {
         int numQueries = 50;
         Fixtures f = Fixtures.getInstance("10.199.26.75,10.199.26.6,10.199.24.5,10.199.28.137,10.199.30.205,10.199.28.199", false);
-        QueryService qs = new QueryService(new QueryRepository(f.getSession()));
+        QueryService qs = new QueryService(new QueryRepositoryImpl(f.getSession()));
         Query q = new Query();
         q.setWhere("NAMELAST = 'Manning'");
         q.setTable(this.getTb().name());

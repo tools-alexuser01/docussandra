@@ -10,13 +10,13 @@ import org.restexpress.exception.BadRequestException;
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.ServiceUtils;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.service.DocumentService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.util.UuidConverter;
+import java.util.UUID;
 
 public class DocumentController
 {
@@ -70,7 +70,7 @@ public class DocumentController
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
         String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
-        Document document = documents.read(database, table, new Identifier(database, table, UuidConverter.parse(id)));
+        Document document = documents.read(database, table, new Identifier(database, table, UUID.fromString(id)));
 
         // enrich the entity with links, etc. here...
         HyperExpress.bind(Constants.Url.DOCUMENT_ID, document.getUuid().toString());
@@ -80,7 +80,7 @@ public class DocumentController
 
 //	public List<Document> readAll(Request request, Response response)
 //	{
-//		String namespace = request.getHeader(Constants.Url.DATABASE, "No namespace provided");
+//		String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
 //		String collection = request.getHeader(Constants.Url.TABLE, "No collection provided");
 //
 //		HyperExpress.tokenBinder(new TokenBinder<Document>()
@@ -92,7 +92,7 @@ public class DocumentController
 //            }
 //		});
 //
-//		return service.readAll(namespace, collection);
+//		return service.readAll(database, collection);
 //	}
     public void update(Request request, Response response)
     {
@@ -107,7 +107,7 @@ public class DocumentController
         }
 
         Document document = new Document();
-        document.setUuid(UuidConverter.parse(id));
+        document.setUuid(UUID.fromString(id));
         document.table(database, table);
         document.object(data);
         documents.update(document);
@@ -119,7 +119,7 @@ public class DocumentController
         String database = request.getHeader(Constants.Url.DATABASE, "No database provided");
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
         String id = request.getHeader(Constants.Url.DOCUMENT_ID, "No document ID supplied");
-        documents.delete(database, table, new Identifier(database, table, UuidConverter.parse(id)));
+        documents.delete(database, table, new Identifier(database, table, UUID.fromString(id)));
         response.setResponseNoContent();
     }
 }

@@ -1,12 +1,12 @@
 package com.strategicgains.docussandra.service;
 
+import com.strategicgains.docussandra.domain.Identifier;
 import java.util.List;
 
 import com.strategicgains.docussandra.domain.Table;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.DatabaseRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
 
 public class TableService
@@ -44,9 +44,10 @@ public class TableService
 
 	public List<Table> readAll(String database)
 	{
-		if (!databases.exists(new Identifier(database))) throw new ItemNotFoundException("Database not found: " + database);
+            Identifier id = new Identifier(database);
+		if (!databases.exists(id)) throw new ItemNotFoundException("Database not found: " + database);
 
-		return tables.readAll(database);
+		return tables.readAll(id);
 	}
 
 	public void update(Table entity)

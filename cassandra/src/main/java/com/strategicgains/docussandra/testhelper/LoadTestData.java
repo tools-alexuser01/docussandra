@@ -20,7 +20,7 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.repoexpress.exception.DuplicateItemException;
+import com.strategicgains.docussandra.exception.DuplicateItemException;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;

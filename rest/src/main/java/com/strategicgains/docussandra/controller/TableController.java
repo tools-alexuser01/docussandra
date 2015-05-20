@@ -8,13 +8,14 @@ import org.restexpress.Request;
 import org.restexpress.Response;
 
 import com.strategicgains.docussandra.Constants;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.service.TableService;
 import com.strategicgains.hyperexpress.HyperExpress;
 import com.strategicgains.hyperexpress.builder.TokenBinder;
 import com.strategicgains.hyperexpress.builder.TokenResolver;
 import com.strategicgains.hyperexpress.builder.UrlBuilder;
-import com.strategicgains.repoexpress.domain.Identifier;
+
 
 public class TableController
 {
@@ -47,7 +48,7 @@ public class TableController
 		response.setResponseCreated();
 
 		// enrich the resource with links, etc. here...
-		TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, saved.getId().components().get(1).toString());
+		TokenResolver resolver = HyperExpress.bind(Constants.Url.TABLE, saved.getId().getTableName());
 
 		// Include the Location header...
 		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.TABLE);
@@ -65,7 +66,7 @@ public class TableController
 		Table table = service.read(databaseName, tableName);
 
 		// enrich the entity with links, etc. here...
-		HyperExpress.bind(Constants.Url.TABLE, table.getId().components().get(1).toString());
+		HyperExpress.bind(Constants.Url.TABLE, table.getId().getTableName());
 
 		return table;
 	}
@@ -79,7 +80,7 @@ public class TableController
 			@Override
             public void bind(Table object, TokenResolver resolver)
             {
-				resolver.bind(Constants.Url.TABLE, object.getId().components().get(1).toString());
+				resolver.bind(Constants.Url.TABLE, object.getId().getTableName());
 			}
 		});
 		return service.readAll(databaseName);

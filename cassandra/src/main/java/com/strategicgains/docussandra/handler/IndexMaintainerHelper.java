@@ -12,8 +12,8 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.exception.IndexParseException;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
-import com.strategicgains.docussandra.persistence.IndexRepository;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
 import com.strategicgains.docussandra.persistence.helper.PreparedStatementFactory;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.bson.BSON;
 import org.bson.BSONObject;
-import org.restexpress.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,7 +160,7 @@ public class IndexMaintainerHelper
                 Object bucketField = jsonObject.get(fields.get(0).getField());
                 if (bucketField == null)
                 {//we can't even bucket, there isn't a field for this document to index on
-                    break;//TODO: i am unsure about this ^^, consider logging this; i think this may only be happening in tests -- issue #100
+                    break;//TODO: i am unsure about this ^^, consider logging this; i think this may only be happening in tests -- issue #100; this may be fixed now
                 }
                 String bucketId = bucketLocator.getBucket(null, Utils.convertStringToFuzzyUUID((String) bucketField));//note, could have parse problems here with non-string types
                 if (logger.isTraceEnabled())
@@ -259,8 +258,8 @@ public class IndexMaintainerHelper
      */
     public static List<Index> getIndexForDocument(Session session, Document entity)
     {
-        IndexRepository indexRepo = new IndexRepository(session);
-        return indexRepo.readAllCached(entity.databaseName(), entity.tableName());
+        IndexRepositoryImpl indexRepo = new IndexRepositoryImpl(session);
+        return indexRepo.readAllCached(entity.getId());
     }
 
     /**
@@ -275,9 +274,9 @@ public class IndexMaintainerHelper
      */
     public static boolean hasIndexedFieldChanged(BSONObject oldObject, Index index, Document entity)
     {
-        //DocumentRepository docRepo = new DocumentRepository(session);
+        //DocumentRepository docRepo = new DocumentRepositoryImpl(session);
         BSONObject newObject = (BSONObject) JSON.parse(entity.object());
-        //BSONObject oldObject = (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
+        //BSONObject oldObject = (BSONObject) JSON.parse(docRepo.read(entity.getId()).object());
         for (IndexField indexField : index.getFields())
         {
             String field = indexField.getField();
@@ -299,8 +298,8 @@ public class IndexMaintainerHelper
     //only public for testing
     public static BSONObject getOldObjectForUpdate(Session session, Document entity)
     {
-        DocumentRepository docRepo = new DocumentRepository(session);
-        return (BSONObject) JSON.parse(docRepo.doRead(entity.getId()).object());
+        DocumentRepositoryImpl docRepo = new DocumentRepositoryImpl(session);
+        return (BSONObject) JSON.parse(docRepo.read(entity.getId()).object());
     }
 
     /**
@@ -344,7 +343,7 @@ public class IndexMaintainerHelper
         String iTableToUpdate = Utils.calculateITableName(index);
         //determine which getFields need to write as PKs
         List<String> fields = index.getFieldsValues();
-        String fieldNamesInsertSyntax = StringUtils.join(", ", fields);
+        String fieldNamesInsertSyntax = Utils.join(", ", fields);
         //calculate the number of '?'s we need to append on the values clause
         StringBuilder fieldValueInsertSyntax = new StringBuilder();
         for (int i = 0; i < fields.size(); i++)
@@ -426,5 +425,5 @@ public class IndexMaintainerHelper
         }
         return setValues.toString();
     }
-
+    
 }

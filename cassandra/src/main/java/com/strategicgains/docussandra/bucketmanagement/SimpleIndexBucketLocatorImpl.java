@@ -34,7 +34,7 @@ import java.util.UUID;
  *
  * @author tnine
  */
-//TODO: clean this up a lot; may variables unused
+//TODO: clean this up a lot; may variables unused -- scrap this class and re-write
 public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
 
     public static final Long MINIMUM = 0l;

@@ -23,8 +23,8 @@ import com.strategicgains.syntaxe.annotation.Required;
  */
 public class Credentials
 {
-	@Required("Namespace")
-	private DatabaseReference namespace;
+	@Required("Database")
+	private DatabaseReference database;
 
 	@Required("Username")
 	private String username;

@@ -2,12 +2,13 @@ package com.strategicgains.docussandra.service;
 
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.exception.IndexParseException;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.syntaxe.ValidationEngine;
+import java.util.UUID;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
@@ -32,6 +33,7 @@ public class DocumentService
         Document doc = new Document();
         doc.table(database, table);
         doc.object(json);
+        doc.setUuid(UUID.randomUUID());//TODO: is this right?
         ValidationEngine.validateAndThrow(doc);
         try
         {

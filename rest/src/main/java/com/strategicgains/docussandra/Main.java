@@ -23,11 +23,10 @@ import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.config.Configuration;
+import com.strategicgains.docussandra.exception.DuplicateItemException;
+import com.strategicgains.docussandra.exception.InvalidObjectIdException;
+import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.serialization.SerializationProvider;
-import com.strategicgains.repoexpress.adapter.Identifiers;
-import com.strategicgains.repoexpress.exception.DuplicateItemException;
-import com.strategicgains.repoexpress.exception.InvalidObjectIdException;
-import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.restexpress.plugin.metrics.MetricsConfig;
 import com.strategicgains.restexpress.plugin.metrics.MetricsPlugin;
 import com.strategicgains.syntaxe.ValidationException;
@@ -68,7 +67,7 @@ public class Main
     public static RestExpress initializeServer(String[] args) throws IOException
     {
         RestExpress.setSerializationProvider(new SerializationProvider());
-        Identifiers.UUID.useShortUUID(true);
+        //Identifiers.UUID.useShortUUID(true);
 
         Configuration config = loadEnvironment(args);
         RestExpress server = new RestExpress()

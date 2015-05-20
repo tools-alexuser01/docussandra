@@ -15,9 +15,9 @@
  */
 package com.strategicgains.docussandra.event;
 
+import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.repoexpress.domain.Identifier;
-import com.strategicgains.repoexpress.domain.UuidIdentifiable;
+import com.strategicgains.docussandra.domain.parent.Identifiable;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +30,7 @@ import org.restexpress.plugin.hyperexpress.Linkable;
  *
  * @author udeyoje
  */
-public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdentifiable, Serializable, Linkable
+public class IndexCreatedEvent extends AbstractEvent<Index> implements Identifiable, Serializable, Linkable
 {
 
     /**
@@ -126,7 +126,13 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
      */
     public boolean isDoneIndexing()
     {
-        return getIndex().isActive();
+        if (getIndex() != null)
+        {
+            return getIndex().isActive();
+        } else
+        {
+            return false;// if for some bizarre reason we don't have an index here, we can't say that it's done
+        }
     }
 
     /**
@@ -168,29 +174,24 @@ public class IndexCreatedEvent extends AbstractEvent<Index> implements UuidIdent
         }
     }
 
-    @Override
     public UUID getUuid()
     {
         return id;
     }
 
-    @Override
     public void setUuid(UUID id)
     {
         this.id = id;
     }
 
-    @Override
+    public void setId(UUID id)
+    {
+        this.id = id;
+    }
+
     public Identifier getId()
     {
         return new Identifier(getIndex().getDatabaseName(), getIndex().getTableName(), getIndex().getName(), id);
-    }
-
-    @Override
-    public void setId(Identifier id)
-    {
-        // Do nothing. Throw.
-        throw new UnsupportedOperationException("This is not a valid call for this object.");
     }
 
     /**

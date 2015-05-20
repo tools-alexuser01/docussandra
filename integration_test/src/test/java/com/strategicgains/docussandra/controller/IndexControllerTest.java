@@ -25,7 +25,7 @@ import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -486,7 +486,7 @@ public class IndexControllerTest
         {
             RestAssured.basePath = restAssuredBasePath;
             //clean up
-            DocumentRepository docrepo = new DocumentRepository(f.getSession());
+            DocumentRepositoryImpl docrepo = new DocumentRepositoryImpl(f.getSession());
             for (Document d : docs)
             {
                 try

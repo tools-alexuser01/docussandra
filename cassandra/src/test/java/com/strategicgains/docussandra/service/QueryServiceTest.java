@@ -19,9 +19,9 @@ import com.mongodb.util.JSON;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.exception.FieldNotIndexedException;
 import com.strategicgains.docussandra.exception.IndexParseException;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
-import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.QueryRepository;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.List;
 import org.bson.BSONObject;
@@ -53,8 +53,8 @@ public class QueryServiceTest
     {
         f.clearTestTables();
         f.createTestITables();
-        instance = new QueryService(new QueryRepository(f.getSession()));
-        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        instance = new QueryService(new QueryRepositoryImpl(f.getSession()));
+        IndexRepositoryImpl indexRepo = new IndexRepositoryImpl(f.getSession());
         indexRepo.create(Fixtures.createTestIndexTwoField());
     }
 
@@ -73,8 +73,8 @@ public class QueryServiceTest
         System.out.println("query");
         Document doc = Fixtures.createTestDocument();
         //put a test doc in
-        DocumentRepository docRepo = new DocumentRepository(f.getSession());
-        docRepo.doCreate(doc);
+        DocumentRepositoryImpl docRepo = new DocumentRepositoryImpl(f.getSession());
+        docRepo.create(doc);
         List<Document> result = instance.query(Fixtures.DB, Fixtures.createTestQuery());
         assertNotNull(result);
         assertTrue(!result.isEmpty());

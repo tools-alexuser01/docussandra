@@ -19,16 +19,15 @@ import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.expect;
 import static com.jayway.restassured.RestAssured.given;
 import com.strategicgains.docussandra.domain.Database;
-import com.strategicgains.docussandra.persistence.DatabaseRepository;
-import com.strategicgains.docussandra.persistence.DocumentRepository;
+import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
 import com.strategicgains.docussandra.persistence.ITableRepository;
-import com.strategicgains.docussandra.persistence.IndexRepository;
-import com.strategicgains.docussandra.persistence.TableRepository;
+import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
+import com.strategicgains.docussandra.persistence.impl.TableRepositoryImpl;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.strategicgains.docussandra.testhelper.Fixtures;
-import java.util.List;
 import static org.hamcrest.Matchers.*;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -127,7 +126,7 @@ public class DatabaseControllerTest
                 .body("description", equalTo(testDb.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
+                .get("/" + testDb.name());
     }
 
     /**
@@ -153,7 +152,7 @@ public class DatabaseControllerTest
                 .body("description", equalTo(testDb.description()))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
+                .get("/" + testDb.name());
     }
 
     /**
@@ -176,7 +175,7 @@ public class DatabaseControllerTest
                 .body("description", equalTo(newDesciption))
                 .body("createdAt", notNullValue())
                 .body("updatedAt", notNullValue()).when()
-                .get("/" + testDb.getId());
+                .get("/" + testDb.name());
 
     }
 
@@ -213,21 +212,21 @@ public class DatabaseControllerTest
         //act
         given().expect().statusCode(204)
                 .when().delete(testDb.name());
-        Thread.sleep(5000);
+        //Thread.sleep(5000);
         //check DB deletion
         expect().statusCode(404).when()
                 .get(testDb.name());
         //check table deletion (using direct db calls instead of REST-- being slightly lazy here)
-        TableRepository tableRepo = new TableRepository(f.getSession());
+        TableRepositoryImpl tableRepo = new TableRepositoryImpl(f.getSession());
         assertFalse(tableRepo.exists(Fixtures.createTestTable().getId()));
         //check index deletion (using direct db calls instead of REST-- being slightly lazy here)
-        IndexRepository indexRepo = new IndexRepository(f.getSession());
+        IndexRepositoryImpl indexRepo = new IndexRepositoryImpl(f.getSession());
         assertFalse(indexRepo.exists(Fixtures.createTestIndexOneField().getId()));
         //check iTable deletion (using direct db calls instead of REST-- being slightly lazy here)
-        ITableRepository iTableRepo = new ITableRepository(f.getSession());
+        ITableRepository iTableRepo = new ITableRepositoryImpl(f.getSession());
         assertFalse(iTableRepo.iTableExists(Fixtures.createTestIndexOneField()));
         //check document deletion (using direct db calls instead of REST-- being slightly lazy here)
-        DocumentRepository docRepo = new DocumentRepository(f.getSession());
+        DocumentRepositoryImpl docRepo = new DocumentRepositoryImpl(f.getSession());
         boolean expectedExceptionThrown = false;
         try
         {

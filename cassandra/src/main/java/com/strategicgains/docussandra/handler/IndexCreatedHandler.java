@@ -24,7 +24,7 @@ import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.IndexRepository;
 import com.strategicgains.docussandra.persistence.IndexStatusRepository;
-import com.strategicgains.docussandra.persistence.QueryRepository;
+import com.strategicgains.docussandra.persistence.impl.QueryRepositoryImpl;
 import com.strategicgains.eventing.EventHandler;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,7 +73,7 @@ public class IndexCreatedHandler implements EventHandler
             Index index = indexRepo.read(status.getIndex().getId());
             long offset = 0;
             long recordsCompleted = 0;
-            QueryResponseWrapper responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
+            QueryResponseWrapper responseWrapper = docRepo.readAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
             boolean hasMore;
             if (responseWrapper.isEmpty())
             {
@@ -89,7 +89,7 @@ public class IndexCreatedHandler implements EventHandler
                     try
                     {
                         //actually index here
-                        BoundStatement statement = IndexMaintainerHelper.generateDocumentCreateIndexEntryStatement(indexStatusRepo.getSession(), index, toIndex, QueryRepository.getIbl());
+                        BoundStatement statement = IndexMaintainerHelper.generateDocumentCreateIndexEntryStatement(indexStatusRepo.getSession(), index, toIndex, QueryRepositoryImpl.getIbl());
                         if (statement != null)
                         {
                             indexStatusRepo.getSession().execute(statement);
@@ -109,16 +109,16 @@ public class IndexCreatedHandler implements EventHandler
                         errors.add(e.toString() + " In document: " + toIndex.toString());//may want to reduce the verbosity here eventually -- or break some meta-data out into columns
                         status.setErrors(errors);
                         status.setStatusLastUpdatedAt(new Date());
-                        //indexStatusRepo.updateEntity(status);//lets not save every time for now
+                        //indexStatusRepo.update(status);//lets not save every time for now
                     }
                 }
                 offset = offset + CHUNK;
                 //update status
                 status.setRecordsCompleted(recordsCompleted);
                 status.setStatusLastUpdatedAt(new Date());
-                indexStatusRepo.updateEntity(status);
+                indexStatusRepo.update(status);
                 //get the next chunk
-                responseWrapper = docRepo.doReadAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
+                responseWrapper = docRepo.readAll(index.getDatabaseName(), index.getTableName(), CHUNK, offset);
                 if (responseWrapper.isEmpty())
                 {
                     hasMore = false;
@@ -129,7 +129,7 @@ public class IndexCreatedHandler implements EventHandler
             status.setIndex(index);
             indexRepo.markActive(index);
             //final update       
-            indexStatusRepo.updateEntity(status);
+            indexStatusRepo.update(status);
         } catch (Exception e)
         {
             String indexName = "Cannot be determined.";
@@ -144,7 +144,7 @@ public class IndexCreatedHandler implements EventHandler
                 //intentionally a seperate clause so our error prints in case this throws.
                 status.setFatalError(errorMessage + " Please contact a system administrator to resolve this issue.");
                 status.setStatusLastUpdatedAt(new Date());
-                indexStatusRepo.updateEntity(status);
+                indexStatusRepo.update(status);
             }
             throw e;
         }

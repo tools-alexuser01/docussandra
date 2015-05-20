@@ -81,7 +81,7 @@ public abstract class PerfTestParent
         //act
         given().body(dbStr).expect().when().post(database.name());
         //check
-        expect().statusCode(200).body("name", equalTo(database.name())).body("description", equalTo(database.description())).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).when().get("/" + database.getId());
+        expect().statusCode(200).body("name", equalTo(database.name())).body("description", equalTo(database.description())).body("createdAt", notNullValue()).body("updatedAt", notNullValue()).when().get("/" + database.name());
     }
 
     protected static void deleteData(Database database, Table table, List<Index> index)

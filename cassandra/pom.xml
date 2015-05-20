@@ -19,11 +19,11 @@
             <artifactId>Syntaxe</artifactId>
             <version>0.4.9</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>com.strategicgains.repoexpress</groupId>
             <artifactId>repoexpress-cassandra</artifactId>
             <version>0.4.5</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>com.strategicgains</groupId>
             <artifactId>HyperExpressPlugin</artifactId>
