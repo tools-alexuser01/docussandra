@@ -15,7 +15,7 @@ public class Database
     private String name;
     private String description;
 
-	//TODO: add consistency & distro metadata here.
+    //TODO: add consistency & distro metadata here.
     public Database()
     {
         super();

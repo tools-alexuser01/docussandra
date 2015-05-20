@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.junit.Assert;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Ignore;
 
 /**
  * @author tnine
@@ -97,7 +96,6 @@ public class SimpleIndexBucketLocatorImplTest
 //        assertEquals(bucket3, "000000000000000000000000000000000000000");
 //        assertEquals(bucket4, "085070591730234615865843651857942052863");
 //    }
-
 //    @Test
 //    @Ignore
 //    public void evenDistribution()
@@ -176,7 +174,6 @@ public class SimpleIndexBucketLocatorImplTest
 //            }
 //        }
 //    }
-
     @Test
     public void practicalDistribution()
     {

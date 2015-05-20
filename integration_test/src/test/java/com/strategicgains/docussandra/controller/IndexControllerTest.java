@@ -23,7 +23,6 @@ import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Database;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Index;
-import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.Table;
 import com.strategicgains.docussandra.persistence.impl.DocumentRepositoryImpl;
 import org.junit.BeforeClass;

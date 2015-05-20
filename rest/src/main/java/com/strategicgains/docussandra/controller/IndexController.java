@@ -49,9 +49,9 @@ public class IndexController
         String table = request.getHeader(Constants.Url.TABLE, "No table provided");
         String name = request.getHeader(Constants.Url.INDEX, "No index name provided");
         //TODO: check name passed in with url and name in domain object
-        
+
         Index entity = request.getBodyAs(Index.class, "Resource details not provided");
-        
+
         Table t = new Table();
         t.database(database);
         t.name(table);

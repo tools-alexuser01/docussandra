@@ -46,17 +46,15 @@ public class QueryResponseWrapper extends ArrayList<Document>
         this.numAdditionalResults = numAdditionalResults;
     }
 
-
     /**
      * Number of additional results that exist. Null if there are additional
      * results, but the number is unknown.
+     *
      * @return the numAdditionalResults
      */
     public Long getNumAdditionalResults()
     {
         return numAdditionalResults;
     }
-    
-    
 
 }

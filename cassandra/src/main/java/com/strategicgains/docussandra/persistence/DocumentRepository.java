@@ -39,5 +39,5 @@ public interface DocumentRepository
     QueryResponseWrapper readAll(String database, String tableString, int limit, long offset);
 
     Document update(Document entity);
-    
+
 }

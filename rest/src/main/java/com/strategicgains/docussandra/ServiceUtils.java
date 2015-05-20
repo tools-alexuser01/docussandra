@@ -25,11 +25,11 @@ import org.restexpress.Response;
  */
 public class ServiceUtils
 {
-
     /**
      * Sets an exception to the response object as a bad request exception.
+     *
      * @param t
-     * @param response 
+     * @param response
      */
     public static void setBadRequestExceptionToResponse(Throwable t, Response response)
     {

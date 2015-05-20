@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Repository for interacting with documents.
+ *
  * @author udeyoje
  */
 public class DocumentRepositoryImpl extends AbstractCRUDRepository<Document> implements DocumentRepository
 {
-
 
     public class Columns
     {
@@ -61,7 +61,8 @@ public class DocumentRepositoryImpl extends AbstractCRUDRepository<Document> imp
 
     /**
      * Constructor.
-     * @param session 
+     *
+     * @param session
      */
     public DocumentRepositoryImpl(Session session)
     {
@@ -98,7 +99,7 @@ public class DocumentRepositoryImpl extends AbstractCRUDRepository<Document> imp
             throw new RuntimeException(e);
         }
     }
-    
+
     @Override
     public Document read(Identifier identifier)
     {

@@ -47,7 +47,7 @@ public class DocumentIdentifier extends Identifier
      * Constructor.
      *
      * Creates an Identifier from another Identifier.
-     * 
+     *
      * @param id
      */
     public DocumentIdentifier(Identifier id)

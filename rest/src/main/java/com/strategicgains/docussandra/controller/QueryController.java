@@ -15,7 +15,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.List;
 import org.restexpress.common.query.QueryRange;
 import org.restexpress.query.QueryRanges;
-import org.restexpress.serialization.SerializationSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

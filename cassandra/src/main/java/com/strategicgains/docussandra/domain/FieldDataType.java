@@ -17,10 +17,12 @@ package com.strategicgains.docussandra.domain;
 
 /**
  * Enum for types of data that we can index on.
+ *
  * @author udeyoje
  */
 public enum FieldDataType
 {
+
     TEXT,
     DATE_TIME,
     DOUBLE,
@@ -28,26 +30,34 @@ public enum FieldDataType
     BOOLEAN,
     UUID,
     BINARY;// maybe?
-    
-    public String mapToCassandaraDataType(){
-        if(this.equals(TEXT)){
+
+    public String mapToCassandaraDataType()
+    {
+        if (this.equals(TEXT))
+        {
             return "varchar";
-        } else if(this.equals(DATE_TIME)){
+        } else if (this.equals(DATE_TIME))
+        {
             return "timestamp";
-        } else if(this.equals(DOUBLE)){
+        } else if (this.equals(DOUBLE))
+        {
             return "double";
-        } else if(this.equals(INTEGER)){
+        } else if (this.equals(INTEGER))
+        {
             return "int";//should we use bigint instead?
-        } else if(this.equals(BOOLEAN)){
+        } else if (this.equals(BOOLEAN))
+        {
             return "boolean";
-        } else if(this.equals(UUID)){
+        } else if (this.equals(UUID))
+        {
             return "uuid";
-        } else if(this.equals(BINARY)){
+        } else if (this.equals(BINARY))
+        {
             return "blob";
-        } else {
+        } else
+        {
             throw new IllegalArgumentException("Type not supported. " + this.toString());//this should never happen
         }
     }
-    
-    
+
 }

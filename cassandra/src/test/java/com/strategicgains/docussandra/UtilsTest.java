@@ -1,7 +1,6 @@
 package com.strategicgains.docussandra;
 
 import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.Session;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.strategicgains.docussandra.domain.FieldDataType;
@@ -11,7 +10,6 @@ import com.strategicgains.docussandra.domain.IndexIdentifier;
 import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.testhelper.Fixtures;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.junit.After;
@@ -218,7 +216,6 @@ public class UtilsTest
         assertEquals("e38193e3-81ae-e382-0000-000000000000", result.toString());
     }
 
-
     @Test
     public void testSetField() throws Exception
     {
@@ -294,21 +291,21 @@ public class UtilsTest
         List<String> two = null;
         boolean result = Utils.equalLists(one, two);
         assertEquals(true, result);
-        
+
         one = new ArrayList<>();
         two = new ArrayList<>();
         result = Utils.equalLists(one, two);
         assertEquals(true, result);
-                
+
         one.add("test");
         two.add("test");
         result = Utils.equalLists(one, two);
         assertEquals(true, result);
-        
+
         two.add("testtest");
         result = Utils.equalLists(one, two);
         assertEquals(false, result);
-        
+
         two = new ArrayList<>();
         result = Utils.equalLists(one, two);
         assertEquals(false, result);

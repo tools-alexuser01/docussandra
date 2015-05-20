@@ -2,7 +2,6 @@ package com.strategicgains.docussandra.domain;
 
 import java.util.List;
 
-
 public class Query
 {
 
@@ -109,5 +108,4 @@ public class Query
         return "Query{" + "table=" + table + ", columns=" + columns + ", where=" + where + ", limit=" + limit + ", offset=" + offset + '}';
     }
 
-    
 }

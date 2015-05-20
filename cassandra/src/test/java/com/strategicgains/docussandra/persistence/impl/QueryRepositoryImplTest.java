@@ -70,7 +70,7 @@ public class QueryRepositoryImplTest
     @After
     public void tearDown()
     {
-        
+
     }
 
     /**

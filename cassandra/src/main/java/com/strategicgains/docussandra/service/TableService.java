@@ -11,53 +11,60 @@ import com.strategicgains.syntaxe.ValidationEngine;
 
 public class TableService
 {
-	private TableRepository tables;
-	private DatabaseRepository databases;
-	
-	public TableService(DatabaseRepository databaseRepository, TableRepository tableRepository)
-	{
-		super();
-		this.databases = databaseRepository;
-		this.tables = tableRepository;
-	}
 
-	public Table create(Table entity)
-	{
-		if (!databases.exists(entity.database().getId()))
-		{
-			throw new ItemNotFoundException("Database not found: " + entity.database());
-		}
+    private TableRepository tables;
+    private DatabaseRepository databases;
 
-		ValidationEngine.validateAndThrow(entity);
-		return tables.create(entity);
-	}
-
-	public Table read(String database, String table)
-	{
-		Identifier id = new Identifier(database, table);
-		Table t = tables.read(id);
-
-		if (t == null) throw new ItemNotFoundException("Table not found: " + id.toString());
-
-		return t;
-	}
-
-	public List<Table> readAll(String database)
-	{
-            Identifier id = new Identifier(database);
-		if (!databases.exists(id)) throw new ItemNotFoundException("Database not found: " + database);
-
-		return tables.readAll(id);
-	}
-
-	public void update(Table entity)
+    public TableService(DatabaseRepository databaseRepository, TableRepository tableRepository)
     {
-		ValidationEngine.validateAndThrow(entity);
-		tables.update(entity);
+        super();
+        this.databases = databaseRepository;
+        this.tables = tableRepository;
     }
 
-	public void delete(Identifier id)
+    public Table create(Table entity)
     {
-		tables.delete(id);
+        if (!databases.exists(entity.database().getId()))
+        {
+            throw new ItemNotFoundException("Database not found: " + entity.database());
+        }
+
+        ValidationEngine.validateAndThrow(entity);
+        return tables.create(entity);
+    }
+
+    public Table read(String database, String table)
+    {
+        Identifier id = new Identifier(database, table);
+        Table t = tables.read(id);
+
+        if (t == null)
+        {
+            throw new ItemNotFoundException("Table not found: " + id.toString());
+        }
+
+        return t;
+    }
+
+    public List<Table> readAll(String database)
+    {
+        Identifier id = new Identifier(database);
+        if (!databases.exists(id))
+        {
+            throw new ItemNotFoundException("Database not found: " + database);
+        }
+
+        return tables.readAll(id);
+    }
+
+    public void update(Table entity)
+    {
+        ValidationEngine.validateAndThrow(entity);
+        tables.update(entity);
+    }
+
+    public void delete(Identifier id)
+    {
+        tables.delete(id);
     }
 }

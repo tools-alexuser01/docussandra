@@ -76,7 +76,7 @@ public class IndexService
     {
         verifyTable(index.getDatabaseName(), index.getTableName());
         ValidationEngine.validateAndThrow(index);
-        
+
         index.setActive(false);//we default to not active when being created; we don't allow the user to change this; only the app can change this
         logger.debug("Creating index: " + index.toString());
         Index created = indexesRepo.create(index);

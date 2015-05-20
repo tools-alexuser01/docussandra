@@ -296,7 +296,8 @@ public class IndexStatusRepositoryImplTest
     }
 
     /**
-     * Test of readAllCurrentlyIndexing method, of class IndexStatusRepositoryImpl.
+     * Test of readAllCurrentlyIndexing method, of class
+     * IndexStatusRepositoryImpl.
      */
     @Test
     public void testReadAllActive()

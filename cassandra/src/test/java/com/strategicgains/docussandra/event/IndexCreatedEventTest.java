@@ -132,7 +132,6 @@ public class IndexCreatedEventTest
 //        }
 //        assertTrue("Expected exception not thrown", expectedExceptionThrown);
 //    }
-
     /**
      * Test of getDateStarted method, of class IndexCreatedEvent.
      */

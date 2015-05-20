@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class IndexRepositoryImpl extends AbstractCRUDRepository<Index> implements IndexRepository
 {
+
     /**
      * Logger for this class.
      */

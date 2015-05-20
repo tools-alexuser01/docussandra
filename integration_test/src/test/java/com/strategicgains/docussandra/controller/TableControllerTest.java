@@ -35,14 +35,16 @@ import testhelper.RestExpressManager;
  *
  * @author udeyoje
  */
-public class TableControllerTest {
+public class TableControllerTest
+{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableControllerTest.class);
     private static final String BASE_URI = "http://localhost";
     private static final int PORT = 19080;
     private Fixtures f;
 
-    public TableControllerTest() throws Exception {
+    public TableControllerTest() throws Exception
+    {
         f = Fixtures.getInstance(false);
     }
 
@@ -53,7 +55,8 @@ public class TableControllerTest {
      * @throws Exception
      */
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() throws Exception
+    {
         RestAssured.baseURI = BASE_URI;
         RestAssured.port = PORT;
         //RestAssured.basePath = "/courses/" + COURSE_ID + "/categories";
@@ -65,7 +68,8 @@ public class TableControllerTest {
     }
 
     @Before
-    public void beforeTest() {
+    public void beforeTest()
+    {
         f.clearTestTables();
         Database testDb = Fixtures.createTestDatabase();
         f.insertDatabase(testDb);
@@ -77,14 +81,16 @@ public class TableControllerTest {
      * executed.
      */
     @AfterClass
-    public static void afterClass() {
+    public static void afterClass()
+    {
     }
 
     /**
      * Cleanup that is performed after each test is executed.
      */
     @After
-    public void afterTest() {
+    public void afterTest()
+    {
         f.clearTestTables();
     }
 
@@ -93,7 +99,8 @@ public class TableControllerTest {
      * table.
      */
     @Test
-    public void getTableTest() {
+    public void getTableTest()
+    {
         Table testTable = Fixtures.createTestTable();
         f.insertTable(testTable);
         expect().statusCode(200)
@@ -109,7 +116,8 @@ public class TableControllerTest {
      * table.
      */
     @Test
-    public void postTableTest() {
+    public void postTableTest()
+    {
         Table testTable = Fixtures.createTestTable();
         String tableStr = "{" + "\"description\" : \"" + testTable.description()
                 + "\"," + "\"name\" : \"" + testTable.name() + "\"}";
@@ -135,7 +143,8 @@ public class TableControllerTest {
      * table.
      */
     @Test
-    public void putTableTest() {
+    public void putTableTest()
+    {
         Table testTable = Fixtures.createTestTable();
         f.insertTable(testTable);
         String newDesciption = "this is a new description";
@@ -160,7 +169,8 @@ public class TableControllerTest {
      * table.
      */
     @Test
-    public void deleteTableTest() {
+    public void deleteTableTest()
+    {
         Table testTable = Fixtures.createTestTable();
         f.insertTable(testTable);
         //act

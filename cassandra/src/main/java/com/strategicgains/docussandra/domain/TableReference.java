@@ -23,7 +23,8 @@ import java.util.Objects;
  * @author toddf
  * @since Jan 30, 2015
  */
-public class TableReference {
+public class TableReference
+{
 
     @RegexValidation(name = "Database Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
     private String database;
@@ -31,24 +32,29 @@ public class TableReference {
     @RegexValidation(name = "Table Name", nullable = false, pattern = Constants.NAME_PATTERN, message = Constants.NAME_MESSAGE)
     private String name;
 
-    public TableReference(String database, String table) {
+    public TableReference(String database, String table)
+    {
         this.database = database;
         this.name = table;
     }
 
-    public TableReference(Table table) {
+    public TableReference(Table table)
+    {
         this(table.databaseName(), table.name());
     }
 
-    public String database() {
+    public String database()
+    {
         return database;
     }
 
-    public String name() {
+    public String name()
+    {
         return name;
     }
 
-    public Table asObject() {
+    public Table asObject()
+    {
         Table t = new Table();
         t.database(database);
         t.name(name);
@@ -56,7 +62,8 @@ public class TableReference {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         int hash = 5;
         hash = 59 * hash + Objects.hashCode(this.database);
         hash = 59 * hash + Objects.hashCode(this.name);
@@ -64,30 +71,32 @@ public class TableReference {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
+        {
             return false;
         }
         final TableReference other = (TableReference) obj;
-        if (!Objects.equals(this.database, other.database)) {
+        if (!Objects.equals(this.database, other.database))
+        {
             return false;
         }
-        if (!Objects.equals(this.name, other.name)) {
+        if (!Objects.equals(this.name, other.name))
+        {
             return false;
         }
         return true;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "TableReference{" + "database=" + database + ", name=" + name + '}';
     }
-    
-    
-    
-    
 
 }

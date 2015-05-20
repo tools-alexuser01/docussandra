@@ -57,5 +57,5 @@ public interface IndexRepository
     List<Index> readAllCached(Identifier id);
 
     Index update(Index entity);
-    
+
 }

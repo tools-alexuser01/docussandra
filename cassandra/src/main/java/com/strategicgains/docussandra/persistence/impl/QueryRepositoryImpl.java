@@ -30,7 +30,7 @@ public class QueryRepositoryImpl implements QueryRepository
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    
+
     private static final String QUERY_CQL = "select * from %s where bucket = ? AND %s";
     private static final String QUERY_CQL_LIMIT = "select * from %s where bucket = ? AND %s LIMIT %s";//we use the limit as to not put any more stress on cassandra than we need to (even though our algorithm will discard the data anyway)
 

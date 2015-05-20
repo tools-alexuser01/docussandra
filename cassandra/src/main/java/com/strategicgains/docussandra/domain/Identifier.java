@@ -50,12 +50,14 @@ public class Identifier
         super();
         add(components);
     }
-    
+
     /**
      * Creates an Identifier from another Identifier.
-     * @param id 
+     *
+     * @param id
      */
-    public Identifier(Identifier id){
+    public Identifier(Identifier id)
+    {
         this.components = id.components();
     }
 
@@ -108,7 +110,8 @@ public class Identifier
 
     /**
      * Gets the database name for this Identifier
-     * @return 
+     *
+     * @return
      */
     public String getDatabaseName()
     {
@@ -121,7 +124,8 @@ public class Identifier
 
     /**
      * Gets the table name for this Identifier.
-     * @return 
+     *
+     * @return
      */
     public String getTableName()
     {
@@ -134,7 +138,8 @@ public class Identifier
 
     /**
      * Gets the Table object for this Identifier.
-     * @return 
+     *
+     * @return
      */
     public Table getTable()
     {

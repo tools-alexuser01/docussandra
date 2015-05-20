@@ -131,7 +131,7 @@ public class Main
                 .mapException(ItemNotFoundException.class, NotFoundException.class)
                 .mapException(DuplicateItemException.class, ConflictException.class)
                 .mapException(ValidationException.class, BadRequestException.class)
-                .mapException(InvalidObjectIdException.class, BadRequestException.class);                
+                .mapException(InvalidObjectIdException.class, BadRequestException.class);
     }
 
     private static Configuration loadEnvironment(String[] args)

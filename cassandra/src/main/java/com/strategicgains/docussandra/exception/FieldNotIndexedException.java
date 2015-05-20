@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * Exception that indicates an attempted query on a field that is not indexed.
+ *
  * @author udeyoje
  */
 public class FieldNotIndexedException extends Exception
@@ -50,5 +51,5 @@ public class FieldNotIndexedException extends Exception
     public List<String> getFields()
     {
         return fields;
-    }    
+    }
 }

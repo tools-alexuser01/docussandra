@@ -91,5 +91,4 @@ public class QueryServiceTest
         assertEquals(expected, actual);
     }
 
- 
 }

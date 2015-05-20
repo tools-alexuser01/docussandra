@@ -259,8 +259,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
- query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs
+     * a query with a set time.
      */
     @Test
     public void postQueryTest()
@@ -285,8 +285,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
- two field query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs
+     * a two field query with a set time.
      */
     @Test
     public void postQueryTestTwoField()
@@ -312,8 +312,8 @@ public class PlayByPlayRemote extends PerfTestParent
     }
 
     /**
-     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs a
- two field query with a set time.
+     * Tests that the POST /{databases}/{setTable}/query endpoint properly runs
+     * a two field query with a set time.
      */
     @Test
     public void postQueryTestThreeField()

@@ -77,7 +77,6 @@ public abstract class Routes
 //        server.uri("/{database}/{table}/index_status", config.getIndexStatusController())
 //                .action("readAll", GET)
 //                .name(Constants.Routes.INDEX_STATUS_ALL);//this route isn't supported we don't have the level of info needed presently
-       
         server.uri("/{database}/{table}/{documentId}", config.getDocumentController())
                 .method(GET, PUT, DELETE)
                 .name(Constants.Routes.DOCUMENT);

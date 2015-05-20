@@ -162,7 +162,7 @@ public class DocumentRepositoryImplTest
         f.insertDocuments(Fixtures.getBulkDocuments());
 
         DocumentRepository instance = new DocumentRepositoryImpl(f.getSession());
-        
+
         //let's get the first 5
         QueryResponseWrapper result = instance.readAll(testDb.name(), testTable.name(), 5, 0);
         assertNotNull(result);

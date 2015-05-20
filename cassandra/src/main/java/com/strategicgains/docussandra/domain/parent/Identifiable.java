@@ -17,12 +17,12 @@ package com.strategicgains.docussandra.domain.parent;
 
 import com.strategicgains.docussandra.domain.Identifier;
 
-
 /**
  * @author toddf
  * @since Jul 19, 2010
  */
 public interface Identifiable
 {
-	public Identifier getId();
+
+    public Identifier getId();
 }

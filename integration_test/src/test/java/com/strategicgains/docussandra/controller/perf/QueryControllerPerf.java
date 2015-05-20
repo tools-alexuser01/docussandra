@@ -87,7 +87,7 @@ public class QueryControllerPerf
     @After
     public void afterTest()
     {
-        
+
     }
 
     /**

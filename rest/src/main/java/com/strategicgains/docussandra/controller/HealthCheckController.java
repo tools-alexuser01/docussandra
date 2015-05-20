@@ -5,9 +5,11 @@ import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
 
-public class HealthCheckController {
+public class HealthCheckController
+{
 
-    public Object getHealth(Request request, Response response) {
+    public Object getHealth(Request request, Response response)
+    {
         response.setResponseStatus(HttpResponseStatus.OK);
         response.setContentType(ContentType.JSON);
         return "{\"isHealthy\":true}";

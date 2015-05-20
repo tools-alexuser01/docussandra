@@ -19,7 +19,8 @@ import com.strategicgains.docussandra.domain.IndexField;
 
 /**
  * Exception that indicates that a field that should be indexable is not in the
- * specified format. Contains more meta-data than using an IndexParseFieldException alone.
+ * specified format. Contains more meta-data than using an
+ * IndexParseFieldException alone.
  *
  * @author udeyoje
  */
@@ -57,12 +58,10 @@ public class IndexParseException extends IndexParseFieldException
         return field;
     }
 
-
     @Override
     public String toString()
     {
         return "IndexParseException{" + "field=" + field + ", fieldValue=" + super.getFieldValue() + '}';
     }
-    
-    
+
 }

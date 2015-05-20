@@ -6,16 +6,16 @@ import org.restexpress.serialization.AbstractSerializationProvider;
 import org.restexpress.serialization.SerializationProcessor;
 
 public class SerializationProvider
-extends AbstractSerializationProvider
+        extends AbstractSerializationProvider
 {
-	// SECTION: CONSTANTS
+    // SECTION: CONSTANTS
 
-	private static final SerializationProcessor JSON_SERIALIZER = new JsonSerializationProcessor();
-	private static final ResponseWrapper RESPONSE_WRAPPER = new ErrorResponseWrapper();
+    private static final SerializationProcessor JSON_SERIALIZER = new JsonSerializationProcessor();
+    private static final ResponseWrapper RESPONSE_WRAPPER = new ErrorResponseWrapper();
 
-	public SerializationProvider()
+    public SerializationProvider()
     {
-	    super();
-	    add(JSON_SERIALIZER, RESPONSE_WRAPPER, true);
+        super();
+        add(JSON_SERIALIZER, RESPONSE_WRAPPER, true);
     }
 }

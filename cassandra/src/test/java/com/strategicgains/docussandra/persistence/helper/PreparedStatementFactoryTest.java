@@ -30,28 +30,29 @@ import static org.junit.Assert.*;
  */
 public class PreparedStatementFactoryTest
 {
+
     private Fixtures f;
-    
+
     public PreparedStatementFactoryTest() throws Exception
     {
         f = Fixtures.getInstance();
     }
-    
+
     @BeforeClass
     public static void setUpClass()
     {
     }
-    
+
     @AfterClass
     public static void tearDownClass()
     {
     }
-    
+
     @Before
     public void setUp()
     {
     }
-    
+
     @After
     public void tearDown()
     {
@@ -70,5 +71,5 @@ public class PreparedStatementFactoryTest
         result = PreparedStatementFactory.getPreparedStatement(query, f.getSession());
         assertNotNull(result);
     }
-    
+
 }

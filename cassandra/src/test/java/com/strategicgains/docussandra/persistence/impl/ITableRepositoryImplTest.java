@@ -1,6 +1,5 @@
 package com.strategicgains.docussandra.persistence.impl;
 
-import com.strategicgains.docussandra.persistence.impl.ITableRepositoryImpl;
 import com.strategicgains.docussandra.Utils;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.persistence.ITableRepository;
@@ -130,7 +129,8 @@ public class ITableRepositoryImplTest
     }
 
     /**
-     * Test of generateTableCreationSyntax method, of class ITableDao. Tests datatypes other than text.
+     * Test of generateTableCreationSyntax method, of class ITableDao. Tests
+     * datatypes other than text.
      */
     @Test
     public void testGenerateTableCreationSyntaxWithDataTypes()

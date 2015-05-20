@@ -1,6 +1,5 @@
 package com.strategicgains.docussandra.persistence.impl;
 
-import com.strategicgains.docussandra.persistence.impl.IndexRepositoryImpl;
 import com.datastax.driver.core.BatchStatement;
 import java.util.ArrayList;
 import java.util.Iterator;

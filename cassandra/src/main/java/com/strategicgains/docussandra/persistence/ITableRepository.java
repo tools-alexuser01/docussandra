@@ -70,5 +70,5 @@ public interface ITableRepository
      * @return True if the iTable exists for the index, false otherwise.
      */
     boolean iTableExists(IndexIdentifier indexId);
-    
+
 }

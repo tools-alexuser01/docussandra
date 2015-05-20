@@ -52,7 +52,7 @@ public class IndexField implements Validatable, Serializable
 
     public IndexField()
     {
-    }        
+    }
 
     /**
      * Constructor.

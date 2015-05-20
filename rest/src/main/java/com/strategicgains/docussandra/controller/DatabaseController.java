@@ -23,93 +23,93 @@ import com.strategicgains.hyperexpress.builder.UrlBuilder;
  */
 public class DatabaseController
 {
-	private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
 
-	private DatabaseService databases;
-	
-	public DatabaseController(DatabaseService databaseService)
-	{
-		super();
-		this.databases = databaseService;
-	}
+    private static final UrlBuilder LOCATION_BUILDER = new UrlBuilder();
 
-	public void options(Request request, Response response)
-	{
-		if (DATABASES.equals(request.getResolvedRoute().getName()))
-		{
-			response.addHeader(HttpHeaders.Names.ALLOW, "GET");
-		}
-		else if (DATABASE.equals(request.getResolvedRoute().getName()))
-		{
-			response.addHeader(HttpHeaders.Names.ALLOW, "GET, DELETE, PUT, POST");			
-		}
-	}
+    private DatabaseService databases;
 
-	public Database create(Request request, Response response)
-	{
-		String name = request.getHeader(Constants.Url.DATABASE, "No database name provided");
-		Database database = request.getBodyAs(Database.class);
+    public DatabaseController(DatabaseService databaseService)
+    {
+        super();
+        this.databases = databaseService;
+    }
 
-		if (database == null)
-		{
-			database = new Database();
-		}
+    public void options(Request request, Response response)
+    {
+        if (DATABASES.equals(request.getResolvedRoute().getName()))
+        {
+            response.addHeader(HttpHeaders.Names.ALLOW, "GET");
+        } else if (DATABASE.equals(request.getResolvedRoute().getName()))
+        {
+            response.addHeader(HttpHeaders.Names.ALLOW, "GET, DELETE, PUT, POST");
+        }
+    }
 
-		database.name(name);
-		Database saved = databases.create(database);
+    public Database create(Request request, Response response)
+    {
+        String name = request.getHeader(Constants.Url.DATABASE, "No database name provided");
+        Database database = request.getBodyAs(Database.class);
 
-		// Construct the response for create...
-		response.setResponseCreated();
+        if (database == null)
+        {
+            database = new Database();
+        }
 
-		// enrich the resource with links, etc. here...
-		TokenResolver resolver = HyperExpress.bind(Constants.Url.DATABASE, saved.name());
+        database.name(name);
+        Database saved = databases.create(database);
 
-		// Include the Location header...
-		String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.DATABASE);
-		response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
+        // Construct the response for create...
+        response.setResponseCreated();
 
-		// Return the newly-created resource...
-		return saved;
-	}
+        // enrich the resource with links, etc. here...
+        TokenResolver resolver = HyperExpress.bind(Constants.Url.DATABASE, saved.name());
 
-	public Database read(Request request, Response response)
-	{
-		String name = request.getHeader(Constants.Url.DATABASE, "No database provided");
-		Database database = databases.read(name);
+        // Include the Location header...
+        String locationPattern = request.getNamedUrl(HttpMethod.GET, Constants.Routes.DATABASE);
+        response.addLocationHeader(LOCATION_BUILDER.build(locationPattern, resolver));
 
-		// enrich the entity with links, etc. here...
-		HyperExpress.bind(Constants.Url.DATABASE, database.name());
+        // Return the newly-created resource...
+        return saved;
+    }
 
-		return database;
-	}
+    public Database read(Request request, Response response)
+    {
+        String name = request.getHeader(Constants.Url.DATABASE, "No database provided");
+        Database database = databases.read(name);
 
-	public List<Database> readAll(Request request, Response response)
-	{
-		HyperExpress.tokenBinder(new TokenBinder<Database>()
-		{
-			@Override
+        // enrich the entity with links, etc. here...
+        HyperExpress.bind(Constants.Url.DATABASE, database.name());
+
+        return database;
+    }
+
+    public List<Database> readAll(Request request, Response response)
+    {
+        HyperExpress.tokenBinder(new TokenBinder<Database>()
+        {
+            @Override
             public void bind(Database object, TokenResolver resolver)
             {
-				resolver.bind(Constants.Url.DATABASE, object.name());
+                resolver.bind(Constants.Url.DATABASE, object.name());
             }
-		});
-		return databases.readAll();
-	}
+        });
+        return databases.readAll();
+    }
 
-	public void update(Request request, Response response)
-	{
-		String name = request.getHeader(Constants.Url.DATABASE, "No database name provided");
-		Database database = request.getBodyAs(Database.class, "Database details not provided");
+    public void update(Request request, Response response)
+    {
+        String name = request.getHeader(Constants.Url.DATABASE, "No database name provided");
+        Database database = request.getBodyAs(Database.class, "Database details not provided");
 
-		database.name(name);
-		databases.update(database);
-		response.setResponseNoContent();
-	}
+        database.name(name);
+        databases.update(database);
+        response.setResponseNoContent();
+    }
 
-	public void delete(Request request, Response response)
-	{
-		String name = request.getHeader(Constants.Url.DATABASE, "No database name provided");
-		databases.delete(name);
-		response.setResponseNoContent();
-	}
+    public void delete(Request request, Response response)
+    {
+        String name = request.getHeader(Constants.Url.DATABASE, "No database name provided");
+        databases.delete(name);
+        response.setResponseNoContent();
+    }
 }

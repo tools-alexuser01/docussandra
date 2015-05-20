@@ -41,5 +41,5 @@ public interface DatabaseRepository
     List<Database> readAll(Identifier id);
 
     Database update(Database entity);
-    
+
 }

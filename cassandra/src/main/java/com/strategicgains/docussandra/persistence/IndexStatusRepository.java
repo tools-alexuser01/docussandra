@@ -93,5 +93,5 @@ public interface IndexStatusRepository
      * @return The updated IndexCreatedEvent.
      */
     IndexCreatedEvent update(IndexCreatedEvent entity);
-    
+
 }

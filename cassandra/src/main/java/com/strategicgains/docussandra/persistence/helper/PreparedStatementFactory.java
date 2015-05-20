@@ -77,20 +77,20 @@ public class PreparedStatementFactory
         Element e = null;
 //        synchronized (LOCK)
         //{
-            e = c.get(query);
-            if (e == null || e.getObjectValue() == null)
+        e = c.get(query);
+        if (e == null || e.getObjectValue() == null)
+        {
+            logger.debug("Creating new Prepared Statement for: " + query);
+            e = new Element(query, session.prepare(query));
+            c.put(e);
+        } else
+        {
+            if (logger.isTraceEnabled())
             {
-                logger.debug("Creating new Prepared Statement for: " + query);
-                e = new Element(query, session.prepare(query));
-                c.put(e);
-            } else
-            {
-                if (logger.isTraceEnabled())
-                {
-                    PreparedStatement ps = (PreparedStatement) e.getObjectValue();
-                    logger.trace("Pulling PreparedStatement from Cache: " + ps.getQueryString());
-                }
+                PreparedStatement ps = (PreparedStatement) e.getObjectValue();
+                logger.trace("Pulling PreparedStatement from Cache: " + ps.getQueryString());
             }
+        }
         //}
         //sw.stop();
         //logger.debug("Time to fetch prepared statement (" + query + "): " + sw.getTime());

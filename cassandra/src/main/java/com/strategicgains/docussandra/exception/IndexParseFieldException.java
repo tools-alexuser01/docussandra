@@ -43,6 +43,7 @@ public class IndexParseFieldException extends Exception
 
     /**
      * Constructors for child classes to call.
+     *
      * @param message Message for this exception.
      * @param fieldValue Value of the field with the problem.
      * @param e Root exception for the problem.
@@ -51,7 +52,7 @@ public class IndexParseFieldException extends Exception
     {
         super(message + " Could not parse field with value: '" + fieldValue + "'", e);
         this.fieldValue = fieldValue;
-    }   
+    }
 
     /**
      * Constructor.

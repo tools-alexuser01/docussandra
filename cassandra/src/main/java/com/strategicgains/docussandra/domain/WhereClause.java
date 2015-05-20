@@ -9,7 +9,8 @@ import java.util.Objects;
  *
  * @author udeyoje
  */
-public class WhereClause {
+public class WhereClause
+{
 
     private static final int FIELD = 0;
     private static final int OPERATOR = 1;
@@ -30,21 +31,25 @@ public class WhereClause {
      */
     private ArrayList<String> values = new ArrayList<>();
 
-    public WhereClause(String whereClause) {
+    public WhereClause(String whereClause)
+    {
         this.whereClause = whereClause;
         parse(whereClause);
     }
 
     //TODO: this will need improvment; handle exceptions
-    private void parse(String whereClause) {
+    private void parse(String whereClause)
+    {
 
         StringBuilder boundStatementBuilder = new StringBuilder();
         //foo = 'fooish' AND bar < 'barish'... [ORDER BY] foo
         String[] tokens = whereClause.split("\\Q \\E");
         int currentOperator = FIELD;
-        for (int i = 0; i < tokens.length; i++) {
+        for (int i = 0; i < tokens.length; i++)
+        {
             String token = tokens[i];
-            switch (currentOperator) {
+            switch (currentOperator)
+            {
                 case FIELD:
                     fields.add(token);
                     boundStatementBuilder.append(token);
@@ -57,10 +62,12 @@ public class WhereClause {
                 case VALUE:
                     boundStatementBuilder.append("?");
                     StringBuilder sb = new StringBuilder();
-                    if (token.charAt(0) == '\'') {
+                    if (token.charAt(0) == '\'')
+                    {
                         token = token.substring(1);//take out the quote
                     }
-                    while (token.charAt(token.length() - 1) != '\'') {
+                    while (token.charAt(token.length() - 1) != '\'')
+                    {
                         sb.append(token);
                         sb.append(" ");//put the spaces back in
                         token = tokens[++i];
@@ -85,7 +92,8 @@ public class WhereClause {
 
     }
 
-    public String getBoundStatementSyntax() {
+    public String getBoundStatementSyntax()
+    {
         return boundStatementSyntax;
     }
 
@@ -94,7 +102,8 @@ public class WhereClause {
      *
      * @return the fields
      */
-    public ArrayList<String> getFields() {
+    public ArrayList<String> getFields()
+    {
         return fields;
     }
 
@@ -103,24 +112,28 @@ public class WhereClause {
      *
      * @return the values
      */
-    public ArrayList<String> getValues() {
+    public ArrayList<String> getValues()
+    {
         return values;
     }
 
     /**
      * @return the original where clause passed in. Use as a reference only.
      */
-    public String getWhereClause() {
+    public String getWhereClause()
+    {
         return whereClause;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "WhereClause{" + "whereClause=" + whereClause + ", boundStatementSyntax=" + boundStatementSyntax + ", fields=" + fields + ", values=" + values + '}';
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         int hash = 7;
         hash = 23 * hash + Objects.hashCode(this.whereClause);
         hash = 23 * hash + Objects.hashCode(this.boundStatementSyntax);
@@ -130,24 +143,31 @@ public class WhereClause {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
+        {
             return false;
         }
         final WhereClause other = (WhereClause) obj;
-        if (!Objects.equals(this.whereClause, other.whereClause)) {
+        if (!Objects.equals(this.whereClause, other.whereClause))
+        {
             return false;
         }
-        if (!Objects.equals(this.boundStatementSyntax, other.boundStatementSyntax)) {
+        if (!Objects.equals(this.boundStatementSyntax, other.boundStatementSyntax))
+        {
             return false;
         }
-        if (!Objects.equals(this.fields, other.fields)) {
+        if (!Objects.equals(this.fields, other.fields))
+        {
             return false;
         }
-        if (!Objects.equals(this.values, other.values)) {
+        if (!Objects.equals(this.values, other.values))
+        {
             return false;
         }
         return true;

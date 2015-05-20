@@ -20,37 +20,43 @@ import java.util.Objects;
 
 /**
  * Object that represents a query that has been parsed for processing.
+ *
  * @author udeyoje
  */
-public class ParsedQuery {
-    
+public class ParsedQuery
+{
+
     /**
      * Original query that was passed in.
      */
     private Query query;
-    
+
     /**
      * Parsed where clause for this query.
      */
     private WhereClause whereClause;
-    
+
     /**
      * Index for this query.
      */
     private Index index;
-    
+
     /**
-     * The iTable (index table) that needs to be queried in order to retrieve results.
+     * The iTable (index table) that needs to be queried in order to retrieve
+     * results.
      */
-    private String iTable;   
+    private String iTable;
 
     /**
      * Constructor.
+     *
      * @param query Original query that was passed in.
      * @param whereClause Parsed where clause for this query.
-     * @param index The index that needs to be queried in order to retrieve results.
+     * @param index The index that needs to be queried in order to retrieve
+     * results.
      */
-    public ParsedQuery(Query query, WhereClause whereClause, Index index) {
+    public ParsedQuery(Query query, WhereClause whereClause, Index index)
+    {
         this.query = query;
         this.whereClause = whereClause;
         this.index = index;
@@ -59,30 +65,38 @@ public class ParsedQuery {
 
     /**
      * Original query that was passed in.
-     * @return 
+     *
+     * @return
      */
-    public Query getQuery() {
+    public Query getQuery()
+    {
         return query;
     }
 
     /**
      * Parsed where clause for this query.
-     * @return 
+     *
+     * @return
      */
-    public WhereClause getWhereClause() {
+    public WhereClause getWhereClause()
+    {
         return whereClause;
     }
 
     /**
-     * The iTable (index table) that needs to be queried in order to retrieve results.
-     * @return 
+     * The iTable (index table) that needs to be queried in order to retrieve
+     * results.
+     *
+     * @return
      */
-    public String getITable() {
+    public String getITable()
+    {
         return iTable;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         int hash = 5;
         hash = 17 * hash + Objects.hashCode(this.query);
         hash = 17 * hash + Objects.hashCode(this.whereClause);
@@ -91,38 +105,46 @@ public class ParsedQuery {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
+        {
             return false;
         }
         final ParsedQuery other = (ParsedQuery) obj;
-        if (!Objects.equals(this.query, other.query)) {
+        if (!Objects.equals(this.query, other.query))
+        {
             return false;
         }
-        if (!Objects.equals(this.whereClause, other.whereClause)) {
+        if (!Objects.equals(this.whereClause, other.whereClause))
+        {
             return false;
         }
-        if (!Objects.equals(this.iTable, other.iTable)) {
+        if (!Objects.equals(this.iTable, other.iTable))
+        {
             return false;
         }
         return true;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "ParsedQuery{" + "query=" + query + ", whereClause=" + whereClause + ", iTable=" + iTable + '}';
     }
 
     /**
      * Index for this query.
+     *
      * @return the index
      */
     public Index getIndex()
     {
         return index;
     }
-    
+
 }

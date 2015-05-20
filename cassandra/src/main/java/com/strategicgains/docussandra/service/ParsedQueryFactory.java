@@ -44,7 +44,6 @@ public class ParsedQueryFactory
 
     private static final Logger logger = LoggerFactory.getLogger(PreparedStatementFactory.class);
 
-
     /**
      * Gets a parsed query for the passed in parameters. If the ParsedQuery
      * requested has already been created on this app node, it will retrieve it
@@ -116,11 +115,11 @@ public class ParsedQueryFactory
         {
 //            if (index.isActive())//only use active indexes
 //            {
-                if (Utils.equalLists(index.getFieldsValues(), fieldsToQueryOn))
-                {
-                    indexToUse = index;//we have a perfect match; the index matches the query exactly
-                    break;
-                }
+            if (Utils.equalLists(index.getFieldsValues(), fieldsToQueryOn))
+            {
+                indexToUse = index;//we have a perfect match; the index matches the query exactly
+                break;
+            }
 //            }
         }
         if (indexToUse == null)
@@ -130,17 +129,17 @@ public class ParsedQueryFactory
             {
 //                if (index.isActive())//only use active indexes
 //                {
-                    //make a copy of the fieldsToQueryOn so we don't mutate the orginal
-                    ArrayList<String> fieldsToQueryOnCopy = new ArrayList<>(fieldsToQueryOn);
-                    ArrayList<String> indexFields = new ArrayList<>(index.getFieldsValues());//make a copy here too
-                    fieldsToQueryOnCopy.removeAll(indexFields);//we remove all the getFields we have, from the getFields we want
-                    //if there are not any getFields left in getFields we want
-                    if (fieldsToQueryOnCopy.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0)))
-                    {//second clause in this statement is what ensure we have a primary index; see TODO above.
-                        //we have an index that will work (even though we have extra getFields in it)
-                        indexToUse = index;
-                        break;
-                    }
+                //make a copy of the fieldsToQueryOn so we don't mutate the orginal
+                ArrayList<String> fieldsToQueryOnCopy = new ArrayList<>(fieldsToQueryOn);
+                ArrayList<String> indexFields = new ArrayList<>(index.getFieldsValues());//make a copy here too
+                fieldsToQueryOnCopy.removeAll(indexFields);//we remove all the getFields we have, from the getFields we want
+                //if there are not any getFields left in getFields we want
+                if (fieldsToQueryOnCopy.isEmpty() && fieldsToQueryOn.contains(indexFields.get(0)))
+                {//second clause in this statement is what ensure we have a primary index; see TODO above.
+                    //we have an index that will work (even though we have extra getFields in it)
+                    indexToUse = index;
+                    break;
+                }
 //                }
             }
         }

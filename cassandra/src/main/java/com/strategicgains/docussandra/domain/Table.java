@@ -1,6 +1,5 @@
 package com.strategicgains.docussandra.domain;
 
-
 import com.strategicgains.docussandra.domain.parent.Timestamped;
 import com.strategicgains.docussandra.Constants;
 import com.strategicgains.docussandra.domain.parent.Identifiable;
@@ -22,7 +21,7 @@ public class Table
     private String name;
     private String description;
 
-	//TODO: add consistency & distro metadata here.
+    //TODO: add consistency & distro metadata here.
     // How long should this data live?
     private long ttl;
 
@@ -160,6 +159,5 @@ public class Table
         }
         return true;
     }
-    
-    
+
 }

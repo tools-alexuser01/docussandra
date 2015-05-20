@@ -16,18 +16,18 @@
  */
 package com.strategicgains.docussandra.bucketmanagement;
 
-
 import java.util.List;
 import java.util.UUID;
 
-
 /**
- * Interface for locating different buckets for indexing entities. These buckets are not intended for user with time
- * series indexing. Rather this a means of partitioning index puts across multiple rows
+ * Interface for locating different buckets for indexing entities. These buckets
+ * are not intended for user with time series indexing. Rather this a means of
+ * partitioning index puts across multiple rows
  *
  * @author tnine
  */
-public interface IndexBucketLocator {
+public interface IndexBucketLocator
+{
 
 //    public enum IndexType {
 //        COLLECTION( "collection" ), CONNECTION( "connection" ), GEO( "geo" ), UNIQUE( "unique" );
@@ -45,29 +45,31 @@ public interface IndexBucketLocator {
 //        }
 //
 //    }
-
     /**
      * Return the bucket to use for indexing this entity
      *
      * @param applicationId The application id
      * @param entityId The entity id to be indexed
-     * @param components The strings and uniquely identify the path to this index. I.E entityType and propName,
-     * collection name etc This string must remain the same for all reads and writes
+     * @param components The strings and uniquely identify the path to this
+     * index. I.E entityType and propName, collection name etc This string must
+     * remain the same for all reads and writes
      *
-     * @return A bucket to use.  Note that ALL properties for the given entity should be in the same bucket.  This
-     *         allows us to shard and execute queries in parallel.  Generally speaking, sharding on entityId is the best
-     *         strategy, since this is an immutable value
+     * @return A bucket to use. Note that ALL properties for the given entity
+     * should be in the same bucket. This allows us to shard and execute queries
+     * in parallel. Generally speaking, sharding on entityId is the best
+     * strategy, since this is an immutable value
      */
-    public String getBucket( UUID applicationId, UUID entityId, String... components );
+    public String getBucket(UUID applicationId, UUID entityId, String... components);
 
     /**
-     * Get all buckets that exist for this application with the given entity type, and property name
+     * Get all buckets that exist for this application with the given entity
+     * type, and property name
      *
      * @param applicationId The application id
-     * @param components The strings and uniquely identify the path to this index. I.E entityType and propName,
-     * collection name etc
+     * @param components The strings and uniquely identify the path to this
+     * index. I.E entityType and propName, collection name etc
      *
      * @return All buckets for this application at the given component path
      */
-    public List<String> getBuckets( UUID applicationId, String... components );
+    public List<String> getBuckets(UUID applicationId, String... components);
 }

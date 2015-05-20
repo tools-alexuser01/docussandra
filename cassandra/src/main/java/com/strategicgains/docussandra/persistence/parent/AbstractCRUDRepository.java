@@ -51,11 +51,13 @@ public abstract class AbstractCRUDRepository<T extends Identifiable> extends Abs
 
     public abstract T update(T entity);
 
-    public List<T> readAll(){
+    public List<T> readAll()
+    {
         throw new UnsupportedOperationException("Not valid for this class.");
     }
 
-    public List<T> readAll(Identifier id){
+    public List<T> readAll(Identifier id)
+    {
         throw new UnsupportedOperationException("Not valid for this class.");
     }
 

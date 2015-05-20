@@ -5,7 +5,6 @@ import com.datastax.driver.core.Session;
 import com.mongodb.DBObject;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.FieldDataType;
-import com.strategicgains.docussandra.domain.Identifier;
 import com.strategicgains.docussandra.domain.Index;
 import com.strategicgains.docussandra.domain.IndexField;
 import com.strategicgains.docussandra.domain.IndexIdentifier;
@@ -38,7 +37,7 @@ public class Utils
 {
 
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
-    
+
     public static final String EMPTY_STRING = "";
 
     /**

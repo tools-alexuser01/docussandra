@@ -10,15 +10,16 @@ import com.strategicgains.hyperexpress.serialization.jackson.HalResourceDeserial
 import com.strategicgains.hyperexpress.serialization.jackson.HalResourceSerializer;
 
 public class JsonSerializationProcessor
-extends JacksonJsonProcessor
+        extends JacksonJsonProcessor
 {
-	@Override
+
+    @Override
     protected void initializeModule(SimpleModule module)
     {
-	    super.initializeModule(module);
-	    module.addDeserializer(UUID.class, new UuidDeserializer());
-	    module.addSerializer(UUID.class, new UuidSerializer());
-	    module.addDeserializer(HalResource.class, new HalResourceDeserializer());
-	    module.addSerializer(HalResource.class, new HalResourceSerializer());
+        super.initializeModule(module);
+        module.addDeserializer(UUID.class, new UuidDeserializer());
+        module.addSerializer(UUID.class, new UuidSerializer());
+        module.addDeserializer(HalResource.class, new HalResourceDeserializer());
+        module.addSerializer(HalResource.class, new HalResourceSerializer());
     }
 }

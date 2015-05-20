@@ -16,7 +16,6 @@
  */
 package com.strategicgains.docussandra.bucketmanagement;
 
-
 import static com.strategicgains.docussandra.bucketmanagement.ConversionUtils.bytes;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -24,80 +23,93 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-
-
-
 /**
- * Simple implementation that does static hashing across 100 rows. Future implementations should be smarter and create
- * new tokens as required when buckets become too large for an entity property within an application for the given index
- * type.
+ * Simple implementation that does static hashing across 100 rows. Future
+ * implementations should be smarter and create new tokens as required when
+ * buckets become too large for an entity property within an application for the
+ * given index type.
  *
  * @author tnine
  */
 //TODO: clean this up a lot; may variables unused -- scrap this class and re-write
-public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
+public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator
+{
 
     public static final Long MINIMUM = 0l;
     public static final Long MAXIMUM = Long.MAX_VALUE;
 
-    private final List<Long> buckets = new ArrayList<>( 100 );
-    private final List<String> bucketsString = new ArrayList<>( 100 );
+    private final List<Long> buckets = new ArrayList<>(100);
+    private final List<String> bucketsString = new ArrayList<>(100);
     private final int size;
 
-
-    /** Create a bucket locator with the specified size */
-    public SimpleIndexBucketLocatorImpl( int size ) {
-        for ( int i = 0; i < size; i++ ) {
-            Long integer = initialToken( size, i );
-            buckets.add( integer );
-            bucketsString.add( String.format( "%039d", integer ) );
+    /**
+     * Create a bucket locator with the specified size
+     */
+    public SimpleIndexBucketLocatorImpl(int size)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            Long integer = initialToken(size, i);
+            buckets.add(integer);
+            bucketsString.add(String.format("%039d", integer));
         }
 
         this.size = size;
     }
 
-
-    /** Base constructor that creates a ring of 100 tokens */
-    public SimpleIndexBucketLocatorImpl() {
-        this( 100 );
+    /**
+     * Base constructor that creates a ring of 100 tokens
+     */
+    public SimpleIndexBucketLocatorImpl()
+    {
+        this(100);
     }
 
-
-    /** Get a token */
-    private static Long initialToken( int size, int position ) {
+    /**
+     * Get a token
+     */
+    private static Long initialToken(int size, int position)
+    {
         Long decValue = MINIMUM;
-        if ( position != 0 ) {
+        if (position != 0)
+        {
             decValue = ((MAXIMUM / size) * position) - 1;
         }
         return decValue;
     }
 
-
-    /** Get the next token in the ring for this big int. */
-    private String getClosestToken( UUID entityId ) { //TODO: consider scrapping UUIDs and just going with longs
-        byte[] bytes = bytes( entityId );
+    /**
+     * Get the next token in the ring for this big int.
+     */
+    private String getClosestToken(UUID entityId)
+    { //TODO: consider scrapping UUIDs and just going with longs
+        byte[] bytes = bytes(entityId);
         byte[] finalBytes = new byte[8];
-        if(bytes.length > 8){
-            for(int i = 0; i < finalBytes.length; i++){
+        if (bytes.length > 8)
+        {
+            for (int i = 0; i < finalBytes.length; i++)
+            {
                 finalBytes[i] = bytes[i];
             }
-        } else {
+        } else
+        {
             finalBytes = bytes;//i doubt this will ever happen
         }
         ByteBuffer bb = ByteBuffer.wrap(finalBytes);
         Long location = bb.getLong();
         location = Math.abs(location);
 
-        int index = Collections.binarySearch( buckets, location );
+        int index = Collections.binarySearch(buckets, location);
 
-        if ( index < 0 ) {
-            index = ( index + 1 ) * -1;
+        if (index < 0)
+        {
+            index = (index + 1) * -1;
         }
 
         // mod if we need to wrap
         index = index % size;
 
-        return bucketsString.get( index );
+        return bucketsString.get(index);
     }
 
 
@@ -110,11 +122,13 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
      * java.lang.String[])
      */
     @Override
-    public String getBucket( UUID applicationId, UUID entityId, String... components ) {
-        if(entityId == null){
+    public String getBucket(UUID applicationId, UUID entityId, String... components)
+    {
+        if (entityId == null)
+        {
             throw new IllegalArgumentException("Entity ID must be not null");
         }
-        return getClosestToken( entityId );
+        return getClosestToken(entityId);
     }
 
 
@@ -127,7 +141,8 @@ public class SimpleIndexBucketLocatorImpl implements IndexBucketLocator {
      * java.lang.String[])
      */
     @Override
-    public List<String> getBuckets( UUID applicationId, String... components ) {
+    public List<String> getBuckets(UUID applicationId, String... components)
+    {
         return bucketsString;
     }
 }

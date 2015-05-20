@@ -85,12 +85,12 @@ public class Configuration
             //TODO: consider re-working this section
 //            if (p.get("cassandra.contactPoints").equals("127.0.0.1"))//if localhost, assume cassandra is being co-hosted on the same box with cassandra
 //            {
-                String currentHostName = InetAddress.getLocalHost().getHostAddress();//get the boxes actual ip and use that; for some reason (firewalls?) some machines don't like to actually use 127.0.0.1 and need their external ip referenced
-                if (currentHostName.equals("127.0.1.1"))//something odd with ubuntu; hack fix for now 
-                {
-                    currentHostName = "127.0.0.1";//use localhost; it should work in this case
-                }
-                p.setProperty("cassandra.contactPoints", currentHostName);//using localhost for cassandra seed -- we are going to try cohosting; TODO: ensure thalassa health check checks DB as well
+            String currentHostName = InetAddress.getLocalHost().getHostAddress();//get the boxes actual ip and use that; for some reason (firewalls?) some machines don't like to actually use 127.0.0.1 and need their external ip referenced
+            if (currentHostName.equals("127.0.1.1"))//something odd with ubuntu; hack fix for now 
+            {
+                currentHostName = "127.0.0.1";//use localhost; it should work in this case
+            }
+            p.setProperty("cassandra.contactPoints", currentHostName);//using localhost for cassandra seed -- we are going to try cohosting; TODO: ensure thalassa health check checks DB as well
             //}
         } catch (UnknownHostException e)
         {
@@ -134,9 +134,9 @@ public class Configuration
         // TODO: create service and repository implementations for these...
 //		entitiesController = new EntitiesController(SampleUuidEntityService);
         EventBus bus = new LocalEventBusBuilder()
-//                .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
-//                .subscribe(new TableDeleteHandler(dbConfig.getSession()))
-//                .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
+                //                .subscribe(new IndexDeletedHandler(dbConfig.getSession()))
+                //                .subscribe(new TableDeleteHandler(dbConfig.getSession()))
+                //                .subscribe(new DatabaseDeletedHandler(dbConfig.getSession()))
                 .subscribe(new IndexCreatedHandler(indexRepository, indexStatusRepository, documentRepository))
                 .build();
         DomainEvents.addBus("local", bus);
