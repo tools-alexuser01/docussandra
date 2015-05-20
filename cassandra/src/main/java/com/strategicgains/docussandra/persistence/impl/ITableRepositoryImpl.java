@@ -43,7 +43,7 @@ public class ITableRepositoryImpl implements ITableRepository
     /**
      * CQL statement for dynamically creating an iTable.
      */
-    private static final String TABLE_CREATE_CQL = "CREATE TABLE %s (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY ((bucket), %s));";
+    private static final String TABLE_CREATE_CQL = "CREATE TABLE IF NOT EXISTS %s (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, %s, PRIMARY KEY ((bucket), %s));";
 
     /**
      * CQL statement for deleting an iTable (or for that matter, any setTable).

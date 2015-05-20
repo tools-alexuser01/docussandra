@@ -102,10 +102,10 @@ public class ITableRepositoryImplTest
         ITableRepositoryImpl instance = new ITableRepositoryImpl(f.getSession());
         String response = instance.generateTableCreationSyntax(Fixtures.createTestIndexOneField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield, id));", response);
+        assertEquals("CREATE TABLE IF NOT EXISTS mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield, id));", response);
         response = instance.generateTableCreationSyntax(Fixtures.createTestIndexTwoField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield1 varchar, myindexedfield2 varchar, PRIMARY KEY ((bucket), myindexedfield1, myindexedfield2, id));", response);
+        assertEquals("CREATE TABLE IF NOT EXISTS mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield1 varchar, myindexedfield2 varchar, PRIMARY KEY ((bucket), myindexedfield1, myindexedfield2, id));", response);
     }
 
     /**
@@ -120,12 +120,12 @@ public class ITableRepositoryImplTest
         one.isUnique(true);
         String response = instance.generateTableCreationSyntax(one);
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield));", response);
+        assertEquals("CREATE TABLE IF NOT EXISTS mydb_mytable_myindexwithonefield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield varchar, PRIMARY KEY ((bucket), myindexedfield));", response);
         Index two = Fixtures.createTestIndexTwoField();
         two.isUnique(true);
         response = instance.generateTableCreationSyntax(two);
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield1 varchar, myindexedfield2 varchar, PRIMARY KEY ((bucket), myindexedfield1, myindexedfield2));", response);
+        assertEquals("CREATE TABLE IF NOT EXISTS mydb_mytable_myindexwithtwofields (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield1 varchar, myindexedfield2 varchar, PRIMARY KEY ((bucket), myindexedfield1, myindexedfield2));", response);
     }
 
     /**
@@ -139,10 +139,10 @@ public class ITableRepositoryImplTest
         ITableRepositoryImpl instance = new ITableRepositoryImpl(f.getSession());
         String response = instance.generateTableCreationSyntax(Fixtures.createTestIndexNumericField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE mydb_mytable_myindexnumericfield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield3 int, PRIMARY KEY ((bucket), myindexedfield3, id));", response);
+        assertEquals("CREATE TABLE IF NOT EXISTS mydb_mytable_myindexnumericfield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield3 int, PRIMARY KEY ((bucket), myindexedfield3, id));", response);
         response = instance.generateTableCreationSyntax(Fixtures.createTestIndexUUIDField());
         Assert.assertNotNull(response);
-        assertEquals("CREATE TABLE mydb_mytable_myindexuuidfield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield4 uuid, PRIMARY KEY ((bucket), myindexedfield4, id));", response);
+        assertEquals("CREATE TABLE IF NOT EXISTS mydb_mytable_myindexuuidfield (bucket varchar, id uuid, object blob, created_at timestamp, updated_at timestamp, myindexedfield4 uuid, PRIMARY KEY ((bucket), myindexedfield4, id));", response);
     }
 
     /**
