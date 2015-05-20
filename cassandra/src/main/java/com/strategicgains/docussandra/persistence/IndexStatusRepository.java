@@ -85,10 +85,10 @@ public interface IndexStatusRepository
      * Updates the status for an IndexCreatedEvent in the database. Take note:
      * only a few getFields are updatable: numberOfRecordsCompleted,
      * statusLastUpdatedAt, and error. This is a logical decision; there should
-     * not be a reason to update any other getFields. This will also mark the
+     * not be a reason to update any other fields. This will also mark the
      * record as done indexing or not as appropriate.
      *
-     * @param entity The IndexCreatedEvent to update with the proper getFields
+     * @param entity The IndexCreatedEvent to update with the proper fields
      * set.
      * @return The updated IndexCreatedEvent.
      */
