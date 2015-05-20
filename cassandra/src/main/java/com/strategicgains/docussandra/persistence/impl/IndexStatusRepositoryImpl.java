@@ -72,10 +72,10 @@ public class IndexStatusRepositoryImpl extends AbstractCRUDRepository<IndexCreat
     private static final String IDENTITY_CQL = " where id = ?";
     private static final String EXISTENCE_CQL = "select count(*) from " + Tables.BY_ID + IDENTITY_CQL;
     private static final String DELETE_FROM_NOT_DONE = "delete from " + Tables.BY_NOT_DONE + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.TOTAL_RECORDS + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ", " + Columns.ERRORS + ", " + Columns.FATAL_ERROR + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into " + Tables.BY_ID + " (" + Columns.ID + ", " + Columns.DATABASE + ", " + Columns.TABLE + ", " + Columns.INDEX_NAME + ", " + Columns.RECORDS_COMPLETED + ", " + Columns.TOTAL_RECORDS + ", " + Columns.STARTED_AT + ", " + Columns.UPDATED_AT + ", " + Columns.ERRORS + ", " + Columns.FATAL_ERROR + ") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) IF NOT EXISTS";
     private static final String READ_CQL = "select * from " + Tables.BY_ID + IDENTITY_CQL;
     private static final String UPDATE_CQL = "update " + Tables.BY_ID + " set " + Columns.RECORDS_COMPLETED + " = ?, " + Columns.UPDATED_AT + " = ?, " + Columns.ERRORS + " = ?, " + Columns.FATAL_ERROR + " = ?" + IDENTITY_CQL;
-    private static final String MARK_INDEXING_CQL = "insert into " + Tables.BY_NOT_DONE + "(" + Columns.ID + ") values (?)";//TODO: if not exists?
+    private static final String MARK_INDEXING_CQL = "insert into " + Tables.BY_NOT_DONE + "(" + Columns.ID + ") values (?) IF NOT EXISTS";
 
     private static final String READ_ALL_CQL = "select * from " + Tables.BY_ID;
     private static final String READ_ALL_CURRENTLY_INDEXING_CQL = "select * from " + Tables.BY_NOT_DONE;
