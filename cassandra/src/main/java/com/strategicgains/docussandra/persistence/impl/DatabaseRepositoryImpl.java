@@ -38,7 +38,7 @@ public class DatabaseRepositoryImpl extends AbstractCRUDRepository<Database> imp
         static final String UPDATED_AT = "updated_at";
     }
 
-    private static final String CREATE_CQL = "insert into %s (%s, description, created_at, updated_at) values (?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into %s (%s, description, created_at, updated_at) values (?, ?, ?, ?) IF NOT EXISTS";
     private static final String UPDATE_CQL = "update %s set description = ?, updated_at = ? where %s = ?";
     private static final String READ_ALL_CQL = "select * from %s";
     private static final String EXISTENCE_CQL = "select count(*) from %s where %s = ?";
@@ -196,7 +196,6 @@ public class DatabaseRepositoryImpl extends AbstractCRUDRepository<Database> imp
         return databases;
     }
 
-    //@Override
     protected Database marshalRow(Row row)
     {
         if (row == null)

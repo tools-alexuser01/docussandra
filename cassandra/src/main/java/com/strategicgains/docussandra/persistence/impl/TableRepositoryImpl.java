@@ -47,7 +47,7 @@ public class TableRepositoryImpl extends AbstractCRUDRepository<Table> implement
 
     private static final String IDENTITY_CQL = " where " + Columns.DATABASE + " = ? and " + Columns.NAME + " = ?";
     private static final String EXISTENCE_CQL = "select count(*) from %s" + IDENTITY_CQL;
-    private static final String CREATE_CQL = "insert into %s (%s, " + Columns.DATABASE + ", " + Columns.DESCRIPTION + ", " + Columns.CREATED_AT + ", " + Columns.UPDATED_AT + ") values (?, ?, ?, ?, ?)";
+    private static final String CREATE_CQL = "insert into %s (%s, " + Columns.DATABASE + ", " + Columns.DESCRIPTION + ", " + Columns.CREATED_AT + ", " + Columns.UPDATED_AT + ") values (?, ?, ?, ?, ?) IF NOT EXISTS";
     private static final String READ_CQL = "select * from %s" + IDENTITY_CQL;
     private static final String DELETE_CQL = "delete from %s" + IDENTITY_CQL;
     private static final String UPDATE_CQL = "update %s set " + Columns.DESCRIPTION + " = ?, " + Columns.UPDATED_AT + " = ?" + IDENTITY_CQL;
