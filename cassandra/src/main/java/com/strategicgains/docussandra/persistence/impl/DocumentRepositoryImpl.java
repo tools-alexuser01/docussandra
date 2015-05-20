@@ -73,7 +73,7 @@ public class DocumentRepositoryImpl extends AbstractCRUDRepository<Document> imp
     @Override
     public Document create(Document entity)
     {
-        if (exists(entity.getId()))
+        if (exists(entity.getId()))//This is expensive; any way around this? IF NOT EXISTS doesn't work in this case
         {
             throw new DuplicateItemException(entity.getClass().getSimpleName()
                     + " ID already exists: " + entity.getId().toString());
