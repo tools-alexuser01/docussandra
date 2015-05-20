@@ -84,10 +84,7 @@ public class IndexService
         Date now = new Date();
         UUID uuid = UUID.randomUUID();//TODO: is this right?
         IndexCreatedEvent toReturn = new IndexCreatedEvent(uuid, now, now, created, dataSize, 0l);
-        if (!statusRepo.exists(uuid))
-        {
-            statusRepo.create(toReturn);
-        }
+        statusRepo.create(toReturn);
         toReturn.calculateValues();
         DomainEvents.publish(toReturn);
         return toReturn;
