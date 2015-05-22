@@ -1,7 +1,7 @@
 drop keyspace if exists docussandra;
 create keyspace docussandra
-//with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-with replication = { 'class' : 'NetworkTopologyStrategy', 'use1' : 2, 'usw2' : 2};
+with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 3};
+//with replication = { 'class' : 'NetworkTopologyStrategy', 'use1' : 3, 'usw2' : 2};
 use docussandra;
 
 drop table if exists sys_meta;
