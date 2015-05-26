@@ -74,7 +74,8 @@ public class Main
                 .setName(config.getProjectName(SERVICE_NAME))
                 .setBaseUrl(config.getBaseUrl())
                 .setExecutorThreadCount(config.getExecutorThreadPoolSize())
-                .addMessageObserver(new SimpleConsoleLogMessageObserver());
+                .addMessageObserver(new SimpleConsoleLogMessageObserver())
+                .setMaxContentSize(6000000);
 
         new VersionPlugin(config.getProjectVersion())
                 .register(server);
