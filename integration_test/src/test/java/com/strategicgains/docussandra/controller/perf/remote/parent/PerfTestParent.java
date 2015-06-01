@@ -100,7 +100,7 @@ public abstract class PerfTestParent
     {
         //setup
         //set rookie year to be empty so we don't cause more problems than we need
-        String object = d.object().replaceAll("\\Q\"ROOKIEYEAR\":\"\"\\E", "");
+        String object = d.object().replaceAll("\\Q\"ROOKIEYEAR\":\"\",\\E", "");
         d.object(object);
         //act
         //long start = new Date().getTime();

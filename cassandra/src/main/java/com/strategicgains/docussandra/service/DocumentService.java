@@ -1,5 +1,7 @@
 package com.strategicgains.docussandra.service;
 
+import com.mongodb.util.JSON;
+import com.mongodb.util.JSONParseException;
 import com.strategicgains.docussandra.cache.CacheFactory;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Identifier;
@@ -7,6 +9,7 @@ import com.strategicgains.docussandra.exception.IndexParseException;
 import com.strategicgains.docussandra.exception.ItemNotFoundException;
 import com.strategicgains.docussandra.persistence.DocumentRepository;
 import com.strategicgains.docussandra.persistence.TableRepository;
+import com.strategicgains.docussandra.persistence.impl.HadoopDocumentRepositoryImpl;
 import com.strategicgains.syntaxe.ValidationEngine;
 import java.util.UUID;
 import net.sf.ehcache.Cache;
@@ -29,7 +32,7 @@ public class DocumentService
     public Document create(String database, String table, String json) throws IndexParseException
     {
         verifyTable(database, table);
-
+        verifyJSON(json);
         Document doc = new Document();
         doc.table(database, table);
         doc.object(json);
@@ -37,7 +40,10 @@ public class DocumentService
         ValidationEngine.validateAndThrow(doc);
         try
         {
-            return docs.create(doc);
+            Document toReturn = docs.create(doc);
+//            DocumentRepository hadoopRepo = new HadoopDocumentRepositoryImpl();
+//            hadoopRepo.create(toReturn);
+            return toReturn;
         } catch (RuntimeException e)//the framework does not allow us to throw the IndexParseException directly from the repository layer
         {
             if (e.getCause() != null && e.getCause() instanceof IndexParseException)
@@ -69,6 +75,7 @@ public class DocumentService
     public void update(Document entity)
     {
         ValidationEngine.validateAndThrow(entity);
+        verifyJSON(entity.object());
         docs.update(entity);
     }
 
@@ -98,5 +105,16 @@ public class DocumentService
 //        if (!tables.exists(tableId)){
 //            throw new ItemNotFoundException("Table not found: " + tableId.toString());
 //        }
+    }
+
+    private void verifyJSON(String json)
+    {
+        try
+        {
+            JSON.parse(json);
+        } catch (JSONParseException e)
+        {
+            throw new IllegalArgumentException(e);
+        }
     }
 }
