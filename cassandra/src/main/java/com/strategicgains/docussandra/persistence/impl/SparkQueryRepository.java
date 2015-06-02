@@ -18,24 +18,25 @@ package com.strategicgains.docussandra.persistence.impl;
 import com.strategicgains.docussandra.domain.Document;
 import com.strategicgains.docussandra.domain.Query;
 import com.strategicgains.docussandra.domain.QueryResponseWrapper;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.sql.api.java.JavaSchemaRDD;
 import org.apache.spark.sql.api.java.Row;
 import org.apache.spark.sql.cassandra.api.java.JavaCassandraSQLContext;
-
 
 /**
  *
  * @author udeyoje
  */
 @Deprecated
-public class SparkQueryRepository
+public class SparkQueryRepository implements Serializable
 {
 
-    public QueryResponseWrapper query(Query query)
+    public QueryResponseWrapper queryCassandra(Query query)
     {
 
         SparkConf sparkConf = new SparkConf().setMaster("local").setAppName("SparkTest")
@@ -46,15 +47,37 @@ public class SparkQueryRepository
         JavaSparkContext context = new JavaSparkContext(sparkConf);
         JavaCassandraSQLContext sqlContext = new JavaCassandraSQLContext(context);
         sqlContext.sqlContext().setKeyspace("docussandra");
-        
+
         String sql = "SELECT * FROM docussandra.players_players_table";// + query.getTable() + " WHERE " + query.getWhere();
         JavaSchemaRDD rdd = sqlContext.sql(sql);
         List<Row> rows = rdd.collect();
         List<Document> docs = new ArrayList<>();
-        for(Row r : rows){
+        for (Row r : rows)
+        {
             //toReturn.add(Utils.)
         }
         QueryResponseWrapper toReturn = new QueryResponseWrapper(docs, Long.MAX_VALUE);
         return toReturn;
+    }
+
+    public QueryResponseWrapper queryHadoop(Query query)
+    {
+        SparkConf sparkConf = new SparkConf().setMaster("local").setAppName("SparkTest")
+                .set("spark.executor.memory", "1g");
+        JavaSparkContext context = new JavaSparkContext(sparkConf);
+        String path = "hdfs://localhost:54310/hdocussandra/players/players_table";
+        JavaCassandraSQLContext sqlContext = new JavaCassandraSQLContext(context);
+        JavaSchemaRDD table = sqlContext.jsonFile(path);
+        table.printSchema();
+        table.registerTempTable("table1");
+        JavaSchemaRDD manning = sqlContext.sql("SELECT * FROM table1 WHERE NAMELAST = 'Manning'");
+        List<String> manningRecords = manning.map(new Function<Row, String>()
+        {
+            public String call(Row row)
+            {
+                return "Name: " + row.getString(0);
+            }
+        }).collect();
+        return null;
     }
 }

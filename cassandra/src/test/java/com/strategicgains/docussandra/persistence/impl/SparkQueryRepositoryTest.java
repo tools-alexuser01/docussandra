@@ -62,16 +62,30 @@ public class SparkQueryRepositoryTest
      */
     @Test
     @Ignore
-    public void testQuery()
+    public void testQueryCassandra()
     {
         System.out.println("query");
         Query query = Fixtures.createTestQuery();
         SparkQueryRepository instance = new SparkQueryRepository();
         QueryResponseWrapper expResult = null;
-        QueryResponseWrapper result = instance.query(query);
+        QueryResponseWrapper result = instance.queryCassandra(query);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
+    }
+    
+        /**
+     * Test of query method, of class SparkQueryRepository.
+     */
+    @Test
+    @Ignore
+    public void testQueryHadoop()
+    {
+        System.out.println("query");
+        Query query = Fixtures.createTestQuery();
+        SparkQueryRepository instance = new SparkQueryRepository();
+        QueryResponseWrapper expResult = null;
+        QueryResponseWrapper result = instance.queryHadoop(query);
     }
     
 }
