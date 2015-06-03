@@ -1,6 +1,6 @@
 create keyspace IF NOT EXISTS docussandra
-with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 3};
-//with replication = { 'class' : 'NetworkTopologyStrategy', 'use1' : 3};
+with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 1};
+//with replication = { 'class' : 'NetworkTopologyStrategy', 'use1' : 2, 'usw2' : 2};
 use docussandra;
 
 create table IF NOT EXISTS sys_meta (
