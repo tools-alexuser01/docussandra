@@ -77,24 +77,18 @@ public class Fixtures
     /**
      * Private constructor as this is a singleton object
      */
-    private Fixtures(String seeds, boolean mockCassandra) throws Exception
+    private Fixtures(String seedsList, boolean mockCassandra) throws Exception
     {
-        //try {
-        //Properties properties = loadTestProperties(); //TODO: put this call back in ???
-        String cassandraSeedsProperty = seeds;//properties.getProperty(
-        //CASSANDRA_SEEDS, "localhost");
-        cassandraKeyspace = "docussandra";//properties.getProperty(CASSANDRA_KEYSPACE);
-        cassandraSeeds = cassandraSeedsProperty.split(",");
-//        } catch (IOException ioe) { // Because Checked Exceptions are the bane
-//            throw new RuntimeException(ioe);
-//        }
+        cassandraKeyspace = "docussandra";
+        cassandraSeeds = seedsList.split(",");
+
         boolean embeddedCassandra;
         Cluster cluster;
         if (mockCassandra)//using cassandra-unit for testing
         {
             long timeout = 30000;
             EmbeddedCassandraServerHelper.startEmbeddedCassandra(timeout);
-            cluster = Cluster.builder().addContactPoints(seeds).withPort(9142).build();
+            cluster = Cluster.builder().addContactPoints(cassandraSeeds).withPort(9142).build();
             embeddedCassandra = true;
             //Thread.sleep(20000);//time to let cassandra startup
         } else //using a remote or local server for testing
